@@ -1,11 +1,12 @@
-const CACHE = 'gconfig-v2';
+const CACHE = 'gconfig-v3';
 
 const PRECACHE = [
     './',
     './index.html',
+    './welcome.html',
     './app.html',
-    './GCONFIG/index.html',
-    './GCONFIG/beds.html'
+    './beds.html',
+    './manifest.json'
 ];
 
 self.addEventListener('install', (e) => {
