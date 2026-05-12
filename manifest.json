@@ -2,7 +2,7 @@
     "name": "GConfig — Cabinet Configurator",
     "short_name": "GConfig",
     "description": "Professional furniture configurator: calculate part dimensions, weights, and hardware for kitchen and bathroom cabinets.",
-    "start_url": "./welcome.html",
+    "start_url": "./app.html",
     "scope": "./",
     "display": "standalone",
     "background_color": "#f4f7f6",
