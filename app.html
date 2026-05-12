@@ -981,7 +981,7 @@
     <nav class="top-nav-links" aria-label="Site navigation">
         <a class="top-nav-link" href="welcome.html" target="_top" data-i18n="nav_home">Home</a>
         <a class="top-nav-link" href="https://www.eamf.ee/est/plaadid-ja-servakandid/melamiinkattega-puitlaastplaadid" target="_blank" rel="noopener noreferrer" data-i18n="nav_materials">Materials and Furniture</a>
-        <a class="top-nav-link" href="app.html" target="_top" data-i18n="nav_closets">Closets</a>
+        <a class="top-nav-link" href="configurator.html" target="_top" data-i18n="nav_closets">Closets</a>
         <a class="top-nav-link" href="beds.html" target="_top" data-i18n="nav_beds">Beds</a>
     </nav>
     <button class="lang-btn" id="btn-ru" onclick="setLang('ru')">
@@ -1853,7 +1853,12 @@
 
     function updateNavActiveState() {
         const path = (window.location.pathname || '').toLowerCase();
-        const isBeds = /beds\.html/i.test(path);
+        const mode = new URLSearchParams(window.location.search).get('mode') || 'closets';
+        const isBedsPage = /beds\.html/i.test(path);
+        const isConfigurator = /configurator\.html/i.test(path);
+        const bedsMode = isConfigurator && mode === 'beds';
+        const bedsActive = isBedsPage || bedsMode;
+
         document.querySelectorAll('.top-nav-link').forEach(link => {
             const href = (link.getAttribute('href') || '').toLowerCase();
             if (/welcome\.html/.test(href)) {
@@ -1867,16 +1872,16 @@
             const isBedLink = href.includes('beds.html');
             const isClosetsLink =
                 href.includes('app.html') ||
+                href.includes('configurator.html') ||
                 href.includes('index (1).html') ||
                 href.includes('index%20(1).html');
             if (!isBedLink && !isClosetsLink) {
                 link.classList.remove('active');
                 return;
             }
-            link.classList.toggle('active', isBeds ? isBedLink : isClosetsLink);
+            link.classList.toggle('active', bedsActive ? isBedLink : isClosetsLink);
         });
     }
-
     function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('configurator_lang', lang);

@@ -136,12 +136,18 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: bold;
-            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
             transition: background 0.2s, color 0.2s;
         }
 
-        .top-nav-link:hover {
+        .top-nav-link:hover:not(.active) {
             background: #e8f5e9;
+        }
+
+        .top-nav-link.active {
+            background: var(--primary);
+            color: #fff;
         }
 
         /* Main layout row — no gap; gap is provided by the resizer element itself */
@@ -776,9 +782,10 @@
         Download Android App
     </a>
     <nav class="top-nav-links" aria-label="Site navigation">
-        <a class="top-nav-link" href="welcome.html" target="_top">HOME</a>
-        <a class="top-nav-link" href="app.html" target="_top">CLOSETS</a>
-        <a class="top-nav-link" href="beds.html" target="_top">BEDS</a>
+        <a class="top-nav-link" href="welcome.html" target="_top" data-i18n="nav_home">Home</a>
+        <a class="top-nav-link" href="https://www.eamf.ee/est/plaadid-ja-servakandid/melamiinkattega-puitlaastplaadid" target="_blank" rel="noopener noreferrer" data-i18n="nav_materials">Materials and Furniture</a>
+        <a class="top-nav-link" href="configurator.html" target="_top" data-i18n="nav_closets">Closets</a>
+        <a class="top-nav-link" href="beds.html" target="_top" data-i18n="nav_beds">Beds</a>
     </nav>
     <button class="lang-btn" id="btn-ru" onclick="setLang('ru')">
         <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><use href="#icon-language"/></svg>
@@ -1355,6 +1362,10 @@
             project_name: "Проект: Комплект мебели",
             project_label: "Проект:",
             date_label: "Дата: ",
+            nav_home: "Главная",
+            nav_materials: "Материалы и фурнитура",
+            nav_closets: "Шкафы",
+            nav_beds: "Кровати",
             weight_summary_title: "Расчёт масс",
             table1_title: "Таблица 1: Детали корпуса",
             table2_title: "Таблица 2: Фурнитура и направляющие",
@@ -1519,6 +1530,10 @@
             project_name: "Project: Bathroom Furniture Set",
             project_label: "Project:",
             date_label: "Date: ",
+            nav_home: "Home",
+            nav_materials: "Materials and Furniture",
+            nav_closets: "Closets",
+            nav_beds: "Beds",
             weight_summary_title: "Weight Summary",
             table1_title: "Table 1: Carcass Parts",
             table2_title: "Table 2: Furniture & Runners",
@@ -1664,6 +1679,38 @@
         window.location.replace(window.location.pathname + (q ? '?' + q : '') + (window.location.hash || ''));
     }
     const CONFIG_MODE = CONFIG_MODE_RAW === 'shelves' ? 'closets' : CONFIG_MODE_RAW;
+
+    function updateNavActiveState() {
+        const path = (window.location.pathname || '').toLowerCase();
+        const mode = new URLSearchParams(window.location.search).get('mode') || 'closets';
+        const isBedsPage = /beds\.html/i.test(path);
+        const isConfigurator = /configurator\.html/i.test(path);
+        const bedsMode = isConfigurator && mode === 'beds';
+        const bedsActive = isBedsPage || bedsMode;
+
+        document.querySelectorAll('.top-nav-link').forEach(link => {
+            const href = (link.getAttribute('href') || '').toLowerCase();
+            if (/welcome\.html/.test(href)) {
+                link.classList.remove('active');
+                return;
+            }
+            if (/^https?:\/\//.test(href)) {
+                link.classList.remove('active');
+                return;
+            }
+            const isBedLink = href.includes('beds.html');
+            const isClosetsLink =
+                href.includes('app.html') ||
+                href.includes('configurator.html') ||
+                href.includes('index (1).html') ||
+                href.includes('index%20(1).html');
+            if (!isBedLink && !isClosetsLink) {
+                link.classList.remove('active');
+                return;
+            }
+            link.classList.toggle('active', bedsActive ? isBedLink : isClosetsLink);
+        });
+    }
 
     function applyConfiguratorMode(lang) {
         if (CONFIG_MODE !== 'beds') return;
@@ -2571,6 +2618,7 @@
 
         // Recalculate to refresh dynamic text
         updateConfigurator();
+        updateNavActiveState();
     }
 
     // ==========================================
