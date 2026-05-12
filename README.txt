@@ -5,34 +5,44 @@ This folder contains the complete static web app, ready to upload.
 
 What to upload
 --------------
-Upload the CONTENTS of this `deploy/` folder (not the folder itself) to
-the document root of your hosting (the directory that is served at
-https://your-domain/ ). After upload, the root listing on the server
-should look exactly like this:
+Upload these files to the document root of your hosting (the directory that is
+served at https://your-domain/ ). The root listing should include at least:
 
     /index.html
     /welcome.html
-    /index (1).html        <-- filename contains a space and parentheses
+    /configurator.html
     /beds.html
     /app.html
     /manifest.json
     /sw.js
 
-IMPORTANT: keep the original filename "index (1).html" exactly as is
-(with the space and the parentheses). Internal links use the URL-encoded
-form "./index%20(1).html"; do NOT rename it.
+Legacy note: some older packages used a file named "index (1).html" (with a
+space) instead of configurator.html. If you still use that name, keep it and
+point beds.html to ./index%20(1).html?mode=beds instead.
+
+IMPORTANT: beds.html MUST load the unified configurator with BEDS mode, e.g.:
+
+    ./configurator.html?mode=beds
+
+Do NOT point the iframe at ./index.html alone (that file is only the short
+redirect to welcome.html).
 
 Entry points
 ------------
 - /                  -> index.html redirects to welcome.html (landing).
 - /welcome.html      -> landing page with cards (Closets / Beds / ...).
-- /index (1).html    -> Closets / Cabinet configurator.
-- /beds.html         -> Beds configurator (iframes index (1).html).
+- /configurator.html -> Closets / cabinet configurator (+ ?mode=beds for beds).
+- /beds.html         -> Beds page (iframes configurator.html?mode=beds).
 - /app.html          -> Alternative app entry; registers the Service
                         Worker and references manifest.json (PWA).
 
+Optional alternate layout (same repository)
+---------------------------------------------
+If the folder GCONFIG/ is present, open /GCONFIG/index.html for the split
+layout; it is independent of the flat root files above.
+
 All HTML pages, manifest.json and sw.js use ONLY relative paths
-(./welcome.html, ./index%20(1).html, ./app.html, manifest.json, sw.js),
+(./welcome.html, ./configurator.html, ./app.html, manifest.json, sw.js),
 so the site works correctly as long as the files above are at the
 document root. No path edits are required after upload.
 
@@ -81,4 +91,4 @@ Not included on purpose
 - GConfig_mobile.apk / .zip      (Android packages, not needed for the
                                    web deployment)
 
-That's it — upload the seven files above and the app is live.
+That's it — upload the files above and the app is live.
