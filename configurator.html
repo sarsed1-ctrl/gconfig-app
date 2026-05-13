@@ -253,6 +253,24 @@
             font-size: 0.9em;
         }
 
+        /* Beds sidebar: align all inputs/selects to one vertical line */
+        #beds-controls .form-group {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 130px;
+            column-gap: 10px;
+            align-items: center;
+        }
+        #beds-controls .form-group label {
+            min-width: 0;
+        }
+        #beds-controls .form-group select,
+        #beds-controls .form-group input[type="number"] {
+            width: 130px;
+            max-width: 100%;
+            box-sizing: border-box;
+            justify-self: start;
+        }
+
         input[type="number"], select, input[type="text"] { 
             width: 130px;
             padding: 6px;
