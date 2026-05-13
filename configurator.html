@@ -1808,10 +1808,10 @@
         return { centerSupportCount: 1 };
     }
 
-    function getBedDeckStripLayout({ bedLength, mattressW, ledgerW = 40, centerSupportCount = 0, centerSupportT = 18 }) {
+    function getBedDeckStripLayout({ bedLength, mattressW, ledgerW = 40, centerSupportCount = 0, centerSupportT = 18, stripThicknessMm }) {
         const TARGET_STRIP_W = 400;
         const STRIP_GAP = 40;
-        const STRIP_T = 18;
+        const STRIP_T = Math.max(10, parseInt(stripThicknessMm, 10) || parseInt(centerSupportT, 10) || 18);
         const STRIP_CLEARANCE_TOTAL = 2;
         // Per-side lateral clearance between the strip end and the rail inner face.
         // Picked within the requested 3–4 mm band; 4 mm gives a clean assembly tolerance
@@ -1906,7 +1906,7 @@
         mattressNominalT = BED_MATTRESS_THICKNESS_NOMINAL_MM
     }) {
         const safeFrameH = Math.max(0, parseInt(frameH, 10) || 0);
-        const safeLedgerT = Math.max(1, parseInt(ledgerT, 10) || 22);
+        const safeLedgerT = Math.max(1, parseInt(ledgerT, 10) || 16);
         const safeMattT = Math.max(1, parseInt(mattressNominalT, 10) || BED_MATTRESS_THICKNESS_NOMINAL_MM);
         const deckT = getBedDeckThicknessMm(baseType, stripLayout);
 
@@ -3164,17 +3164,18 @@
 
             const outerW      = mattressW + 2 * railT;      // total bed outer width
             const outerL      = bedLength + 2 * panelT;     // total bed outer length
+            // Inner ledgers, center supports, deck strips — thickness follows "Carcass thickness" (general params).
+            const ledgerT     = carcassT;
+            const centerSupportT = carcassT;
             const sideRailL   = bedLength;                   // rail fits between panels
 
             // Inner ledger (longitudinal cleat) on each side rail
             const ledgerW     = 40;
-            const ledgerT     = 22;
             const ledgerL     = sideRailL;
 
             // Center longitudinal supports (count driven by mattress width)
             const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
             const useCenterBeam = centerSupportCount > 0;
-            const centerSupportT = panelT;
             const centerSupportL = bedLength;
 
             // Transverse deck strips (LDSP): target W=400; if not fitting, reduce to available span minus 2 mm clearance.
@@ -3183,7 +3184,8 @@
                 mattressW,
                 ledgerW,
                 centerSupportCount,
-                centerSupportT
+                centerSupportT,
+                stripThicknessMm: carcassT
             });
             const STRIP_GAP = stripLayout.STRIP_GAP;
             const STRIP_T = stripLayout.STRIP_T;
@@ -3227,8 +3229,8 @@
                 { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
                 { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
                 { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
-                { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: 'Chipboard (MFC) / Softwood' },
-                { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: 'Chipboard (MFC) / Softwood' }
+                { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `Chipboard (MFC) ${ledgerT}mm / Softwood` },
+                { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `Chipboard (MFC) ${ledgerT}mm / Softwood` }
             ];
 
             if (useCenterBeam) {
@@ -3249,7 +3251,7 @@
                     l: stripL,
                     w: STRIP_W,
                     t: STRIP_T,
-                    mat: 'Chipboard (MFC) 18mm'
+                    mat: `Chipboard (MFC) ${STRIP_T}mm`
                 });
             } else {
                 bedParts.push({
@@ -4841,6 +4843,7 @@
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
         const panelT     = Math.max(10, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
         const railT      = panelT;
+        const carcassTBed = Math.max(10, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
         const useCenterBeam = centerSupportCount > 0;
@@ -4850,13 +4853,14 @@
 
         // Match model math exactly: one adjusted strip width is reused in render and parts/export.
         const LEDGER_W_MM = 40;
-        const LEDGER_T_MM = 22;
+        const LEDGER_T_MM = carcassTBed;
         const stripLayout = getBedDeckStripLayout({
             bedLength,
             mattressW,
             ledgerW: LEDGER_W_MM,
             centerSupportCount,
-            centerSupportT: panelT
+            centerSupportT: carcassTBed,
+            stripThicknessMm: carcassTBed
         });
         const stripSupportSpanW = stripLayout.stripSupportSpanW;
         const stripLengthL = stripLayout.stripLengthL;
