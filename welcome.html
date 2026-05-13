@@ -374,11 +374,11 @@
             if (isExternal) {
                 msg.textContent = 'You are being redirected to an external site...';
                 setTimeout(function() { msg.style.opacity = '1'; }, 50);
-                setTimeout(function() { window.open(href, '_blank'); }, 800);
                 setTimeout(function() {
-                    msg.style.opacity = '0';
-                    loader.classList.add('hidden');
-                }, 2200);
+                    var t = link.getAttribute('target') || '_blank';
+                    window.open(href, t);
+                }, 800);
+                setTimeout(hideLoader, 2200);
             } else {
                 setTimeout(function() { window.location.href = href; }, 350);
             }
