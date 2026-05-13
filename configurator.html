@@ -827,7 +827,7 @@
             <select id="facadeThick">
                 <option value="16" selected>16 mm</option>
                 <option value="18">18 mm</option>
-                <option value="19">19 mm PerfectSense</option>
+                <option value="19">19 mm PM/FeelWood</option>
                 <option value="25">25 mm</option>
             </select>
         </div>
@@ -2605,7 +2605,7 @@
             Array.from(select.options).forEach(opt => {
                 if (!opt.value) return;
                 if (select.id === 'facadeThick' && opt.value === '19') {
-                    opt.textContent = `${opt.value} ${unit} PerfectSense`;
+                    opt.textContent = `${opt.value} ${unit} PM/FeelWood`;
                 } else {
                     opt.textContent = opt.value + ' ' + unit;
                 }
