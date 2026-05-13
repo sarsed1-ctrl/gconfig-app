@@ -2673,7 +2673,7 @@
         thicknessSelects.forEach(select => {
             Array.from(select.options).forEach(opt => {
                 if (!opt.value) return;
-                if (select.id === 'facadeThick' && opt.value === '19') {
+                if ((select.id === 'facadeThick' || select.id === 'bedFacadeThick') && opt.value === '19') {
                     opt.textContent = `${opt.value} ${unit} PM/FeelWood`;
                 } else {
                     opt.textContent = opt.value + ' ' + unit;
