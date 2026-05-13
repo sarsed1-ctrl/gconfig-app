@@ -3537,6 +3537,13 @@
             renderWarnings(bedWarnings);
 
             drawSchematic(mattressW, frameH, bedLength, outerW, headboardH, railT, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
+
+            // Hide closet-only hinge/gas spec tables
+            ['hingeSpecTableUpper','hingeSpecTable','upperGasSpecTable','gasSpecTable',
+             'hingeTableHeading','upperGasSpecsHeading','lowerGasSpecsHeading'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
             return;
         }
 
