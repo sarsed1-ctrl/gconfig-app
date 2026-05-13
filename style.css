@@ -436,11 +436,7 @@ header {
     margin: 0 !important;
   }
   body.mobile-preview .main-content .header-title,
-  body.mobile-preview .main-content .order-details,
-  body.mobile-preview .main-content h3,
-  body.mobile-preview .main-content table,
-  body.mobile-preview .main-content .recommendations-block,
-  body.mobile-preview .main-content .weight-summary {
+  body.mobile-preview .main-content .order-details {
     display: none !important;
   }
 
