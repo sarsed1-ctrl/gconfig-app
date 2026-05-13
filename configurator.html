@@ -90,9 +90,9 @@
             background: #e8f5e9;
         }
 
-        /* Download APK button — mobile only */
+        /* Download APK button */
         #download-android-btn {
-            display: none; /* hidden on desktop */
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
@@ -111,9 +111,6 @@
         }
         #download-android-btn:hover { background: #135223; }
         #download-android-btn svg { flex-shrink: 0; }
-        @media (max-width: 768px) {
-            #download-android-btn { display: flex; }
-        }
 
         .top-nav-links {
             display: flex;
