@@ -1350,7 +1350,7 @@
         ru: {
             general_params: "Общие параметры",
             facade_thick: "Толщина фасада (мм):",
-            carcass_thick: "Толщина MDF-каркаса (мм):",
+            carcass_thick: "Толщина каркаса (мм):",
             wall_type: "Материал стен (Монтаж):",
             wall_concrete: "Бетон / Кирпич",
             wall_drywall: "Гипсокартон",
@@ -2189,15 +2189,33 @@
         if (document.getElementById('beds-controls')) return;
 
         const blocks = sidebar.querySelectorAll('.block');
-        blocks.forEach((block, idx) => {
-            block.style.display = idx === 0 ? '' : 'none';
-        });
+        blocks.forEach(block => { block.style.display = 'none'; });
 
         const bedBlock = document.createElement('div');
         bedBlock.className = 'block';
         bedBlock.id = 'beds-controls';
         bedBlock.innerHTML = `
             <h3>Beds Configurator</h3>
+            <div class="form-group">
+                <label data-i18n="facade_thick">Facade Thickness (mm):</label>
+                <select id="bedFacadeThick">
+                    <option value="16" selected>16 mm</option>
+                    <option value="18">18 mm</option>
+                    <option value="19">19 mm PM/FeelWood</option>
+                    <option value="25">25 mm</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label data-i18n="carcass_thick">MDF Carcass Thickness (mm):</label>
+                <select id="bedCarcassThick">
+                    <option value="16" selected>16 mm</option>
+                    <option value="18">18 mm</option>
+                    <option value="19">19 mm</option>
+                    <option value="22">22 mm</option>
+                    <option value="25">25 mm</option>
+                    <option value="28">28 mm</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Preset:</label>
                 <select id="bedPreset">
@@ -2247,7 +2265,7 @@
             const bedLength = parseInt(document.getElementById('bedLength')?.value || '2000', 10);
             const frameH = parseInt(document.getElementById('bedFrameH')?.value || '420', 10);
             const headboardH = parseInt(document.getElementById('bedHeadboardH')?.value || '900', 10);
-            const railT = parseInt(document.getElementById('facadeThick')?.value || '16', 10);
+            const railT = parseInt(document.getElementById('bedFacadeThick')?.value || '16', 10);
 
             const outerW = mattressW + railT * 2;
             const fW1 = document.getElementById('w1');
@@ -2289,7 +2307,8 @@
             });
 
         document.getElementById('bedBaseType')?.addEventListener('change', redrawBedsConfigurator);
-        document.getElementById('facadeThick')?.addEventListener('change', syncBedToCoreFields);
+        document.getElementById('bedFacadeThick')?.addEventListener('change', redrawBedsConfigurator);
+        document.getElementById('bedCarcassThick')?.addEventListener('change', redrawBedsConfigurator);
 
         syncBedToCoreFields();
     }
@@ -4924,9 +4943,9 @@
         const bedLength  = Math.max(1200, d1 || 2000);
         const headboardH = Math.max(300, h2 || 900);
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
-        const panelT     = Math.max(16, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
+        const panelT     = Math.max(16, parseInt(document.getElementById('bedFacadeThick')?.value || '16', 10));
         const railT      = panelT;
-        const carcassTBed = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
+        const carcassTBed = Math.max(16, parseInt(document.getElementById('bedCarcassThick')?.value || '16', 10));
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
         const useCenterBeam = centerSupportCount > 0;
