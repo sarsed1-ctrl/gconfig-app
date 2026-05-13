@@ -331,11 +331,27 @@
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-        // Hide loader after page load
+
+        function hideLoader() {
+            var loader = document.getElementById('loader');
+            var msg = document.getElementById('loader-msg');
+            if (!loader) return;
+            loader.style.transition = '';
+            loader.style.opacity = '';
+            loader.style.visibility = '';
+            loader.classList.add('hidden');
+            if (msg) msg.style.opacity = '0';
+        }
+
+        // Hide loader after page load (first open / hard refresh)
         window.addEventListener('load', function() {
-            setTimeout(function() {
-                document.getElementById('loader').classList.add('hidden');
-            }, 400);
+            setTimeout(hideLoader, 400);
+        });
+
+        // Back/forward cache: "load" does not run again; click handler leaves the loader
+        // visible with inline opacity/visibility, which overrides .hidden — page looks stuck.
+        window.addEventListener('pageshow', function(ev) {
+            if (ev.persisted) hideLoader();
         });
 
         // Show loader on any link click
