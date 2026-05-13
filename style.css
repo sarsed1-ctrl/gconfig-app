@@ -5,19 +5,19 @@
 
 /* ── 1. CSS Variables (override inline :root) ──────────────── */
 :root {
-  --primary:        #4a9060;
-  --primary-light:  #5aaa72;
-  --primary-dark:   #357050;
-  --primary-pale:   #2a3c32;
-  --bg:             #2c3830;
-  --bg2:            #324038;
-  --panel-bg:       #2e3c34;
-  --border:         #3e5448;
-  --text:           #d8e8dc;
-  --text-muted:     #90aa98;
-  --warning-bg:     #2a3c28;
-  --warning-border: #5a7a48;
-  --warning-text:   #aac888;
+  --primary:        #6aaa40;
+  --primary-light:  #82c050;
+  --primary-dark:   #4e8830;
+  --primary-pale:   #30401e;
+  --bg:             #343e28;
+  --bg2:            #3c4830;
+  --panel-bg:       #384230;
+  --border:         #4e5e3a;
+  --text:           #dceacc;
+  --text-muted:     #96aa7a;
+  --warning-bg:     #2e3e1e;
+  --warning-border: #607840;
+  --warning-text:   #b0cc80;
 }
 
 /* ── 2. Base reset ─────────────────────────────────────────── */
@@ -81,10 +81,10 @@ h3 { border-bottom-color: var(--border) !important; }
 .block {
   background: var(--panel-bg) !important;
   border-color: var(--border) !important;
-  box-shadow: 0 0 0 1px rgba(90,158,106,0.06);
+  box-shadow: 0 0 0 1px rgba(106,170,64,0.06);
 }
 .block:hover {
-  box-shadow: 0 0 0 1px rgba(90,158,106,0.14);
+  box-shadow: 0 0 0 1px rgba(106,170,64,0.14);
 }
 
 /* ── 7. Form elements ─────────────────────────────────────── */
@@ -102,7 +102,7 @@ textarea:focus,
 select:focus {
   border-color: var(--primary) !important;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(90,158,106,0.18);
+  box-shadow: 0 0 0 2px rgba(106,170,64,0.18);
 }
 input::placeholder,
 textarea::placeholder { color: var(--text-muted) !important; }
@@ -129,10 +129,10 @@ button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn):hove
   background-color: var(--primary-light) !important;
 }
 button.btn-cancel {
-  background: #333e38 !important;
+  background: #363e28 !important;
   color: var(--text-muted) !important;
 }
-button.btn-cancel:hover { background: #3a4a42 !important; }
+button.btn-cancel:hover { background: #424e32 !important; }
 button.close-btn {
   background: none !important;
   color: var(--text-muted) !important;
@@ -142,19 +142,19 @@ button.close-btn:hover { color: var(--primary-light) !important; background: non
 /* ── 9. Tables ────────────────────────────────────────────── */
 table { border-color: var(--border) !important; }
 th {
-  background-color: #303e38 !important;
+  background-color: #3c4a2c !important;
   color: var(--primary) !important;
   border-color: var(--border) !important;
 }
 td { border-color: var(--border) !important; }
-tr:nth-child(even) { background-color: #323e38 !important; }
+tr:nth-child(even) { background-color: #3e4c2e !important; }
 tr:nth-child(odd)  { background-color: var(--panel-bg) !important; }
-tr:hover td        { background-color: #3a4e44 !important; }
+tr:hover td        { background-color: #485a34 !important; }
 
 /* ── 10. Main content area ────────────────────────────────── */
 .main-content {
   background: var(--panel-bg) !important;
-  box-shadow: 0 0 0 1px rgba(90,158,106,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(106,170,64,0.08) !important;
 }
 
 /* Document preview (PDF output area) */
@@ -162,7 +162,7 @@ tr:hover td        { background-color: #3a4e44 !important; }
 
 /* ── 11. Weight summary box ───────────────────────────────── */
 .weight-summary {
-  background: #2a3a2e !important;
+  background: #303e22 !important;
   border-color: var(--primary-dark) !important;
 }
 .weight-summary h4 { color: var(--primary) !important; }
@@ -174,7 +174,7 @@ tr:hover td        { background-color: #3a4e44 !important; }
 }
 .recommendations-block h3 {
   color: var(--warning-text) !important;
-  border-bottom-color: #2a4030 !important;
+  border-bottom-color: #304020 !important;
 }
 
 /* ── 13. Resizer ──────────────────────────────────────────── */
@@ -195,7 +195,7 @@ tr:hover td        { background-color: #3a4e44 !important; }
   border-bottom-color: var(--border) !important;
 }
 #send-modal .sm-field label { color: var(--text-muted) !important; }
-#send-modal-overlay { background: rgba(20,30,24,0.85) !important; }
+#send-modal-overlay { background: rgba(28,36,18,0.88) !important; }
 
 /* ── 15. Toast ────────────────────────────────────────────── */
 #toast {
@@ -218,7 +218,7 @@ tr:hover td        { background-color: #3a4e44 !important; }
 /* ── 17. Project name input ───────────────────────────────── */
 #project-name-input {
   color: var(--text-muted) !important;
-  border-bottom-color: rgba(90,158,106,0.3) !important;
+  border-bottom-color: rgba(106,170,64,0.3) !important;
 }
 #project-name-input:focus {
   border-bottom-color: var(--primary) !important;
@@ -287,11 +287,11 @@ input[type="range"] { accent-color: var(--primary) !important; }
 }
 .card:hover {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 1px var(--primary), 0 8px 28px rgba(90,158,106,0.18) !important;
+  box-shadow: 0 0 0 1px var(--primary), 0 8px 28px rgba(106,170,64,0.18) !important;
   transform: translateY(-4px);
 }
 .card-icon-area {
-  background: linear-gradient(135deg, #303e38 0%, #1e2e24 100%) !important;
+  background: linear-gradient(135deg, #3c4a2c 0%, #1e2e24 100%) !important;
 }
 .card-icon-area svg { color: var(--primary) !important; }
 .card-title { color: var(--primary) !important; }
@@ -399,13 +399,14 @@ header {
   .radio-group { flex-direction: column !important; gap: 10px !important; }
   .radio-group label { font-size: 1em !important; padding: 8px 12px !important; border-radius: 6px !important; }
 
-  /* Canvas */
+  /* Canvas default */
   canvas {
     width: 100% !important;
     height: auto !important;
     max-width: 100% !important;
     display: block !important;
   }
+
 
   /* Tables */
   table {
@@ -419,6 +420,37 @@ header {
   .block { border-radius: 8px !important; padding: 14px !important; }
   h3 { font-size: 1em !important; }
   h4 { font-size: 0.92em !important; }
+
+  /* ── Full-screen schematic in preview tab ── */
+  body.mobile-preview .main-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  body.mobile-preview #document-preview {
+    padding: 0 !important;
+    overflow: hidden !important;
+    height: calc(100dvh - 56px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--panel-bg) !important;
+  }
+  body.mobile-preview #schematicCanvas {
+    width: 100% !important;
+    height: calc(100dvh - 56px) !important;
+    max-width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+  }
+  /* Hide non-canvas content in full-screen preview */
+  body.mobile-preview .main-content .header-title,
+  body.mobile-preview .main-content .order-details,
+  body.mobile-preview .main-content h3,
+  body.mobile-preview .main-content table,
+  body.mobile-preview .main-content .recommendations-block,
+  body.mobile-preview .main-content .weight-summary {
+    display: none !important;
+  }
 
   /* Send modal full-screen */
   #send-modal { width: 94vw !important; padding: 20px 16px !important; }
