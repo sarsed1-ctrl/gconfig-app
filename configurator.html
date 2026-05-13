@@ -3258,7 +3258,7 @@
             const bedFacadeT  = parseInt(document.getElementById('bedFacadeThick')?.value || '16', 10);
             const railT       = bedFacadeT;
             const panelT      = bedFacadeT;
-            const bedPerimeterMaterial = () => 'MDF/MFC';
+            const bedPerimeterMaterial = () => bedFacadeT === 19 ? 'MDF/MFC' : `Chipboard (MFC) ${bedFacadeT}mm`;
             const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
 
             const outerW      = mattressW + 2 * railT;      // total bed outer width
