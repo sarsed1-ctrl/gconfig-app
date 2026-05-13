@@ -5339,13 +5339,8 @@
         lastDrawArgs = { w1, h1, d1, w2, h2, d2, hasCT, ctT, fOver, sOver, upFW, upFH, carcassT, doorPlanner };
         const canvas = document.getElementById('schematicCanvas');
         const preview = document.getElementById('document-preview');
-        const isMobilePreview = window.innerWidth <= 768 && document.body.classList.contains('mobile-preview');
-        const targetCanvasW = isMobilePreview
-            ? Math.floor(window.innerWidth)
-            : Math.max(800, Math.floor((preview?.clientWidth || canvas.clientWidth || 800) - 24));
-        const targetCanvasH = isMobilePreview
-            ? Math.max(300, Math.floor(window.innerHeight - 56))
-            : 500;
+        const targetCanvasW = Math.max(800, Math.floor((preview?.clientWidth || canvas.clientWidth || 800) - 24));
+        const targetCanvasH = 500;
         if (canvas.width !== targetCanvasW || canvas.height !== targetCanvasH) {
             canvas.width  = targetCanvasW;
             canvas.height = targetCanvasH;
