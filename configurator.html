@@ -3181,6 +3181,7 @@
             // Headboard, footboard, side rails — same thickness as "Facade thickness" (LDSP frame).
             const railT       = facadeT;
             const panelT      = facadeT;
+            const bedPerimeterMaterial = (tMm) => (facadeT === 19 ? `LMDF ${tMm}mm` : `Chipboard (MFC) ${tMm}mm`);
             const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
 
             const outerW      = mattressW + 2 * railT;      // total bed outer width
@@ -3246,10 +3247,10 @@
             const sheetW   = Math.max(300, stripLayout.stripSupportSpanW);
 
             const bedParts = [
-                { name: getBedUILabel(currentLang, 'headboard'), qty: 1, l: outerW,   w: headboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
-                { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
-                { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
-                { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
+                { name: getBedUILabel(currentLang, 'headboard'), qty: 1, l: outerW,   w: headboardH, t: panelT,   mat: bedPerimeterMaterial(panelT) },
+                { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: bedPerimeterMaterial(panelT) },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: bedPerimeterMaterial(railT) },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: bedPerimeterMaterial(railT) },
                 { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` },
                 { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` }
             ];
