@@ -819,11 +819,12 @@
         <div class="form-group">
             <label data-i18n="carcass_thick">MDF Carcass Thickness (mm):</label>
             <select id="carcassThick">
-                <option value="10">10 mm</option>
                 <option value="16" selected>16 mm</option>
                 <option value="18">18 mm</option>
                 <option value="19">19 mm</option>
+                <option value="22">22 mm</option>
                 <option value="25">25 mm</option>
+                <option value="28">28 mm</option>
             </select>
         </div>
 
@@ -2626,11 +2627,12 @@
 
     // Carcass weight by thickness (kg/m²) - use same map
     const CARCASS_WEIGHT_MAP = {
-        10: 7.5,
         16: 12.5,
         18: 14.0,
         19: 14.8,
-        25: 19.0
+        22: 16.9,
+        25: 19.0,
+        28: 21.1
     };
 
     // Door/hinge planner runtime state
@@ -4843,7 +4845,7 @@
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
         const panelT     = Math.max(10, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
         const railT      = panelT;
-        const carcassTBed = Math.max(10, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
+        const carcassTBed = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
         const useCenterBeam = centerSupportCount > 0;
