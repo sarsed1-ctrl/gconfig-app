@@ -5,19 +5,19 @@
 
 /* ── 1. CSS Variables (override inline :root) ──────────────── */
 :root {
-  --primary:        #5a9e6a;
-  --primary-light:  #70b87e;
-  --primary-dark:   #3d7a4e;
-  --primary-pale:   #1e2b22;
-  --bg:             #191f1b;
-  --bg2:            #1e2720;
-  --panel-bg:       #1c2520;
-  --border:         #2a3a30;
-  --text:           #c2d0c6;
-  --text-muted:     #7a9282;
-  --warning-bg:     #1f2a1a;
-  --warning-border: #4a6a38;
-  --warning-text:   #9ab878;
+  --primary:        #4a9060;
+  --primary-light:  #5aaa72;
+  --primary-dark:   #357050;
+  --primary-pale:   #2a3c32;
+  --bg:             #2c3830;
+  --bg2:            #324038;
+  --panel-bg:       #2e3c34;
+  --border:         #3e5448;
+  --text:           #d8e8dc;
+  --text-muted:     #90aa98;
+  --warning-bg:     #2a3c28;
+  --warning-border: #5a7a48;
+  --warning-text:   #aac888;
 }
 
 /* ── 2. Base reset ─────────────────────────────────────────── */
@@ -129,10 +129,10 @@ button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn):hove
   background-color: var(--primary-light) !important;
 }
 button.btn-cancel {
-  background: #252e28 !important;
+  background: #333e38 !important;
   color: var(--text-muted) !important;
 }
-button.btn-cancel:hover { background: #2c3830 !important; }
+button.btn-cancel:hover { background: #3a4a42 !important; }
 button.close-btn {
   background: none !important;
   color: var(--text-muted) !important;
@@ -142,14 +142,14 @@ button.close-btn:hover { color: var(--primary-light) !important; background: non
 /* ── 9. Tables ────────────────────────────────────────────── */
 table { border-color: var(--border) !important; }
 th {
-  background-color: #1a2820 !important;
+  background-color: #303e38 !important;
   color: var(--primary) !important;
   border-color: var(--border) !important;
 }
 td { border-color: var(--border) !important; }
-tr:nth-child(even) { background-color: #1b2520 !important; }
+tr:nth-child(even) { background-color: #323e38 !important; }
 tr:nth-child(odd)  { background-color: var(--panel-bg) !important; }
-tr:hover td        { background-color: #22302a !important; }
+tr:hover td        { background-color: #3a4e44 !important; }
 
 /* ── 10. Main content area ────────────────────────────────── */
 .main-content {
@@ -162,7 +162,7 @@ tr:hover td        { background-color: #22302a !important; }
 
 /* ── 11. Weight summary box ───────────────────────────────── */
 .weight-summary {
-  background: #182218 !important;
+  background: #2a3a2e !important;
   border-color: var(--primary-dark) !important;
 }
 .weight-summary h4 { color: var(--primary) !important; }
@@ -195,7 +195,7 @@ tr:hover td        { background-color: #22302a !important; }
   border-bottom-color: var(--border) !important;
 }
 #send-modal .sm-field label { color: var(--text-muted) !important; }
-#send-modal-overlay { background: rgba(10,15,12,0.80) !important; }
+#send-modal-overlay { background: rgba(20,30,24,0.85) !important; }
 
 /* ── 15. Toast ────────────────────────────────────────────── */
 #toast {
@@ -291,7 +291,7 @@ input[type="range"] { accent-color: var(--primary) !important; }
   transform: translateY(-4px);
 }
 .card-icon-area {
-  background: linear-gradient(135deg, #1a2820 0%, #1e2e24 100%) !important;
+  background: linear-gradient(135deg, #303e38 0%, #1e2e24 100%) !important;
 }
 .card-icon-area svg { color: var(--primary) !important; }
 .card-title { color: var(--primary) !important; }
