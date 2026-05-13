@@ -1271,8 +1271,8 @@
         <!-- Decorative divider -->
         <svg class="section-divider" width="100%" height="20" aria-hidden="true"><use href="#divider"/></svg>
 
-        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="upperCabinetHeading">Upper Closet</h2>
-        <table id="upperPartsTable">
+        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;display:none;" id="upperCabinetHeading">Upper Closet</h2>
+        <table id="upperPartsTable" style="display:none;">
             <thead>
                 <tr>
                     <th data-i18n="col_part_name">Part Name</th>
@@ -1295,8 +1295,8 @@
             <p>Enter parameters — parts will appear here</p>
         </div>
 
-        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="lowerCabinetHeading">Lower Closet</h2>
-        <table id="lowerPartsTable">
+        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;display:none;" id="lowerCabinetHeading">Lower Closet</h2>
+        <table id="lowerPartsTable" style="display:none;">
             <thead>
                 <tr>
                     <th data-i18n="col_part_name">Part Name</th>
@@ -1319,8 +1319,8 @@
 
         <svg class="section-divider" width="100%" height="20" aria-hidden="true"><use href="#divider"/></svg>
 
-        <h2 id="hardwareTitle" style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" data-i18n="hardware_title">Furniture</h2>
-        <table id="hardwareTable">
+        <h2 id="hardwareTitle" style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;display:none;" data-i18n="hardware_title">Furniture</h2>
+        <table id="hardwareTable" style="display:none;">
             <thead>
                 <tr>
                     <th data-i18n="col_hw_name">Name</th>
@@ -3538,8 +3538,10 @@
 
             drawSchematic(mattressW, frameH, bedLength, outerW, headboardH, railT, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
 
-            // Hide closet-only hinge/gas spec tables
-            ['hingeSpecTableUpper','hingeSpecTable','upperGasSpecTable','gasSpecTable',
+            // Hide all closet-only sections
+            ['upperCabinetHeading','upperPartsTable','lowerCabinetHeading','lowerPartsTable',
+             'hardwareTitle','hardwareTable',
+             'hingeSpecTableUpper','hingeSpecTable','upperGasSpecTable','gasSpecTable',
              'hingeTableHeading','upperGasSpecsHeading','lowerGasSpecsHeading'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
