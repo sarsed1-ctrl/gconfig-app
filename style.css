@@ -5,19 +5,19 @@
 
 /* ── 1. CSS Variables (override inline :root) ──────────────── */
 :root {
-  --primary:        #00cc00;
-  --primary-light:  #00ff00;
-  --primary-dark:   #008800;
-  --primary-pale:   #0d200d;
-  --bg:             #0a0f0a;
-  --bg2:            #111811;
-  --panel-bg:       #0d140d;
-  --border:         #1e3a1e;
-  --text:           #d4f0d4;
-  --text-muted:     #6b9e6b;
-  --warning-bg:     #1a2a0a;
-  --warning-border: #4a7a00;
-  --warning-text:   #a8d060;
+  --primary:        #5a9e6a;
+  --primary-light:  #70b87e;
+  --primary-dark:   #3d7a4e;
+  --primary-pale:   #1e2b22;
+  --bg:             #191f1b;
+  --bg2:            #1e2720;
+  --panel-bg:       #1c2520;
+  --border:         #2a3a30;
+  --text:           #c2d0c6;
+  --text-muted:     #7a9282;
+  --warning-bg:     #1f2a1a;
+  --warning-border: #4a6a38;
+  --warning-text:   #9ab878;
 }
 
 /* ── 2. Base reset ─────────────────────────────────────────── */
@@ -50,7 +50,7 @@ h3 { border-bottom-color: var(--border) !important; }
 }
 .lang-btn.active {
   background: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
 }
 .lang-btn:hover:not(.active) {
   background: var(--primary-pale) !important;
@@ -63,7 +63,7 @@ h3 { border-bottom-color: var(--border) !important; }
 }
 .top-nav-link.active {
   background: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
 }
 .top-nav-link:hover:not(.active) {
   background: var(--primary-pale) !important;
@@ -71,7 +71,7 @@ h3 { border-bottom-color: var(--border) !important; }
 
 #download-android-btn {
   background: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
 }
 #download-android-btn:hover {
   background: var(--primary-light) !important;
@@ -81,10 +81,10 @@ h3 { border-bottom-color: var(--border) !important; }
 .block {
   background: var(--panel-bg) !important;
   border-color: var(--border) !important;
-  box-shadow: 0 0 0 1px rgba(0,204,0,0.06);
+  box-shadow: 0 0 0 1px rgba(90,158,106,0.06);
 }
 .block:hover {
-  box-shadow: 0 0 0 1px rgba(0,204,0,0.14);
+  box-shadow: 0 0 0 1px rgba(90,158,106,0.14);
 }
 
 /* ── 7. Form elements ─────────────────────────────────────── */
@@ -102,7 +102,7 @@ textarea:focus,
 select:focus {
   border-color: var(--primary) !important;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0,204,0,0.18);
+  box-shadow: 0 0 0 2px rgba(90,158,106,0.18);
 }
 input::placeholder,
 textarea::placeholder { color: var(--text-muted) !important; }
@@ -121,7 +121,7 @@ textarea::placeholder { color: var(--text-muted) !important; }
 /* ── 8. Buttons ───────────────────────────────────────────── */
 button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn) {
   background-color: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
   font-weight: 700;
   border: none;
 }
@@ -129,10 +129,10 @@ button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn):hove
   background-color: var(--primary-light) !important;
 }
 button.btn-cancel {
-  background: #2a3a2a !important;
+  background: #252e28 !important;
   color: var(--text-muted) !important;
 }
-button.btn-cancel:hover { background: #354535 !important; }
+button.btn-cancel:hover { background: #2c3830 !important; }
 button.close-btn {
   background: none !important;
   color: var(--text-muted) !important;
@@ -142,19 +142,19 @@ button.close-btn:hover { color: var(--primary-light) !important; background: non
 /* ── 9. Tables ────────────────────────────────────────────── */
 table { border-color: var(--border) !important; }
 th {
-  background-color: #0f1f0f !important;
+  background-color: #1a2820 !important;
   color: var(--primary) !important;
   border-color: var(--border) !important;
 }
 td { border-color: var(--border) !important; }
-tr:nth-child(even) { background-color: #0e1a0e !important; }
+tr:nth-child(even) { background-color: #1b2520 !important; }
 tr:nth-child(odd)  { background-color: var(--panel-bg) !important; }
-tr:hover td        { background-color: #132013 !important; }
+tr:hover td        { background-color: #22302a !important; }
 
 /* ── 10. Main content area ────────────────────────────────── */
 .main-content {
   background: var(--panel-bg) !important;
-  box-shadow: 0 0 0 1px rgba(0,204,0,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(90,158,106,0.08) !important;
 }
 
 /* Document preview (PDF output area) */
@@ -162,7 +162,7 @@ tr:hover td        { background-color: #132013 !important; }
 
 /* ── 11. Weight summary box ───────────────────────────────── */
 .weight-summary {
-  background: #091509 !important;
+  background: #182218 !important;
   border-color: var(--primary-dark) !important;
 }
 .weight-summary h4 { color: var(--primary) !important; }
@@ -174,7 +174,7 @@ tr:hover td        { background-color: #132013 !important; }
 }
 .recommendations-block h3 {
   color: var(--warning-text) !important;
-  border-bottom-color: #2a4a10 !important;
+  border-bottom-color: #2a4030 !important;
 }
 
 /* ── 13. Resizer ──────────────────────────────────────────── */
@@ -187,7 +187,7 @@ tr:hover td        { background-color: #132013 !important; }
 /* ── 14. Send modal ───────────────────────────────────────── */
 #send-modal {
   background: var(--panel-bg) !important;
-  box-shadow: 0 8px 40px rgba(0,255,0,0.10) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
   border: 1px solid var(--border);
 }
 #send-modal h3 {
@@ -195,14 +195,14 @@ tr:hover td        { background-color: #132013 !important; }
   border-bottom-color: var(--border) !important;
 }
 #send-modal .sm-field label { color: var(--text-muted) !important; }
-#send-modal-overlay { background: rgba(0,5,0,0.75) !important; }
+#send-modal-overlay { background: rgba(10,15,12,0.80) !important; }
 
 /* ── 15. Toast ────────────────────────────────────────────── */
 #toast {
   background: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
 }
-#toast.error { background: #cc2200 !important; color: #fff !important; }
+#toast.error { background: #b83320 !important; color: #fff !important; }
 
 /* ── 16. Radio groups ─────────────────────────────────────── */
 .radio-group label {
@@ -218,7 +218,7 @@ tr:hover td        { background-color: #132013 !important; }
 /* ── 17. Project name input ───────────────────────────────── */
 #project-name-input {
   color: var(--text-muted) !important;
-  border-bottom-color: rgba(0,204,0,0.3) !important;
+  border-bottom-color: rgba(90,158,106,0.3) !important;
 }
 #project-name-input:focus {
   border-bottom-color: var(--primary) !important;
@@ -287,18 +287,18 @@ input[type="range"] { accent-color: var(--primary) !important; }
 }
 .card:hover {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 1px var(--primary), 0 8px 32px rgba(0,204,0,0.15) !important;
+  box-shadow: 0 0 0 1px var(--primary), 0 8px 28px rgba(90,158,106,0.18) !important;
   transform: translateY(-4px);
 }
 .card-icon-area {
-  background: linear-gradient(135deg, #091509 0%, #0e1e0e 100%) !important;
+  background: linear-gradient(135deg, #1a2820 0%, #1e2e24 100%) !important;
 }
 .card-icon-area svg { color: var(--primary) !important; }
 .card-title { color: var(--primary) !important; }
 .card-desc  { color: var(--text-muted) !important; }
 .card-btn {
   background: var(--primary) !important;
-  color: #0a0f0a !important;
+  color: #f0f4f2 !important;
 }
 .card-btn:hover { background: var(--primary-light) !important; }
 
