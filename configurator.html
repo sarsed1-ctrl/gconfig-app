@@ -1877,8 +1877,6 @@
     /** Keep solid material below the ledger inside the rail. */
     const BED_RAIL_SOLID_BOTTOM_MIN_MM = 20;
     const BED_SHEET_BASE_THICKNESS_MM = 16;
-    /** Side rail (царга) thickness — fixed product standard (static bed). */
-    const BED_SIDE_RAIL_THICKNESS_MM = 25;
 
     /**
      * Single source of truth for BEDS vertical stack (mm from floor upward):
@@ -2141,7 +2139,6 @@
             <div class="form-group"><label>Frame height (mm):</label><input type="number" id="bedFrameH" value="420" min="250" step="5"></div>
             <div class="form-group"><label>Headboard height (mm):</label><input type="number" id="bedHeadboardH" value="900" min="400" step="10"></div>
             <div class="form-group"><label>Footboard height (mm):</label><input type="number" id="bedFootboardH" value="420" min="200" step="10"></div>
-            <div class="form-group"><label>Side rail thickness (mm):</label><span style="font-weight:700;color:var(--primary);">${BED_SIDE_RAIL_THICKNESS_MM} mm</span></div>
             <div class="form-group">
                 <label>Deck base:</label>
                 <select id="bedBaseType">
@@ -2178,7 +2175,7 @@
             const bedLength = parseInt(document.getElementById('bedLength')?.value || '2000', 10);
             const frameH = parseInt(document.getElementById('bedFrameH')?.value || '420', 10);
             const headboardH = parseInt(document.getElementById('bedHeadboardH')?.value || '900', 10);
-            const railT = BED_SIDE_RAIL_THICKNESS_MM;
+            const railT = parseInt(document.getElementById('facadeThick')?.value || '16', 10);
 
             const outerW = mattressW + railT * 2;
             const fW1 = document.getElementById('w1');
@@ -2220,6 +2217,7 @@
             });
 
         document.getElementById('bedBaseType')?.addEventListener('change', redrawBedsConfigurator);
+        document.getElementById('facadeThick')?.addEventListener('change', syncBedToCoreFields);
 
         syncBedToCoreFields();
     }
@@ -3159,10 +3157,11 @@
             const frameH      = parseInt(document.getElementById('bedFrameH')?.value || h1 || '420', 10);
             const headboardH  = parseInt(document.getElementById('bedHeadboardH')?.value || h2 || '900', 10);
             const footboardH  = parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10);
-            const railT       = BED_SIDE_RAIL_THICKNESS_MM;
+            // Headboard, footboard, side rails — same thickness as "Facade thickness" (LDSP frame).
+            const railT       = facadeT;
+            const panelT      = facadeT;
             const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
 
-            const panelT      = carcassT || 18;             // headboard / footboard LDSP thickness
             const outerW      = mattressW + 2 * railT;      // total bed outer width
             const outerL      = bedLength + 2 * panelT;     // total bed outer length
             const sideRailL   = bedLength;                   // rail fits between panels
@@ -3224,10 +3223,10 @@
             const sheetW   = Math.max(300, stripLayout.stripSupportSpanW);
 
             const bedParts = [
-                { name: getBedUILabel(currentLang, 'headboard'), qty: 1, l: outerW,   w: headboardH, t: panelT,   mat: 'Chipboard (MFC) 18mm' },
-                { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: 'Chipboard (MFC) 18mm' },
-                { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: 'Chipboard (MFC)' },
-                { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: 'Chipboard (MFC)' },
+                { name: getBedUILabel(currentLang, 'headboard'), qty: 1, l: outerW,   w: headboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
+                { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
                 { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: 'Chipboard (MFC) / Softwood' },
                 { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: 'Chipboard (MFC) / Softwood' }
             ];
@@ -3239,7 +3238,7 @@
                     l: centerSupportL,
                     w: centerSupportH,
                     t: centerSupportT,
-                    mat: 'Chipboard (MFC) 18mm'
+                    mat: `Chipboard (MFC) ${centerSupportT}mm`
                 });
             }
 
@@ -4840,9 +4839,9 @@
         const bedLength  = Math.max(1200, d1 || 2000);
         const headboardH = Math.max(300, h2 || 900);
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
-        const railT      = BED_SIDE_RAIL_THICKNESS_MM;
+        const panelT     = Math.max(10, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
+        const railT      = panelT;
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
-        const panelT     = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '18', 10));
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
         const useCenterBeam = centerSupportCount > 0;
 
