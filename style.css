@@ -1,23 +1,23 @@
 /* ============================================================
    GConfig — Shared Design System
-   Dark green theme | Mobile-first | v2.0
+   Original light green theme | Mobile-first | v1.0
    ============================================================ */
 
-/* ── 1. CSS Variables (override inline :root) ──────────────── */
+/* ── 1. CSS Variables (restore original palette) ───────────── */
 :root {
-  --primary:        #6aaa40;
-  --primary-light:  #82c050;
-  --primary-dark:   #4e8830;
-  --primary-pale:   #30401e;
-  --bg:             #343e28;
-  --bg2:            #3c4830;
-  --panel-bg:       #384230;
-  --border:         #4e5e3a;
-  --text:           #dceacc;
-  --text-muted:     #96aa7a;
-  --warning-bg:     #2e3e1e;
-  --warning-border: #607840;
-  --warning-text:   #b0cc80;
+  --primary:        #1a6b2f;
+  --primary-light:  #2d9348;
+  --primary-dark:   #145224;
+  --primary-pale:   #e8f5e9;
+  --bg:             #f4f7f6;
+  --bg2:            #ecf0ec;
+  --panel-bg:       #ffffff;
+  --border:         #d0ddd0;
+  --text:           #333333;
+  --text-muted:     #777777;
+  --warning-bg:     #fff8e1;
+  --warning-border: #ffc107;
+  --warning-text:   #856404;
 }
 
 /* ── 2. Base reset ─────────────────────────────────────────── */
@@ -50,7 +50,7 @@ h3 { border-bottom-color: var(--border) !important; }
 }
 .lang-btn.active {
   background: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
 }
 .lang-btn:hover:not(.active) {
   background: var(--primary-pale) !important;
@@ -63,7 +63,7 @@ h3 { border-bottom-color: var(--border) !important; }
 }
 .top-nav-link.active {
   background: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
 }
 .top-nav-link:hover:not(.active) {
   background: var(--primary-pale) !important;
@@ -71,7 +71,7 @@ h3 { border-bottom-color: var(--border) !important; }
 
 #download-android-btn {
   background: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
 }
 #download-android-btn:hover {
   background: var(--primary-light) !important;
@@ -81,10 +81,10 @@ h3 { border-bottom-color: var(--border) !important; }
 .block {
   background: var(--panel-bg) !important;
   border-color: var(--border) !important;
-  box-shadow: 0 0 0 1px rgba(106,170,64,0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .block:hover {
-  box-shadow: 0 0 0 1px rgba(106,170,64,0.14);
+  box-shadow: 0 2px 8px rgba(26,107,47,0.12);
 }
 
 /* ── 7. Form elements ─────────────────────────────────────── */
@@ -102,7 +102,7 @@ textarea:focus,
 select:focus {
   border-color: var(--primary) !important;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(106,170,64,0.18);
+  box-shadow: 0 0 0 2px rgba(26,107,47,0.15);
 }
 input::placeholder,
 textarea::placeholder { color: var(--text-muted) !important; }
@@ -121,7 +121,7 @@ textarea::placeholder { color: var(--text-muted) !important; }
 /* ── 8. Buttons ───────────────────────────────────────────── */
 button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn) {
   background-color: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
   font-weight: 700;
   border: none;
 }
@@ -129,32 +129,33 @@ button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn):hove
   background-color: var(--primary-light) !important;
 }
 button.btn-cancel {
-  background: #363e28 !important;
+  background: #f0f0f0 !important;
   color: var(--text-muted) !important;
+  border: 1px solid var(--border) !important;
 }
-button.btn-cancel:hover { background: #424e32 !important; }
+button.btn-cancel:hover { background: #e4e4e4 !important; }
 button.close-btn {
   background: none !important;
   color: var(--text-muted) !important;
 }
-button.close-btn:hover { color: var(--primary-light) !important; background: none !important; }
+button.close-btn:hover { color: var(--primary) !important; background: none !important; }
 
 /* ── 9. Tables ────────────────────────────────────────────── */
 table { border-color: var(--border) !important; }
 th {
-  background-color: #3c4a2c !important;
+  background-color: #e8f5e9 !important;
   color: var(--primary) !important;
   border-color: var(--border) !important;
 }
 td { border-color: var(--border) !important; }
-tr:nth-child(even) { background-color: #3e4c2e !important; }
+tr:nth-child(even) { background-color: #f5fbf5 !important; }
 tr:nth-child(odd)  { background-color: var(--panel-bg) !important; }
-tr:hover td        { background-color: #485a34 !important; }
+tr:hover td        { background-color: #ddf0dd !important; }
 
 /* ── 10. Main content area ────────────────────────────────── */
 .main-content {
   background: var(--panel-bg) !important;
-  box-shadow: 0 0 0 1px rgba(106,170,64,0.08) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
 }
 
 /* Document preview (PDF output area) */
@@ -162,8 +163,8 @@ tr:hover td        { background-color: #485a34 !important; }
 
 /* ── 11. Weight summary box ───────────────────────────────── */
 .weight-summary {
-  background: #303e22 !important;
-  border-color: var(--primary-dark) !important;
+  background: #f0fbf0 !important;
+  border-color: var(--primary) !important;
 }
 .weight-summary h4 { color: var(--primary) !important; }
 
@@ -174,20 +175,20 @@ tr:hover td        { background-color: #485a34 !important; }
 }
 .recommendations-block h3 {
   color: var(--warning-text) !important;
-  border-bottom-color: #304020 !important;
+  border-bottom-color: #ffeaa0 !important;
 }
 
 /* ── 13. Resizer ──────────────────────────────────────────── */
 #resizer { background: var(--border) !important; }
 #resizer::after { color: var(--text-muted) !important; }
-#resizer:hover  { background: var(--primary-dark) !important; }
-#resizer:hover::after { color: var(--bg) !important; }
-#resizer.dragging { background: var(--primary) !important; }
+#resizer:hover  { background: var(--primary) !important; }
+#resizer:hover::after { color: #fff !important; }
+#resizer.dragging { background: var(--primary-dark) !important; }
 
 /* ── 14. Send modal ───────────────────────────────────────── */
 #send-modal {
   background: var(--panel-bg) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
   border: 1px solid var(--border);
 }
 #send-modal h3 {
@@ -195,14 +196,14 @@ tr:hover td        { background-color: #485a34 !important; }
   border-bottom-color: var(--border) !important;
 }
 #send-modal .sm-field label { color: var(--text-muted) !important; }
-#send-modal-overlay { background: rgba(28,36,18,0.88) !important; }
+#send-modal-overlay { background: rgba(0,0,0,0.5) !important; }
 
 /* ── 15. Toast ────────────────────────────────────────────── */
 #toast {
   background: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
 }
-#toast.error { background: #b83320 !important; color: #fff !important; }
+#toast.error { background: #c0392b !important; color: #fff !important; }
 
 /* ── 16. Radio groups ─────────────────────────────────────── */
 .radio-group label {
@@ -218,7 +219,7 @@ tr:hover td        { background-color: #485a34 !important; }
 /* ── 17. Project name input ───────────────────────────────── */
 #project-name-input {
   color: var(--text-muted) !important;
-  border-bottom-color: rgba(106,170,64,0.3) !important;
+  border-bottom-color: rgba(26,107,47,0.3) !important;
 }
 #project-name-input:focus {
   border-bottom-color: var(--primary) !important;
@@ -238,7 +239,7 @@ input[type="range"] { accent-color: var(--primary) !important; }
 /* ── 20. Order details text ───────────────────────────────── */
 .order-details { color: var(--text-muted) !important; }
 
-/* ── 21. Mobile tab bar (configurator.html) ───────────────── */
+/* ── 21. Mobile tab bar ───────────────────────────────────── */
 #mobile-tab-bar {
   background: var(--panel-bg) !important;
   border-top-color: var(--border) !important;
@@ -260,8 +261,8 @@ input[type="range"] { accent-color: var(--primary) !important; }
 
 /* ── 22. Hinge tooltip ────────────────────────────────────── */
 #hingeTooltip {
-  background: var(--bg2) !important;
-  color: var(--text) !important;
+  background: #333 !important;
+  color: #fff !important;
   border: 1px solid var(--border);
   z-index: 999 !important;
 }
@@ -276,29 +277,29 @@ input[type="range"] { accent-color: var(--primary) !important; }
 /* ── 24. Scrollbar (Webkit) ───────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+::-webkit-scrollbar-thumb { background: #c0c8c0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* ── 25. Welcome page cards ───────────────────────────────── */
 .card {
   background: var(--panel-bg) !important;
-  border-color: var(--border) !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4) !important;
+  border-color: rgba(26,107,47,0.15) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
 }
 .card:hover {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 1px var(--primary), 0 8px 28px rgba(106,170,64,0.18) !important;
+  box-shadow: 0 8px 28px rgba(26,107,47,0.14) !important;
   transform: translateY(-4px);
 }
 .card-icon-area {
-  background: linear-gradient(135deg, #3c4a2c 0%, #1e2e24 100%) !important;
+  background: linear-gradient(135deg, var(--primary-pale) 0%, #d6ead9 100%) !important;
 }
 .card-icon-area svg { color: var(--primary) !important; }
 .card-title { color: var(--primary) !important; }
 .card-desc  { color: var(--text-muted) !important; }
 .card-btn {
   background: var(--primary) !important;
-  color: #f0f4f2 !important;
+  color: #fff !important;
 }
 .card-btn:hover { background: var(--primary-light) !important; }
 
@@ -311,7 +312,7 @@ footer {
 }
 header {
   background: var(--panel-bg) !important;
-  border-bottom-color: var(--border) !important;
+  border-bottom-color: rgba(26,107,47,0.12) !important;
 }
 .header-page-title { color: var(--primary) !important; }
 
@@ -459,7 +460,7 @@ header {
     bottom: 0 !important; left: 0 !important; right: 0 !important;
     height: 56px !important;
     z-index: 300 !important;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.1) !important;
   }
   .mobile-tab-btn {
     flex: 1 !important;
