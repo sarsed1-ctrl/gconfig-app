@@ -37,6 +37,7 @@
         /* Language switcher bar — buttons pushed to the right, PCB background */
         #lang-bar {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             padding: 8px 12px;
             align-items: center;
@@ -108,6 +109,7 @@
             cursor: pointer;
             transition: background 0.2s;
             white-space: nowrap;
+            width: 100%;
         }
         #download-android-btn:hover { background: #135223; }
         #download-android-btn svg { flex-shrink: 0; }
@@ -693,7 +695,6 @@
                 border-right: none;
                 border-top: none;
                 padding: 6px 8px;
-                flex-wrap: nowrap;
                 gap: 4px;
             }
             .top-nav-links { gap: 4px; flex-shrink: 0; }
