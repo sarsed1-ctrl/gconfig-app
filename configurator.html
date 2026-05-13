@@ -1877,6 +1877,8 @@
     /** Keep solid material below the ledger inside the rail. */
     const BED_RAIL_SOLID_BOTTOM_MIN_MM = 20;
     const BED_SHEET_BASE_THICKNESS_MM = 16;
+    /** Side rail (царга) thickness — fixed product standard (static bed). */
+    const BED_SIDE_RAIL_THICKNESS_MM = 25;
 
     /**
      * Single source of truth for BEDS vertical stack (mm from floor upward):
@@ -2139,7 +2141,7 @@
             <div class="form-group"><label>Frame height (mm):</label><input type="number" id="bedFrameH" value="420" min="250" step="5"></div>
             <div class="form-group"><label>Headboard height (mm):</label><input type="number" id="bedHeadboardH" value="900" min="400" step="10"></div>
             <div class="form-group"><label>Footboard height (mm):</label><input type="number" id="bedFootboardH" value="420" min="200" step="10"></div>
-            <div class="form-group"><label>Side rail thickness (mm):</label><input type="number" id="bedRailT" value="26" min="16" step="1"></div>
+            <div class="form-group"><label>Side rail thickness (mm):</label><span style="font-weight:700;color:var(--primary);">${BED_SIDE_RAIL_THICKNESS_MM} mm</span></div>
             <div class="form-group">
                 <label>Deck base:</label>
                 <select id="bedBaseType">
@@ -2176,7 +2178,7 @@
             const bedLength = parseInt(document.getElementById('bedLength')?.value || '2000', 10);
             const frameH = parseInt(document.getElementById('bedFrameH')?.value || '420', 10);
             const headboardH = parseInt(document.getElementById('bedHeadboardH')?.value || '900', 10);
-            const railT = parseInt(document.getElementById('bedRailT')?.value || '26', 10);
+            const railT = BED_SIDE_RAIL_THICKNESS_MM;
 
             const outerW = mattressW + railT * 2;
             const fW1 = document.getElementById('w1');
@@ -2209,7 +2211,7 @@
             updateConfigurator();
         };
 
-        ['bedMattressW', 'bedLength', 'bedFrameH', 'bedHeadboardH', 'bedFootboardH', 'bedRailT']
+        ['bedMattressW', 'bedLength', 'bedFrameH', 'bedHeadboardH', 'bedFootboardH']
             .forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -3157,7 +3159,7 @@
             const frameH      = parseInt(document.getElementById('bedFrameH')?.value || h1 || '420', 10);
             const headboardH  = parseInt(document.getElementById('bedHeadboardH')?.value || h2 || '900', 10);
             const footboardH  = parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10);
-            const railT       = parseInt(document.getElementById('bedRailT')?.value || '26', 10);
+            const railT       = BED_SIDE_RAIL_THICKNESS_MM;
             const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
 
             const panelT      = carcassT || 18;             // headboard / footboard LDSP thickness
@@ -4838,7 +4840,7 @@
         const bedLength  = Math.max(1200, d1 || 2000);
         const headboardH = Math.max(300, h2 || 900);
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
-        const railT      = Math.max(16, parseInt(document.getElementById('bedRailT')?.value || '26', 10));
+        const railT      = BED_SIDE_RAIL_THICKNESS_MM;
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
         const panelT     = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '18', 10));
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
