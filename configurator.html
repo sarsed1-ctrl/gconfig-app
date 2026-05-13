@@ -6546,6 +6546,13 @@
         document.addEventListener('DOMContentLoaded', patchSetLang);
         window.addEventListener('load', patchSetLang);
 
+        // On mobile: hide main content by default so only sidebar shows
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) {
+                switchMobileTab('settings');
+            }
+        });
+
         // Register service worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
