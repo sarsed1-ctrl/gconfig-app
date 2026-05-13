@@ -503,10 +503,11 @@
            We just ensure the content width stays within A4 bounds. */
         thead { display: table-header-group; }
         @media (max-width: 768px) {
-            .top-nav-links { display: none !important; }
-            #lang-bar { flex-wrap: nowrap; gap: 4px; padding: 0 8px; }
-            #download-android-btn { font-size: 11px; padding: 5px 7px; }
-            .lang-btn { padding: 4px 7px; font-size: 11px; }
+            #lang-bar { overflow-x: auto; flex-wrap: nowrap; gap: 4px; padding: 4px 8px; }
+            .top-nav-links { gap: 4px; flex-shrink: 0; }
+            .top-nav-link { font-size: 10px; padding: 4px 6px; min-width: unset; white-space: nowrap; letter-spacing: 0; }
+            #download-android-btn { font-size: 10px; padding: 4px 6px; white-space: nowrap; flex-shrink: 0; }
+            .lang-btn { padding: 4px 6px; font-size: 11px; flex-shrink: 0; }
         }
         @media print {
             table { page-break-inside: auto; }
