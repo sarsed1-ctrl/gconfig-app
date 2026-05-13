@@ -90,33 +90,6 @@
             background: #e8f5e9;
         }
 
-        /* Download Android App button in top bar */
-        #download-android-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: #1a6b2f;
-            color: #fff;
-            text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-right: auto;
-        }
-
-        #download-android-btn:hover {
-            background: #135223;
-        }
-
-        #download-android-btn svg {
-            flex-shrink: 0;
-        }
-
         .top-nav-links {
             display: flex;
             align-items: center;
@@ -794,12 +767,6 @@
     <svg class="pcb-bg" aria-hidden="true">
         <rect width="100%" height="100%" fill="url(#pcb-pattern)"/>
     </svg>
-    <a id="download-android-btn" href="GConfig.apk" download="GConfig.apk" onclick="return downloadGConfigApk(event)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 2v13M7 11l5 5 5-5"/><rect x="3" y="18" width="18" height="3" rx="1"/>
-        </svg>
-        Download Android App
-    </a>
     <nav class="top-nav-links" aria-label="Site navigation">
         <a class="top-nav-link" href="welcome.html" target="_top" data-i18n="nav_home">Home</a>
         <a class="top-nav-link" href="https://www.eamf.ee/est/plaadid-ja-servakandid/melamiinkattega-puitlaastplaadid" target="_blank" rel="noopener noreferrer" data-i18n="nav_materials">Materials and Furniture</a>
@@ -6113,35 +6080,6 @@
     });
 
     // ── Android APK: try several relative paths (same folder, ./, ../Desktop-style) then blob-download ──
-    async function downloadGConfigApk(ev) {
-        const candidates = ['GConfig.apk', './GConfig.apk', '../GConfig.apk'];
-        for (const rel of candidates) {
-            try {
-                const url = new URL(rel, window.location.href).href;
-                const res = await fetch(url, { cache: 'no-store' });
-                if (!res.ok) continue;
-                const blob = await res.blob();
-                if (!blob || blob.size < 4096) continue;
-                ev.preventDefault();
-                const u = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = u;
-                a.download = 'GConfig.apk';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => URL.revokeObjectURL(u), 120000);
-                return false;
-            } catch (err) { /* try next */ }
-        }
-        const ru = typeof currentLang === 'string' && currentLang === 'ru';
-        alert(ru
-            ? 'Не удалось загрузить GConfig.apk. Положите файл рядом с этой страницей (имя GConfig.apk) или на уровень выше папки (например GConfig.apk на Рабочем столе рядом с папкой GConfig). Либо откройте сайт через http://localhost.'
-            : 'Could not load GConfig.apk. Put the file next to this page (named GConfig.apk) or one level above the folder (e.g. Desktop/GConfig.apk beside the GConfig folder). Or serve the folder over http://localhost.');
-        ev.preventDefault();
-        return false;
-    }
-
     // ── Telegram Bot — sends clean jsPDF document ────────────
     const TG_TOKEN   = '8447797079:AAE50QcS_bMg9gWYg83HEGjjcb9dFnDa0_I';
     const TG_CHAT_ID = '904669192';

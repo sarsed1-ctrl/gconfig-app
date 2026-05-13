@@ -69,14 +69,6 @@ h3 { border-bottom-color: var(--border) !important; }
   background: var(--primary-pale) !important;
 }
 
-#download-android-btn {
-  background: var(--primary) !important;
-  color: #fff !important;
-}
-#download-android-btn:hover {
-  background: var(--primary-light) !important;
-}
-
 /* ── 6. Sidebar blocks ────────────────────────────────────── */
 .block {
   background: var(--panel-bg) !important;
