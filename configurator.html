@@ -3263,9 +3263,10 @@
 
             const outerW      = mattressW + 2 * railT;      // total bed outer width
             const outerL      = bedLength + 2 * panelT;     // total bed outer length
-            // Inner ledgers, center supports, deck strips — thickness follows "Carcass thickness" (general params).
-            const ledgerT     = carcassT;
-            const centerSupportT = carcassT;
+            // Inner ledgers, center supports, deck strips — use bed-specific carcass thickness.
+            const bedCarcassT    = parseInt(document.getElementById('bedCarcassThick')?.value || '16', 10);
+            const ledgerT        = bedCarcassT;
+            const centerSupportT = bedCarcassT;
             const sideRailL   = bedLength;                   // rail fits between panels
 
             // Inner ledger (longitudinal cleat) on each side rail
@@ -3284,7 +3285,7 @@
                 ledgerW,
                 centerSupportCount,
                 centerSupportT,
-                stripThicknessMm: carcassT
+                stripThicknessMm: bedCarcassT
             });
             const STRIP_GAP = stripLayout.STRIP_GAP;
             const STRIP_T = stripLayout.STRIP_T;
