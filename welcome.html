@@ -151,11 +151,43 @@
         }
         .lang-btn.active { background: var(--primary); color: #fff; }
         .lang-btn:hover:not(.active) { background: var(--primary-pale); }
+        /* ── Centering wrapper ── */
+        .inner-wrap {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        header {
+            padding: 18px 0;
+        }
+        .hero {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+        .cards {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        footer .inner-wrap {
+            justify-content: center;
+        }
+
         @media (max-width: 720px) {
+            .inner-wrap { padding: 0 16px; }
             header {
+                padding: 12px 0;
+            }
+            header .inner-wrap {
                 flex-wrap: wrap;
                 justify-content: space-between;
-                padding: 12px 16px;
                 gap: 10px;
             }
             .header-brand { order: 1; }
@@ -222,16 +254,18 @@
   </symbol>
           </defs>
         </svg>
-        <a class="header-brand" href="https://eamf.ee" target="_blank" rel="noopener" style="display:flex;align-items:center;text-decoration:none;">
-          <svg width="220" height="52" aria-label="GConfig"><use href="#logo-horizontal"/></svg>
-        </a>
-        <h1 class="header-page-title">
-            <span data-lang="ru">Конфигуратор мебели</span>
-            <span data-lang="en">Furniture Configurator</span>
-        </h1>
-        <div id="lang-bar">
-            <button class="lang-btn" onclick="setLang('ru')">RU</button>
-            <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <div class="inner-wrap">
+            <a class="header-brand" href="https://eamf.ee" target="_blank" rel="noopener" style="display:flex;align-items:center;text-decoration:none;">
+              <svg width="220" height="52" aria-label="GConfig"><use href="#logo-horizontal"/></svg>
+            </a>
+            <h1 class="header-page-title">
+                <span data-lang="ru">Конфигуратор мебели</span>
+                <span data-lang="en">Furniture Configurator</span>
+            </h1>
+            <div id="lang-bar">
+                <button class="lang-btn" onclick="setLang('ru')">RU</button>
+                <button class="lang-btn active" onclick="setLang('en')">EN</button>
+            </div>
         </div>
     </header>
 
@@ -353,7 +387,9 @@
     </section>
 
     <footer>
-        &copy; <span id="year"></span> AMFurnituur EESTI — GConfig
+        <div class="inner-wrap">
+            &copy; <span id="year"></span> AMFurnituur EESTI — GConfig
+        </div>
     </footer>
 
     <script>
