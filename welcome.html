@@ -31,18 +31,27 @@
             padding: 18px 40px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .header-brand {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .header-page-title {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
+            font-size: clamp(18px, 2.8vw, 32px);
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+            line-height: 1.2;
         }
         .hero {
             text-align: center;
-            padding: 64px 24px 48px;
-        }
-        .hero h1 {
-            font-size: clamp(26px, 4vw, 42px);
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 14px;
-            line-height: 1.2;
+            padding: 40px 24px 48px;
         }
         .hero p {
             font-size: 17px;
@@ -98,9 +107,9 @@
             background: var(--primary);
             color: #fff;
             text-decoration: none;
-            padding: 11px 20px;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 8px 14px;
+            border-radius: 5px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.02em;
@@ -117,20 +126,22 @@
             background: var(--panel-bg);
         }
         #lang-bar {
+            flex-shrink: 0;
             display: flex;
             justify-content: flex-end;
             align-items: center;
             gap: 6px;
-            padding: 8px 40px;
-            background: var(--panel-bg);
-            border-bottom: 1px solid rgba(26,107,47,0.08);
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: none;
         }
         .lang-btn {
             background: var(--panel-bg);
             color: var(--primary);
             border: 2px solid var(--primary);
-            padding: 4px 12px;
-            font-size: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.02em;
@@ -140,6 +151,22 @@
         }
         .lang-btn.active { background: var(--primary); color: #fff; }
         .lang-btn:hover:not(.active) { background: var(--primary-pale); }
+        @media (max-width: 720px) {
+            header {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                padding: 12px 16px;
+                gap: 10px;
+            }
+            .header-brand { order: 1; }
+            #lang-bar { order: 2; }
+            .header-page-title {
+                order: 3;
+                flex: 1 1 100%;
+                font-size: clamp(16px, 5vw, 26px);
+                margin-top: 4px;
+            }
+        }
         [data-lang] { display: none; }
         body.lang-ru [data-lang="ru"] { display: block; }
         body.lang-ru [data-lang="ru"].inline { display: inline; }
@@ -183,11 +210,6 @@
             <div id="loader-msg" style="font-family:'Segoe UI',sans-serif;font-size:15px;color:#1a6b2f;opacity:0;transition:opacity 0.4s ease;letter-spacing:0.3px;"></div>
         </div>
     </div>
-    <div id="lang-bar">
-        <button class="lang-btn" onclick="setLang('ru')">RU</button>
-        <button class="lang-btn active" onclick="setLang('en')">EN</button>
-    </div>
-
     <header>
         <svg width="0" height="0" style="position:absolute">
           <defs>
@@ -199,19 +221,23 @@
   </symbol>
           </defs>
         </svg>
-        <a href="https://eamf.ee" target="_blank" rel="noopener" style="display:flex;align-items:center;text-decoration:none;">
+        <a class="header-brand" href="https://eamf.ee" target="_blank" rel="noopener" style="display:flex;align-items:center;text-decoration:none;">
           <svg width="220" height="52" aria-label="GConfig"><use href="#logo-horizontal"/></svg>
         </a>
-    </header>
-
-    <section class="hero">
-        <h1>
+        <h1 class="header-page-title">
             <span data-lang="ru">Конфигуратор мебели</span>
             <span data-lang="en">Furniture Configurator</span>
         </h1>
+        <div id="lang-bar">
+            <button class="lang-btn" onclick="setLang('ru')">RU</button>
+            <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <section class="hero">
         <p>
             <span data-lang="ru">Выберите раздел, который хотите настроить. Каждый конфигуратор позволяет подобрать размеры, материалы и опции — пожалуйста, укажите дополнительную информацию при оформлении заказа.</span>
-            <span data-lang="en">Choose the section you want to configure. Each configurator lets you pick dimensions, materials and options please give us in additional info while ordering</span>
+            <span data-lang="en">Choose the section you want. Each configurator lets you pick dimensions, please give us materials in additional info while ordering</span>
         </p>
     </section>
 
@@ -236,7 +262,7 @@
                     <span data-lang="ru">Настройте шкаф: ширина, высота, секции, наполнение и отделка.</span>
                     <span data-lang="en">Configure a closet: width, height, sections, interior and finish.</span>
                 </div>
-                <a class="card-btn" href="./index%20(1).html">
+                <a class="card-btn" href="./configurator.html">
                     <span data-lang="ru" class="inline">Открыть конфигуратор</span>
                     <span data-lang="en" class="inline">Open configurator</span>
                 </a>
@@ -331,20 +357,28 @@
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-        // Hide loader after page load
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                document.getElementById('loader').classList.add('hidden');
-            }, 400);
-        });
 
         function hideLoader() {
             var loader = document.getElementById('loader');
             var msg = document.getElementById('loader-msg');
-            loader.style.transition = 'opacity 0.7s ease, visibility 0.7s ease';
+            if (!loader) return;
+            loader.style.transition = '';
+            loader.style.opacity = '';
+            loader.style.visibility = '';
             loader.classList.add('hidden');
-            if (msg) { msg.style.opacity = '0'; msg.textContent = ''; }
+            if (msg) msg.style.opacity = '0';
         }
+
+        // Hide loader after page load (first open / hard refresh)
+        window.addEventListener('load', function() {
+            setTimeout(hideLoader, 400);
+        });
+
+        // Back/forward cache: "load" does not run again; click handler leaves the loader
+        // visible with inline opacity/visibility, which overrides .hidden — page looks stuck.
+        window.addEventListener('pageshow', function(ev) {
+            if (ev.persisted) hideLoader();
+        });
 
         // Show loader on any link click
         document.addEventListener('click', function(e) {
@@ -365,11 +399,12 @@
 
             if (isExternal) {
                 msg.textContent = 'You are being redirected to an external site...';
-                msg.style.opacity = '1';
+                setTimeout(function() { msg.style.opacity = '1'; }, 50);
                 setTimeout(function() {
-                    window.open(href, '_blank');
-                    hideLoader();
+                    var t = link.getAttribute('target') || '_blank';
+                    window.open(href, t);
                 }, 800);
+                setTimeout(hideLoader, 2200);
             } else {
                 setTimeout(function() { window.location.href = href; }, 350);
             }

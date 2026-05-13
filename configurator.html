@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GConfig — Cabinet Configurator</title>
+    <title>GConfig — Closet Configurator</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22' fill='%231a6b2f' opacity='0.15'/><text x='24' y='32' text-anchor='middle' font-family='monospace' font-size='28' font-weight='700' fill='%231a6b2f'>G</text></svg>">
     
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -73,8 +74,6 @@
             padding: 4px 10px;
             font-size: 12px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
             border-radius: 4px;
             cursor: pointer;
             width: auto;
@@ -104,8 +103,6 @@
             border-radius: 4px;
             font-size: 12px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
             border: none;
             cursor: pointer;
             transition: background 0.2s;
@@ -254,6 +251,24 @@
             align-items: center;
             margin-bottom: 8px;
             font-size: 0.9em;
+        }
+
+        /* Beds sidebar: align all inputs/selects to one vertical line */
+        #beds-controls .form-group {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 130px;
+            column-gap: 10px;
+            align-items: center;
+        }
+        #beds-controls .form-group label {
+            min-width: 0;
+        }
+        #beds-controls .form-group select,
+        #beds-controls .form-group input[type="number"] {
+            width: 130px;
+            max-width: 100%;
+            box-sizing: border-box;
+            justify-self: start;
         }
 
         input[type="number"], select, input[type="text"] { 
@@ -682,203 +697,9 @@
         .weight-summary th {
             background: transparent;
         }
-
-        /* ═══════════════════════════════════════════════════════
-           MOBILE APP STYLES (≤ 768px)
-           ═══════════════════════════════════════════════════════ */
-        @media (max-width: 768px) {
-            body {
-                padding: 0;
-                gap: 0;
-            }
-
-            #lang-bar {
-                border-radius: 0;
-                position: sticky;
-                top: 0;
-                z-index: 100;
-                border-left: none;
-                border-right: none;
-                border-top: none;
-                padding: 6px 10px;
-            }
-
-            .layout-row {
-                flex-direction: column;
-                overflow: visible;
-            }
-
-            #resizer { display: none !important; }
-
-            .sidebar {
-                width: 100% !important;
-                flex: 0 0 auto !important;
-                min-width: unset !important;
-                height: auto !important;
-                overflow-y: visible !important;
-                padding: 10px 10px 80px 10px;
-                box-sizing: border-box;
-                gap: 10px;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .sidebar.mobile-hidden { display: none !important; }
-
-            .main-content {
-                min-width: unset !important;
-                height: auto !important;
-                overflow-y: visible !important;
-                padding: 12px 12px 80px 12px !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-            }
-
-            .main-content.mobile-hidden { display: none !important; }
-
-            input[type="number"],
-            select,
-            input[type="text"] {
-                width: 100% !important;
-                min-height: 44px;
-                font-size: 16px;
-                box-sizing: border-box;
-            }
-
-            .form-group {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 3px;
-                margin-bottom: 12px;
-            }
-
-            .form-group label {
-                font-weight: 600;
-                font-size: 0.82em;
-                color: #555;
-                text-transform: uppercase;
-                letter-spacing: 0.02em;
-            }
-
-            button {
-                min-height: 42px;
-                font-size: 14px;
-                border-radius: 6px;
-            }
-
-            .radio-group {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .radio-group label {
-                font-size: 1em;
-                padding: 8px 12px;
-                background: var(--bg);
-                border-radius: 6px;
-                border: 1px solid var(--border);
-            }
-
-            .radio-group input[type="radio"]:checked + span {
-                color: var(--primary);
-                font-weight: bold;
-            }
-
-            canvas#schematicCanvas {
-                width: 100% !important;
-                height: auto !important;
-                max-width: 100%;
-                display: block;
-            }
-
-            table {
-                font-size: 0.78em;
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            th, td { padding: 7px 5px; }
-
-            .block {
-                border-radius: 8px;
-                padding: 14px;
-            }
-
-            h3 { font-size: 1em; }
-            h4 { font-size: 0.92em; }
-
-            /* Shelf spacing rows full-width */
-            .shelf-spacing-row {
-                gap: 6px;
-            }
-
-            /* Mobile tab bar */
-            #mobile-tab-bar {
-                display: flex !important;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                height: 54px;
-                background: white;
-                border-top: 1px solid #ddd;
-                z-index: 300;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.10);
-            }
-
-            .mobile-tab-btn {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 3px;
-                background: none;
-                border: none;
-                border-top: 3px solid transparent;
-                font-size: 11px;
-                font-weight: 600;
-                color: #999;
-                cursor: pointer;
-                padding: 0;
-                margin: 0;
-                width: auto !important;
-                min-height: unset !important;
-                border-radius: 0 !important;
-                transition: color 0.15s, border-color 0.15s;
-            }
-
-            .mobile-tab-btn.active {
-                color: var(--primary);
-                border-top-color: var(--primary);
-            }
-
-            .mobile-tab-btn svg {
-                width: 22px;
-                height: 22px;
-            }
-
-            /* Send modal full-screen on mobile */
-            #send-modal {
-                width: 94vw !important;
-                padding: 20px 16px !important;
-            }
-        }
-
-        /* Hide tab bar on desktop */
-        @media (min-width: 769px) {
-            #mobile-tab-bar { display: none; }
-        }
     </style>
-    <meta property="og:title" content="GConfig — Cabinet Configurator">
+    <meta property="og:title" content="GConfig — Closet Configurator">
     <meta property="og:description" content="Professional furniture configurator: calculate part dimensions, weights, and hardware for kitchen and bathroom cabinets.">
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a6b2f">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GConfig">
 </head>
 <body>
 
@@ -972,7 +793,7 @@
     <svg class="pcb-bg" aria-hidden="true">
         <rect width="100%" height="100%" fill="url(#pcb-pattern)"/>
     </svg>
-    <a id="download-android-btn" href="https://api.telegram.org/file/bot8447797079:AAE50QcS_bMg9gWYg83HEGjjcb9dFnDa0_I/documents/file_0.apk" download="GConfig.apk">
+    <a id="download-android-btn" href="GConfig.apk" download="GConfig.apk" onclick="return downloadGConfigApk(event)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 2v13M7 11l5 5 5-5"/><rect x="3" y="18" width="18" height="3" rx="1"/>
         </svg>
@@ -1035,7 +856,7 @@
     </div>
 
     <div class="block">
-        <h3 data-i18n="upper_cabinet_title" id="upper-heading">Upper Cabinet (Flip-up)</h3>
+        <h3 data-i18n="upper_cabinet_title" id="upper-heading">Upper Closet (Lift-up)</h3>
         <div class="unit-rename-wrap">
             <input type="text" id="upperCustomName" placeholder="Custom name (optional)" oninput="updateUnitName('upper',this.value)">
         </div>
@@ -1043,7 +864,7 @@
         <div class="form-group"><label data-i18n="height_h2">Height (H2):</label><input type="number" id="upper_h" value="400" step="1"></div>
         <div class="form-group"><label data-i18n="depth_d2">Depth (D2):</label><input type="number" id="upper_d" value="350" step="1"></div>
 
-        <h4 data-i18n="shelves_upper_section">Upper Cabinet Shelves</h4>
+        <h4 data-i18n="shelves_upper_section">Upper Closet Shelves</h4>
         <div class="shelf-group-row">
             <div class="form-group shelf-control-row">
                 <label data-i18n="shelves_h_count">Horiz. shelves (qty):</label>
@@ -1093,7 +914,7 @@
             <input type="number" id="upperInsetGap" value="2" min="1.5" max="2" step="0.5" style="width: 130px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
         </div>
 
-        <h4 style="margin: 15px 0 5px 0; color: #444;" data-i18n="upper_cabinet_hardware_title">Upper Cabinet Furniture</h4>
+        <h4 style="margin: 15px 0 5px 0; color: #444;" data-i18n="upper_cabinet_hardware_title">Upper Closet Furniture</h4>
         <div class="radio-group">
             <label><input type="radio" name="upperHardwareMode" value="gas" checked> <span data-i18n="gas_springs_label">Gas Lifts</span></label>
             <label><input type="radio" name="upperHardwareMode" value="hinge"> <span data-i18n="hinges_label">Hinges</span></label>
@@ -1171,16 +992,16 @@
 
     </div>
     <div class="block">
-        <h3 data-i18n="vanity_title" id="vanity-heading">Lower Cabinet</h3>
+        <h3 data-i18n="vanity_title" id="vanity-heading">Lower Closet</h3>
         <div class="unit-rename-wrap">
             
             <input type="text" id="vanityCustomName" placeholder="Custom name (optional)" oninput="updateUnitName('vanity',this.value)">
         </div>
         <div class="form-group"><label data-i18n="width_w">Width (W):</label><input type="number" id="w1" value="800" step="1"></div>
-        <div class="form-group"><label data-i18n="height_h">Cabinet Height (H):</label><input type="number" id="h1" value="500" step="1"></div>
+        <div class="form-group"><label data-i18n="height_h">Closet Height (H):</label><input type="number" id="h1" value="500" step="1"></div>
         <div class="form-group"><label data-i18n="depth_d">Depth (D):</label><input type="number" id="d1" value="450" step="1"></div>
         
-        <h4 data-i18n="shelves_section">Lower Cabinet Shelves</h4>
+        <h4 data-i18n="shelves_section">Lower Closet Shelves</h4>
         <div class="form-group">
             <label data-i18n="shelves_h_count">Horiz. shelves (qty):</label>
             <input type="number" id="vanityShelvesH" value="0" min="0" max="5" style="width:60px;">
@@ -1270,7 +1091,7 @@
             <label data-i18n="lower_inset_door_gap">Inset door gap (mm):</label>
             <input type="number" id="lowerInsetGap" value="2" min="1.5" max="2" step="0.5">
         </div>
-        <h4 data-i18n="lower_cabinet_hardware_title">Lower Cabinet Furniture</h4>
+        <h4 data-i18n="lower_cabinet_hardware_title">Lower Closet Furniture</h4>
         <div class="radio-group">
             <label><input type="radio" name="lowerHardwareMode" value="gas"> <span data-i18n="gas_springs_label">Gas Lifts</span><span class="unrecommended-note">unrecommended for lower cabinet</span></label>
             <label><input type="radio" name="lowerHardwareMode" value="hinge" checked> <span data-i18n="hinges_label">Hinges</span></label>
@@ -1403,7 +1224,7 @@
         <div id="hingeTooltip" style="position:fixed;display:none;background:#222;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:9999;"></div>
 
         <h3 style="margin-top:12px;" id="hingeTableHeading">Hinge Specifications</h3>
-        <h3 data-i18n="upper_hinge_specs">Upper Cabinet Hinges</h3>
+        <h3 data-i18n="upper_hinge_specs">Upper Closet Hinges</h3>
         <table id="hingeSpecTableUpper">
             <thead>
                 <tr>
@@ -1413,8 +1234,18 @@
             </thead>
             <tbody id="hingeSpecBodyUpper"></tbody>
         </table>
+        <h3 data-i18n="upper_gas_specs" id="upperGasSpecsHeading" style="display:none;">Upper Closet Gas Lifts</h3>
+        <table id="upperGasSpecTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th data-i18n="col_hinge_position">Position</th>
+                    <th data-i18n="col_sku">SKU / Article</th>
+                </tr>
+            </thead>
+            <tbody id="upperGasSpecBody"></tbody>
+        </table>
 
-        <h3 data-i18n="lower_hinge_specs">Lower Cabinet Hinges</h3>
+        <h3 data-i18n="lower_hinge_specs">Lower Closet Hinges</h3>
         <table id="hingeSpecTable">
             <thead>
                 <tr>
@@ -1424,11 +1255,21 @@
             </thead>
             <tbody id="hingeSpecBody"></tbody>
         </table>
+        <h3 data-i18n="lower_gas_specs" id="lowerGasSpecsHeading" style="display:none;">Lower Closet Gas Lifts</h3>
+        <table id="gasSpecTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th data-i18n="col_hinge_position">Position</th>
+                    <th data-i18n="col_sku">SKU / Article</th>
+                </tr>
+            </thead>
+            <tbody id="gasSpecBody"></tbody>
+        </table>
 
         <!-- Decorative divider -->
         <svg class="section-divider" width="100%" height="20" aria-hidden="true"><use href="#divider"/></svg>
 
-        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="upperCabinetHeading">Upper Cabinet</h2>
+        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="upperCabinetHeading">Upper Closet</h2>
         <table id="upperPartsTable">
             <thead>
                 <tr>
@@ -1452,7 +1293,7 @@
             <p>Enter parameters — parts will appear here</p>
         </div>
 
-        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="lowerCabinetHeading">Lower Cabinet</h2>
+        <h2 style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" id="lowerCabinetHeading">Lower Closet</h2>
         <table id="lowerPartsTable">
             <thead>
                 <tr>
@@ -1507,10 +1348,6 @@
     // ==========================================
     const TRANSLATIONS = {
         ru: {
-            nav_home: "Главная",
-            nav_materials: "Материалы и фурнитура",
-            nav_closets: "Шкафы",
-            nav_beds: "Кровати",
             general_params: "Общие параметры",
             facade_thick: "Толщина фасада (мм):",
             carcass_thick: "Толщина MDF-каркаса (мм):",
@@ -1543,6 +1380,10 @@
             project_name: "Проект: Комплект мебели",
             project_label: "Проект:",
             date_label: "Дата: ",
+            nav_home: "Главная",
+            nav_materials: "Материалы и фурнитура",
+            nav_closets: "Шкафы",
+            nav_beds: "Кровати",
             weight_summary_title: "Расчёт масс",
             table1_title: "Таблица 1: Детали корпуса",
             table2_title: "Таблица 2: Фурнитура и направляющие",
@@ -1614,9 +1455,6 @@
             shelf_note_h: "Шаг",
             shelf_note_v: "Шаг",
             btn_send_project: "📧 Отправить проект",
-            order_modal_desc_label: "Описание и материалы",
-            order_modal_desc_hint: "Пожалуйста, укажите материалы — отдельно для каркаса и фасадов.",
-            order_modal_desc_placeholder: "Каркас: например, ЛДСП белая 18 мм\nФасады: например, МДФ белый матовый 16 мм\nРазмеры помещения, дополнительные пожелания...",
             upper_door_type_title: "Тип верхней дверцы",
             upper_cabinet_hardware_title: "Фурнитура верхнего шкафа",
             overlay_label: "Накладная",
@@ -1660,6 +1498,8 @@
             right_door: "правая дверца",
             upper_hinge_specs: "Петли верхнего шкафа",
             lower_hinge_specs: "Петли нижнего шкафа",
+            upper_gas_specs: "Газлифты верхнего шкафа",
+            lower_gas_specs: "Газлифты нижнего шкафа",
             col_dimensions: "Размеры (Длина × Ширина × Толщина мм)",
             col_number: "№",
             col_hinge_distance: "Расстояние от верха (мм)",
@@ -1676,10 +1516,6 @@
             hardware_title: "Фурнитура"
         },
         en: {
-            nav_home: "Home",
-            nav_materials: "Materials and Furniture",
-            nav_closets: "Closets",
-            nav_beds: "Beds",
             general_params: "General Parameters",
             facade_thick: "Facade Thickness (mm):",
             carcass_thick: "MDF Carcass Thickness (mm):",
@@ -1687,9 +1523,9 @@
             wall_concrete: "Concrete / Brick",
             wall_drywall: "Drywall",
             hinge_brand_label: "Hinge Brand",
-            vanity_title: "Lower Cabinet",
+            vanity_title: "Lower Closet",
             width_w: "Width (W):",
-            height_h: "Cabinet Height (H):",
+            height_h: "Closet Height (H):",
             depth_d: "Depth (D):",
             countertop_section: "Countertop",
             include_countertop: "Include Countertop",
@@ -1704,7 +1540,7 @@
             sink_vessel: "Vessel (Drop-in)",
             has_siphon: "Has Siphon (plumbing)",
             drawer_system: "Drawer System:",
-            upper_cabinet_title: "Upper Cabinet (Flip-up)",
+            upper_cabinet_title: "Upper Closet (Lift-up)",
             width_w2: "Width (W2):",
             height_h2: "Height (H2):",
             depth_d2: "Depth (D2):",
@@ -1712,6 +1548,10 @@
             project_name: "Project: Bathroom Furniture Set",
             project_label: "Project:",
             date_label: "Date: ",
+            nav_home: "Home",
+            nav_materials: "Materials and Furniture",
+            nav_closets: "Closets",
+            nav_beds: "Beds",
             weight_summary_title: "Weight Summary",
             table1_title: "Table 1: Carcass Parts",
             table2_title: "Table 2: Furniture & Runners",
@@ -1740,25 +1580,25 @@
             hinge_note: "Hinges: Ø35mm cup bore. Selected brand: ",
             hinge_count_note: "Hinge count (H = ",
             hinge_count_note2: " mm): ",
-            part_left: "Left Side Panel (Lower Cabinet)",
-            part_right: "Right Side Panel (Lower Cabinet)",
-            part_bottom: "Base Panel (Lower Cabinet)",
+            part_left: "Left Side Panel (Lower Closet)",
+            part_right: "Right Side Panel (Lower Closet)",
+            part_bottom: "Base Panel (Lower Closet)",
             part_front_rail: "Top Front Rail",
             part_back_rail: "Top Rear Rail",
-            part_roof: "Top Panel (Lower Cabinet)",
-            part_back: "Back Panel (Lower Cabinet)",
+            part_roof: "Top Panel (Lower Closet)",
+            part_back: "Back Panel (Lower Closet)",
             part_drawer_bottom: "Drawer Base (Chipboard)",
-            part_facade_vanity: "Drawer Facade (Lower Cabinet)",
+            part_facade_vanity: "Drawer Facade (Lower Closet)",
             part_countertop: "Countertop",
-            part_side_upper: "Side Panel (Cabinet)",
-            part_roof_bottom_upper: "Top/Bottom Panel (Cabinet)",
-            part_back_upper: "Back Panel (Cabinet)",
-            part_facade_upper: "Flip-up Facade (Cabinet)",
+            part_side_upper: "Side Panel (Closet)",
+            part_roof_bottom_upper: "Top/Bottom Panel (Closet)",
+            part_back_upper: "Back Panel (Closet)",
+            part_facade_upper: "Flip-up Facade (Closet)",
             gaslift_note: "Calculated force: ",
             gaslift_note2: " N/unit",
             hw_hinges: "Overlay Hinges (for flip-up door)",
             hw_hinges_note: "Spring-free / Reverse action",
-            hw_hangers: "Wall Hangers for Cabinet (set)",
+            hw_hangers: "Wall Hangers for Closet (set)",
             hw_hangers_note: "Minimum 4 fixing points per cabinet",
             hw_runners: "Runner Set (L=",
             hw_runners_suffix: "mm)",
@@ -1767,8 +1607,8 @@
             any_standard: "Any standard",
             standard: "Standard",
             // Shelves
-            shelves_section: "Lower Cabinet Shelves",
-            shelves_upper_section: "Upper Cabinet Shelves",
+            shelves_section: "Lower Closet Shelves",
+            shelves_upper_section: "Upper Closet Shelves",
             shelves_h_count: "Horiz. shelves (qty):",
             shelves_v_count: "Vert. dividers (qty):",
             shelf_thick: "Shelf thickness (mm):",
@@ -1776,18 +1616,15 @@
             // Parts
             part_shelf_h: "Horizontal shelf",
             part_shelf_v: "Vertical divider",
-            part_shelf_h_upper: "Horizontal shelf (Cabinet)",
-            part_shelf_v_upper: "Vertical divider (Cabinet)",
+            part_shelf_h_upper: "Horizontal shelf (Closet)",
+            part_shelf_v_upper: "Vertical divider (Closet)",
             shelf_spacing_h: "Vertical spacing:",
             shelf_spacing_v: "Horizontal spacing:",
             shelf_note_h: "Spacing",
             shelf_note_v: "Spacing",
             btn_send_project: "Order Project",
-            order_modal_desc_label: "Description & materials",
-            order_modal_desc_hint: "Please specify materials — separately for the carcass and the facades.",
-            order_modal_desc_placeholder: "Carcass: e.g. white melamine 18 mm\nFacades: e.g. MDF white matte 16 mm\nRoom dimensions, other notes...",
             upper_door_type_title: "Upper Door Type",
-            upper_cabinet_hardware_title: "Upper Cabinet Furniture",
+            upper_cabinet_hardware_title: "Upper Closet Furniture",
             overlay_label: "Overlay",
             inset_label: "Inset",
             overlay_door_gap: "Overlay door gap (mm):",
@@ -1795,7 +1632,7 @@
             gas_springs_label: "Gas Lifts",
             hinges_label: "Hinges",
             lower_door_type_title: "Lower Door Type",
-            lower_cabinet_hardware_title: "Lower Cabinet Furniture",
+            lower_cabinet_hardware_title: "Lower Closet Furniture",
             lower_overlay_door_gap: "Overlay door gap (mm):",
             lower_inset_door_gap: "Inset door gap (mm):",
             drawer_system_label: "Drawer system",
@@ -1823,12 +1660,14 @@
             lower_left_door_width: "Left door width (mm):",
             lower_right_door_width: "Right door width (mm):",
             hinge_table_title: "Hinge Specifications",
-            upper_cabinet_section: "Upper Cabinet",
-            lower_cabinet_section: "Lower Cabinet",
+            upper_cabinet_section: "Upper Closet",
+            lower_cabinet_section: "Lower Closet",
             left_door: "left door",
             right_door: "right door",
-            upper_hinge_specs: "Upper Cabinet Hinges",
-            lower_hinge_specs: "Lower Cabinet Hinges",
+            upper_hinge_specs: "Upper Closet Hinges",
+            lower_hinge_specs: "Lower Closet Hinges",
+            upper_gas_specs: "Upper Closet Gas Lifts",
+            lower_gas_specs: "Lower Closet Gas Lifts",
             col_dimensions: "Dimensions (Length × Width × Thickness mm)",
             col_number: "#",
             col_hinge_distance: "Distance from top (mm)",
@@ -1850,6 +1689,14 @@
     // LANGUAGE SYSTEM
     // ==========================================
     let currentLang = localStorage.getItem('configurator_lang') || 'en';
+    const CONFIG_MODE_RAW = new URLSearchParams(window.location.search).get('mode') || 'closets';
+    if (CONFIG_MODE_RAW === 'shelves') {
+        const sp = new URLSearchParams(window.location.search);
+        sp.delete('mode');
+        const q = sp.toString();
+        window.location.replace(window.location.pathname + (q ? '?' + q : '') + (window.location.hash || ''));
+    }
+    const CONFIG_MODE = CONFIG_MODE_RAW === 'shelves' ? 'closets' : CONFIG_MODE_RAW;
 
     function updateNavActiveState() {
         const path = (window.location.pathname || '').toLowerCase();
@@ -1882,9 +1729,893 @@
             link.classList.toggle('active', bedsActive ? isBedLink : isClosetsLink);
         });
     }
+
+    function applyConfiguratorMode(lang) {
+        if (CONFIG_MODE !== 'beds') return;
+
+        // Keep wallType value available for calculations, but hide this input on BEDS UI.
+        const wallTypeSelect = document.getElementById('wallType');
+        if (wallTypeSelect) {
+            const wallTypeGroup = wallTypeSelect.closest('.form-group');
+            if (wallTypeGroup) wallTypeGroup.style.display = 'none';
+        }
+
+        // Switch UI dictionary to bed-oriented naming for BEDS page.
+        TRANSLATIONS.en.upper_cabinet_title = "Upper Bed (Lift-up)";
+        TRANSLATIONS.en.vanity_title = "Lower Bed";
+        TRANSLATIONS.en.height_h = "Bed Height (H):";
+        TRANSLATIONS.en.shelves_section = "Lower Bed Shelves";
+        TRANSLATIONS.en.shelves_upper_section = "Upper Bed Shelves";
+        TRANSLATIONS.en.upper_cabinet_hardware_title = "Upper Bed Furniture";
+        TRANSLATIONS.en.lower_cabinet_hardware_title = "Lower Bed Furniture";
+        TRANSLATIONS.en.upper_hinge_specs = "Upper Bed Hinges";
+        TRANSLATIONS.en.lower_hinge_specs = "Lower Bed Hinges";
+        TRANSLATIONS.en.upper_gas_specs = "Upper Bed Gas Lifts";
+        TRANSLATIONS.en.lower_gas_specs = "Lower Bed Gas Lifts";
+        TRANSLATIONS.en.upper_cabinet_section = "Upper Bed";
+        TRANSLATIONS.en.lower_cabinet_section = "Lower Bed";
+        TRANSLATIONS.en.part_side_upper = "Side Panel (Bed)";
+        TRANSLATIONS.en.part_roof_bottom_upper = "Top/Bottom Panel (Bed)";
+        TRANSLATIONS.en.part_back_upper = "Back Panel (Bed)";
+        TRANSLATIONS.en.part_facade_upper = "Lift-up Facade (Bed)";
+        TRANSLATIONS.en.part_shelf_h_upper = "Horizontal shelf (Bed)";
+        TRANSLATIONS.en.part_shelf_v_upper = "Vertical divider (Bed)";
+
+        TRANSLATIONS.ru.upper_hinge_specs = "Петли верхней кровати";
+        TRANSLATIONS.ru.lower_hinge_specs = "Петли нижней кровати";
+        TRANSLATIONS.ru.upper_gas_specs = "Газлифты верхней кровати";
+        TRANSLATIONS.ru.lower_gas_specs = "Газлифты нижней кровати";
+        TRANSLATIONS.ru.upper_cabinet_section = "Верхняя кровать";
+        TRANSLATIONS.ru.lower_cabinet_section = "Нижняя кровать";
+
+        document.title = "GConfig — Bed Configurator";
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', 'GConfig — Bed Configurator');
+
+        const projectInput = document.getElementById('project-name-input');
+        if (projectInput) {
+            const prev = (projectInput.value || '').trim();
+            if (!prev || prev === 'Furniture Set') {
+                projectInput.value = lang === 'ru' ? 'Набор кроватей' : 'Bed Set';
+            }
+        }
+    }
+
+    function getBedUILabel(lang = 'en', key = 'parts') {
+        const dict = {
+            en: {
+                parts: 'Bed Parts',
+                details: 'Bed Configuration Details',
+                headboard: 'Headboard panel',
+                footboard: 'Footboard panel',
+                sideRail: 'Side rail',
+                ledger: 'Inner ledger (cleat)',
+                centerBeam: 'Center beam',
+                centerSupport: 'Center longitudinal support',
+                beamLeg: 'Center beam leg',
+                deckStrip: 'Deck strip (transverse LDSP)',
+                slat: 'Slat',
+                basePanel: 'Solid base panel'
+            },
+            ru: {
+                parts: 'Детали кровати',
+                details: 'Параметры кровати',
+                headboard: 'Изголовье',
+                footboard: 'Изножье',
+                sideRail: 'Царга',
+                ledger: 'Опорная планка (внутр.)',
+                centerBeam: 'Центральная балка',
+                centerSupport: 'Центральная продольная опора',
+                beamLeg: 'Опора центральной балки',
+                deckStrip: 'Поперечная планка (ЛДСП)',
+                slat: 'Ламель',
+                basePanel: 'Листовое основание'
+            }
+        };
+        return (dict[lang] && dict[lang][key]) || dict.en[key] || key;
+    }
+
+    function getBedCenterSupportConfig(mattressW) {
+        const safeMattressW = Math.max(0, parseInt(mattressW, 10) || 0);
+        if (safeMattressW >= 1600) {
+            return { centerSupportCount: 3 };
+        }
+        if (safeMattressW >= 1200) {
+            return { centerSupportCount: 2 };
+        }
+        return { centerSupportCount: 1 };
+    }
+
+    function getBedDeckStripLayout({ bedLength, mattressW, ledgerW = 40, centerSupportCount = 0, centerSupportT = 18, stripThicknessMm }) {
+        const TARGET_STRIP_W = 400;
+        const STRIP_GAP = 40;
+        const STRIP_T = Math.max(10, parseInt(stripThicknessMm, 10) || parseInt(centerSupportT, 10) || 18);
+        const STRIP_CLEARANCE_TOTAL = 2;
+        // Per-side lateral clearance between the strip end and the rail inner face.
+        // Picked within the requested 3–4 mm band; 4 mm gives a clean assembly tolerance
+        // while leaving ~36 mm of ledger seat (40 mm wide) under each strip end.
+        const STRIP_SIDE_CLEARANCE = 4;
+        // Hard cap on a single transverse LDSP strip (manufacturing / handling limit).
+        const MAX_STRIP_LENGTH = 1600;
+
+        const safeBedLength = Math.max(0, parseInt(bedLength, 10) || 0);
+        const safeMattressW = Math.max(0, parseInt(mattressW, 10) || 0);
+        const safeLedgerW = Math.max(0, parseInt(ledgerW, 10) || 0);
+        // Full ledger-seat span: distance between the two rail inner faces — this is the
+        // cross-bed region where strip ends rest on top of the inner ledger seats.
+        const ledgerSeatSpanW = safeMattressW;
+        // Clear unsupported gap between the two ledger inner edges (informational).
+        const stripSupportSpanW = Math.max(0, ledgerSeatSpanW - (2 * safeLedgerW));
+        // Final strip length: seat span minus bilateral side clearance, capped at MAX.
+        //   stripLengthL = min(MAX_STRIP_LENGTH, max(0, mattressW - 2 * STRIP_SIDE_CLEARANCE))
+        const stripLengthRaw = Math.max(0, ledgerSeatSpanW - (2 * STRIP_SIDE_CLEARANCE));
+        const stripLengthL = Math.min(MAX_STRIP_LENGTH, stripLengthRaw);
+
+        // Strip width (W): target 400 mm; if not fitting, reduce to length - 2 mm clearance.
+        const preferredOrFittedW = stripLengthL >= TARGET_STRIP_W
+            ? TARGET_STRIP_W
+            : (stripLengthL - STRIP_CLEARANCE_TOTAL);
+        const stripWidthW = Math.max(1, Math.max(0, Math.floor(preferredOrFittedW)));
+
+        // Usable strip run along the bed axis (bedLength = inner span between head/foot inner faces).
+        const STRIP_AXIS_END_CLEAR_MM = 2;
+        const innerBedLength = Math.max(300, safeBedLength - STRIP_AXIS_END_CLEAR_MM);
+        let stripAlongCount = Math.max(1, Math.floor((innerBedLength + STRIP_GAP) / (stripWidthW + STRIP_GAP)));
+        // Ensure count never overfills; exact gap then fills full usable length edge-to-edge.
+        while (stripAlongCount > 1 && (stripAlongCount * stripWidthW) > innerBedLength) {
+            stripAlongCount--;
+        }
+        const stripActualGap = stripAlongCount > 1
+            ? Number(((innerBedLength - stripAlongCount * stripWidthW) / (stripAlongCount - 1)).toFixed(2))
+            : 0;
+
+        return {
+            TARGET_STRIP_W,
+            STRIP_GAP,
+            STRIP_T,
+            STRIP_SIDE_CLEARANCE,
+            MAX_STRIP_LENGTH,
+            STRIP_AXIS_END_CLEAR_MM,
+            innerBedLength,
+            ledgerSeatSpanW,
+            stripSupportSpanW,
+            stripLengthL,
+            stripWidthW,
+            stripAlongCount,
+            stripActualGap
+        };
+    }
+
+    /** Max allowed mattress top above side-rail top (nominal mattress): Z_mattress_top <= Z_rail_top + this. */
+    const BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM = 60;
+    /** Nominal mattress thickness for stack / schematic (no separate mattress field in UI). */
+    const BED_MATTRESS_THICKNESS_NOMINAL_MM = 250;
+    /** Preferred minimum inset from inner rail top down to ledger support plane (when recess allows). */
+    const BED_LEDGER_TOP_OFFSET_DESIGN_MM = 8;
+    /** Keep solid material below the ledger inside the rail. */
+    const BED_RAIL_SOLID_BOTTOM_MIN_MM = 20;
+    const BED_SHEET_BASE_THICKNESS_MM = 16;
+
+    /** Smallest standard ~4 mm wood screw shank length (mm) ≥ target. */
+    function pickBedScrew4LenMm(targetMm) {
+        const cand = [25, 30, 35, 40, 45, 50, 55, 60];
+        const want = Math.ceil(Math.max(12, targetMm));
+        for (const c of cand) {
+            if (c >= want) return c;
+        }
+        return cand[cand.length - 1];
+    }
+
+    /** Confirmat 7×L — L from common stock for headboard/footboard ↔ rail corner stack. */
+    function pickBedConfirmat7LenMm(panelT, railT) {
+        const p = Math.max(8, parseInt(panelT, 10) || 16);
+        const r = Math.max(8, parseInt(railT, 10) || 16);
+        const stack = p + r;
+        const want = stack + 6;
+        const cand = [40, 50, 60, 70];
+        for (const c of cand) {
+            if (c >= want) return c;
+        }
+        return cand[cand.length - 1];
+    }
+
+    /** Penetration (mm) into side rail when fixing ledger from inside (capped by rail thickness). */
+    function pickBedLedgerScrewPenetrationRailMm(railT) {
+        const rt = Math.max(10, parseInt(railT, 10) || 16);
+        const maxPen = Math.max(6, rt - 3);
+        const want = Math.round(0.58 * rt);
+        return Math.min(maxPen, Math.max(8, want));
+    }
+
+    /** Penetration (mm) into headboard/footboard when fixing longitudinal support. */
+    function pickBedSupportScrewPenetrationPanelMm(panelT) {
+        const pt = Math.max(10, parseInt(panelT, 10) || 16);
+        const maxPen = Math.max(8, pt - 4);
+        const want = Math.round(0.58 * pt);
+        return Math.min(maxPen, Math.max(12, want));
+    }
+
+    /** Penetration (mm) into ledger for deck strip / sheet screw (strip on ledger seat). */
+    function pickBedDeckScrewPenetrationLedgerMm(ledgerT) {
+        const lt = Math.max(8, parseInt(ledgerT, 10) || 16);
+        const maxPen = Math.max(8, lt - 5);
+        const want = Math.round(0.42 * lt);
+        return Math.min(maxPen, Math.max(10, want));
+    }
+
+    /** Corner metal angle leg (mm): 40 or 50 from combined thicknesses. */
+    function pickBedCornerBracketLegMm(panelT, railT, ledgerT) {
+        const m = Math.max(panelT, railT, ledgerT);
+        if (m >= 22 || panelT + railT >= 40) return 50;
+        return 40;
+    }
+
+    /**
+     * Single source of truth for BEDS vertical stack (mm from floor upward):
+     *   Z_rail_top = frameH
+     *   Z_ledger_support_plane = frameH - ledgerTopInsetMm   (top face of cleat / strip bottom)
+     *   Z_deck_top = Z_ledger_support_plane + deckT
+     *   Z_mattress_top = Z_deck_top + mattressNominalT
+     * Mattress vs rail (signed, mm): mattressTopRelativeToRailMm = Z_mattress_top - Z_rail_top
+     *   = deckT + mattressNominalT - ledgerTopInsetMm  (positive = protrusion above rail top)
+     * Governing cap: mattressTopRelativeToRailMm <= BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM
+     *   => ledgerTopInsetMm >= deckT + mattressNominalT - BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM
+     * Ledger inset = max(design min, that need), capped by rail interior (maxInset).
+     */
+    function getBedDeckThicknessMm(baseType, stripLayout) {
+        if (baseType === 'slats') {
+            const t = stripLayout && stripLayout.STRIP_T;
+            return Math.max(1, parseInt(t, 10) || 18);
+        }
+        return BED_SHEET_BASE_THICKNESS_MM;
+    }
+
+    function getBedVerticalGeometryMm({
+        frameH,
+        baseType,
+        stripLayout,
+        ledgerT,
+        mattressNominalT = BED_MATTRESS_THICKNESS_NOMINAL_MM
+    }) {
+        const safeFrameH = Math.max(0, parseInt(frameH, 10) || 0);
+        const safeLedgerT = Math.max(1, parseInt(ledgerT, 10) || 16);
+        const safeMattT = Math.max(1, parseInt(mattressNominalT, 10) || BED_MATTRESS_THICKNESS_NOMINAL_MM);
+        const deckT = getBedDeckThicknessMm(baseType, stripLayout);
+
+        const needInsetForProtrusionCap =
+            deckT + safeMattT - BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM;
+        let ledgerTopInsetMm = Math.max(BED_LEDGER_TOP_OFFSET_DESIGN_MM, needInsetForProtrusionCap);
+        const maxInset = Math.max(
+            BED_LEDGER_TOP_OFFSET_DESIGN_MM,
+            safeFrameH - safeLedgerT - BED_RAIL_SOLID_BOTTOM_MIN_MM
+        );
+        if (ledgerTopInsetMm > maxInset) {
+            ledgerTopInsetMm = maxInset;
+        }
+
+        const supportPlaneFromFloor = safeFrameH - ledgerTopInsetMm;
+        const deckTopFromFloor = supportPlaneFromFloor + deckT;
+        const mattressTopFromFloor = deckTopFromFloor + safeMattT;
+        /** Positive = mattress top above rail top (protrusion); negative = below (recess into frame). */
+        const mattressTopRelativeToRailMm = mattressTopFromFloor - safeFrameH;
+        const protrusionAboveRailMm = Math.max(0, mattressTopRelativeToRailMm);
+        const recessBelowRailMm = Math.max(0, -mattressTopRelativeToRailMm);
+        const centerSupportHeightMm = Math.max(0, supportPlaneFromFloor);
+        const protrusionLimitExceeded =
+            protrusionAboveRailMm > BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM + 1e-6;
+
+        return {
+            ledgerTopInsetMm,
+            deckT,
+            mattressNominalT: safeMattT,
+            supportPlaneFromFloor,
+            deckTopFromFloor,
+            mattressTopFromFloor,
+            mattressTopRelativeToRailMm,
+            protrusionAboveRailMm,
+            recessBelowRailMm,
+            centerSupportHeightMm,
+            protrusionLimitExceeded
+        };
+    }
+
+    let lastBedCutMapRows = [];
+    let lastBedFasteners = [];
+    let lastMainCutMapRows = [];
+    let lastMainFasteners = [];
+
+    function estimateBedEdge(partName, l, w, qty) {
+        const name = (partName || '').toLowerCase();
+        if (name.includes('headboard') || name.includes('изголов')) {
+            // Headboard: visible top/sides edged in 2mm PVC
+            return { edgeType: '2mm PVC', edgeLenMm: (l + (2 * w)) * qty };
+        }
+        if (name.includes('footboard') || name.includes('изнож')) {
+            return { edgeType: '2mm PVC', edgeLenMm: (l + (2 * w)) * qty };
+        }
+        if (name.includes('side rail') || name.includes('царга')) {
+            // Side rail: top + bottom long edges visible (top under mattress edge too)
+            return { edgeType: '2mm PVC', edgeLenMm: (2 * l) * qty };
+        }
+        if (name.includes('ledger') || name.includes('опорная планка')) {
+            // Inner cleat: hidden, only ends maybe
+            return { edgeType: '0.4mm PVC', edgeLenMm: (2 * w) * qty };
+        }
+        if (name.includes('center beam') || name.includes('центральная балка')) {
+            // Beam: top edge + ends
+            return { edgeType: '0.4mm PVC', edgeLenMm: (l + 2 * w) * qty };
+        }
+        if (name.includes('beam leg') || name.includes('опора центральной')) {
+            // Leg: hidden mostly, light edging on ends
+            return { edgeType: '0.4mm PVC', edgeLenMm: (2 * w) * qty };
+        }
+        if (name.includes('deck strip') || name.includes('поперечная') || name.includes('продольная')) {
+            // Transverse deck strip: short ends only (rests on ledgers/supports)
+            return { edgeType: '0.4mm PVC', edgeLenMm: (2 * w) * qty };
+        }
+        if (name.includes('base panel') || name.includes('листовое')) {
+            // Solid sheet base: ends only
+            return { edgeType: '0.4mm PVC', edgeLenMm: (2 * w) * qty };
+        }
+        return { edgeType: 'none', edgeLenMm: 0 };
+    }
+
+    function estimateMainEdge(partName, l, w, qty, t) {
+        const name = (partName || '').toLowerCase();
+        if (t <= 3 || name.includes('back panel') || name.includes('задняя стенка')) {
+            return { edgeType: 'none', edgeLenMm: 0 };
+        }
+        if (name.includes('facade') || name.includes('door') || name.includes('фасад')) {
+            return { edgeType: '2mm PVC', edgeLenMm: (2 * (l + w)) * qty };
+        }
+        return { edgeType: '0.4mm PVC', edgeLenMm: (2 * (l + w)) * qty };
+    }
+
+    function collectMainExportData() {
+        if (!lastMainCutMapRows.length) updateConfigurator();
+        return lastMainCutMapRows.length > 0;
+    }
+
+    /** Cut map + fasteners as CSV for Telegram / order (closets or beds). */
+    function buildOrderCutMapCsvBlob() {
+        if (CONFIG_MODE === 'beds') {
+            if (!lastBedCutMapRows.length) updateConfigurator();
+            if (!lastBedCutMapRows.length) return null;
+            const lines = [];
+            lines.push('Part,Qty,Length_mm,Width_mm,Thickness_mm,Material,Edge_Type,Edge_Length_mm');
+            lastBedCutMapRows.forEach(r => {
+                lines.push([
+                    `"${r.name}"`, r.qty, r.l, r.w, r.t, `"${r.mat}"`, `"${r.edgeType}"`,
+                    Math.round(r.edgeLenMm)
+                ].join(','));
+            });
+            lines.push('');
+            lines.push('Fastener,Qty,Note');
+            lastBedFasteners.forEach(f => {
+                lines.push([`"${f.name}"`, f.qty, `"${f.note || ''}"`].join(','));
+            });
+            return new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        }
+        if (!collectMainExportData()) return null;
+        const lines = [];
+        lines.push('Part,Qty,Length_mm,Width_mm,Thickness_mm,Material,Edge_Type,Edge_Length_mm');
+        lastMainCutMapRows.forEach(r => {
+            lines.push([
+                `"${r.name}"`, r.qty, r.l, r.w, r.t, `"${r.mat}"`, `"${r.edgeType}"`, Math.round(r.edgeLenMm)
+            ].join(','));
+        });
+        lines.push('');
+        lines.push('Fastener,Qty,Note');
+        lastMainFasteners.forEach(f => lines.push([`"${f.name}"`, f.qty, `"${f.note || ''}"`].join(',')));
+        return new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    }
+
+    /** Same sheets as former manual XLSX export; null if no data or library missing. */
+    function buildOrderCutMapXlsxBlob() {
+        if (typeof XLSX === 'undefined') return null;
+        if (CONFIG_MODE === 'beds') {
+            if (!lastBedCutMapRows.length) updateConfigurator();
+            if (!lastBedCutMapRows.length) return null;
+            const cutMapRows = lastBedCutMapRows.map((r, idx) => ({
+                No: idx + 1,
+                Part: r.name,
+                Qty: r.qty,
+                Length_mm: r.l,
+                Width_mm: r.w,
+                Thickness_mm: r.t,
+                Material: r.mat,
+                Edge_Type: r.edgeType || 'none',
+                Edge_Length_mm: Math.round(r.edgeLenMm || 0)
+            }));
+            const nestingRows = [];
+            lastBedCutMapRows.forEach(r => {
+                for (let i = 0; i < (r.qty || 1); i++) {
+                    nestingRows.push({
+                        Part: r.name,
+                        Length_mm: r.l,
+                        Width_mm: r.w,
+                        Thickness_mm: r.t,
+                        Material: r.mat,
+                        Grain: r.l >= r.w ? 'L' : 'W',
+                        Can_Rotate: 1,
+                        Edge_Long_1: r.edgeType || 'none',
+                        Edge_Long_2: r.edgeType || 'none',
+                        Edge_Short_1: 'none',
+                        Edge_Short_2: 'none'
+                    });
+                }
+            });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cutMapRows), 'CutMap');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(nestingRows), 'Nesting-ready');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+                lastBedFasteners.map((f, idx) => ({
+                    No: idx + 1, Fastener: f.name, Qty: f.qty, Note: f.note || ''
+                }))
+            ), 'Fasteners');
+            const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            return new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        }
+        if (!collectMainExportData()) return null;
+        const cutMapRows = lastMainCutMapRows.map((r, idx) => ({
+            No: idx + 1, Part: r.name, Qty: r.qty, Length_mm: r.l, Width_mm: r.w, Thickness_mm: r.t, Material: r.mat,
+            Edge_Type: r.edgeType || 'none', Edge_Length_mm: Math.round(r.edgeLenMm || 0)
+        }));
+        const nestingRows = [];
+        lastMainCutMapRows.forEach(r => {
+            for (let i = 0; i < (r.qty || 1); i++) {
+                nestingRows.push({
+                    Part: r.name, Length_mm: r.l, Width_mm: r.w, Thickness_mm: r.t, Material: r.mat,
+                    Grain: r.l >= r.w ? 'L' : 'W', Can_Rotate: 1,
+                    Edge_Long_1: r.edgeType || 'none', Edge_Long_2: r.edgeType || 'none',
+                    Edge_Short_1: 'none', Edge_Short_2: 'none'
+                });
+            }
+        });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cutMapRows), 'CutMap');
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(nestingRows), 'Nesting-ready');
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+            lastMainFasteners.map((f, idx) => ({ No: idx + 1, Fastener: f.name, Qty: f.qty, Note: f.note || '' }))
+        ), 'Fasteners');
+        const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        return new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+
+    function initBedsModeUI() {
+        if (CONFIG_MODE !== 'beds') return;
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return;
+        if (document.getElementById('beds-controls')) return;
+
+        const blocks = sidebar.querySelectorAll('.block');
+        blocks.forEach((block, idx) => {
+            block.style.display = idx === 0 ? '' : 'none';
+        });
+
+        const bedBlock = document.createElement('div');
+        bedBlock.className = 'block';
+        bedBlock.id = 'beds-controls';
+        bedBlock.innerHTML = `
+            <h3>Beds Configurator</h3>
+            <div class="form-group">
+                <label>Preset:</label>
+                <select id="bedPreset">
+                    <option value="single">Single (900x2000)</option>
+                    <option value="onehalf">1.5 (1200x2000)</option>
+                    <option value="double" selected>Double (1600x2000)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Mattress width (mm):</label><input type="number" id="bedMattressW" value="1600" min="700" step="10"></div>
+            <div class="form-group"><label>Bed length (mm):</label><input type="number" id="bedLength" value="2000" min="1800" step="10"></div>
+            <div class="form-group"><label>Frame height (mm):</label><input type="number" id="bedFrameH" value="420" min="250" step="5"></div>
+            <div class="form-group"><label>Headboard height (mm):</label><input type="number" id="bedHeadboardH" value="900" min="400" step="10"></div>
+            <div class="form-group"><label>Footboard height (mm):</label><input type="number" id="bedFootboardH" value="420" min="200" step="10"></div>
+            <div class="form-group">
+                <label>Deck base:</label>
+                <select id="bedBaseType">
+                    <option value="slats" selected>Transverse strips (LDSP)</option>
+                    <option value="sheet">Solid LDSP sheet</option>
+                </select>
+            </div>
+            <div id="beds-main-actions" style="display:grid; gap:8px; margin-top:8px;"></div>
+        `;
+        sidebar.appendChild(bedBlock);
+
+        const bedsMainActions = document.getElementById('beds-main-actions');
+        if (bedsMainActions) {
+            const pdfBtn = document.querySelector('button[onclick="generatePDF()"]');
+            const sendBtn = document.getElementById('btn-send-project');
+            if (pdfBtn && pdfBtn.parentElement !== bedsMainActions) {
+                pdfBtn.style.marginTop = '0';
+                bedsMainActions.appendChild(pdfBtn);
+            }
+            if (sendBtn && sendBtn.parentElement !== bedsMainActions) {
+                sendBtn.style.marginTop = '0';
+                bedsMainActions.appendChild(sendBtn);
+            }
+        }
+
+        const presetMap = {
+            single: { w: 900, l: 2000 },
+            onehalf: { w: 1200, l: 2000 },
+            double: { w: 1600, l: 2000 }
+        };
+
+        const syncBedToCoreFields = () => {
+            const mattressW = parseInt(document.getElementById('bedMattressW')?.value || '1600', 10);
+            const bedLength = parseInt(document.getElementById('bedLength')?.value || '2000', 10);
+            const frameH = parseInt(document.getElementById('bedFrameH')?.value || '420', 10);
+            const headboardH = parseInt(document.getElementById('bedHeadboardH')?.value || '900', 10);
+            const railT = parseInt(document.getElementById('facadeThick')?.value || '16', 10);
+
+            const outerW = mattressW + railT * 2;
+            const fW1 = document.getElementById('w1');
+            const fD1 = document.getElementById('d1');
+            const fH1 = document.getElementById('h1');
+            const fW2 = document.getElementById('upper_w');
+            const fH2 = document.getElementById('upper_h');
+            const fD2 = document.getElementById('upper_d');
+            if (fW1) fW1.value = String(mattressW);
+            if (fD1) fD1.value = String(bedLength);
+            if (fH1) fH1.value = String(frameH);
+            if (fW2) fW2.value = String(outerW);
+            if (fH2) fH2.value = String(headboardH);
+            if (fD2) fD2.value = String(railT);
+        };
+
+        document.getElementById('bedPreset')?.addEventListener('change', (e) => {
+            const preset = presetMap[e.target.value];
+            if (!preset) return;
+            const bw = document.getElementById('bedMattressW');
+            const bl = document.getElementById('bedLength');
+            if (bw) bw.value = String(preset.w);
+            if (bl) bl.value = String(preset.l);
+            syncBedToCoreFields();
+            updateConfigurator();
+        });
+
+        const redrawBedsConfigurator = () => {
+            syncBedToCoreFields();
+            updateConfigurator();
+        };
+
+        ['bedMattressW', 'bedLength', 'bedFrameH', 'bedHeadboardH', 'bedFootboardH']
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', redrawBedsConfigurator);
+                el.addEventListener('change', redrawBedsConfigurator);
+            });
+
+        document.getElementById('bedBaseType')?.addEventListener('change', redrawBedsConfigurator);
+        document.getElementById('facadeThick')?.addEventListener('change', syncBedToCoreFields);
+
+        syncBedToCoreFields();
+    }
+
+    function initShelvesModeUI() {
+        if (CONFIG_MODE !== 'shelves') return;
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar || document.getElementById('shelves-controls')) return;
+
+        sidebar.querySelectorAll('.block').forEach(block => {
+            block.style.display = 'none';
+        });
+
+        const wallSel = document.getElementById('wallType');
+        const wallOpts = wallSel
+            ? [...wallSel.options].map(o => `<option value="${o.value}">${o.textContent}</option>`).join('')
+            : '<option value="concrete">Concrete / Brick</option><option value="drywall">Drywall</option>';
+
+        const block = document.createElement('div');
+        block.className = 'block';
+        block.id = 'shelves-controls';
+        block.innerHTML = `
+            <h3 id="shelves-ui-title">SHELFS</h3>
+            <p id="shelves-ui-intro" style="font-size:12px;color:#555;line-height:1.5;margin:0 0 10px 0;"></p>
+            <div class="form-group">
+                <label id="lbl-shelf-preset">Preset</label>
+                <select id="shelfPreset">
+                    <option value="compact">Compact 1400x700</option>
+                    <option value="classic" selected>Classic 1800x900</option>
+                    <option value="wide">Wide 2200x900</option>
+                    <option value="tall">Tall 1800x1200</option>
+                    <option value="drawing1200">Drawing 1200x1200</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-scheme-type">Scheme type</label>
+                <select id="shelfSchemeType">
+                    <option value="advanced" selected>Advanced modular</option>
+                    <option value="simple">Simple grid (square/rectangular)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-total-w">Overall width (mm)</label>
+                <input type="number" id="shelfTotalW" value="1800" min="900" max="3600" step="10">
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-total-h">Overall height (mm)</label>
+                <input type="number" id="shelfTotalH" value="900" min="400" max="1800" step="10">
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-depth">Depth (mm)</label>
+                <input type="number" id="shelfDepthD" value="280" min="150" max="500" step="10">
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-thick">LDSP thickness (mm)</label>
+                <select id="shelfThickT">
+                    <option value="16" selected>16</option>
+                    <option value="18">18</option>
+                    <option value="22">22</option>
+                    <option value="25">25</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-simple-shape">Simple shape</label>
+                <select id="shelfSimpleShape">
+                    <option value="square">Square</option>
+                    <option value="rect" selected>Rectangular</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-simple-cols">Columns</label>
+                <select id="shelfSimpleCols">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-simple-rows">Rows</label>
+                <select id="shelfSimpleRows">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-side-w">Side module width each (mm)</label>
+                <input type="number" id="shelfSideW" value="300" min="160" max="900" step="10">
+            </div>
+            <div class="form-group" style="align-items:flex-start;">
+                <label style="display:flex;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="shelfAsymmetry" style="margin-top:3px;">
+                    <span id="lbl-shelf-asymmetry">Asymmetric side widths (left/right different)</span>
+                </label>
+            </div>
+            <div id="shelfAsymmetryRow" style="display:none; gap:8px; grid-template-columns:1fr 1fr;" class="form-group">
+                <div>
+                    <label id="lbl-shelf-left-w">Left module width (mm)</label>
+                    <input type="number" id="shelfLeftW" value="300" min="160" max="900" step="10">
+                </div>
+                <div>
+                    <label id="lbl-shelf-right-w">Right module width (mm)</label>
+                    <input type="number" id="shelfRightW" value="300" min="160" max="900" step="10">
+                </div>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-side-rows">Shelves in side modules (each side)</label>
+                <select id="shelfSideRows">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-center-rows">Shelves in center module</label>
+                <select id="shelfCenterRows">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-offset-mode">Offsets mode</label>
+                <select id="shelfOffsetMode">
+                    <option value="top" selected>From top</option>
+                    <option value="bottom">From bottom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-left-offsets">Left shelves offsets from top (mm, comma)</label>
+                <input type="text" id="shelfLeftOffsets" value="250,500">
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-center-offsets">Center shelves offsets from top (mm, comma)</label>
+                <input type="text" id="shelfCenterOffsets" value="300,600">
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-right-offsets">Right shelves offsets from top (mm, comma)</label>
+                <input type="text" id="shelfRightOffsets" value="250,500">
+            </div>
+            <div class="form-group" style="align-items:flex-start;">
+                <label style="display:flex;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="shelfCenterDivider" checked style="margin-top:3px;">
+                    <span id="lbl-shelf-center-divider">Center vertical divider</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-bracket">Mounting type</label>
+                <select id="shelfBracketType">
+                    <option value="angle" id="opt-br-angle">Visible L-brackets</option>
+                    <option value="concealed" id="opt-br-conc">Concealed rods / pins</option>
+                    <option value="rail" id="opt-br-rail">Wall upright rail + shelf brackets</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-wall">Wall for anchors</label>
+                <select id="shelfWallTypeMount">${wallOpts}</select>
+            </div>
+            <div class="form-group">
+                <label id="lbl-shelf-load">Target distributed load on center shelf (kg)</label>
+                <input type="number" id="shelfPlannedLoadKg" value="25" min="5" max="150" step="5">
+            </div>
+            <div id="shelf-tip-box" style="font-size:11px;line-height:1.45;color:#333;background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:4px;padding:8px 10px;margin-top:4px;"></div>
+            <div id="shelves-main-actions" style="display:grid; gap:8px; margin-top:10px;"></div>
+        `;
+        sidebar.appendChild(block);
+
+        const mountSel = document.getElementById('shelfWallTypeMount');
+        if (mountSel && wallSel) {
+            mountSel.value = wallSel.value;
+            mountSel.addEventListener('change', () => {
+                wallSel.value = mountSel.value;
+                wallSel.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
+
+        const presetMap = {
+            compact: { w: 1400, h: 700, d: 260, sideW: 260, sideRows: 1, centerRows: 1, divider: true, asym: false, leftW: 260, rightW: 260, lOff: '250', cOff: '300', rOff: '250', offsetMode: 'top', schemeType: 'advanced', shape: 'rect', cols: 3, rows: 3 },
+            classic: { w: 1800, h: 900, d: 280, sideW: 300, sideRows: 2, centerRows: 2, divider: true, asym: false, leftW: 300, rightW: 300, lOff: '250,500', cOff: '300,600', rOff: '250,500', offsetMode: 'top', schemeType: 'advanced', shape: 'rect', cols: 3, rows: 3 },
+            wide: { w: 2200, h: 900, d: 300, sideW: 320, sideRows: 2, centerRows: 2, divider: true, asym: false, leftW: 320, rightW: 320, lOff: '250,500', cOff: '300,600', rOff: '250,500', offsetMode: 'top', schemeType: 'advanced', shape: 'rect', cols: 4, rows: 3 },
+            tall: { w: 1800, h: 1200, d: 300, sideW: 320, sideRows: 3, centerRows: 2, divider: true, asym: false, leftW: 320, rightW: 320, lOff: '280,560,840', cOff: '360,760', rOff: '280,560,840', offsetMode: 'top', schemeType: 'advanced', shape: 'rect', cols: 3, rows: 4 },
+            drawing1200: { w: 1200, h: 1200, d: 280, sideW: 268, sideRows: 3, centerRows: 2, divider: true, asym: false, leftW: 268, rightW: 268, lOff: '300,600,900', cOff: '300,900', rOff: '300,600,900', offsetMode: 'top', schemeType: 'advanced', shape: 'rect', cols: 3, rows: 4 }
+        };
+
+        const applyPreset = (presetKey) => {
+            const p = presetMap[presetKey];
+            if (!p) return;
+            const setV = (id, val) => { const el = document.getElementById(id); if (el) el.value = String(val); };
+            setV('shelfTotalW', p.w);
+            setV('shelfTotalH', p.h);
+            setV('shelfDepthD', p.d);
+            setV('shelfSideW', p.sideW);
+            setV('shelfSideRows', p.sideRows);
+            setV('shelfCenterRows', p.centerRows);
+            setV('shelfLeftW', p.leftW);
+            setV('shelfRightW', p.rightW);
+            setV('shelfLeftOffsets', p.lOff);
+            setV('shelfCenterOffsets', p.cOff);
+            setV('shelfRightOffsets', p.rOff);
+            setV('shelfOffsetMode', p.offsetMode || 'top');
+            setV('shelfSchemeType', p.schemeType || 'advanced');
+            setV('shelfSimpleShape', p.shape || 'rect');
+            setV('shelfSimpleCols', p.cols || 3);
+            setV('shelfSimpleRows', p.rows || 3);
+            const asymCb = document.getElementById('shelfAsymmetry');
+            if (asymCb) asymCb.checked = !!p.asym;
+            const cb = document.getElementById('shelfCenterDivider');
+            if (cb) cb.checked = !!p.divider;
+        };
+
+        const redraw = () => {
+            const w1f = document.getElementById('w1');
+            const h1f = document.getElementById('h1');
+            const d1f = document.getElementById('d1');
+            const cfg = getShelvesModeConfig();
+            const sideInput = document.getElementById('shelfSideW');
+            const asymRow = document.getElementById('shelfAsymmetryRow');
+            if (cfg.schemeType === 'simple' && cfg.simpleShape === 'square') {
+                const hInput = document.getElementById('shelfTotalH');
+                if (hInput) hInput.value = String(cfg.totalW);
+            }
+            if (asymRow) asymRow.style.display = cfg.asymmetry ? 'grid' : 'none';
+            if (sideInput && String(cfg.sideWInput) !== String(cfg.sideW)) {
+                sideInput.value = String(cfg.sideW);
+            }
+            if (w1f) w1f.value = String(cfg.totalW);
+            if (h1f) h1f.value = String(cfg.totalH);
+            if (d1f) d1f.value = String(cfg.depthD);
+            if (typeof window.refreshShelvesModeLabels === 'function') window.refreshShelvesModeLabels(currentLang);
+            updateConfigurator();
+        };
+
+        [
+            'shelfPreset',
+            'shelfTotalW', 'shelfTotalH', 'shelfDepthD', 'shelfThickT',
+            'shelfSideW', 'shelfSideRows', 'shelfCenterRows', 'shelfCenterDivider', 'shelfAsymmetry',
+            'shelfLeftW', 'shelfRightW', 'shelfOffsetMode', 'shelfLeftOffsets', 'shelfCenterOffsets', 'shelfRightOffsets',
+            'shelfSchemeType', 'shelfSimpleShape', 'shelfSimpleCols', 'shelfSimpleRows',
+            'shelfBracketType', 'shelfPlannedLoadKg'
+        ].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', redraw);
+            document.getElementById(id)?.addEventListener('change', redraw);
+        });
+        document.getElementById('shelfPreset')?.addEventListener('change', (e) => {
+            applyPreset(e.target.value);
+            redraw();
+        });
+
+        const shelvesMain = document.getElementById('shelves-main-actions');
+        if (shelvesMain) {
+            const pdfBtn = document.querySelector('button[onclick="generatePDF()"]');
+            const sendBtn = document.getElementById('btn-send-project');
+            if (pdfBtn && pdfBtn.parentElement !== shelvesMain) {
+                pdfBtn.style.marginTop = '0';
+                shelvesMain.appendChild(pdfBtn);
+            }
+            if (sendBtn && sendBtn.parentElement !== shelvesMain) {
+                sendBtn.style.marginTop = '0';
+                shelvesMain.appendChild(sendBtn);
+            }
+        }
+
+        window.refreshShelvesModeLabels = function(lang) {
+            const ru = lang === 'ru';
+            const title = document.getElementById('shelves-ui-title');
+            const intro = document.getElementById('shelves-ui-intro');
+            if (title) title.textContent = ru ? 'ПОЛКИ (SHELFS)' : 'SHELFS — modular wall shelf';
+            if (intro) {
+                intro.textContent = ru
+                    ? 'Модульная навесная/приставная полка как на ваших примерах: две боковые башни и центральная горизонтальная зона. Изменяйте габариты и количество полок.'
+                    : 'Modular shelf like your references: two side towers and a central horizontal section. Tune dimensions and shelf counts.';
+            }
+            const setTxt = (id, ruText, enText) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = ru ? ruText : enText;
+            };
+            setTxt('lbl-shelf-total-w', 'Общая ширина (мм)', 'Overall width (mm)');
+            setTxt('lbl-shelf-total-h', 'Общая высота (мм)', 'Overall height (mm)');
+            setTxt('lbl-shelf-preset', 'Пресет', 'Preset');
+            setTxt('lbl-shelf-scheme-type', 'Тип схемы', 'Scheme type');
+            setTxt('lbl-shelf-depth', 'Глубина (мм)', 'Depth (mm)');
+            setTxt('lbl-shelf-thick', 'Толщина ЛДСП (мм)', 'LDSP thickness (mm)');
+            setTxt('lbl-shelf-simple-shape', 'Форма (упрощенная)', 'Simple shape');
+            setTxt('lbl-shelf-simple-cols', 'Колонки (упрощенная)', 'Columns');
+            setTxt('lbl-shelf-simple-rows', 'Ряды (упрощенная)', 'Rows');
+            setTxt('lbl-shelf-side-w', 'Ширина боковых модулей (каждый, мм)', 'Side module width each (mm)');
+            setTxt('lbl-shelf-asymmetry', 'Асимметрия боковых модулей (левая/правая)', 'Asymmetric side widths (left/right)');
+            setTxt('lbl-shelf-left-w', 'Ширина левого модуля (мм)', 'Left module width (mm)');
+            setTxt('lbl-shelf-right-w', 'Ширина правого модуля (мм)', 'Right module width (mm)');
+            setTxt('lbl-shelf-side-rows', 'Полок в боковых модулях (на каждой стороне)', 'Shelves in side modules (each side)');
+            setTxt('lbl-shelf-center-rows', 'Полок в центральном модуле', 'Shelves in center module');
+            setTxt('lbl-shelf-offset-mode', 'Режим отступов', 'Offsets mode');
+            const modeTop = document.querySelector('#shelfOffsetMode option[value="top"]');
+            const modeBottom = document.querySelector('#shelfOffsetMode option[value="bottom"]');
+            if (modeTop) modeTop.textContent = ru ? 'От верха' : 'From top';
+            if (modeBottom) modeBottom.textContent = ru ? 'От низа' : 'From bottom';
+            const offsetMode = document.getElementById('shelfOffsetMode')?.value || 'top';
+            const ruMode = offsetMode === 'bottom' ? 'от низа' : 'от верха';
+            const enMode = offsetMode === 'bottom' ? 'from bottom' : 'from top';
+            setTxt('lbl-shelf-left-offsets', `Отступы полок слева ${ruMode} (мм, через запятую)`, `Left shelves offsets ${enMode} (mm, comma)`);
+            setTxt('lbl-shelf-center-offsets', `Отступы полок центра ${ruMode} (мм, через запятую)`, `Center shelves offsets ${enMode} (mm, comma)`);
+            setTxt('lbl-shelf-right-offsets', `Отступы полок справа ${ruMode} (мм, через запятую)`, `Right shelves offsets ${enMode} (mm, comma)`);
+            setTxt('lbl-shelf-center-divider', 'Центральная вертикальная перегородка', 'Center vertical divider');
+            setTxt('lbl-shelf-bracket', 'Тип крепления к стене', 'Wall mounting type');
+            setTxt('lbl-shelf-wall', 'Материал стены', 'Wall for anchors');
+            setTxt('lbl-shelf-load', 'Целевая распределенная нагрузка на центр (кг)', 'Target distributed load on center shelf (kg)');
+            const oa = document.getElementById('opt-br-angle');
+            const oc = document.getElementById('opt-br-conc');
+            const or = document.getElementById('opt-br-rail');
+            if (oa) oa.textContent = ru ? 'Накладные уголки / консоли' : 'Visible L-brackets';
+            if (oc) oc.textContent = ru ? 'Скрытые штыри / пины' : 'Concealed rods / pins';
+            if (or) or.textContent = ru ? 'Рельсовая система' : 'Wall upright rail + shelf brackets';
+        };
+        window.refreshShelvesModeLabels(currentLang);
+
+        redraw();
+    }
+
     function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('configurator_lang', lang);
+        applyConfiguratorMode(lang);
 
         // Update button states
         document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
@@ -1902,12 +2633,6 @@
             if (TRANSLATIONS[lang][key]) el.textContent = TRANSLATIONS[lang][key];
         });
 
-        // Update localized placeholders (inputs / textareas)
-        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-            const key = el.getAttribute('data-i18n-ph');
-            if (TRANSLATIONS[lang][key]) el.setAttribute('placeholder', TRANSLATIONS[lang][key]);
-        });
-
         // Update the date label
         document.getElementById('date-info').innerText =
             TRANSLATIONS[lang].date_label + new Date().toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-GB');
@@ -1922,10 +2647,10 @@
         if (hingeTableHeading) hingeTableHeading.textContent = TRANSLATIONS[lang].hinge_table_title || 'Hinge Specifications';
         
         const upperCabinetHeading = document.getElementById('upperCabinetHeading');
-        if (upperCabinetHeading) upperCabinetHeading.textContent = TRANSLATIONS[lang].upper_cabinet_section || 'Upper Cabinet';
+        if (upperCabinetHeading) upperCabinetHeading.textContent = TRANSLATIONS[lang].upper_cabinet_section || 'Upper Closet';
         
         const lowerCabinetHeading = document.getElementById('lowerCabinetHeading');
-        if (lowerCabinetHeading) lowerCabinetHeading.textContent = TRANSLATIONS[lang].lower_cabinet_section || 'Lower Cabinet';
+        if (lowerCabinetHeading) lowerCabinetHeading.textContent = TRANSLATIONS[lang].lower_cabinet_section || 'Lower Closet';
         
         // Update dropdown options units (mm)
         const unit = lang === 'en' ? 'mm' : 'мм';
@@ -2068,6 +2793,168 @@
     // ==========================================
     function panelAreaM2(lengthMm, widthMm) {
         return (lengthMm * widthMm) / 1e6;
+    }
+
+    // SHELFS mode — span/load hints based on common LDSP practice (e.g. privetmaket.ru, furniture industry tables).
+    // Baseline max free span (mm) for shelf depth ~300–400 mm; deeper shelves reduce safe span.
+    function getShelfBaselineMaxSpanMm(thicknessMm) {
+        const t = Number(thicknessMm) || 16;
+        if (t <= 16) return 600;
+        if (t <= 18) return 800;
+        if (t <= 22) return 1000;
+        return 1150;
+    }
+
+    function getShelfRecommendedMaxSpanMm(thicknessMm, depthMm) {
+        const base = getShelfBaselineMaxSpanMm(thicknessMm);
+        const d = Math.min(550, Math.max(200, Number(depthMm) || 300));
+        const depthFactor = 350 / d;
+        return Math.round(base * Math.min(1.25, Math.max(0.72, depthFactor)));
+    }
+
+    /** Conservative distributed load (kg) rating for LDSP shelf by span & thickness (orientative). */
+    function getShelfDistributedLoadRatingKg(spanMm, thicknessMm) {
+        const s = Number(spanMm) || 0;
+        const t = Number(thicknessMm) || 16;
+        const thickBoost = Math.min(1.35, t / 16);
+        let base;
+        if (s <= 600) base = 40;
+        else if (s <= 800) base = 30;
+        else if (s <= 1000) base = 20;
+        else base = 10;
+        return Math.round(base * thickBoost);
+    }
+
+    function getShelvesModeConfig() {
+        const MIN_SHELF_CLEAR_MM = 90;
+        const MIN_EDGE_OFFSET_MM = 40;
+        const parseOffsets = (raw, maxVal) => {
+            const arr = String(raw || '')
+                .split(',')
+                .map(v => parseInt(v.trim(), 10))
+                .filter(v => Number.isFinite(v));
+            const filtered = arr
+                .map(v => Math.max(MIN_EDGE_OFFSET_MM, Math.min(Math.max(MIN_EDGE_OFFSET_MM, maxVal - MIN_EDGE_OFFSET_MM), v)))
+                .sort((a, b) => a - b);
+            const dedup = [];
+            filtered.forEach(v => {
+                if (!dedup.length || Math.abs(dedup[dedup.length - 1] - v) >= 24) dedup.push(v);
+            });
+            return dedup;
+        };
+
+        const totalW = Math.max(900, parseInt(document.getElementById('shelfTotalW')?.value || '1800', 10));
+        const totalH = Math.max(400, parseInt(document.getElementById('shelfTotalH')?.value || '900', 10));
+        const depthD = Math.max(150, parseInt(document.getElementById('shelfDepthD')?.value || '280', 10));
+        const thickT = Math.max(10, parseInt(document.getElementById('shelfThickT')?.value || '16', 10));
+        const sideRows = Math.max(1, parseInt(document.getElementById('shelfSideRows')?.value || '2', 10));
+        const centerRows = Math.max(1, parseInt(document.getElementById('shelfCenterRows')?.value || '2', 10));
+        const schemeType = document.getElementById('shelfSchemeType')?.value || 'advanced';
+        const simpleShape = document.getElementById('shelfSimpleShape')?.value || 'rect';
+        const simpleCols = Math.max(2, parseInt(document.getElementById('shelfSimpleCols')?.value || '3', 10));
+        const simpleRows = Math.max(2, parseInt(document.getElementById('shelfSimpleRows')?.value || '3', 10));
+        const centerDivider = !!document.getElementById('shelfCenterDivider')?.checked;
+        const asymmetry = !!document.getElementById('shelfAsymmetry')?.checked;
+        const offsetMode = document.getElementById('shelfOffsetMode')?.value || 'top';
+        const bracket = document.getElementById('shelfBracketType')?.value || 'angle';
+        const plannedLoad = Math.max(0, parseInt(document.getElementById('shelfPlannedLoadKg')?.value || '25', 10));
+        const wallTypeShelf = document.getElementById('wallType')?.value || 'concrete';
+        const sideWInput = Math.max(160, parseInt(document.getElementById('shelfSideW')?.value || '300', 10));
+        const leftWInput = Math.max(160, parseInt(document.getElementById('shelfLeftW')?.value || sideWInput || '300', 10));
+        const rightWInput = Math.max(160, parseInt(document.getElementById('shelfRightW')?.value || sideWInput || '300', 10));
+
+        const minCenterOuterW = 220;
+        const maxSideEach = Math.max(160, totalW - minCenterOuterW - 160);
+        let leftW = asymmetry ? Math.min(leftWInput, maxSideEach) : Math.min(sideWInput, Math.floor((totalW - minCenterOuterW) / 2));
+        let rightW = asymmetry ? Math.min(rightWInput, maxSideEach) : leftW;
+        let centerOuterW = totalW - leftW - rightW;
+        if (centerOuterW < minCenterOuterW) {
+            const deficit = minCenterOuterW - centerOuterW;
+            if (leftW >= rightW) leftW = Math.max(160, leftW - deficit);
+            else rightW = Math.max(160, rightW - deficit);
+            centerOuterW = totalW - leftW - rightW;
+        }
+        if (centerOuterW < minCenterOuterW) {
+            const deficit = minCenterOuterW - centerOuterW;
+            leftW = Math.max(160, leftW - Math.ceil(deficit / 2));
+            rightW = Math.max(160, rightW - Math.floor(deficit / 2));
+            centerOuterW = Math.max(minCenterOuterW, totalW - leftW - rightW);
+        }
+
+        const verticalH = Math.max(120, totalH - 2 * thickT);
+        const leftInnerW = Math.max(80, leftW - 2 * thickT);
+        const rightInnerW = Math.max(80, rightW - 2 * thickT);
+        const centerInnerW = Math.max(120, centerOuterW - (centerDivider ? thickT : 0));
+        const centerShelfLen = centerDivider ? Math.max(80, Math.floor(centerInnerW / 2)) : centerInnerW;
+        const leftOffsetsRaw = parseOffsets(document.getElementById('shelfLeftOffsets')?.value, verticalH);
+        const centerOffsetsRaw = parseOffsets(document.getElementById('shelfCenterOffsets')?.value, verticalH);
+        const rightOffsetsRaw = parseOffsets(document.getElementById('shelfRightOffsets')?.value, verticalH);
+        const toTop = (arr) => offsetMode === 'bottom'
+            ? arr.map(v => Math.max(MIN_EDGE_OFFSET_MM, Math.min(verticalH - MIN_EDGE_OFFSET_MM, verticalH - v))).sort((a, b) => a - b)
+            : arr.slice().sort((a, b) => a - b);
+        const leftOffsets = toTop(leftOffsetsRaw);
+        const centerOffsets = toTop(centerOffsetsRaw);
+        const rightOffsets = toTop(rightOffsetsRaw);
+
+        const validateOffsets = (arr) => {
+            const errors = [];
+            if (!arr.length) {
+                errors.push('empty');
+                return errors;
+            }
+            if (arr[0] < MIN_EDGE_OFFSET_MM) errors.push('too_close_top');
+            if ((verticalH - arr[arr.length - 1]) < MIN_EDGE_OFFSET_MM) errors.push('too_close_bottom');
+            for (let i = 1; i < arr.length; i++) {
+                if ((arr[i] - arr[i - 1]) < MIN_SHELF_CLEAR_MM) {
+                    errors.push('too_tight_gap');
+                    break;
+                }
+            }
+            return errors;
+        };
+
+        const validation = {
+            left: validateOffsets(leftOffsets),
+            center: validateOffsets(centerOffsets),
+            right: validateOffsets(rightOffsets)
+        };
+
+        return {
+            totalW, totalH, depthD, thickT, sideRows, centerRows, centerDivider, asymmetry,
+            schemeType, simpleShape, simpleCols, simpleRows,
+            bracket, plannedLoad, wallTypeShelf, sideWInput, leftWInput, rightWInput,
+            sideW: Math.min(leftW, rightW), leftW, rightW, centerOuterW, verticalH, leftInnerW, rightInnerW,
+            centerInnerW, centerShelfLen, leftOffsets, centerOffsets, rightOffsets,
+            offsetMode, MIN_SHELF_CLEAR_MM, MIN_EDGE_OFFSET_MM, validation
+        };
+    }
+
+    function applyShelvesValidationUI(cfg) {
+        const ids = ['shelfLeftOffsets', 'shelfCenterOffsets', 'shelfRightOffsets', 'shelfLeftW', 'shelfRightW', 'shelfSideW'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.borderColor = '';
+                el.style.background = '';
+            }
+        });
+        const markError = (id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.borderColor = '#d9534f';
+                el.style.background = '#fff1f1';
+            }
+        };
+        if (cfg.schemeType === 'simple') return;
+        if (cfg.validation?.left?.length) markError('shelfLeftOffsets');
+        if (cfg.validation?.center?.length) markError('shelfCenterOffsets');
+        if (cfg.validation?.right?.length) markError('shelfRightOffsets');
+        if (cfg.asymmetry) {
+            if (cfg.leftW <= 170) markError('shelfLeftW');
+            if (cfg.rightW <= 170) markError('shelfRightW');
+        } else {
+            if (cfg.sideW <= 170) markError('shelfSideW');
+        }
     }
 
     // ==========================================
@@ -2322,6 +3209,632 @@
         const facadeWpm2  = FACADE_WEIGHT_MAP[facadeT]  || 12.5;
         const carcassWpm2 = CARCASS_WEIGHT_MAP[carcassT] || 12.5;
 
+        if (CONFIG_MODE === 'beds') {
+            // ----------------------------------------------------------------
+            // BEDS MODEL — simple LDSP perimeter frame (matches reference photos)
+            //
+            // Geometry conventions (top view):
+            //   ┌────────────────────────────────┐  ← Headboard panel (full outer width)
+            //   │ rail │     mattress area     │ rail │
+            //   │ ...  │  ledgers + strips     │  ... │
+            //   └────────────────────────────────┘  ← Footboard panel
+            //   • Headboard / footboard span the full outer width
+            //   • Side rails fit BETWEEN them, so rail length == bedLength
+            //   • Outer length = bedLength + 2 × panelT
+            //   • Outer width  = mattressW + 2 × railT
+            //   • Inner ledger (cleat) screwed to inner face of each side rail
+            //     keeps base/sheet level at the top reference
+            //   • Optional center longitudinal beam when mattressW ≥ 1200
+            //     (splits transverse strips into lanes; solid sheet stays one panel)
+            // ----------------------------------------------------------------
+            const mattressW   = parseInt(document.getElementById('bedMattressW')?.value || w1 || '1600', 10);
+            const bedLength   = parseInt(document.getElementById('bedLength')?.value || d1 || '2000', 10);
+            const frameH      = parseInt(document.getElementById('bedFrameH')?.value || h1 || '420', 10);
+            const headboardH  = parseInt(document.getElementById('bedHeadboardH')?.value || h2 || '900', 10);
+            const footboardH  = parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10);
+            // Headboard, footboard, side rails — same thickness as "Facade thickness" (LDSP frame).
+            const railT       = facadeT;
+            const panelT      = facadeT;
+            const bedPerimeterMaterial = (tMm) => (facadeT === 19 ? `LMDF ${tMm}mm` : `Chipboard (MFC) ${tMm}mm`);
+            const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
+
+            const outerW      = mattressW + 2 * railT;      // total bed outer width
+            const outerL      = bedLength + 2 * panelT;     // total bed outer length
+            // Inner ledgers, center supports, deck strips — thickness follows "Carcass thickness" (general params).
+            const ledgerT     = carcassT;
+            const centerSupportT = carcassT;
+            const sideRailL   = bedLength;                   // rail fits between panels
+
+            // Inner ledger (longitudinal cleat) on each side rail
+            const ledgerW     = 40;
+            const ledgerL     = sideRailL;
+
+            // Center longitudinal supports (count driven by mattress width)
+            const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
+            const useCenterBeam = centerSupportCount > 0;
+            const centerSupportL = bedLength;
+
+            // Transverse deck strips (LDSP): target W=400; if not fitting, reduce to available span minus 2 mm clearance.
+            const stripLayout = getBedDeckStripLayout({
+                bedLength,
+                mattressW,
+                ledgerW,
+                centerSupportCount,
+                centerSupportT,
+                stripThicknessMm: carcassT
+            });
+            const STRIP_GAP = stripLayout.STRIP_GAP;
+            const STRIP_T = stripLayout.STRIP_T;
+            const stripSupportSpanW = stripLayout.stripSupportSpanW;
+            const stripLengthL = stripLayout.stripLengthL;
+            const STRIP_SIDE_CLEARANCE = stripLayout.STRIP_SIDE_CLEARANCE;
+            const MAX_STRIP_LENGTH = stripLayout.MAX_STRIP_LENGTH;
+            const STRIP_W = stripLayout.stripWidthW;
+            const innerBedLength = stripLayout.innerBedLength;
+            const stripAlongCount = stripLayout.stripAlongCount;
+            const stripQty        = baseType === 'slats' ? stripAlongCount : 0;
+            // Single source of truth for strip length used by parts table, schematic,
+            // callouts and export rows.
+            const stripL          = stripLengthL;
+            const stripActualGap  = stripLayout.stripActualGap;
+
+            const bedVert = getBedVerticalGeometryMm({
+                frameH,
+                baseType,
+                stripLayout,
+                ledgerT,
+                mattressNominalT: BED_MATTRESS_THICKNESS_NOMINAL_MM
+            });
+            const centerSupportH  = bedVert.centerSupportHeightMm;
+            const mattressVsRailDetail = currentLang === 'ru'
+                ? (bedVert.protrusionAboveRailMm > 0.5
+                    ? `вылет ≈ ${Math.round(bedVert.protrusionAboveRailMm)} мм (макс ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм; ном. матрас ${bedVert.mattressNominalT} мм, настил ${bedVert.deckT} мм)`
+                    : `утопление ≈ ${Math.round(bedVert.recessBelowRailMm)} мм (ном. матрас ${bedVert.mattressNominalT} мм, настил ${bedVert.deckT} мм)`)
+                : (bedVert.protrusionAboveRailMm > 0.5
+                    ? `protrusion ≈ ${Math.round(bedVert.protrusionAboveRailMm)} mm (max ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm; nom. mattress ${bedVert.mattressNominalT} mm, deck ${bedVert.deckT} mm)`
+                    : `recess ≈ ${Math.round(bedVert.recessBelowRailMm)} mm below rail top (nom. mattress ${bedVert.mattressNominalT} mm, deck ${bedVert.deckT} mm)`);
+
+            // Solid sheet base: always one panel spanning ledger seats (same inner W as strip support span)
+            const sheetQty = 1;
+            const sheetT   = BED_SHEET_BASE_THICKNESS_MM;
+            const sheetL   = stripLayout.innerBedLength;
+            const sheetW   = Math.max(300, stripLayout.stripSupportSpanW);
+
+            const bedParts = [
+                { name: getBedUILabel(currentLang, 'headboard'), qty: 1, l: outerW,   w: headboardH, t: panelT,   mat: bedPerimeterMaterial(panelT) },
+                { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: bedPerimeterMaterial(panelT) },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: bedPerimeterMaterial(railT) },
+                { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: bedPerimeterMaterial(railT) },
+                { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` },
+                { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` }
+            ];
+
+            if (useCenterBeam) {
+                bedParts.push({
+                    name: getBedUILabel(currentLang, 'centerSupport'),
+                    qty: centerSupportCount,
+                    l: centerSupportL,
+                    w: centerSupportH,
+                    t: centerSupportT,
+                    mat: `MDF ${centerSupportT}mm`
+                });
+            }
+
+            if (baseType === 'slats') {
+                bedParts.push({
+                    name: getBedUILabel(currentLang, 'deckStrip'),
+                    qty: stripQty,
+                    l: stripL,
+                    w: STRIP_W,
+                    t: STRIP_T,
+                    mat: `MDF ${STRIP_T}mm`
+                });
+            } else {
+                bedParts.push({
+                    name: getBedUILabel(currentLang, 'basePanel'),
+                    qty: sheetQty,
+                    l: sheetL,
+                    w: sheetW,
+                    t: sheetT,
+                    mat: 'Chipboard (MFC) 16mm'
+                });
+            }
+
+            const bedCutMapRows = bedParts
+                .filter(p => p.l > 0 && p.w > 0 && p.t > 0)
+                .map(p => {
+                    const edge = estimateBedEdge(p.name, p.l, p.w, p.qty);
+                    return { ...p, edgeType: edge.edgeType, edgeLenMm: edge.edgeLenMm };
+                });
+
+            // Fasteners — confirmat counts driven by part count, not magic numbers
+            // 4 corners × 2 screws + 2 rail→ledger rows × 6 screws + supports (4 each)
+            const cornerConfirmats = 8;                       // 2 per corner × 4 corners
+            const ledgerScrews     = 12;                      // 6 per side along ledger
+            const supportScrews    = centerSupportCount * 4;  // each support fixed to head + foot
+            const stripScrewQty    = baseType === 'slats' ? stripQty * 2 : 0; // 1 each end of strip
+            const sheetScrewQty    = baseType === 'sheet' ? sheetQty * 10 : 0;
+
+            const confirmatLen = pickBedConfirmat7LenMm(panelT, railT);
+            const ledgerScrewLen = pickBedScrew4LenMm(ledgerT + pickBedLedgerScrewPenetrationRailMm(railT));
+            const bracketLeg = pickBedCornerBracketLegMm(panelT, railT, ledgerT);
+            const supportScrewLen = pickBedScrew4LenMm(centerSupportT + pickBedSupportScrewPenetrationPanelMm(panelT));
+            const stripScrewLen = pickBedScrew4LenMm(STRIP_T + pickBedDeckScrewPenetrationLedgerMm(ledgerT));
+            const sheetScrewLen = pickBedScrew4LenMm(sheetT + pickBedDeckScrewPenetrationLedgerMm(ledgerT));
+
+            const bedFasteners = [
+                { name: currentLang === 'ru' ? `Конфирмат 7×${confirmatLen}` : `Confirmat 7×${confirmatLen}`,
+                  qty: cornerConfirmats,
+                  note: currentLang === 'ru' ? 'Углы каркаса (по 2 на угол)' : 'Frame corners (2 per corner)' },
+                { name: currentLang === 'ru' ? `Саморез 4×${ledgerScrewLen}` : `Screw 4×${ledgerScrewLen}`,
+                  qty: ledgerScrews,
+                  note: currentLang === 'ru' ? 'Опорная планка к царге' : 'Ledger to side rail' },
+                { name: currentLang === 'ru' ? `Уголок ${bracketLeg}×${bracketLeg}` : `Corner bracket ${bracketLeg}×${bracketLeg}`,
+                  qty: useCenterBeam ? 6 : 4,
+                  note: currentLang === 'ru' ? 'Усиление углов и балки' : 'Corner / beam reinforcement' }
+            ];
+
+            if (useCenterBeam) {
+                bedFasteners.push({
+                    name: currentLang === 'ru' ? `Саморез 4×${supportScrewLen}` : `Screw 4×${supportScrewLen}`,
+                    qty: supportScrews,
+                    note: currentLang === 'ru' ? 'Продольные опоры к щитам' : 'Longitudinal supports to panels'
+                });
+            }
+
+            if (baseType === 'slats') {
+                bedFasteners.push({
+                    name: currentLang === 'ru' ? `Саморез 4×${stripScrewLen}` : `Screw 4×${stripScrewLen}`,
+                    qty: stripScrewQty,
+                    note: currentLang === 'ru' ? 'Поперечные планки к опорным планкам' : 'Transverse deck strips to ledgers'
+                });
+            } else {
+                bedFasteners.push({
+                    name: currentLang === 'ru' ? `Саморез 4×${sheetScrewLen}` : `Screw 4×${sheetScrewLen}`,
+                    qty: sheetScrewQty,
+                    note: currentLang === 'ru' ? 'Крепление листового основания' : 'Solid base fixing'
+                });
+            }
+
+            lastBedCutMapRows = bedCutMapRows;
+            lastBedFasteners = bedFasteners;
+
+            [
+                'hingeSpecTableUpper',
+                'upperGasSpecTable',
+                'hingeSpecTable',
+                'gasSpecTable',
+                'upperGasSpecsHeading',
+                'lowerGasSpecsHeading'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            document.querySelectorAll('[data-i18n="upper_hinge_specs"], [data-i18n="lower_hinge_specs"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            updateHingeSpecsSectionVisibility();
+
+            const upperHeading = document.getElementById('upperCabinetHeading');
+            const lowerHeading = document.getElementById('lowerCabinetHeading');
+            const upperTable = document.getElementById('upperPartsTable');
+            const lowerTable = document.getElementById('lowerPartsTable');
+            const upperBody = document.getElementById('upperPartsTableBody');
+            const lowerBody = document.getElementById('lowerPartsTableBody');
+            if (upperHeading) upperHeading.textContent = getBedUILabel(currentLang, 'parts');
+            if (lowerHeading) lowerHeading.textContent = getBedUILabel(currentLang, 'details');
+            if (upperTable) upperTable.style.display = '';
+            if (lowerTable) lowerTable.style.display = '';
+
+            // Re-title bottom (details) table headers so columns read sensibly in BEDS mode
+            const lowerHead = lowerTable?.querySelector('thead tr');
+            if (lowerHead) {
+                const ths = lowerHead.querySelectorAll('th');
+                if (ths.length >= 4) {
+                    ths[0].textContent = currentLang === 'ru' ? 'Параметр' : 'Item';
+                    ths[1].textContent = currentLang === 'ru' ? 'Значение' : 'Value';
+                    ths[2].textContent = currentLang === 'ru' ? 'Кол-во' : 'Qty';
+                    ths[3].textContent = currentLang === 'ru' ? 'Примечание' : 'Notes';
+                }
+            }
+            if (upperBody) {
+                upperBody.innerHTML = bedParts.map(p => `
+                    <tr><td>${p.name}</td><td>${p.l} × ${p.w} × ${p.t} mm</td><td>${p.qty}</td><td>${p.mat}</td></tr>
+                `).join('');
+            }
+            if (lowerBody) {
+                const baseTypeLabel = baseType === 'slats'
+                    ? (currentLang === 'ru' ? `Поперечные планки ЛДСП: ${stripAlongCount} шт, L=${stripL} мм (зазор ${STRIP_SIDE_CLEARANCE} мм/сторону, макс ${MAX_STRIP_LENGTH} мм), W=${STRIP_W} мм (W цель 400; если не влезает: L-2), шаг ~${stripActualGap} мм`
+                                            : `Transverse LDSP strips: ${stripAlongCount} pcs, L=${stripL} mm (${STRIP_SIDE_CLEARANCE} mm side clearance, max ${MAX_STRIP_LENGTH} mm), W=${STRIP_W} mm (W target 400; if not fitting: L-2), ~${stripActualGap} mm gap`)
+                    : (currentLang === 'ru' ? 'Листовое ЛДСП 16 мм: 1 панель на всю ширину между опорными планками'
+                                            : 'Solid LDSP 16 mm: 1 full-width panel between inner ledgers');
+                const beamLabel = useCenterBeam
+                    ? (currentLang === 'ru' ? `Есть (${centerSupportCount} продольн. опора${centerSupportCount > 1 ? 'ы' : ''})` : `Yes (${centerSupportCount} longitudinal support${centerSupportCount > 1 ? 's' : ''})`)
+                    : (currentLang === 'ru' ? 'Нет' : 'No');
+
+                const baseRows = [
+                    { key: currentLang === 'ru' ? 'Матрас (Ш × Д)' : 'Mattress (W × L)',
+                      val: `${mattressW} × ${bedLength} mm` },
+                    { key: currentLang === 'ru' ? 'Внешние размеры' : 'Outer footprint',
+                      val: `${outerW} × ${outerL} mm` },
+                    { key: currentLang === 'ru' ? 'Высота царги' : 'Side rail height',
+                      val: `${frameH} mm` },
+                    { key: currentLang === 'ru'
+                        ? `Матрас относительно верха царги (вылет макс ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм)`
+                        : `Mattress vs rail top (max protrusion ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm)`,
+                      val: mattressVsRailDetail },
+                    { key: currentLang === 'ru' ? 'Вылет опоры (верх царги → плоскость опор)' : 'Ledger inset (rail top → support plane)',
+                      val: `${Math.round(bedVert.ledgerTopInsetMm)} mm` },
+                    { key: currentLang === 'ru' ? 'Высота изголовья' : 'Headboard height',
+                      val: `${headboardH} mm` },
+                    { key: currentLang === 'ru' ? 'Высота изножья' : 'Footboard height',
+                      val: `${footboardH} mm` },
+                    { key: currentLang === 'ru' ? 'Толщина царги' : 'Side rail thickness',
+                      val: `${railT} mm` },
+                    { key: currentLang === 'ru' ? 'Толщина щитов' : 'Panel thickness (head/foot)',
+                      val: `${panelT} mm` },
+                    { key: currentLang === 'ru' ? 'Опорная планка' : 'Inner ledger',
+                      val: `${ledgerL} × ${ledgerW} × ${ledgerT} mm (×2)` },
+                    { key: currentLang === 'ru' ? 'Центральные опоры' : 'Center supports',
+                      val: beamLabel },
+                    { key: currentLang === 'ru' ? 'Тип основания' : 'Deck type',
+                      val: baseTypeLabel }
+                ];
+
+                const fastenerRows = bedFasteners.map(f => ({
+                    key: f.name,
+                    val: f.note || ''
+                }));
+
+                lowerBody.innerHTML = baseRows
+                    .concat(fastenerRows)
+                    .map((row, idx) => {
+                        const qty = idx >= baseRows.length ? (bedFasteners[idx - baseRows.length].qty || '—') : '—';
+                        return `<tr><td>${row.key}</td><td>${row.val}</td><td>${qty}</td><td>—</td></tr>`;
+                    })                    .join('');
+            }
+
+            const bedWarnings = [];
+            if (bedVert.protrusionLimitExceeded) {
+                bedWarnings.push(currentLang === 'ru'
+                    ? `При ном. толщине матраса ${bedVert.mattressNominalT} мм и настиле ${bedVert.deckT} мм верх матраса выступает над верхом царги примерно на ${Math.round(bedVert.protrusionAboveRailMm)} мм (допустимо максимум ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм). Увеличьте высоту царги или уменьшите толщину настила / толщину опорной планки в расчёте.`
+                    : `With nominal ${bedVert.mattressNominalT} mm mattress and ${bedVert.deckT} mm deck, the mattress top sits about ${Math.round(bedVert.protrusionAboveRailMm)} mm above the rail top (limit ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm). Increase side rail height or reduce deck / ledger stack in the model.`);
+            }
+            renderWarnings(bedWarnings);
+
+            drawSchematic(mattressW, frameH, bedLength, outerW, headboardH, railT, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
+            return;
+        }
+
+        if (CONFIG_MODE === 'shelves') {
+            const {
+                totalW, totalH, depthD, thickT, sideRows, centerRows, centerDivider,
+                bracket, plannedLoad, wallTypeShelf, sideW, leftW, rightW, centerShelfLen, verticalH, leftInnerW, rightInnerW,
+                leftOffsets, centerOffsets, rightOffsets, asymmetry, validation, MIN_SHELF_CLEAR_MM, MIN_EDGE_OFFSET_MM, offsetMode,
+                schemeType, simpleCols, simpleRows, simpleShape
+            } = getShelvesModeConfig();
+            applyShelvesValidationUI({
+                sideW, leftW, rightW, asymmetry, validation, schemeType
+            });
+
+            const matCarcass = 'Chipboard (MFC)';
+            const shelfParts = [];
+            const addPart = (name, qty, l, w, t = thickT, mat = matCarcass) => {
+                if (qty <= 0 || l <= 0 || w <= 0 || t <= 0) return;
+                shelfParts.push({ name, qty, l: Math.round(l), w: Math.round(w), t: Math.round(t), mat });
+            };
+
+            if (schemeType === 'simple') {
+                const cols = simpleCols;
+                const rows = simpleRows;
+                const cellW = Math.floor((totalW - (cols + 1) * thickT) / cols);
+                const cellH = Math.floor((totalH - (rows + 1) * thickT) / rows);
+                addPart(currentLang === 'ru' ? 'Верхняя панель' : 'Top panel', 1, totalW, depthD);
+                addPart(currentLang === 'ru' ? 'Нижняя панель' : 'Bottom panel', 1, totalW, depthD);
+                addPart(currentLang === 'ru' ? 'Боковина' : 'Outer side', 2, totalH - 2 * thickT, depthD);
+                addPart(currentLang === 'ru' ? 'Вертикальная перегородка' : 'Vertical divider', Math.max(0, cols - 1), totalH - 2 * thickT, depthD);
+                addPart(currentLang === 'ru' ? 'Горизонтальная полка ячейки' : 'Horizontal cell shelf', Math.max(0, rows - 1) * cols, cellW, depthD);
+
+                const maxRecCenter = getShelfRecommendedMaxSpanMm(thickT, depthD);
+                const loadRating = getShelfDistributedLoadRatingKg(cellW, thickT);
+                const supportPoints = Math.max(2, 2 + Math.ceil(Math.max(0, totalW - 900) / 500));
+                const shelfHardware = [
+                    {
+                        item: currentLang === 'ru' ? 'Крепеж к стене' : 'Wall mount hardware',
+                        brandModel: bracket === 'rail' ? 'Rail system' : (bracket === 'concealed' ? 'Concealed brackets' : 'L-brackets'),
+                        type: currentLang === 'ru' ? `Точек крепления: ${supportPoints}` : `Mount points: ${supportPoints}`,
+                        article: '—',
+                        qty: supportPoints * 2,
+                        active: true,
+                        note: currentLang === 'ru' ? 'Ставить по уровню, с анкерами под стену' : 'Install level, use anchors per wall type'
+                    }
+                ];
+                const shelfWarnings = [];
+                if (cellW < 120 || cellH < 120) {
+                    shelfWarnings.push(currentLang === 'ru'
+                        ? 'Ячейки получаются слишком маленькими. Уменьшите число колонок/рядов или увеличьте габариты.'
+                        : 'Cells are too small. Reduce rows/columns or increase overall dimensions.');
+                }
+                if (cellW > maxRecCenter) {
+                    shelfWarnings.push(currentLang === 'ru'
+                        ? `Пролет ячейки ${cellW} мм больше рекомендуемого (~${maxRecCenter} мм).`
+                        : `Cell span ${cellW} mm is above recommended (~${maxRecCenter} mm).`);
+                }
+                if (plannedLoad > loadRating) {
+                    shelfWarnings.push(currentLang === 'ru'
+                        ? `Нагрузка ${plannedLoad} кг выше ориентировочной (~${loadRating} кг) на полку ячейки.`
+                        : `Load ${plannedLoad} kg exceeds typical rating (~${loadRating} kg) per cell shelf.`);
+                }
+                const tipEl = document.getElementById('shelf-tip-box');
+                if (tipEl) {
+                    tipEl.innerHTML = currentLang === 'ru'
+                        ? `<strong>Упрощенная схема:</strong> ${simpleShape === 'square' ? 'квадратная' : 'прямоугольная'} сетка ${cols}×${rows}, ячейка ~${cellW}×${cellH} мм.`
+                        : `<strong>Simple scheme:</strong> ${simpleShape === 'square' ? 'square' : 'rectangular'} ${cols}×${rows} grid, cell ~${cellW}×${cellH} mm.`;
+                }
+
+                lastMainCutMapRows = shelfParts.map(p => {
+                    const edge = estimateMainEdge(p.name, p.l, p.w, p.qty || 1, p.t);
+                    return { name: p.name, qty: p.qty, l: p.l, w: p.w, t: p.t, mat: p.mat, edgeType: edge.edgeType, edgeLenMm: edge.edgeLenMm };
+                });
+                lastMainFasteners = shelfHardware.map(h => ({
+                    name: h.item,
+                    qty: h.qty || 0,
+                    note: h.note || ''
+                }));
+
+                const upperHeading = document.getElementById('upperCabinetHeading');
+                const lowerHeading = document.getElementById('lowerCabinetHeading');
+                const upperTable = document.getElementById('upperPartsTable');
+                const lowerTable = document.getElementById('lowerPartsTable');
+                const upperBody = document.getElementById('upperPartsTableBody');
+                const lowerBody = document.getElementById('lowerPartsTableBody');
+                if (upperHeading) upperHeading.textContent = currentLang === 'ru' ? 'Детали (упрощенная схема)' : 'Parts (simple scheme)';
+                if (lowerHeading) lowerHeading.textContent = currentLang === 'ru' ? 'Параметры сетки' : 'Grid parameters';
+                if (upperTable) upperTable.style.display = '';
+                if (lowerTable) lowerTable.style.display = '';
+                if (upperBody) {
+                    upperBody.innerHTML = shelfParts.map(p => `<tr><td><strong>${p.name}</strong></td><td>${p.l} × ${p.w} × ${p.t} mm</td><td>${p.qty}</td><td>${p.mat}</td></tr>`).join('');
+                }
+                if (lowerBody) {
+                    lowerBody.innerHTML = [
+                        { k: currentLang === 'ru' ? 'Форма' : 'Shape', v: simpleShape === 'square' ? (currentLang === 'ru' ? 'Квадрат' : 'Square') : (currentLang === 'ru' ? 'Прямоугольник' : 'Rectangle'), q: '—' },
+                        { k: currentLang === 'ru' ? 'Сетка' : 'Grid', v: `${cols} × ${rows}`, q: '—' },
+                        { k: currentLang === 'ru' ? 'Размер ячейки' : 'Cell size', v: `${cellW} × ${cellH} mm`, q: `${cols * rows}` },
+                        { k: currentLang === 'ru' ? 'Общий размер' : 'Overall size', v: `${totalW} × ${totalH} × ${depthD} mm`, q: '—' }
+                    ].map(r => `<tr><td>${r.k}</td><td>${r.v}</td><td>${r.q}</td><td>—</td></tr>`).join('');
+                }
+                const hwTable = document.getElementById('hardwareTable');
+                const hwHead = hwTable ? hwTable.previousElementSibling : null;
+                if (hwTable) hwTable.style.display = 'none';
+                if (hwHead) hwHead.style.display = 'none';
+
+                const shelfWpm2 = CARCASS_WEIGHT_MAP[thickT] || 12.5;
+                const totalAreaM2 = shelfParts.reduce((sum, p) => sum + panelAreaM2(p.l, p.w) * (p.qty || 1), 0);
+                renderWarnings(shelfWarnings);
+                renderWeightSummary({
+                    wtVanityCarcass: totalAreaM2 * shelfWpm2,
+                    wtUpperCarcass: 0,
+                    wtFacadesVanity: 0,
+                    wtFacadeUpper: 0,
+                    wtCountertop: 0,
+                    hasCT: false
+                }, T);
+                drawSchematic(totalW, totalH, depthD, 0, 0, 0, false, 0, 0, 0, cellW, thickT, thickT, null, currentLang);
+                return;
+            }
+
+            addPart(currentLang === 'ru' ? 'Верхняя крышка' : 'Top panel', 1, totalW, depthD);
+            addPart(currentLang === 'ru' ? 'Нижняя крышка' : 'Bottom panel', 1, totalW, depthD);
+            addPart(currentLang === 'ru' ? 'Боковина левая' : 'Outer side left', 1, verticalH, depthD);
+            addPart(currentLang === 'ru' ? 'Боковина правая' : 'Outer side right', 1, verticalH, depthD);
+            addPart(currentLang === 'ru' ? 'Перегородка левая внутр.' : 'Inner divider left', 1, verticalH, depthD);
+            addPart(currentLang === 'ru' ? 'Перегородка правая внутр.' : 'Inner divider right', 1, verticalH, depthD);
+            if (centerDivider) {
+                addPart(currentLang === 'ru' ? 'Перегородка центральная' : 'Center divider', 1, verticalH, depthD);
+            }
+            addPart(currentLang === 'ru' ? 'Полка левого модуля' : 'Left module shelf', Math.max(sideRows, leftOffsets.length), leftInnerW, depthD);
+            addPart(currentLang === 'ru' ? 'Полка правого модуля' : 'Right module shelf', Math.max(sideRows, rightOffsets.length), rightInnerW, depthD);
+            addPart(currentLang === 'ru' ? 'Полка центрального модуля' : 'Center module shelf', centerDivider ? Math.max(centerRows, centerOffsets.length) * 2 : Math.max(centerRows, centerOffsets.length), centerShelfLen, depthD);
+
+            const maxRecCenter = getShelfRecommendedMaxSpanMm(thickT, depthD);
+            const loadRating = getShelfDistributedLoadRatingKg(centerShelfLen, thickT);
+            const supportPoints = Math.max(3, 2 + Math.ceil(Math.max(0, totalW - 1000) / 450));
+
+            const shelfHardware = [];
+            if (bracket === 'angle') {
+                shelfHardware.push({
+                    item: currentLang === 'ru' ? 'Уголок/консоль настенная' : 'Wall L-bracket',
+                    brandModel: currentLang === 'ru' ? 'Мебельный крепеж' : 'Furniture hardware',
+                    type: currentLang === 'ru' ? `Опорных точек: ${supportPoints}` : `Support points: ${supportPoints}`,
+                    article: '—',
+                    qty: supportPoints * 2,
+                    active: true,
+                    note: currentLang === 'ru' ? 'Шаг 400-500 мм, обязательно по уровню' : '400-500 mm pitch, align with level'
+                });
+            } else if (bracket === 'concealed') {
+                shelfHardware.push({
+                    item: currentLang === 'ru' ? 'Скрытый кронштейн/штырь' : 'Concealed bracket rod',
+                    brandModel: currentLang === 'ru' ? 'Скрытая система' : 'Hidden support system',
+                    type: currentLang === 'ru' ? `Точек: ${supportPoints}` : `Points: ${supportPoints}`,
+                    article: '—',
+                    qty: supportPoints,
+                    active: true,
+                    note: currentLang === 'ru' ? 'Следовать паспорту по глубине отверстий' : 'Follow manufacturer bore depth guidance'
+                });
+            } else {
+                shelfHardware.push({
+                    item: currentLang === 'ru' ? 'Рельс настенный + консоли' : 'Wall rails + shelf brackets',
+                    brandModel: currentLang === 'ru' ? 'Система полкодержателей' : 'Upright rail system',
+                    type: currentLang === 'ru' ? 'Пара рельсов' : 'Pair of uprights',
+                    article: '—',
+                    qty: 2,
+                    active: true,
+                    note: currentLang === 'ru' ? 'Для высокой нагрузки и длинных модулей' : 'For high load / long modules'
+                });
+            }
+
+            shelfHardware.push({
+                item: currentLang === 'ru' ? 'Анкер/дюбель в стену' : 'Wall anchor/plug',
+                brandModel: wallTypeShelf === 'drywall' ? 'Drywall anchor / stud' : 'Concrete plug + screw',
+                type: currentLang === 'ru' ? 'По материалу стены' : 'By wall type',
+                article: '—',
+                qty: supportPoints * 2,
+                active: true,
+                note: wallTypeShelf === 'drywall'
+                    ? (currentLang === 'ru' ? 'Для ГКЛ лучше крепить в стойки' : 'Prefer fixing into studs in drywall')
+                    : (currentLang === 'ru' ? 'Для бетона/кирпича: бур + дюбель' : 'Concrete/brick: drill + plug')
+            });
+            shelfHardware.push({
+                item: currentLang === 'ru' ? 'Конфирмат / саморез ЛДСП' : 'Confirmat / chipboard screw',
+                brandModel: '5x50 / 7x50',
+                type: currentLang === 'ru' ? 'С предварительным сверлением' : 'Pre-drill pilot holes',
+                article: '—',
+                qty: 32 + sideRows * 8 + centerRows * 8,
+                active: true,
+                note: currentLang === 'ru' ? 'Отступ от края не менее 37 мм' : 'Keep at least 37 mm from panel edge'
+            });
+
+            const shelfWarnings = [];
+            if (centerShelfLen > maxRecCenter) {
+                shelfWarnings.push(currentLang === 'ru'
+                    ? `Центральный пролёт ${centerShelfLen} мм больше рекомендуемого для ${thickT} мм и глубины ${depthD} мм (~${maxRecCenter} мм). Добавьте перегородку/увеличьте толщину.`
+                    : `Center span ${centerShelfLen} mm exceeds rule-of-thumb for ${thickT} mm and depth ${depthD} mm (~${maxRecCenter} mm). Add divider or increase thickness.`);
+            }
+            if (plannedLoad > loadRating) {
+                shelfWarnings.push(currentLang === 'ru'
+                    ? `Планируемая нагрузка ${plannedLoad} кг выше ориентировочной (~${loadRating} кг) для центральной полки.`
+                    : `Target load ${plannedLoad} kg exceeds typical rating (~${loadRating} kg) for center shelf.`);
+            }
+            if (sideW < 220) {
+                shelfWarnings.push(currentLang === 'ru'
+                    ? 'Боковые модули слишком узкие, полкодержатели и сборка могут не поместиться.'
+                    : 'Side modules are narrow; hardware clearance/assembly may be problematic.');
+            }
+            if (leftOffsets.length === 0 || rightOffsets.length === 0 || centerOffsets.length === 0) {
+                shelfWarnings.push(currentLang === 'ru'
+                    ? 'Не заданы точные отступы полок. Добавьте значения через запятую (мм от верхней панели).'
+                    : 'No precise shelf offsets set. Add comma-separated values (mm from top panel).');
+            }
+            if (validation.left.length || validation.center.length || validation.right.length) {
+                shelfWarnings.push(currentLang === 'ru'
+                    ? `Ошибка отступов: минимальный отступ от края ${MIN_EDGE_OFFSET_MM} мм, минимальный зазор между полками ${MIN_SHELF_CLEAR_MM} мм. Поля с ошибками подсвечены.`
+                    : `Offsets validation failed: min edge offset ${MIN_EDGE_OFFSET_MM} mm, min gap between shelves ${MIN_SHELF_CLEAR_MM} mm. Invalid fields are highlighted.`);
+            }
+            shelfWarnings.push(currentLang === 'ru'
+                ? 'Нюанс монтажа: сначала собрать секции на конфирматах, проверить диагонали, затем навешивать на стену по уровню.'
+                : 'Assembly note: pre-assemble with confirmats, verify diagonals, then mount to wall level.');
+
+            const tipEl = document.getElementById('shelf-tip-box');
+            if (tipEl) {
+                tipEl.innerHTML = currentLang === 'ru'
+                    ? `<strong>Формат как на ваших фото:</strong> две боковые башни + длинный центр. Режим отступов: ${offsetMode === 'bottom' ? 'от низа' : 'от верха'}. Для центра держите чистый пролёт до ~${maxRecCenter} мм при толщине ${thickT} мм и глубине ${depthD} мм.`
+                    : `<strong>Reference-like layout:</strong> two side towers + long center bay. Offset mode: ${offsetMode === 'bottom' ? 'from bottom' : 'from top'}. Keep center clear span around ~${maxRecCenter} mm for ${thickT} mm at ${depthD} mm depth.`;
+            }
+
+            lastMainCutMapRows = shelfParts
+                .filter(p => Number.isFinite(p.l) && Number.isFinite(p.w) && Number.isFinite(p.t) && p.l > 0 && p.w > 0)
+                .map(p => {
+                    const edge = estimateMainEdge(p.name, p.l, p.w, p.qty || 1, p.t);
+                    return {
+                        name: p.name || 'Part',
+                        qty: p.qty || 1,
+                        l: Math.round(p.l),
+                        w: Math.round(p.w),
+                        t: Math.round(p.t),
+                        mat: p.mat || '',
+                        edgeType: edge.edgeType,
+                        edgeLenMm: edge.edgeLenMm
+                    };
+                });
+            lastMainFasteners = shelfHardware.map(h => ({
+                name: h.name || h.item || h.brandModel || h.type || 'Hardware',
+                qty: h.qty || 0,
+                note: h.note || h.article || h.sku || ''
+            })).filter(h => h.qty > 0 || h.name !== 'Hardware');
+
+            [
+                'hingeSpecTableUpper',
+                'upperGasSpecTable',
+                'hingeSpecTable',
+                'gasSpecTable',
+                'upperGasSpecsHeading',
+                'lowerGasSpecsHeading'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            document.querySelectorAll('[data-i18n="upper_hinge_specs"], [data-i18n="lower_hinge_specs"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            updateHingeSpecsSectionVisibility();
+
+            const upperHeading = document.getElementById('upperCabinetHeading');
+            const lowerHeading = document.getElementById('lowerCabinetHeading');
+            const upperTable = document.getElementById('upperPartsTable');
+            const lowerTable = document.getElementById('lowerPartsTable');
+            const upperBody = document.getElementById('upperPartsTableBody');
+            const lowerBody = document.getElementById('lowerPartsTableBody');
+            if (upperHeading) upperHeading.textContent = currentLang === 'ru' ? 'Детали конструкции' : 'Construction parts';
+            if (lowerHeading) lowerHeading.textContent = currentLang === 'ru' ? 'Параметры и крепеж' : 'Parameters & hardware';
+            if (upperTable) upperTable.style.display = '';
+            if (lowerTable) lowerTable.style.display = '';
+
+            const lowerHead = lowerTable?.querySelector('thead tr');
+            if (lowerHead) {
+                const ths = lowerHead.querySelectorAll('th');
+                if (ths.length >= 4) {
+                    ths[0].textContent = currentLang === 'ru' ? 'Параметр' : 'Item';
+                    ths[1].textContent = currentLang === 'ru' ? 'Значение' : 'Value';
+                    ths[2].textContent = currentLang === 'ru' ? 'Кол-во' : 'Qty';
+                    ths[3].textContent = currentLang === 'ru' ? 'Примечание' : 'Notes';
+                }
+            }
+
+            if (upperBody) {
+                upperBody.innerHTML = shelfParts.map(p => `
+                    <tr><td><strong>${p.name}</strong></td><td>${p.l} × ${p.w} × ${p.t} mm</td><td>${p.qty}</td><td>${p.mat}</td></tr>
+                `).join('');
+            }
+            if (lowerBody) {
+                const detailRows = [
+                    { k: currentLang === 'ru' ? 'Габарит (Ш×В×Г)' : 'Overall size (W×H×D)', v: `${totalW} × ${totalH} × ${depthD} mm`, q: '—' },
+                    { k: currentLang === 'ru' ? 'Толщина ЛДСП' : 'Board thickness', v: `${thickT} mm`, q: '—' },
+                    { k: currentLang === 'ru' ? 'Ширина модулей (Л/П)' : 'Side widths (L/R)', v: `${leftW} / ${rightW} mm`, q: asymmetry ? 'asym' : 'sym' },
+                    { k: currentLang === 'ru' ? 'Центральный чистый пролёт' : 'Center clear span', v: `${centerShelfLen} mm`, q: centerDivider ? '2 секции' : '1 секция' },
+                    { k: currentLang === 'ru' ? 'Отступы полок слева' : 'Left shelf offsets', v: leftOffsets.join(', ') || '—', q: String(Math.max(sideRows, leftOffsets.length)) },
+                    { k: currentLang === 'ru' ? 'Отступы полок в центре' : 'Center shelf offsets', v: centerOffsets.join(', ') || '—', q: String(centerDivider ? Math.max(centerRows, centerOffsets.length) * 2 : Math.max(centerRows, centerOffsets.length)) },
+                    { k: currentLang === 'ru' ? 'Отступы полок справа' : 'Right shelf offsets', v: rightOffsets.join(', ') || '—', q: String(Math.max(sideRows, rightOffsets.length)) },
+                    { k: currentLang === 'ru' ? 'Центральная перегородка' : 'Center divider', v: centerDivider ? (currentLang === 'ru' ? 'Да' : 'Yes') : (currentLang === 'ru' ? 'Нет' : 'No'), q: centerDivider ? '1' : '—' }
+                ];
+                lowerBody.innerHTML = detailRows.map(r =>
+                    `<tr><td>${r.k}</td><td>${r.v}</td><td>${r.q}</td><td>—</td></tr>`
+                ).join('') + shelfHardware.map(h => `
+                    <tr><td>${h.item}</td><td>${h.type || h.brandModel || ''}</td><td>${h.qty}</td><td>${h.note || ''}</td></tr>
+                `).join('');
+            }
+
+            const hwTable = document.getElementById('hardwareTable');
+            const hwHead = hwTable ? hwTable.previousElementSibling : null;
+            if (hwTable) hwTable.style.display = 'none';
+            if (hwHead) hwHead.style.display = 'none';
+
+            const shelfWpm2 = CARCASS_WEIGHT_MAP[thickT] || 12.5;
+            const totalAreaM2 = shelfParts.reduce((sum, p) => sum + panelAreaM2(p.l, p.w) * (p.qty || 1), 0);
+            const totalKg = totalAreaM2 * shelfWpm2;
+            renderWarnings(shelfWarnings);
+            renderWeightSummary({
+                wtVanityCarcass: totalKg,
+                wtUpperCarcass: 0,
+                wtFacadesVanity: 0,
+                wtFacadeUpper: 0,
+                wtCountertop: 0,
+                hasCT: false
+            }, T);
+
+            drawSchematic(totalW, totalH, depthD, sideW, centerRows, sideRows, false, 0, 0, 0, centerShelfLen, thickT, thickT, null, currentLang);
+            return;
+        }
+
         // ==========================================
         // 0. UPPER CABINET
         // ==========================================
@@ -2406,8 +3919,8 @@
                     rightW = Math.max(50, upperBaseFacadeW - leftW);
                 }
                 upperDoors = [
-                    { name: 'Left Facade (Cabinet)', width: leftW, height: upperBaseFacadeH },
-                    { name: 'Right Facade (Cabinet)', width: rightW, height: upperBaseFacadeH }
+                    { name: 'Left Facade (Closet)', width: leftW, height: upperBaseFacadeH },
+                    { name: 'Right Facade (Closet)', width: rightW, height: upperBaseFacadeH }
                 ];
             }
             
@@ -2556,7 +4069,7 @@
                 ? Math.max(0, h2 - 2 * upperOverlayGap)
                 : Math.max(0, upperOpeningH - 2 * upperInsetGap);
             
-            let upperDoors = [{ name: 'Upper Cabinet Facade', width: upperBaseFacadeW, height: upperBaseFacadeH, side: 'left' }];
+            let upperDoors = [{ name: 'Upper Closet Facade', width: upperBaseFacadeW, height: upperBaseFacadeH, side: 'left' }];
             if (upperHardwareMode === 'hinge' && upperSplitFacade) {
                 const leftInput = document.getElementById('upperLeftDoorW');
                 const rightInput = document.getElementById('upperRightDoorW');
@@ -2574,8 +4087,8 @@
                     if (rightInput) rightInput.value = String(rightW);
                 }
                 upperDoors = [
-                    { name: 'Upper Cabinet Left Facade', width: leftW, height: upperBaseFacadeH, side: 'left' },
-                    { name: 'Upper Cabinet Right Facade', width: rightW, height: upperBaseFacadeH, side: 'right' }
+                    { name: 'Upper Closet Left Facade', width: leftW, height: upperBaseFacadeH, side: 'left' },
+                    { name: 'Upper Closet Right Facade', width: rightW, height: upperBaseFacadeH, side: 'right' }
                 ];
             }
             
@@ -2667,11 +4180,16 @@
         // Hinge quantity is calculated per leaf and then summed.
         let lowerHardwareRows = [];
         let lowerHingeSpecRows = [];
+        let lowerGasSpecRows = [];
         if (lowerHardwareMode === 'gas') {
             const lowerDoorAreaM2 = (baseFacadeW * baseFacadeH) / 1e6;
             const lowerDoorWeightKg = lowerDoorAreaM2 * facadeWpm2;
             const requiredForce = ((lowerDoorWeightKg * GRAVITY) / 2) * 130;
             const gasSelected = LOWER_HARDWARE_CATALOG.gas.find(g => requiredForce <= g.force) || LOWER_HARDWARE_CATALOG.gas[LOWER_HARDWARE_CATALOG.gas.length - 1];
+            lowerGasSpecRows = [{
+                position: T.lower_cabinet_section,
+                article: `(${gasSelected.article}) X 2`
+            }];
             lowerHardwareRows = LOWER_HARDWARE_CATALOG.gas.map(g => ({
                 item: T.gas_item,
                 brandModel: 'GTV / HORIZON',
@@ -2757,7 +4275,7 @@
         hardware.push({
             item: T.hinge_item,
             brandModel: hingeBrandLabel,
-            type: 'Overlay (Upper Cabinet)',
+            type: 'Overlay (Upper Closet)',
             article: T.any_standard,
             qty: flipupHingeCount,
             active: true,
@@ -2781,18 +4299,52 @@
         warnings.push(`${T.hinge_note}${hingeBrandLabel} (Ø35mm). ${T.hinge_count_note}${upFH}${T.hinge_count_note2}${flipupHingeCount}`);
         hardware = hardware.concat(lowerHardwareRows);
 
+        lastMainCutMapRows = parts
+            .filter(p => Number.isFinite(p.l) && Number.isFinite(p.w) && Number.isFinite(p.t) && p.l > 0 && p.w > 0)
+            .map(p => {
+                const edge = estimateMainEdge(p.name, p.l, p.w, p.qty || 1, p.t);
+                return {
+                    name: p.name || 'Part',
+                    qty: p.qty || 1,
+                    l: Math.round(p.l),
+                    w: Math.round(p.w),
+                    t: Math.round(p.t),
+                    mat: p.mat || '',
+                    edgeType: edge.edgeType,
+                    edgeLenMm: edge.edgeLenMm
+                };
+            });
+        lastMainFasteners = (hardware || []).map(h => ({
+            name: h.name || h.item || h.brandModel || h.type || 'Hardware',
+            qty: h.qty || 0,
+            note: h.note || h.article || h.sku || ''
+        })).filter(h => h.qty > 0 || h.name !== 'Hardware');
+
         // ==========================================
         // RENDER
         // ==========================================
         // Render hinge tables for both cabinets
-        const upperHingeSpecRows = [{
-            index: 1,
-            position: upFH ? Math.round(upFH / 2) + ' mm' : '200 mm',
-            hingeType: T.upper_cabinet_section,
-            manufacturer: 'GTV'
-        }]
+        const upperHingePosition = document.querySelector('input[name="upperHingePosition"]:checked')?.value || 'both';
+        const upperHingeTypeForTable = document.getElementById('upperHingeType')?.value || 'overlay';
+        const upperHingeTypeLabel = T['hinge_' + upperHingeTypeForTable] || T.upper_cabinet_section;
+        let upperHingeSpecRows = [];
+        if (upperHingePosition === 'both') {
+            upperHingeSpecRows = [
+                { hingeType: `${upperHingeTypeLabel} (${T.left_door})` },
+                { hingeType: `${upperHingeTypeLabel} (${T.right_door})` }
+            ];
+        } else if (upperHingePosition === 'left') {
+            upperHingeSpecRows = [{ hingeType: `${upperHingeTypeLabel} (${T.left_door})` }];
+        } else {
+            upperHingeSpecRows = [{ hingeType: `${upperHingeTypeLabel} (${T.right_door})` }];
+        }
+        const upperGasSpecRows = upperHardwareMode === 'gas'
+            ? [{ position: T.upper_cabinet_section, article: `(${gasLiftSKU}) X 2` }]
+            : [];
         renderHingeSpecTableUpper(upperHingeSpecRows, currentLang);
+        renderUpperGasSpecTable(upperGasSpecRows, currentLang);
         renderHingeSpecTable(lowerHingeSpecRows, lowerDoorType, currentLang);
+        renderGasSpecTable(lowerGasSpecRows, currentLang);
         renderTables(parts, hardware, T, { lowerEnabled, upperEnabled }, currentLang);
         renderWarnings(warnings);
         renderWeightSummary({ wtVanityCarcass, wtUpperCarcass, wtFacadesVanity, wtFacadeUpper, wtCountertop, hasCT }, T);
@@ -2885,6 +4437,21 @@
     }
 
 
+    function updateHingeSpecsSectionVisibility() {
+        const mainHeading = document.getElementById('hingeTableHeading');
+        const upperTable = document.getElementById('hingeSpecTableUpper');
+        const lowerTable = document.getElementById('hingeSpecTable');
+        const upperGasTable = document.getElementById('upperGasSpecTable');
+        const gasTable = document.getElementById('gasSpecTable');
+        if (!mainHeading) return;
+
+        const upperVisible = !!upperTable && upperTable.style.display !== 'none';
+        const lowerVisible = !!lowerTable && lowerTable.style.display !== 'none';
+        const upperGasVisible = !!upperGasTable && upperGasTable.style.display !== 'none';
+        const gasVisible = !!gasTable && gasTable.style.display !== 'none';
+        mainHeading.style.display = (upperVisible || lowerVisible || upperGasVisible || gasVisible) ? '' : 'none';
+    }
+
     function renderHingeSpecTableUpper(rows, lang = 'ru') {
         const body = document.getElementById('hingeSpecBodyUpper');
         const table = document.getElementById('hingeSpecTableUpper');
@@ -2894,11 +4461,12 @@
         // Check if Hinges mode selected for upper cabinet
         const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
         
-        // If gas springs selected — hide hinge table
-        if (upperHardwareMode === 'gas') {
+        // Hide hinge table when mode is not "hinge"
+        if (upperHardwareMode !== 'hinge') {
             body.innerHTML = '';
             if (table) table.style.display = 'none';
             if (heading) heading.style.display = 'none';
+            updateHingeSpecsSectionVisibility();
             return;
         }
         
@@ -2908,15 +4476,16 @@
         
         const upperHingeBrand = document.getElementById('upperHingeBrand')?.value || 'hafele';
         const upperHingeType = document.getElementById('upperHingeType')?.value || 'overlay';
+        const upperHingeCount = parseInt(document.getElementById('upperHingeCount')?.value || '2', 10);
         
         body.innerHTML = rows.map((row, i) => {
             let sku = 'N/A';
             if (upperHingeBrand === 'hafele') {
-                sku = upperHingeType === 'overlay' ? '(HAFELE-M540-OV) X 2' : 
-                      upperHingeType === 'half' ? '(HAFELE-M540-HO) X 2' : '(HAFELE-M540-IS) X 2';
+                sku = upperHingeType === 'overlay' ? `(HAFELE-M540-OV) X ${upperHingeCount}` : 
+                      upperHingeType === 'half' ? `(HAFELE-M540-HO) X ${upperHingeCount}` : `(HAFELE-M540-IS) X ${upperHingeCount}`;
             } else {
-                sku = upperHingeType === 'overlay' ? '(GTV-SILENTOPRO-OV) X 2' :
-                      upperHingeType === 'half' ? '(GTV-SILENTOPRO-HO) X 2' : '(GTV-SILENTOPRO-IS) X 2';
+                sku = upperHingeType === 'overlay' ? `(GTV-SILENTOPRO-OV) X ${upperHingeCount}` :
+                      upperHingeType === 'half' ? `(GTV-SILENTOPRO-HO) X ${upperHingeCount}` : `(GTV-SILENTOPRO-IS) X ${upperHingeCount}`;
             }
             return `
             <tr>
@@ -2925,6 +4494,7 @@
             </tr>
             `;
         }).join('');
+        updateHingeSpecsSectionVisibility();
     }
 
     function renderHingeSpecTable(rows, doorType, lang = 'ru') {
@@ -2936,11 +4506,12 @@
         // Check if Hinges mode selected for lower cabinet
         const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
         
-        // If gas springs selected — hide hinge table
-        if (lowerHardwareMode === 'gas') {
+        // Hide hinge table when mode is not "hinge" (gas/drawer)
+        if (lowerHardwareMode !== 'hinge') {
             body.innerHTML = '';
             if (table) table.style.display = 'none';
             if (heading) heading.style.display = 'none';
+            updateHingeSpecsSectionVisibility();
             return;
         }
         
@@ -2950,15 +4521,16 @@
         
         const lowerHingeBrand = document.getElementById('lowerHingeBrand')?.value || 'hafele';
         const lowerHingeType = document.getElementById('lowerHingeType')?.value || 'overlay';
+        const lowerHingeCount = parseInt(document.getElementById('lowerHingeCount')?.value || '2', 10);
         
         body.innerHTML = rows.map((row, i) => {
             let sku = 'N/A';
             if (lowerHingeBrand === 'hafele') {
-                sku = lowerHingeType === 'overlay' ? '(HAFELE-M540-OV) X 2' : 
-                      lowerHingeType === 'half' ? '(HAFELE-M540-HO) X 2' : '(HAFELE-M540-IS) X 2';
+                sku = lowerHingeType === 'overlay' ? `(HAFELE-M540-OV) X ${lowerHingeCount}` : 
+                      lowerHingeType === 'half' ? `(HAFELE-M540-HO) X ${lowerHingeCount}` : `(HAFELE-M540-IS) X ${lowerHingeCount}`;
             } else {
-                sku = lowerHingeType === 'overlay' ? '(GTV-SILENTOPRO-OV) X 2' :
-                      lowerHingeType === 'half' ? '(GTV-SILENTOPRO-HO) X 2' : '(GTV-SILENTOPRO-IS) X 2';
+                sku = lowerHingeType === 'overlay' ? `(GTV-SILENTOPRO-OV) X ${lowerHingeCount}` :
+                      lowerHingeType === 'half' ? `(GTV-SILENTOPRO-HO) X ${lowerHingeCount}` : `(GTV-SILENTOPRO-IS) X ${lowerHingeCount}`;
             }
             return `
             <tr>
@@ -2967,6 +4539,59 @@
             </tr>
             `;
         }).join('');
+        updateHingeSpecsSectionVisibility();
+    }
+
+    function renderUpperGasSpecTable(rows, lang = 'ru') {
+        const body = document.getElementById('upperGasSpecBody');
+        const table = document.getElementById('upperGasSpecTable');
+        const heading = document.getElementById('upperGasSpecsHeading');
+        if (!body || !table) return;
+
+        const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
+        if (upperHardwareMode !== 'gas') {
+            body.innerHTML = '';
+            table.style.display = 'none';
+            if (heading) heading.style.display = 'none';
+            updateHingeSpecsSectionVisibility();
+            return;
+        }
+
+        table.style.display = '';
+        if (heading) heading.style.display = '';
+        body.innerHTML = rows.map((row) => `
+            <tr>
+                <td>${row.position}</td>
+                <td>${row.article}</td>
+            </tr>
+        `).join('');
+        updateHingeSpecsSectionVisibility();
+    }
+
+    function renderGasSpecTable(rows, lang = 'ru') {
+        const body = document.getElementById('gasSpecBody');
+        const table = document.getElementById('gasSpecTable');
+        const heading = document.getElementById('lowerGasSpecsHeading');
+        if (!body || !table) return;
+
+        const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
+        if (lowerHardwareMode !== 'gas') {
+            body.innerHTML = '';
+            table.style.display = 'none';
+            if (heading) heading.style.display = 'none';
+            updateHingeSpecsSectionVisibility();
+            return;
+        }
+
+        table.style.display = '';
+        if (heading) heading.style.display = '';
+        body.innerHTML = rows.map((row) => `
+            <tr>
+                <td>${row.position}</td>
+                <td>${row.article}</td>
+            </tr>
+        `).join('');
+        updateHingeSpecsSectionVisibility();
     }
 
     function renderTables(parts, hardware, T, cabinetState, lang = 'ru') {
@@ -2977,8 +4602,8 @@
             T.part_facade_upper,
             T.part_shelf_h_upper,
             T.part_shelf_v_upper,
-            'Left Door (Cabinet)',
-            'Right Door (Cabinet)'
+            'Left Door (Closet)',
+            'Right Door (Closet)'
         ];
         const isUpperPart = (name) => {
             const n = name || '';
@@ -3052,6 +4677,22 @@
 
     function renderWeightSummary(weights, T) {
         const { wtVanityCarcass, wtUpperCarcass, wtFacadesVanity, wtFacadeUpper, wtCountertop, hasCT } = weights;
+
+        if (CONFIG_MODE === 'shelves') {
+            const total = (wtVanityCarcass || 0) + (wtUpperCarcass || 0) + (wtFacadesVanity || 0) + (wtFacadeUpper || 0) + (hasCT ? wtCountertop : 0);
+            const tbody = document.getElementById('weightTableBody');
+            const lab = currentLang === 'ru' ? 'Детали полки (ЛДСП)' : 'Shelf parts (LDSP)';
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr><td>${lab}</td><td><strong>${total.toFixed(2)} ${T.wt_kg}</strong></td></tr>
+                    <tr style="border-top: 2px solid var(--primary);">
+                        <td><strong>${T.wt_total}</strong></td>
+                        <td><strong>${total.toFixed(2)} ${T.wt_kg}</strong></td>
+                    </tr>`;
+            }
+            return;
+        }
+
         const total = wtVanityCarcass + wtUpperCarcass + wtFacadesVanity + wtFacadeUpper + (hasCT ? wtCountertop : 0);
 
         let rows = [
@@ -3073,16 +4714,626 @@
     }
 
     // ==========================================
+    // CANVAS — SHELFS wall elevation (schematic)
+    // ==========================================
+    function drawShelfSchematic(ctx, canvasW, canvasH, lang = 'ru') {
+        const unit = lang === 'en' ? 'mm' : 'мм';
+        const {
+            totalW, totalH, depthD, thickT, sideRows, centerRows, centerDivider, bracket, leftW, rightW, leftOffsets, centerOffsets, rightOffsets,
+            schemeType, simpleCols, simpleRows
+        } = getShelvesModeConfig();
+        const drawDim = (x1, y1, x2, y2, label, vertical = false) => {
+            ctx.save();
+            ctx.strokeStyle = '#3e4d43';
+            ctx.fillStyle = '#2f3c33';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            const ah = 5;
+            const drawArrow = (x, y, tx, ty) => {
+                const ang = Math.atan2(ty - y, tx - x);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + ah * Math.cos(ang + Math.PI * 0.75), y + ah * Math.sin(ang + Math.PI * 0.75));
+                ctx.lineTo(x + ah * Math.cos(ang - Math.PI * 0.75), y + ah * Math.sin(ang - Math.PI * 0.75));
+                ctx.closePath();
+                ctx.fill();
+            };
+            drawArrow(x1, y1, x2, y2);
+            drawArrow(x2, y2, x1, y1);
+            ctx.font = "11px 'Segoe UI', Arial";
+            if (vertical) {
+                ctx.save();
+                ctx.translate((x1 + x2) / 2 - 8, (y1 + y2) / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText(label, -ctx.measureText(label).width / 2, -3);
+                ctx.restore();
+            } else {
+                ctx.fillText(label, (x1 + x2) / 2 - ctx.measureText(label).width / 2, (y1 + y2) / 2 - 4);
+            }
+            ctx.restore();
+        };
+
+        const margin = 48;
+        const maxW = canvasW - margin * 2;
+        const maxH = canvasH - margin * 2;
+        const scale = Math.min(maxW / totalW, maxH / totalH);
+
+        const x0 = (canvasW - totalW * scale) / 2;
+        const y0 = (canvasH - totalH * scale) / 2;
+        const tpx = Math.max(2, thickT * scale);
+        const leftWpx = leftW * scale;
+        const rightWpx = rightW * scale;
+        const centerWpx = Math.max(60, totalW * scale - leftWpx - rightWpx);
+        const bodyHpx = Math.max(40, totalH * scale - 2 * tpx);
+
+        ctx.fillStyle = '#f4f7f6';
+        ctx.fillRect(0, 0, canvasW, canvasH);
+
+        // outer frame
+        ctx.fillStyle = '#d2b48c';
+        ctx.strokeStyle = '#7a6647';
+        ctx.lineWidth = 1.4;
+        ctx.fillRect(x0, y0, totalW * scale, totalH * scale);
+        ctx.strokeRect(x0, y0, totalW * scale, totalH * scale);
+
+        // void inside frame
+        const innerX = x0 + tpx;
+        const innerY = y0 + tpx;
+        const innerW = totalW * scale - 2 * tpx;
+        const innerH = totalH * scale - 2 * tpx;
+        ctx.fillStyle = '#f9f9f7';
+        ctx.fillRect(innerX, innerY, innerW, innerH);
+
+        if (schemeType === 'simple') {
+            const cols = simpleCols;
+            const rows = simpleRows;
+            const cellWpx = Math.max(20, (totalW * scale - (cols + 1) * tpx) / cols);
+            const cellHpx = Math.max(20, (totalH * scale - (rows + 1) * tpx) / rows);
+            ctx.fillStyle = '#d2b48c';
+            // verticals
+            for (let c = 0; c <= cols; c++) {
+                const x = x0 + c * (cellWpx + tpx);
+                ctx.fillRect(x, y0, tpx, totalH * scale);
+                ctx.strokeRect(x, y0, tpx, totalH * scale);
+            }
+            // horizontals
+            for (let r = 0; r <= rows; r++) {
+                const y = y0 + r * (cellHpx + tpx);
+                ctx.fillRect(x0, y, totalW * scale, tpx);
+                ctx.strokeRect(x0, y, totalW * scale, tpx);
+            }
+            drawDim(x0, y0 - 20, x0 + totalW * scale, y0 - 20, `${Math.round(totalW)} ${unit}`, false);
+            drawDim(x0 - 20, y0, x0 - 20, y0 + totalH * scale, `${Math.round(totalH)} ${unit}`, true);
+            drawDim(x0, y0 + totalH * scale + 18, x0 + cellWpx + tpx, y0 + totalH * scale + 18, `${Math.round((totalW - (cols + 1) * thickT) / cols)}`, false);
+            ctx.fillStyle = '#1a6b2f';
+            ctx.font = "italic 11px 'Segoe UI', Arial";
+            ctx.fillText(lang === 'ru' ? `Упрощенная сетка ${cols}×${rows}` : `Simple grid ${cols}x${rows}`, x0, y0 + totalH * scale + 34);
+            return;
+        }
+
+        // side vertical boundaries
+        const leftDivX = x0 + leftWpx - tpx;
+        const rightDivX = x0 + totalW * scale - rightWpx;
+        ctx.fillStyle = '#d2b48c';
+        ctx.fillRect(leftDivX, y0 + tpx, tpx, bodyHpx);
+        ctx.fillRect(rightDivX, y0 + tpx, tpx, bodyHpx);
+        ctx.strokeRect(leftDivX, y0 + tpx, tpx, bodyHpx);
+        ctx.strokeRect(rightDivX, y0 + tpx, tpx, bodyHpx);
+
+        // optional center divider
+        if (centerDivider) {
+            const cx = x0 + totalW * scale / 2 - tpx / 2;
+            ctx.fillRect(cx, y0 + tpx, tpx, bodyHpx);
+            ctx.strokeRect(cx, y0 + tpx, tpx, bodyHpx);
+        }
+
+        // side shelves
+        ctx.fillStyle = '#d6c3a0';
+        const leftGuide = leftOffsets.length ? leftOffsets : Array.from({ length: sideRows }, (_, i) => Math.round(((i + 1) * (totalH - 2 * thickT)) / (sideRows + 1)));
+        const rightGuide = rightOffsets.length ? rightOffsets : Array.from({ length: sideRows }, (_, i) => Math.round(((i + 1) * (totalH - 2 * thickT)) / (sideRows + 1)));
+        leftGuide.forEach(off => {
+            const y = y0 + tpx + off * scale - tpx / 2;
+            ctx.fillRect(x0 + tpx, y, Math.max(20, leftWpx - 2 * tpx), tpx);
+            ctx.strokeRect(x0 + tpx, y, Math.max(20, leftWpx - 2 * tpx), tpx);
+        });
+        rightGuide.forEach(off => {
+            const y = y0 + tpx + off * scale - tpx / 2;
+            ctx.fillRect(x0 + totalW * scale - rightWpx + tpx, y, Math.max(20, rightWpx - 2 * tpx), tpx);
+            ctx.strokeRect(x0 + totalW * scale - rightWpx + tpx, y, Math.max(20, rightWpx - 2 * tpx), tpx);
+        });
+
+        // center shelves
+        const cStartX = leftDivX + tpx;
+        const cAreaW = Math.max(30, centerWpx - 2 * tpx);
+        const centerGuide = centerOffsets.length ? centerOffsets : Array.from({ length: centerRows }, (_, i) => Math.round(((i + 1) * (totalH - 2 * thickT)) / (centerRows + 1)));
+        for (const off of centerGuide) {
+            const y = y0 + tpx + off * scale - tpx / 2;
+            if (centerDivider) {
+                const half = Math.max(20, (cAreaW - tpx) / 2);
+                ctx.fillRect(cStartX, y, half, tpx);
+                ctx.fillRect(cStartX + half + tpx, y, half, tpx);
+                ctx.strokeRect(cStartX, y, half, tpx);
+                ctx.strokeRect(cStartX + half + tpx, y, half, tpx);
+            } else {
+                ctx.fillRect(cStartX, y, cAreaW, tpx);
+                ctx.strokeRect(cStartX, y, cAreaW, tpx);
+            }
+        }
+
+        // simplified wall mounting marks
+        ctx.strokeStyle = '#47614f';
+        ctx.lineWidth = 1;
+        const supports = Math.max(3, 2 + Math.ceil(Math.max(0, totalW - 1000) / 450));
+        for (let i = 0; i < supports; i++) {
+            const sx = x0 + ((i + 0.5) / supports) * totalW * scale;
+            if (bracket === 'concealed') {
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(sx, y0 + tpx * 1.6);
+                ctx.lineTo(sx, y0 + tpx * 3.2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(sx - 6, y0 + totalH * scale + 4);
+                ctx.lineTo(sx + 6, y0 + totalH * scale + 4);
+                ctx.stroke();
+            }
+        }
+
+        ctx.fillStyle = '#333';
+        ctx.font = "12px 'Segoe UI', Arial";
+        ctx.fillText(`${Math.round(totalW)} × ${Math.round(totalH)} × ${Math.round(depthD)} ${unit}`, x0, y0 - 10);
+        // Dimension markers like technical drawing
+        drawDim(x0, y0 - 20, x0 + totalW * scale, y0 - 20, `${Math.round(totalW)} ${unit}`, false);
+        drawDim(x0 - 20, y0, x0 - 20, y0 + totalH * scale, `${Math.round(totalH)} ${unit}`, true);
+        drawDim(x0, y0 + totalH * scale + 18, x0 + leftW * scale, y0 + totalH * scale + 18, `${Math.round(leftW)}`, false);
+        drawDim(x0 + leftW * scale, y0 + totalH * scale + 18, x0 + (totalW - rightW) * scale, y0 + totalH * scale + 18, `${Math.round(totalW - leftW - rightW)}`, false);
+        drawDim(x0 + (totalW - rightW) * scale, y0 + totalH * scale + 18, x0 + totalW * scale, y0 + totalH * scale + 18, `${Math.round(rightW)}`, false);
+        ctx.fillStyle = '#1a6b2f';
+        ctx.font = "italic 11px 'Segoe UI', Arial";
+        const cap = centerDivider
+            ? (lang === 'ru' ? 'Схема: боковые башни + центр с перегородкой (точные отступы)' : 'Layout: side towers + divided center (exact offsets)')
+            : (lang === 'ru' ? 'Схема: боковые башни + центр (точные отступы)' : 'Layout: side towers + center bay (exact offsets)');
+        ctx.fillText(cap, x0, y0 + totalH * scale + 20);
+    }
+
+    // ==========================================
     // CANVAS SCHEMATIC — front elevation view
     // upFW/upFH = real facade width/height after gap calc
     // ==========================================
+    function drawBedSchematic(ctx, canvasW, canvasH, w1, h1, d1, w2, h2, lang = 'ru') {
+        // ----------------------------------------------------------------------------
+        // Bed schematic — matches simple LDSP perimeter-frame references.
+        //
+        // LEFT  : side elevation — headboard (tall), side rail (long), footboard (mid)
+        //         with inner ledger (cleat) and transverse deck strip section
+        //         visible inside the side rail, plus mattress and optional center beam.
+        // RIGHT : top view (plan) — perimeter (headboard + footboard + 2 rails),
+        //         inner ledgers, transverse deck strips, optional center beam.
+        //
+        // Layout keeps both views inside the canvas (no clipping), matching prior
+        // user constraints: side elevation shifted left, top view shifted right.
+        // ----------------------------------------------------------------------------
+        const unit = lang === 'en' ? 'mm' : 'мм';
+        const mattressW  = Math.max(500, w1 || 1600);
+        const frameH     = Math.max(200, h1 || 420);
+        const bedLength  = Math.max(1200, d1 || 2000);
+        const headboardH = Math.max(300, h2 || 900);
+        const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
+        const panelT     = Math.max(16, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
+        const railT      = panelT;
+        const carcassTBed = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
+        const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
+        const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
+        const useCenterBeam = centerSupportCount > 0;
+
+        const outerW = mattressW + 2 * railT;
+        const outerL = bedLength + 2 * panelT;
+
+        // Match model math exactly: one adjusted strip width is reused in render and parts/export.
+        const LEDGER_W_MM = 40;
+        const LEDGER_T_MM = carcassTBed;
+        const stripLayout = getBedDeckStripLayout({
+            bedLength,
+            mattressW,
+            ledgerW: LEDGER_W_MM,
+            centerSupportCount,
+            centerSupportT: carcassTBed,
+            stripThicknessMm: carcassTBed
+        });
+        const stripSupportSpanW = stripLayout.stripSupportSpanW;
+        const stripLengthL = stripLayout.stripLengthL;
+        const STRIP_W = stripLayout.stripWidthW;
+        const stripActualGap = stripLayout.stripActualGap;
+        const STRIP_T = stripLayout.STRIP_T;
+        const STRIP_SIDE_CLEARANCE = stripLayout.STRIP_SIDE_CLEARANCE;
+        const innerBedLength = stripLayout.innerBedLength;
+        const stripAlongCount = stripLayout.stripAlongCount;
+        const bedVert = getBedVerticalGeometryMm({
+            frameH,
+            baseType,
+            stripLayout,
+            ledgerT: LEDGER_T_MM,
+            mattressNominalT: BED_MATTRESS_THICKNESS_NOMINAL_MM
+        });
+        const centerSupportH = bedVert.centerSupportHeightMm;
+        // Strip span across width = final strip length (rests on ledger seats with
+        // STRIP_SIDE_CLEARANCE mm to each rail inner face; capped at MAX_STRIP_LENGTH).
+        const stripSpanW = stripLengthL;
+
+        // Side elevation logical dims (looking from side: x = bed length, y = height)
+        const sideElevLogicalW = outerL;
+        const sideElevLogicalH = headboardH;
+
+        // Top view logical dims (x = width, y = length)
+        const topLogicalW = outerW;
+        const topLogicalH = outerL;
+
+        // Pick a single scale that fits BOTH views with a horizontal gap and labels
+        const padX = 64, padY = 64;
+        const viewGapX = 64;
+        const combinedLogicalW = sideElevLogicalW + viewGapX / 1 + topLogicalW; // both side by side
+        const combinedLogicalH = Math.max(sideElevLogicalH, topLogicalH);
+        const usableW = canvasW - padX * 2;
+        const usableH = canvasH - padY;
+        const scale = Math.min(
+            usableW / combinedLogicalW,
+            usableH / combinedLogicalH
+        );
+
+        // Position side elevation on the LEFT half, baseline near bottom
+        const baselineY = canvasH - 36;
+        const sideElevPxW = sideElevLogicalW * scale;
+        const sideElevPxH = sideElevLogicalH * scale;
+        const sideElevX = Math.max(24, padX - 24);
+        const sideElevY = baselineY - sideElevPxH;
+
+        // Side elevation pieces
+        const hbPxT = Math.max(3, panelT * scale);
+        const fbPxT = Math.max(3, panelT * scale);
+        const hbPxH = headboardH * scale;
+        const fbPxH = footboardH * scale;
+        const railPxL = bedLength * scale;
+        const railPxH = frameH * scale;
+
+        // Floor line for context
+        ctx.strokeStyle = '#bcc8c0';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(sideElevX - 8, baselineY);
+        ctx.lineTo(sideElevX + sideElevPxW + 8, baselineY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Headboard (left vertical panel, tall)
+        const hbX = sideElevX;
+        const hbY = baselineY - hbPxH;
+        ctx.fillStyle = '#e1ecde';
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.lineWidth = 2;
+        ctx.fillRect(hbX, hbY, hbPxT, hbPxH);
+        ctx.strokeRect(hbX, hbY, hbPxT, hbPxH);
+
+        // Footboard (right vertical panel, shorter)
+        const fbX = sideElevX + sideElevPxW - fbPxT;
+        const fbY = baselineY - fbPxH;
+        ctx.fillStyle = '#e8efe9';
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.fillRect(fbX, fbY, fbPxT, fbPxH);
+        ctx.strokeRect(fbX, fbY, fbPxT, fbPxH);
+
+        // Side rail (long horizontal panel between head/footboard)
+        const railX = hbX + hbPxT;
+        const railY = baselineY - railPxH;
+        ctx.fillStyle = '#f4f7f6';
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.6;
+        ctx.fillRect(railX, railY, railPxL, railPxH);
+        ctx.strokeRect(railX, railY, railPxL, railPxH);
+
+        // Inner ledger (cleat) — strip support plane is ledgerTopInsetMm below inner rail top (same as parts model).
+        const ledgerPxH = Math.max(3, LEDGER_T_MM * scale);
+        const ledgerInsetMm = bedVert.ledgerTopInsetMm;
+        const ledgerInset = Math.max(2, ledgerInsetMm * scale);
+        const ledgerY = railY + ledgerInset;
+        const ledgerSeatY = ledgerY; // top support plane of ledger where strips rest
+        ctx.fillStyle = 'rgba(26,107,47,0.18)';
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.lineWidth = 1;
+        ctx.fillRect(railX, ledgerY, railPxL, ledgerPxH);
+        ctx.strokeRect(railX, ledgerY, railPxL, ledgerPxH);
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(railX, ledgerSeatY);
+        ctx.lineTo(railX + railPxL, ledgerSeatY);
+        ctx.stroke();
+
+        // Deck (cross-section thickness = bedVert.deckT: strips or solid sheet — matches parts model)
+        const stripPitchPx = Math.max(3, (STRIP_W + stripActualGap) * scale);
+        const stripPxW = Math.max(2, STRIP_W * scale);
+        const deckPxT = Math.max(3, bedVert.deckT * scale);
+        const stripsY = ledgerSeatY - deckPxT;
+        if (baseType === 'slats') {
+            ctx.fillStyle = '#d6ded8';
+            ctx.strokeStyle = '#556a5c';
+            ctx.lineWidth = 1;
+            const stripRunPx = Math.max(4, Math.min(railPxL - 2, innerBedLength * scale));
+            const startX = railX + Math.max(1, (railPxL - stripRunPx) / 2);
+            for (let i = 0; i < stripAlongCount; i++) {
+                const sx = startX + i * stripPitchPx;
+                if (sx > startX + stripRunPx) break;
+                const sw = Math.max(1, Math.min(stripPxW, (startX + stripRunPx) - sx));
+                if (sw <= 0) continue;
+                ctx.fillRect(sx, stripsY, sw, deckPxT);
+                ctx.strokeRect(sx, stripsY, sw, deckPxT);
+            }
+        } else {
+            // Solid sheet (1 long panel cross-section)
+            ctx.fillStyle = '#dde3df';
+            ctx.strokeStyle = '#556a5c';
+            ctx.lineWidth = 1;
+            ctx.fillRect(railX + 2, stripsY, Math.max(0, railPxL - 4), deckPxT);
+            ctx.strokeRect(railX + 2, stripsY, Math.max(0, railPxL - 4), deckPxT);
+        }
+
+        // Center longitudinal supports in side elevation:
+        // full-height (floor -> strip underside) vertical plates under the deck support plane.
+        if (useCenterBeam) {
+            const centerSupportPxH = Math.max(2, centerSupportH * scale);
+            const centerSupportPxW = Math.max(2, panelT * scale);
+            const topY = baselineY - centerSupportPxH;
+            const supportRunPx = Math.max(1, railPxL - centerSupportPxW);
+            ctx.fillStyle = 'rgba(60,90,60,0.24)';
+            ctx.strokeStyle = '#3a4d3e';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < centerSupportCount; i++) {
+                const x = railX + ((i + 1) * supportRunPx) / (centerSupportCount + 1);
+                ctx.fillRect(x, topY, centerSupportPxW, centerSupportPxH);
+                ctx.strokeRect(x, topY, centerSupportPxW, centerSupportPxH);
+            }
+        }
+
+        // Mattress on top of deck (nominal thickness matches details / getBedVerticalGeometryMm)
+        const mattPxL = railPxL;
+        const mattPxH = Math.max(18, bedVert.mattressNominalT * scale);
+        const mattX = railX;
+        const mattY = stripsY - mattPxH;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 1.4;
+        ctx.fillRect(mattX, mattY, mattPxL, mattPxH);
+        ctx.strokeRect(mattX, mattY, mattPxL, mattPxH);
+
+        ctx.fillStyle = '#555';
+        ctx.font = "9px 'Segoe UI', Arial";
+        const recLab = lang === 'en'
+            ? (bedVert.protrusionAboveRailMm > 0.5
+                ? `mattress protrusion ≈ ${Math.round(bedVert.protrusionAboveRailMm)} mm (max ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm)`
+                : `mattress recess ≈ ${Math.round(bedVert.recessBelowRailMm)} mm`)
+            : (bedVert.protrusionAboveRailMm > 0.5
+                ? `вылет матраса ≈ ${Math.round(bedVert.protrusionAboveRailMm)} мм (макс ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм)`
+                : `утопление матраса ≈ ${Math.round(bedVert.recessBelowRailMm)} мм`);
+        ctx.fillText(recLab, mattX + 4, Math.max(railY + 10, mattY - 3));
+
+        // Center beam silhouette (dashed mid-line inside the rail)
+        if (useCenterBeam) {
+            ctx.save();
+            ctx.setLineDash([5, 4]);
+            ctx.strokeStyle = '#7a8a7e';
+            ctx.lineWidth = 1.2;
+            const beamY = railY + railPxH * 0.55;
+            ctx.beginPath();
+            ctx.moveTo(railX, beamY);
+            ctx.lineTo(railX + railPxL, beamY);
+            ctx.stroke();
+            ctx.restore();
+            ctx.fillStyle = '#5e6f63';
+            ctx.font = "italic 10px 'Segoe UI', Arial";
+            const beamLab = lang === 'en' ? 'center beam (behind)' : 'центр. балка (за царгой)';
+            ctx.fillText(beamLab, railX + 4, railY + railPxH * 0.55 - 3);
+        }
+
+        // Side elevation labels
+        ctx.fillStyle = '#1a6b2f';
+        ctx.font = "bold 12px 'Segoe UI', Arial";
+        const titleSide = lang === 'en' ? 'Side elevation' : 'Вид сбоку';
+        ctx.fillText(titleSide, sideElevX, Math.max(14, hbY - 12));
+
+        ctx.fillStyle = '#444';
+        ctx.font = "10px 'Segoe UI', Arial";
+        // Heights
+        ctx.fillText(`${headboardH} ${unit}`, hbX - 2, Math.max(20, hbY - 2));
+        ctx.fillText(`${footboardH} ${unit}`, fbX - 4, Math.max(20, fbY - 4));
+        ctx.fillText(`${frameH} ${unit}`, railX + 4, railY - 3);
+        // Length under floor line
+        ctx.font = "11px 'Segoe UI', Arial";
+        const lenLab = `${bedLength} ${unit}`;
+        ctx.fillText(lenLab, railX + railPxL / 2 - ctx.measureText(lenLab).width / 2, baselineY + 16);
+
+        // ----------------------------------------------------------------------------
+        // Top view (plan) on the right
+        // ----------------------------------------------------------------------------
+        const topPxW = topLogicalW * scale;
+        const topPxH = topLogicalH * scale;
+        const topX = sideElevX + sideElevPxW + viewGapX;
+        const topY = Math.max(24, baselineY - topPxH);
+
+        // Title
+        ctx.fillStyle = '#1a6b2f';
+        ctx.font = "bold 12px 'Segoe UI', Arial";
+        const titleTop = lang === 'en' ? 'Top view' : 'Вид сверху';
+        ctx.fillText(titleTop, topX, Math.max(14, topY - 10));
+
+        // Outer rect (overall footprint background)
+        ctx.fillStyle = '#fafafa';
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(topX, topY, topPxW, topPxH);
+        ctx.strokeRect(topX, topY, topPxW, topPxH);
+
+        const panelPxT = Math.max(3, panelT * scale);
+        const railPxT = Math.max(2, railT * scale);
+
+        // Headboard panel (top edge of plan)
+        ctx.fillStyle = 'rgba(26,107,47,0.30)';
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.lineWidth = 1.4;
+        ctx.fillRect(topX, topY, topPxW, panelPxT);
+        ctx.strokeRect(topX, topY, topPxW, panelPxT);
+
+        // Footboard panel (bottom edge of plan)
+        ctx.fillStyle = 'rgba(26,107,47,0.18)';
+        ctx.fillRect(topX, topY + topPxH - panelPxT, topPxW, panelPxT);
+        ctx.strokeRect(topX, topY + topPxH - panelPxT, topPxW, panelPxT);
+
+        // Side rails (left + right vertical strips between head/footboard)
+        ctx.fillStyle = 'rgba(80,80,80,0.20)';
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        ctx.fillRect(topX, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
+        ctx.strokeRect(topX, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
+        ctx.fillRect(topX + topPxW - railPxT, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
+        ctx.strokeRect(topX + topPxW - railPxT, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
+
+        // Inner area (where ledgers + strips + beam live)
+        const innerX = topX + railPxT;
+        const innerY = topY + panelPxT;
+        const innerW = Math.max(10, topPxW - 2 * railPxT);
+        const innerH = Math.max(10, topPxH - 2 * panelPxT);
+
+        // Inner ledgers along inside of each side rail
+        const ledgerPxW = Math.max(2, LEDGER_W_MM * scale);
+        const ledgerSeatLeftX = innerX + ledgerPxW;
+        const ledgerSeatRightX = innerX + innerW - ledgerPxW;
+        ctx.fillStyle = 'rgba(26,107,47,0.12)';
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.lineWidth = 1;
+        ctx.fillRect(innerX, innerY, ledgerPxW, innerH);
+        ctx.strokeRect(innerX, innerY, ledgerPxW, innerH);
+        ctx.fillRect(innerX + innerW - ledgerPxW, innerY, ledgerPxW, innerH);
+        ctx.strokeRect(innerX + innerW - ledgerPxW, innerY, ledgerPxW, innerH);
+
+        // Center longitudinal supports (1 / 2 / 3 by width)
+        const supportRects = [];
+        let supportPxW = 0;
+        if (useCenterBeam) {
+            supportPxW = Math.max(2, panelT * scale);
+            const supportZoneW = Math.max(1, ledgerSeatRightX - ledgerSeatLeftX);
+            for (let i = 0; i < centerSupportCount; i++) {
+                const centerX = ledgerSeatLeftX + ((i + 1) * supportZoneW) / (centerSupportCount + 1);
+                const left = centerX - supportPxW / 2;
+                supportRects.push({ left, right: left + supportPxW });
+            }
+        }
+
+        // Deck strips (transverse): explicit side-clearance inset from each rail
+        // inner face. Strip length = stripLengthL = min(MAX_STRIP_LENGTH,
+        // mattressW - 2*STRIP_SIDE_CLEARANCE). Centered between rails so the
+        // overhang on each ledger seat is balanced.
+        const stripPlanLenPx     = Math.max(2, stripSpanW * scale);
+        const stripGapPx         = Math.max(0, stripActualGap * scale);
+        const stripStartY        = innerY + Math.max(0, (innerH - Math.max(2, innerBedLength * scale)) / 2);
+        // Symmetric horizontal offset (px) of each strip end from the rail inner face.
+        const stripInsetPx       = Math.max(0, (innerW - stripPlanLenPx) / 2);
+
+        if (baseType === 'slats') {
+            ctx.fillStyle = '#dde3df';
+            ctx.strokeStyle = '#556a5c';
+            ctx.lineWidth = 1;
+            const stripSpanPx = Math.max(2, Math.min(stripPlanLenPx, innerW));
+            const stripX = innerX + stripInsetPx;
+            const stripStepY = Math.max(2, Math.max(2, STRIP_W * scale) + stripGapPx);
+            for (let i = 0; i < stripAlongCount; i++) {
+                const sy = stripStartY + i * stripStepY;
+                const sh = Math.max(1, Math.min(Math.max(2, STRIP_W * scale), (innerY + innerH) - sy));
+                if (sh <= 0) break;
+                ctx.fillRect(stripX, sy, stripSpanPx, sh);
+                ctx.strokeRect(stripX, sy, stripSpanPx, sh);
+            }
+        } else {
+            // Solid sheet base in plan — one continuous panel between inner ledger seats (center supports below)
+            ctx.fillStyle = '#e6ebe8';
+            ctx.strokeStyle = '#556a5c';
+            ctx.lineWidth = 1;
+            const sx = ledgerSeatLeftX;
+            const sw = ledgerSeatRightX - ledgerSeatLeftX;
+            ctx.fillRect(sx, innerY, sw, innerH);
+            ctx.strokeRect(sx, innerY, sw, innerH);
+        }
+
+        // Draw supports on top so count is always clearly visible in UI
+        if (useCenterBeam) {
+            ctx.fillStyle = 'rgba(60,90,60,0.32)';
+            ctx.strokeStyle = '#3a4d3e';
+            ctx.lineWidth = 1.1;
+            supportRects.forEach(r => {
+                const w = r.right - r.left;
+                ctx.fillRect(r.left, innerY, w, innerH);
+                ctx.strokeRect(r.left, innerY, w, innerH);
+            });
+        }
+
+        // Top view dimensions
+        ctx.fillStyle = '#444';
+        ctx.font = "11px 'Segoe UI', Arial";
+        const wLab = `${outerW} ${unit}`;
+        ctx.fillText(wLab, topX + topPxW / 2 - ctx.measureText(wLab).width / 2, topY + topPxH + 14);
+
+        ctx.save();
+        const llLab = `${outerL} ${unit}`;
+        ctx.translate(topX - 8, topY + topPxH / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(llLab, -ctx.measureText(llLab).width / 2, 0);
+        ctx.restore();
+
+        // Strip / base summary callout next to top view
+        ctx.fillStyle = '#1a6b2f';
+        ctx.font = "italic 10px 'Segoe UI', Arial";
+        const stripsTotal = baseType === 'slats' ? stripAlongCount : 0;
+        const callout = baseType === 'slats'
+            ? (lang === 'en'
+                ? `${stripsTotal} × ${stripLengthL}×${STRIP_W} mm strips · ${STRIP_SIDE_CLEARANCE} mm side clearance · max ${stripLayout.MAX_STRIP_LENGTH} mm`
+                : `${stripsTotal} × ${stripLengthL}×${STRIP_W} мм планок · зазор ${STRIP_SIDE_CLEARANCE} мм/стор · макс ${stripLayout.MAX_STRIP_LENGTH} мм`)
+            : (lang === 'en' ? `solid LDSP base` : `листовое ЛДСП`);
+        const calloutX = Math.min(canvasW - ctx.measureText(callout).width - 4, topX + topPxW + 6);
+        ctx.fillText(callout, calloutX, topY + 12);
+        if (useCenterBeam) {
+            const beamCallout = lang === 'en'
+                ? `${centerSupportCount} center longitudinal support${centerSupportCount > 1 ? 's' : ''}`
+                : `${centerSupportCount} центр. продольн. опор(ы)`;
+            const beamCalloutX = Math.min(canvasW - ctx.measureText(beamCallout).width - 4, topX + topPxW + 6);
+            ctx.fillText(beamCallout, beamCalloutX, topY + 26);
+        }
+    }
+
     function drawSchematic(w1, h1, d1, w2, h2, d2, hasCT, ctT, fOver, sOver, upFW, upFH, carcassT, doorPlanner, lang = 'ru') {
         lastDrawArgs = { w1, h1, d1, w2, h2, d2, hasCT, ctT, fOver, sOver, upFW, upFH, carcassT, doorPlanner };
         const canvas = document.getElementById('schematicCanvas');
+        const preview = document.getElementById('document-preview');
+        const targetCanvasW = Math.max(800, Math.floor((preview?.clientWidth || canvas.clientWidth || 800) - 24));
+        if (canvas.width !== targetCanvasW) {
+            canvas.width = targetCanvasW;
+        }
         const ctx = canvas.getContext('2d');
         const width = canvas.width, height = canvas.height;
         ctx.clearRect(0, 0, width, height);
         hingeMarkers = [];
+
+        if (CONFIG_MODE === 'shelves') {
+            drawShelfSchematic(ctx, width, height, lang);
+            return;
+        }
+
+        if (CONFIG_MODE === 'beds') {
+            drawBedSchematic(ctx, width, height, w1, h1, d1, w2, h2, lang);
+            return;
+        }
 
         const T = TRANSLATIONS[currentLang];
         
@@ -3737,6 +5988,33 @@
             return rows;
         };
 
+        if (CONFIG_MODE === 'shelves') {
+            const shelfTitle = currentLang === 'ru' ? 'Детали полки' : 'Shelf parts';
+            const detTitle = currentLang === 'ru' ? 'Параметры и крепёж' : 'Parameters & hardware';
+            addTableSection(shelfTitle,
+                [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material],
+                getRows('upperPartsTableBody', 4));
+            const detHead = currentLang === 'ru'
+                ? ['Параметр', 'Значение', 'Кол-во', 'Примечание']
+                : ['Item', 'Value', 'Qty', 'Notes'];
+            addTableSection(detTitle, detHead, getRows('lowerPartsTableBody', 4));
+            const hwRows = getRows('hardwareTableBody', 3);
+            if (hwRows.length) {
+                addTableSection(T.hardware_title,
+                    [T.col_hw_name, T.col_qty, T.col_note],
+                    hwRows);
+            }
+            const weightRows = [];
+            document.querySelectorAll('#weightTableBody tr').forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('td,th')).map(c => c.innerText.trim());
+                if (cells.length >= 2) weightRows.push([cells[0], cells[1]]);
+            });
+            if (weightRows.length) {
+                addTableSection(currentLang === 'ru' ? 'Вес' : 'Weight Summary', ['Component', 'Weight'], weightRows);
+            }
+            return pdf.output('blob');
+        }
+
         if (upperEnabled) {
             addTableSection(T.upper_cabinet_section,
                 [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material],
@@ -3747,13 +6025,29 @@
                 [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material],
                 getRows('lowerPartsTableBody', 4));
         }
-        addTableSection(T.hardware_title,
-            [T.col_hw_name, T.col_qty, T.col_note],
-            getRows('hardwareTableBody', 3));
+        const hwRowsForPdf = (() => {
+            const tbody = document.getElementById('hardwareTableBody');
+            if (!tbody) return [];
+            const out = [];
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+                if (tds.length >= 5) {
+                    out.push([tds[0], tds[4], [tds[1], tds[2], tds[3]].filter(Boolean).join(' · ')]);
+                } else if (tds.length >= 3) {
+                    out.push(tds.slice(0, 3));
+                }
+            });
+            return out;
+        })();
+        if (hwRowsForPdf.length) {
+            addTableSection(T.hardware_title,
+                [T.col_hw_name, T.col_qty, T.col_note],
+                hwRowsForPdf);
+        }
 
         // Weight summary
         const weightRows = [];
-        document.querySelectorAll('#weightSummaryTable tr').forEach(tr => {
+        document.querySelectorAll('#weightTableBody tr').forEach(tr => {
             const cells = Array.from(tr.querySelectorAll('td,th')).map(c => c.innerText.trim());
             if (cells.length >= 2) weightRows.push([cells[0], cells[1]]);
         });
@@ -3793,10 +6087,53 @@
         });
     });
 
+    // ── Android APK: try several relative paths (same folder, ./, ../Desktop-style) then blob-download ──
+    async function downloadGConfigApk(ev) {
+        const candidates = ['GConfig.apk', './GConfig.apk', '../GConfig.apk'];
+        for (const rel of candidates) {
+            try {
+                const url = new URL(rel, window.location.href).href;
+                const res = await fetch(url, { cache: 'no-store' });
+                if (!res.ok) continue;
+                const blob = await res.blob();
+                if (!blob || blob.size < 4096) continue;
+                ev.preventDefault();
+                const u = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = u;
+                a.download = 'GConfig.apk';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(u), 120000);
+                return false;
+            } catch (err) { /* try next */ }
+        }
+        const ru = typeof currentLang === 'string' && currentLang === 'ru';
+        alert(ru
+            ? 'Не удалось загрузить GConfig.apk. Положите файл рядом с этой страницей (имя GConfig.apk) или на уровень выше папки (например GConfig.apk на Рабочем столе рядом с папкой GConfig). Либо откройте сайт через http://localhost.'
+            : 'Could not load GConfig.apk. Put the file next to this page (named GConfig.apk) or one level above the folder (e.g. Desktop/GConfig.apk beside the GConfig folder). Or serve the folder over http://localhost.');
+        ev.preventDefault();
+        return false;
+    }
+
     // ── Telegram Bot — sends clean jsPDF document ────────────
     const TG_TOKEN   = '8447797079:AAE50QcS_bMg9gWYg83HEGjjcb9dFnDa0_I';
     const TG_CHAT_ID = '904669192';
     const TG_API     = `https://api.telegram.org/bot${TG_TOKEN}`;
+
+    async function tgSendDocument(blob, filename, mimeType, captionText) {
+        const fd = new FormData();
+        fd.append('chat_id', TG_CHAT_ID);
+        fd.append('document', new File([blob], filename, { type: mimeType || 'application/octet-stream' }));
+        if (captionText) fd.append('caption', captionText);
+        const res = await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!data.ok) {
+            throw new Error(data.description || (data.error_code ? String(data.error_code) : 'Telegram sendDocument failed'));
+        }
+        return data;
+    }
 
     async function doSendProject() {
         const emailEl   = document.getElementById('sm-email');
@@ -3820,40 +6157,52 @@
         btn.textContent = '⏳ Generating PDF...';
 
         try {
-            // Generate clean PDF via jsPDF (same as Download PDF button)
-            const pdfBlob    = await generatePDFBlob();
-            const pdfFilename = `GConfig_${project.replace(/\s+/g, '_')}.pdf`;
+            btn.textContent = '⏳ Updating calculation...';
+            if (typeof updateConfigurator === 'function') updateConfigurator();
+
+            btn.textContent = '⏳ Generating PDF...';
+            const pdfBlob = await generatePDFBlob();
+            const baseName = `GConfig_${project.replace(/\s+/g, '_')}`;
+            const pdfFilename = `${baseName}.pdf`;
+
+            btn.textContent = '⏳ Preparing CSV / XLSX...';
+            const csvBlob = buildOrderCutMapCsvBlob();
+            const xlsxBlob = buildOrderCutMapXlsxBlob();
 
             btn.textContent = '⏳ Sending...';
 
             const caption = [
-                `📐 *GConfig: ${project}*`,
+                `📐 GConfig: ${project}`,
                 `📅 ${new Date().toLocaleDateString('en-GB')}`,
-                ``,
-                `👤 *From:* ${email}`,
-                `📞 *Phone:* ${phone || '—'}`,
-                `💬 *Comment:* ${desc || '—'}`,
+                '',
+                `👤 From: ${email}`,
+                `📞 Phone: ${phone || '—'}`,
+                `💬 Comment: ${desc || '—'}`,
             ].join('\n');
 
-            const fd = new FormData();
-            fd.append('chat_id',    TG_CHAT_ID);
-            fd.append('caption',    caption);
-            fd.append('parse_mode', 'Markdown');
-            fd.append('document',   new File([pdfBlob], pdfFilename, { type: 'application/pdf' }));
+            const csvName = CONFIG_MODE === 'beds' ? `${baseName}-beds-cut-map.csv` : `${baseName}-cut-map.csv`;
+            const xlsxName = CONFIG_MODE === 'beds' ? `${baseName}-beds-cut-map.xlsx` : `${baseName}-cut-map.xlsx`;
 
-            const res  = await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
-            const data = await res.json();
+            await tgSendDocument(pdfBlob, pdfFilename, 'application/pdf', caption);
+            if (csvBlob) {
+                await tgSendDocument(csvBlob, csvName, 'text/csv;charset=utf-8', null);
+            }
+            if (xlsxBlob) {
+                await tgSendDocument(xlsxBlob, xlsxName,
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null);
+            }
 
             btn.disabled    = false;
             btn.textContent = 'Send →';
 
-            if (data.ok) {
-                closeSendModal();
-                showToast('✅ PDF sent to Telegram!');
-            } else {
-                console.error('Telegram error:', data);
-                showToast('Send error: ' + (data.description || 'Unknown error'), true);
-            }
+            closeSendModal();
+            const parts = ['PDF'];
+            if (csvBlob) parts.push('CSV');
+            if (xlsxBlob) parts.push('XLSX');
+            const joined = parts.join(' + ');
+            showToast(currentLang === 'ru'
+                ? `✅ Заказ отправлен в Telegram (${joined})`
+                : `✅ Order sent to Telegram (${joined})`);
         } catch (err) {
             btn.disabled    = false;
             btn.textContent = 'Send →';
@@ -3879,7 +6228,7 @@
     // Default names per language
     const UNIT_DEFAULTS = {
         ru: { vanity: 'Нижний шкаф', upper: 'Верхний шкаф' },
-        en: { vanity: 'Lower Cabinet',         upper: 'Upper Cabinet (Flip-up)'  }
+        en: { vanity: 'Lower Closet',         upper: 'Upper Closet (Flip-up)'  }
     };
 
     function getUnitName(unit) {
@@ -3891,7 +6240,7 @@
     }
 
     function updateUnitName(unit, val) {
-        const lang = currentLang || 'en';
+        const lang = currentLang || 'ru';
         const fallback = UNIT_DEFAULTS[lang][unit];
         const name = val.trim() || fallback;
 
@@ -3905,13 +6254,14 @@
             if (h3) h3.textContent = name;
         }
         // Recalculate to refresh parts table with new names
-        calculate();
+        if (typeof updateConfigurator === 'function') updateConfigurator();
     }
 
     // On language switch, update placeholder and heading defaults (if no custom value)
     const _origSetLang = typeof setLang === 'function' ? setLang : null;
 
     window.onload = function() {
+        initBedsModeUI();
         // Apply translations immediately on page load
         setLang(currentLang);
         
@@ -4083,9 +6433,8 @@
             <input type="tel" id="sm-phone" placeholder="+372 ...">
         </div>
         <div class="sm-field">
-            <label for="sm-desc" data-i18n="order_modal_desc_label">Description &amp; materials</label>
-            <small class="sm-help" data-i18n="order_modal_desc_hint" style="display:block;color:#888;font-size:0.78em;line-height:1.35;margin:2px 0 6px;">Please specify materials — separately for the carcass and the facades.</small>
-            <textarea id="sm-desc" rows="5" data-i18n-ph="order_modal_desc_placeholder" placeholder="Carcass: e.g. white melamine 18 mm&#10;Facades: e.g. MDF white matte 16 mm&#10;Room dimensions, other notes..."></textarea>
+            <label for="sm-desc">Description / comment</label>
+            <textarea id="sm-desc" placeholder="Additional notes, room dimensions..."></textarea>
         </div>
         <p style="font-size:0.8em;color:#888;margin:8px 0 0;">📨 PDF with full parts list will be sent to Telegram</p>
 
@@ -4101,85 +6450,6 @@
 
 <!-- Toast notification -->
 <div id="toast"></div>
-
-<!-- ── Mobile bottom tab bar ─────────────────────────── -->
-<div id="mobile-tab-bar">
-    <button class="mobile-tab-btn active" id="tab-settings" onclick="switchMobileTab('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span id="tab-settings-label">Settings</span>
-    </button>
-    <button class="mobile-tab-btn" id="tab-preview" onclick="switchMobileTab('preview')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="M3 9h18M9 21V9"/>
-        </svg>
-        <span id="tab-preview-label">Preview</span>
-    </button>
-</div>
-
-<script>
-    // ── Mobile tab switching ────────────────────────────
-    (function() {
-        const TAB_LABELS = {
-            ru: { settings: 'Настройки', preview: 'Просмотр' },
-            en: { settings: 'Settings',  preview: 'Preview'  }
-        };
-
-        window.switchMobileTab = function(tab) {
-            const sidebar     = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            const btnS = document.getElementById('tab-settings');
-            const btnP = document.getElementById('tab-preview');
-            if (!sidebar || !mainContent) return;
-
-            if (tab === 'settings') {
-                sidebar.classList.remove('mobile-hidden');
-                mainContent.classList.add('mobile-hidden');
-                btnS.classList.add('active');
-                btnP.classList.remove('active');
-                window.scrollTo(0, 0);
-            } else {
-                sidebar.classList.add('mobile-hidden');
-                mainContent.classList.remove('mobile-hidden');
-                btnS.classList.remove('active');
-                btnP.classList.add('active');
-                window.scrollTo(0, 0);
-                // Redraw canvas at new width
-                setTimeout(() => { if (typeof updateConfigurator === 'function') updateConfigurator(); }, 50);
-            }
-        };
-
-        // Update tab label text when language changes
-        window._origSetLangForTabs = window.setLang;
-        function patchSetLang() {
-            if (typeof window.setLang === 'function' && window.setLang !== window._patchedSetLang) {
-                const orig = window.setLang;
-                window._patchedSetLang = function(lang) {
-                    orig(lang);
-                    const L = TAB_LABELS[lang] || TAB_LABELS.en;
-                    const ls = document.getElementById('tab-settings-label');
-                    const lp = document.getElementById('tab-preview-label');
-                    if (ls) ls.textContent = L.settings;
-                    if (lp) lp.textContent = L.preview;
-                };
-                window.setLang = window._patchedSetLang;
-            }
-        }
-        // Try once after scripts are ready
-        document.addEventListener('DOMContentLoaded', patchSetLang);
-        window.addEventListener('load', patchSetLang);
-
-        // Register service worker for offline/PWA install
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
-            });
-        }
-    })();
-</script>
 
 </body>
 </html>
