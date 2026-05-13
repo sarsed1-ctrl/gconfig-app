@@ -90,6 +90,31 @@
             background: #e8f5e9;
         }
 
+        /* Download APK button — mobile only */
+        #download-android-btn {
+            display: none; /* hidden on desktop */
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #1a6b2f;
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: auto;
+            white-space: nowrap;
+        }
+        #download-android-btn:hover { background: #135223; }
+        #download-android-btn svg { flex-shrink: 0; }
+        @media (max-width: 768px) {
+            #download-android-btn { display: flex; }
+        }
+
         .top-nav-links {
             display: flex;
             align-items: center;
@@ -767,6 +792,12 @@
     <svg class="pcb-bg" aria-hidden="true">
         <rect width="100%" height="100%" fill="url(#pcb-pattern)"/>
     </svg>
+    <a id="download-android-btn" href="GConfig.apk" download="GConfig.apk">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v13M7 11l5 5 5-5"/><rect x="3" y="18" width="18" height="3" rx="1"/>
+        </svg>
+        <span data-i18n="btn_download_apk">Download App</span>
+    </a>
     <nav class="top-nav-links" aria-label="Site navigation">
         <a class="top-nav-link" href="welcome.html" target="_top" data-i18n="nav_home">Home</a>
         <a class="top-nav-link" href="https://www.eamf.ee/est/plaadid-ja-servakandid/melamiinkattega-puitlaastplaadid" target="_blank" rel="noopener noreferrer" data-i18n="nav_materials">Materials and Furniture</a>
@@ -1348,6 +1379,7 @@
             nav_materials: "Материалы и фурнитура",
             nav_closets: "Шкафы",
             nav_beds: "Кровати",
+            btn_download_apk: "Скачать приложение",
             weight_summary_title: "Расчёт масс",
             table1_title: "Таблица 1: Детали корпуса",
             table2_title: "Таблица 2: Фурнитура и направляющие",
@@ -1516,6 +1548,7 @@
             nav_materials: "Materials and Furniture",
             nav_closets: "Closets",
             nav_beds: "Beds",
+            btn_download_apk: "Download App",
             weight_summary_title: "Weight Summary",
             table1_title: "Table 1: Carcass Parts",
             table2_title: "Table 2: Furniture & Runners",

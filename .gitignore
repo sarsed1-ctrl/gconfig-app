@@ -1,3 +1,4 @@
-*.apk
 *.zip
 .claude/
+build_apk.py
+GConfig_local.apk
