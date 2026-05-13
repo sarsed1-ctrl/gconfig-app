@@ -116,9 +116,9 @@
         .top-nav-links {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
             gap: 8px;
-            flex: 1;
+            margin-left: auto;
         }
 
         .top-nav-link {
@@ -507,7 +507,7 @@
         thead { display: table-header-group; }
         @media (max-width: 768px) {
             #lang-bar { gap: 4px; padding: 4px 8px; }
-            .top-nav-links { gap: 4px; flex-shrink: 0; }
+            .top-nav-links { gap: 4px; flex-shrink: 0; flex: 1; justify-content: center; margin-left: 0; }
             .top-nav-link { font-size: 10px; padding: 4px 6px; min-width: unset; white-space: nowrap; letter-spacing: 0; }
             #download-android-btn { font-size: 10px; padding: 4px 6px; white-space: nowrap; flex-shrink: 0; }
             .lang-btn { padding: 4px 6px; font-size: 11px; flex-shrink: 0; }
