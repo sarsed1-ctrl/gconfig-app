@@ -1896,6 +1896,60 @@
     const BED_RAIL_SOLID_BOTTOM_MIN_MM = 20;
     const BED_SHEET_BASE_THICKNESS_MM = 16;
 
+    /** Smallest standard ~4 mm wood screw shank length (mm) ≥ target. */
+    function pickBedScrew4LenMm(targetMm) {
+        const cand = [25, 30, 35, 40, 45, 50, 55, 60];
+        const want = Math.ceil(Math.max(12, targetMm));
+        for (const c of cand) {
+            if (c >= want) return c;
+        }
+        return cand[cand.length - 1];
+    }
+
+    /** Confirmat 7×L — L from common stock for headboard/footboard ↔ rail corner stack. */
+    function pickBedConfirmat7LenMm(panelT, railT) {
+        const p = Math.max(8, parseInt(panelT, 10) || 16);
+        const r = Math.max(8, parseInt(railT, 10) || 16);
+        const stack = p + r;
+        const want = stack + 6;
+        const cand = [40, 50, 60, 70];
+        for (const c of cand) {
+            if (c >= want) return c;
+        }
+        return cand[cand.length - 1];
+    }
+
+    /** Penetration (mm) into side rail when fixing ledger from inside (capped by rail thickness). */
+    function pickBedLedgerScrewPenetrationRailMm(railT) {
+        const rt = Math.max(10, parseInt(railT, 10) || 16);
+        const maxPen = Math.max(6, rt - 3);
+        const want = Math.round(0.58 * rt);
+        return Math.min(maxPen, Math.max(8, want));
+    }
+
+    /** Penetration (mm) into headboard/footboard when fixing longitudinal support. */
+    function pickBedSupportScrewPenetrationPanelMm(panelT) {
+        const pt = Math.max(10, parseInt(panelT, 10) || 16);
+        const maxPen = Math.max(8, pt - 4);
+        const want = Math.round(0.58 * pt);
+        return Math.min(maxPen, Math.max(12, want));
+    }
+
+    /** Penetration (mm) into ledger for deck strip / sheet screw (strip on ledger seat). */
+    function pickBedDeckScrewPenetrationLedgerMm(ledgerT) {
+        const lt = Math.max(8, parseInt(ledgerT, 10) || 16);
+        const maxPen = Math.max(8, lt - 5);
+        const want = Math.round(0.42 * lt);
+        return Math.min(maxPen, Math.max(10, want));
+    }
+
+    /** Corner metal angle leg (mm): 40 or 50 from combined thicknesses. */
+    function pickBedCornerBracketLegMm(panelT, railT, ledgerT) {
+        const m = Math.max(panelT, railT, ledgerT);
+        if (m >= 22 || panelT + railT >= 40) return 50;
+        return 40;
+    }
+
     /**
      * Single source of truth for BEDS vertical stack (mm from floor upward):
      *   Z_rail_top = frameH
@@ -3301,21 +3355,28 @@
             const stripScrewQty    = baseType === 'slats' ? stripQty * 2 : 0; // 1 each end of strip
             const sheetScrewQty    = baseType === 'sheet' ? sheetQty * 10 : 0;
 
+            const confirmatLen = pickBedConfirmat7LenMm(panelT, railT);
+            const ledgerScrewLen = pickBedScrew4LenMm(ledgerT + pickBedLedgerScrewPenetrationRailMm(railT));
+            const bracketLeg = pickBedCornerBracketLegMm(panelT, railT, ledgerT);
+            const supportScrewLen = pickBedScrew4LenMm(centerSupportT + pickBedSupportScrewPenetrationPanelMm(panelT));
+            const stripScrewLen = pickBedScrew4LenMm(STRIP_T + pickBedDeckScrewPenetrationLedgerMm(ledgerT));
+            const sheetScrewLen = pickBedScrew4LenMm(sheetT + pickBedDeckScrewPenetrationLedgerMm(ledgerT));
+
             const bedFasteners = [
-                { name: currentLang === 'ru' ? 'Конфирмат 7×50' : 'Confirmat 7×50',
+                { name: currentLang === 'ru' ? `Конфирмат 7×${confirmatLen}` : `Confirmat 7×${confirmatLen}`,
                   qty: cornerConfirmats,
                   note: currentLang === 'ru' ? 'Углы каркаса (по 2 на угол)' : 'Frame corners (2 per corner)' },
-                { name: currentLang === 'ru' ? 'Саморез 4×40' : 'Screw 4×40',
+                { name: currentLang === 'ru' ? `Саморез 4×${ledgerScrewLen}` : `Screw 4×${ledgerScrewLen}`,
                   qty: ledgerScrews,
                   note: currentLang === 'ru' ? 'Опорная планка к царге' : 'Ledger to side rail' },
-                { name: currentLang === 'ru' ? 'Уголок 40×40' : 'Corner bracket 40×40',
+                { name: currentLang === 'ru' ? `Уголок ${bracketLeg}×${bracketLeg}` : `Corner bracket ${bracketLeg}×${bracketLeg}`,
                   qty: useCenterBeam ? 6 : 4,
                   note: currentLang === 'ru' ? 'Усиление углов и балки' : 'Corner / beam reinforcement' }
             ];
 
             if (useCenterBeam) {
                 bedFasteners.push({
-                    name: currentLang === 'ru' ? 'Саморез 4×50' : 'Screw 4×50',
+                    name: currentLang === 'ru' ? `Саморез 4×${supportScrewLen}` : `Screw 4×${supportScrewLen}`,
                     qty: supportScrews,
                     note: currentLang === 'ru' ? 'Продольные опоры к щитам' : 'Longitudinal supports to panels'
                 });
@@ -3323,13 +3384,13 @@
 
             if (baseType === 'slats') {
                 bedFasteners.push({
-                    name: currentLang === 'ru' ? 'Саморез 4×30' : 'Screw 4×30',
+                    name: currentLang === 'ru' ? `Саморез 4×${stripScrewLen}` : `Screw 4×${stripScrewLen}`,
                     qty: stripScrewQty,
                     note: currentLang === 'ru' ? 'Поперечные планки к опорным планкам' : 'Transverse deck strips to ledgers'
                 });
             } else {
                 bedFasteners.push({
-                    name: currentLang === 'ru' ? 'Саморез 4×30' : 'Screw 4×30',
+                    name: currentLang === 'ru' ? `Саморез 4×${sheetScrewLen}` : `Screw 4×${sheetScrewLen}`,
                     qty: sheetScrewQty,
                     note: currentLang === 'ru' ? 'Крепление листового основания' : 'Solid base fixing'
                 });
