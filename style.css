@@ -1,0 +1,466 @@
+/* ============================================================
+   GConfig — Shared Design System
+   Dark green theme | Mobile-first | v2.0
+   ============================================================ */
+
+/* ── 1. CSS Variables (override inline :root) ──────────────── */
+:root {
+  --primary:        #00cc00;
+  --primary-light:  #00ff00;
+  --primary-dark:   #008800;
+  --primary-pale:   #0d200d;
+  --bg:             #0a0f0a;
+  --bg2:            #111811;
+  --panel-bg:       #0d140d;
+  --border:         #1e3a1e;
+  --text:           #d4f0d4;
+  --text-muted:     #6b9e6b;
+  --warning-bg:     #1a2a0a;
+  --warning-border: #4a7a00;
+  --warning-text:   #a8d060;
+}
+
+/* ── 2. Base reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── 3. Links ─────────────────────────────────────────────── */
+a { color: var(--primary); }
+a:hover { color: var(--primary-light); }
+
+/* ── 4. Headings ──────────────────────────────────────────── */
+h2, h3, h4, h5 { color: var(--text) !important; }
+h3 { border-bottom-color: var(--border) !important; }
+
+/* ── 5. Nav bar ───────────────────────────────────────────── */
+#lang-bar {
+  background: var(--panel-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.lang-btn {
+  background: var(--panel-bg) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.lang-btn.active {
+  background: var(--primary) !important;
+  color: #0a0f0a !important;
+}
+.lang-btn:hover:not(.active) {
+  background: var(--primary-pale) !important;
+}
+
+.top-nav-link {
+  background: var(--panel-bg) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.top-nav-link.active {
+  background: var(--primary) !important;
+  color: #0a0f0a !important;
+}
+.top-nav-link:hover:not(.active) {
+  background: var(--primary-pale) !important;
+}
+
+#download-android-btn {
+  background: var(--primary) !important;
+  color: #0a0f0a !important;
+}
+#download-android-btn:hover {
+  background: var(--primary-light) !important;
+}
+
+/* ── 6. Sidebar blocks ────────────────────────────────────── */
+.block {
+  background: var(--panel-bg) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 0 0 1px rgba(0,204,0,0.06);
+}
+.block:hover {
+  box-shadow: 0 0 0 1px rgba(0,204,0,0.14);
+}
+
+/* ── 7. Form elements ─────────────────────────────────────── */
+input[type="number"],
+input[type="text"],
+input[type="email"],
+textarea,
+select {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,204,0,0.18);
+}
+input::placeholder,
+textarea::placeholder { color: var(--text-muted) !important; }
+
+/* Prevent iOS zoom on input focus */
+@media (max-width: 768px) {
+  input[type="number"],
+  input[type="text"],
+  input[type="email"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── 8. Buttons ───────────────────────────────────────────── */
+button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn) {
+  background-color: var(--primary) !important;
+  color: #0a0f0a !important;
+  font-weight: 700;
+  border: none;
+}
+button:not(.mobile-tab-btn):not(.close-btn):not(.btn-cancel):not(.lang-btn):hover {
+  background-color: var(--primary-light) !important;
+}
+button.btn-cancel {
+  background: #2a3a2a !important;
+  color: var(--text-muted) !important;
+}
+button.btn-cancel:hover { background: #354535 !important; }
+button.close-btn {
+  background: none !important;
+  color: var(--text-muted) !important;
+}
+button.close-btn:hover { color: var(--primary-light) !important; background: none !important; }
+
+/* ── 9. Tables ────────────────────────────────────────────── */
+table { border-color: var(--border) !important; }
+th {
+  background-color: #0f1f0f !important;
+  color: var(--primary) !important;
+  border-color: var(--border) !important;
+}
+td { border-color: var(--border) !important; }
+tr:nth-child(even) { background-color: #0e1a0e !important; }
+tr:nth-child(odd)  { background-color: var(--panel-bg) !important; }
+tr:hover td        { background-color: #132013 !important; }
+
+/* ── 10. Main content area ────────────────────────────────── */
+.main-content {
+  background: var(--panel-bg) !important;
+  box-shadow: 0 0 0 1px rgba(0,204,0,0.08) !important;
+}
+
+/* Document preview (PDF output area) */
+#document-preview { background: var(--panel-bg) !important; }
+
+/* ── 11. Weight summary box ───────────────────────────────── */
+.weight-summary {
+  background: #091509 !important;
+  border-color: var(--primary-dark) !important;
+}
+.weight-summary h4 { color: var(--primary) !important; }
+
+/* ── 12. Recommendations / warnings block ─────────────────── */
+.recommendations-block {
+  background-color: var(--warning-bg) !important;
+  border-left-color: var(--warning-border) !important;
+}
+.recommendations-block h3 {
+  color: var(--warning-text) !important;
+  border-bottom-color: #2a4a10 !important;
+}
+
+/* ── 13. Resizer ──────────────────────────────────────────── */
+#resizer { background: var(--border) !important; }
+#resizer::after { color: var(--text-muted) !important; }
+#resizer:hover  { background: var(--primary-dark) !important; }
+#resizer:hover::after { color: var(--bg) !important; }
+#resizer.dragging { background: var(--primary) !important; }
+
+/* ── 14. Send modal ───────────────────────────────────────── */
+#send-modal {
+  background: var(--panel-bg) !important;
+  box-shadow: 0 8px 40px rgba(0,255,0,0.10) !important;
+  border: 1px solid var(--border);
+}
+#send-modal h3 {
+  color: var(--primary) !important;
+  border-bottom-color: var(--border) !important;
+}
+#send-modal .sm-field label { color: var(--text-muted) !important; }
+#send-modal-overlay { background: rgba(0,5,0,0.75) !important; }
+
+/* ── 15. Toast ────────────────────────────────────────────── */
+#toast {
+  background: var(--primary) !important;
+  color: #0a0f0a !important;
+}
+#toast.error { background: #cc2200 !important; color: #fff !important; }
+
+/* ── 16. Radio groups ─────────────────────────────────────── */
+.radio-group label {
+  color: var(--text) !important;
+}
+@media (max-width: 768px) {
+  .radio-group label {
+    background: var(--bg2) !important;
+    border-color: var(--border) !important;
+  }
+}
+
+/* ── 17. Project name input ───────────────────────────────── */
+#project-name-input {
+  color: var(--text-muted) !important;
+  border-bottom-color: rgba(0,204,0,0.3) !important;
+}
+#project-name-input:focus {
+  border-bottom-color: var(--primary) !important;
+  color: var(--text) !important;
+}
+
+/* ── 18. Range sliders ────────────────────────────────────── */
+input[type="range"] { accent-color: var(--primary) !important; }
+.spacing-val { color: var(--primary) !important; }
+
+/* ── 19. Alien link hover ─────────────────────────────────── */
+#alien-link:hover * {
+  stroke: var(--primary) !important;
+  fill: var(--primary) !important;
+}
+
+/* ── 20. Order details text ───────────────────────────────── */
+.order-details { color: var(--text-muted) !important; }
+
+/* ── 21. Mobile tab bar (configurator.html) ───────────────── */
+#mobile-tab-bar {
+  background: var(--panel-bg) !important;
+  border-top-color: var(--border) !important;
+}
+.mobile-tab-btn {
+  color: var(--text-muted) !important;
+  background: none !important;
+  border-top: 3px solid transparent;
+  width: auto !important;
+  min-height: unset !important;
+  border-radius: 0 !important;
+  padding: 0;
+  margin: 0;
+}
+.mobile-tab-btn.active {
+  color: var(--primary) !important;
+  border-top-color: var(--primary) !important;
+}
+
+/* ── 22. Hinge tooltip ────────────────────────────────────── */
+#hingeTooltip {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border);
+  z-index: 999 !important; /* was 9999 — reduced */
+}
+
+/* ── 23. Unit rename input ────────────────────────────────── */
+.unit-rename-wrap input {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* ── 24. Scrollbar (Webkit) ───────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
+/* ── 25. Welcome page cards ───────────────────────────────── */
+.card {
+  background: var(--panel-bg) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4) !important;
+}
+.card:hover {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary), 0 8px 32px rgba(0,204,0,0.15) !important;
+  transform: translateY(-4px);
+}
+.card-icon-area {
+  background: linear-gradient(135deg, #091509 0%, #0e1e0e 100%) !important;
+}
+.card-icon-area svg { color: var(--primary) !important; }
+.card-title { color: var(--primary) !important; }
+.card-desc  { color: var(--text-muted) !important; }
+.card-btn {
+  background: var(--primary) !important;
+  color: #0a0f0a !important;
+}
+.card-btn:hover { background: var(--primary-light) !important; }
+
+/* ── 26. Welcome hero & footer ────────────────────────────── */
+.hero p { color: var(--text-muted) !important; }
+footer {
+  background: var(--panel-bg) !important;
+  border-top-color: var(--border) !important;
+  color: var(--text-muted) !important;
+}
+header {
+  background: var(--panel-bg) !important;
+  border-bottom-color: var(--border) !important;
+}
+.header-page-title { color: var(--primary) !important; }
+
+/* ── 27. Loader overlay ───────────────────────────────────── */
+#loader { background: var(--bg) !important; }
+
+/* ── 28. Unrecommended note ───────────────────────────────── */
+.unrecommended-note { color: var(--text-muted) !important; }
+
+/* ── 29. Mobile-specific fixes for configurator.html ────────
+   configurator.html has ZERO media queries — this adds them.
+   ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Layout */
+  body { padding: 0 !important; gap: 0 !important; }
+
+  #lang-bar {
+    border-radius: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    padding: 6px 10px !important;
+  }
+
+  .layout-row {
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  #resizer { display: none !important; }
+
+  .sidebar {
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    min-width: unset !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 10px 10px 80px 10px !important;
+    box-sizing: border-box !important;
+    gap: 10px !important;
+  }
+  .sidebar.mobile-hidden { display: none !important; }
+
+  .main-content {
+    min-width: unset !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 12px 12px 80px 12px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .main-content.mobile-hidden { display: none !important; }
+
+  /* Forms */
+  input[type="number"],
+  select,
+  input[type="text"] {
+    width: 100% !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+    margin-bottom: 12px !important;
+  }
+  .form-group label {
+    font-weight: 600 !important;
+    font-size: 0.82em !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  /* Buttons */
+  button { min-height: 48px !important; font-size: 14px !important; border-radius: 6px !important; }
+
+  /* Radio */
+  .radio-group { flex-direction: column !important; gap: 10px !important; }
+  .radio-group label { font-size: 1em !important; padding: 8px 12px !important; border-radius: 6px !important; }
+
+  /* Canvas */
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  /* Tables */
+  table {
+    font-size: 0.78em !important;
+    display: block !important;
+    overflow-x: auto !important;
+  }
+  th, td { padding: 7px 5px !important; }
+
+  /* Blocks */
+  .block { border-radius: 8px !important; padding: 14px !important; }
+  h3 { font-size: 1em !important; }
+  h4 { font-size: 0.92em !important; }
+
+  /* Send modal full-screen */
+  #send-modal { width: 94vw !important; padding: 20px 16px !important; }
+
+  /* Mobile tab bar */
+  #mobile-tab-bar {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    height: 56px !important;
+    z-index: 300 !important;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.4) !important;
+  }
+  .mobile-tab-btn {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+  .mobile-tab-btn svg { width: 22px !important; height: 22px !important; }
+}
+
+@media (min-width: 769px) {
+  #mobile-tab-bar { display: none !important; }
+}
+
+/* ── 30. Smooth transitions across the board ──────────────── */
+.block,
+.card,
+input,
+select,
+textarea,
+button,
+.top-nav-link,
+.lang-btn {
+  transition:
+    background-color 0.18s ease,
+    border-color     0.18s ease,
+    box-shadow       0.18s ease,
+    color            0.18s ease;
+}
