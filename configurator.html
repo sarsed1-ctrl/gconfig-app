@@ -4031,8 +4031,16 @@
         const baseFacadeH = lowerDoorType === 'overlay'
             ? Math.max(0, h1 - 2 * lowerOverlayGap)
             : Math.max(0, lowerOpeningH - 2 * lowerInsetGap);
-        let lowerDoors = [{ name: T.part_facade_vanity, width: baseFacadeW, height: baseFacadeH, side: 'left' }];
+
+        // Number of drawers (relevant only when lowerHardwareMode === 'drawer')
+        const drawerCount = lowerHardwareMode === 'drawer'
+            ? Math.max(1, parseInt(document.getElementById('lowerDrawerCount')?.value) || 2)
+            : 1;
+
+        let lowerDoors = [{ name: T.part_facade_vanity, width: baseFacadeW, height: baseFacadeH, qty: 1, side: 'left' }];
+
         if (lowerHardwareMode === 'hinge' && lowerSplitFacade) {
+            // Split facade into two side-by-side door leaves
             const leftInput = document.getElementById('lowerLeftDoorW');
             const rightInput = document.getElementById('lowerRightDoorW');
             const autoHalf = Math.max(50, Math.round((baseFacadeW - 3) / 2));
@@ -4049,18 +4057,37 @@
                 if (rightInput) rightInput.value = String(rightW);
             }
             lowerDoors = [
-                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.left_door + ')', width: leftW, height: baseFacadeH, side: 'left' },
-                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.right_door + ')', width: rightW, height: baseFacadeH, side: 'right' }
+                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.left_door + ')', width: leftW, height: baseFacadeH, qty: 1, side: 'left' },
+                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.right_door + ')', width: rightW, height: baseFacadeH, qty: 1, side: 'right' }
             ];
+        } else if (lowerHardwareMode === 'drawer' && drawerCount > 1) {
+            // Split facade into N equal horizontal strips (one per drawer)
+            // Gap between adjacent drawer facades = lowerOverlayGap (default 2 mm)
+            const gapBetween = lowerOverlayGap;
+            const drawerFacadeH = Math.max(50,
+                Math.floor((baseFacadeH - (drawerCount - 1) * gapBetween) / drawerCount));
+            lowerDoors = [{
+                name: T.part_facade_vanity,
+                width: baseFacadeW,
+                height: drawerFacadeH,
+                qty: drawerCount,
+                side: 'left'
+            }];
         }
+
         lowerDoors.forEach(d => {
-            parts.push({ name: d.name, qty: 1, l: d.height, w: d.width, t: facadeT, mat: matFacade });
-            wtFacadesVanity += panelAreaM2(d.height, d.width) * facadeWpm2;
+            const q = d.qty || 1;
+            parts.push({ name: d.name, qty: q, l: d.height, w: d.width, t: facadeT, mat: matFacade });
+            wtFacadesVanity += q * panelAreaM2(d.height, d.width) * facadeWpm2;
         });
 
         const lowerFacadeDimsEl = document.getElementById('lowerFacadeDims');
         if (lowerFacadeDimsEl) {
-            const label = lowerDoors.map(d => `${d.name}: ${Math.round(d.width)}×${Math.round(d.height)} mm`).join(' | ');
+            const label = lowerDoors.map(d => {
+                const q = d.qty || 1;
+                const qStr = q > 1 ? ` ×${q}` : '';
+                return `${d.name}: ${Math.round(d.width)}×${Math.round(d.height)} mm${qStr}`;
+            }).join(' | ');
             lowerFacadeDimsEl.textContent = label;
         }
         const lowerHintEl = document.getElementById('lowerHingeHint');
