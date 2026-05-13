@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Browse GreenRoot's full range of plant fertilizers and supplements for home gardeners." />
+  <title>Catalog — GreenRoot</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <nav class="nav container" aria-label="Main navigation">
+      <a href="index.html" class="logo">🌿 GreenRoot</a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html"   class="nav-link">Home</a></li>
+        <li><a href="catalog.html" class="nav-link active">Catalog</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+    <section class="section" aria-labelledby="catalog-heading">
+      <div class="container">
+        <h1 id="catalog-heading" class="page-title">Product Catalog</h1>
+        <p class="page-sub">Select any product to learn more, or place an order directly.</p>
+
+        <!-- Product cards are injected here by main.js renderCatalog() -->
+        <div class="product-grid" id="catalog-grid" aria-live="polite" aria-label="Products">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2024 GreenRoot. All rights reserved.</p>
+      <a href="admin.html" class="footer-admin-link">Admin</a>
+    </div>
+  </footer>
+
+  <!-- Order modal is injected by initOrderModal() in main.js -->
+  <script src="main.js"></script>
+</body>
+</html>
