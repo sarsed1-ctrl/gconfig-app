@@ -807,10 +807,9 @@
         <div class="form-group">
             <label data-i18n="facade_thick">Facade Thickness (mm):</label>
             <select id="facadeThick">
-                <option value="10">10 mm</option>
                 <option value="16" selected>16 mm</option>
                 <option value="18">18 mm</option>
-                <option value="19">19 mm</option>
+                <option value="19">19 mm PerfectSense</option>
                 <option value="25">25 mm</option>
             </select>
         </div>
@@ -2586,7 +2585,10 @@
         const thicknessSelects = document.querySelectorAll('select[id*="Thick"], select[id*="thick"]');
         thicknessSelects.forEach(select => {
             Array.from(select.options).forEach(opt => {
-                if (opt.value) {
+                if (!opt.value) return;
+                if (select.id === 'facadeThick' && opt.value === '19') {
+                    opt.textContent = `${opt.value} ${unit} PerfectSense`;
+                } else {
                     opt.textContent = opt.value + ' ' + unit;
                 }
             });
@@ -2618,7 +2620,6 @@
 
     // Facade weight by thickness (kg/m²)
     const FACADE_WEIGHT_MAP = {
-        10: 7.5,
         16: 12.5,
         18: 14.0,
         19: 14.8,
@@ -4843,7 +4844,7 @@
         const bedLength  = Math.max(1200, d1 || 2000);
         const headboardH = Math.max(300, h2 || 900);
         const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
-        const panelT     = Math.max(10, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
+        const panelT     = Math.max(16, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
         const railT      = panelT;
         const carcassTBed = Math.max(16, parseInt(document.getElementById('carcassThick')?.value || '16', 10));
         const baseType   = document.getElementById('bedBaseType')?.value || 'slats';
