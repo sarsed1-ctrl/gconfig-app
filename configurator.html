@@ -1777,8 +1777,7 @@
                 beamLeg: 'Center beam leg',
                 deckStrip: 'Deck strip (transverse LDSP)',
                 slat: 'Slat',
-                basePanel: 'Solid base panel',
-                mechanism: 'Lift mechanism'
+                basePanel: 'Solid base panel'
             },
             ru: {
                 parts: 'Детали кровати',
@@ -1792,8 +1791,7 @@
                 beamLeg: 'Опора центральной балки',
                 deckStrip: 'Поперечная планка (ЛДСП)',
                 slat: 'Ламель',
-                basePanel: 'Листовое основание',
-                mechanism: 'Подъемный механизм'
+                basePanel: 'Листовое основание'
             }
         };
         return (dict[lang] && dict[lang][key]) || dict.en[key] || key;
@@ -2149,13 +2147,6 @@
                     <option value="sheet">Solid LDSP sheet</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Lift mechanism:</label>
-                <select id="bedLiftMechanism">
-                    <option value="none" selected>None</option>
-                    <option value="gas">Gas lift</option>
-                </select>
-            </div>
             <div id="beds-main-actions" style="display:grid; gap:8px; margin-top:8px;"></div>
         `;
         sidebar.appendChild(bedBlock);
@@ -2226,10 +2217,7 @@
                 el.addEventListener('change', redrawBedsConfigurator);
             });
 
-        ['bedBaseType', 'bedLiftMechanism']
-            .forEach(id => {
-                document.getElementById(id)?.addEventListener('change', redrawBedsConfigurator);
-            });
+        document.getElementById('bedBaseType')?.addEventListener('change', redrawBedsConfigurator);
 
         syncBedToCoreFields();
     }
@@ -3171,7 +3159,6 @@
             const footboardH  = parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10);
             const railT       = parseInt(document.getElementById('bedRailT')?.value || '26', 10);
             const baseType    = document.getElementById('bedBaseType')?.value || 'slats';
-            const liftMechanism = document.getElementById('bedLiftMechanism')?.value || 'none';
 
             const panelT      = carcassT || 18;             // headboard / footboard LDSP thickness
             const outerW      = mattressW + 2 * railT;      // total bed outer width
@@ -3274,10 +3261,6 @@
                 });
             }
 
-            if (liftMechanism === 'gas') {
-                bedParts.push({ name: getBedUILabel(currentLang, 'mechanism'), qty: 1, l: 0, w: 0, t: 0, mat: 'Gas lift set (2 pcs)' });
-            }
-
             const bedCutMapRows = bedParts
                 .filter(p => p.l > 0 && p.w > 0 && p.t > 0)
                 .map(p => {
@@ -3325,10 +3308,6 @@
                     qty: sheetScrewQty,
                     note: currentLang === 'ru' ? 'Крепление листового основания' : 'Solid base fixing'
                 });
-            }
-
-            if (liftMechanism === 'gas') {
-                bedFasteners.push({ name: currentLang === 'ru' ? 'Комплект газлифтов' : 'Gas lift kit', qty: 1, note: currentLang === 'ru' ? 'Левый + правый' : 'Left + right' });
             }
 
             lastBedCutMapRows = bedCutMapRows;
@@ -3413,9 +3392,7 @@
                     { key: currentLang === 'ru' ? 'Центральные опоры' : 'Center supports',
                       val: beamLabel },
                     { key: currentLang === 'ru' ? 'Тип основания' : 'Deck type',
-                      val: baseTypeLabel },
-                    { key: currentLang === 'ru' ? 'Подъемный механизм' : 'Lift mechanism',
-                      val: liftMechanism === 'gas' ? 'Gas lift' : (currentLang === 'ru' ? 'Нет' : 'None') }
+                      val: baseTypeLabel }
                 ];
 
                 const fastenerRows = bedFasteners.map(f => ({
