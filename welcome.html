@@ -33,6 +33,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
+            position: relative;
         }
         .header-brand {
             flex-shrink: 0;
@@ -40,14 +41,17 @@
             align-items: center;
         }
         .header-page-title {
-            flex: 1 1 auto;
-            min-width: 0;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
             text-align: center;
             font-size: clamp(18px, 2.8vw, 32px);
             font-weight: 700;
             color: var(--primary);
             margin: 0;
             line-height: 1.2;
+            pointer-events: none;
         }
         .hero {
             text-align: center;
@@ -197,10 +201,14 @@
             .header-brand { order: 1; }
             #lang-bar { order: 2; }
             .header-page-title {
+                position: static;
+                transform: none;
+                white-space: normal;
                 order: 3;
                 flex: 1 1 100%;
                 font-size: clamp(16px, 5vw, 26px);
                 margin-top: 4px;
+                pointer-events: auto;
             }
         }
         [data-lang] { display: none; }
