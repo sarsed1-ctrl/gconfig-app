@@ -2125,7 +2125,7 @@
         bedBlock.className = 'block';
         bedBlock.id = 'beds-controls';
         bedBlock.innerHTML = `
-            <h3>BEDS Configurator</h3>
+            <h3>Beds Configurator</h3>
             <div class="form-group">
                 <label>Preset:</label>
                 <select id="bedPreset">
@@ -3229,8 +3229,8 @@
                 { name: getBedUILabel(currentLang, 'footboard'), qty: 1, l: outerW,   w: footboardH, t: panelT,   mat: `Chipboard (MFC) ${panelT}mm` },
                 { name: getBedUILabel(currentLang, 'sideRail') + ' (L)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
                 { name: getBedUILabel(currentLang, 'sideRail') + ' (R)', qty: 1, l: sideRailL, w: frameH, t: railT, mat: `Chipboard (MFC) ${railT}mm` },
-                { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `Chipboard (MFC) ${ledgerT}mm / Softwood` },
-                { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `Chipboard (MFC) ${ledgerT}mm / Softwood` }
+                { name: getBedUILabel(currentLang, 'ledger') + ' (L)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` },
+                { name: getBedUILabel(currentLang, 'ledger') + ' (R)',   qty: 1, l: ledgerL,   w: ledgerW, t: ledgerT, mat: `MDF ${ledgerT}mm` }
             ];
 
             if (useCenterBeam) {
@@ -3240,7 +3240,7 @@
                     l: centerSupportL,
                     w: centerSupportH,
                     t: centerSupportT,
-                    mat: `Chipboard (MFC) ${centerSupportT}mm`
+                    mat: `MDF ${centerSupportT}mm`
                 });
             }
 
@@ -3251,7 +3251,7 @@
                     l: stripL,
                     w: STRIP_W,
                     t: STRIP_T,
-                    mat: `Chipboard (MFC) ${STRIP_T}mm`
+                    mat: `MDF ${STRIP_T}mm`
                 });
             } else {
                 bedParts.push({
