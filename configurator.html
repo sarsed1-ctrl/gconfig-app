@@ -1471,6 +1471,8 @@
             eamf_back_panel_auto: "Авто (по корпусу)",
             eamf_back_panel_auto_none: "Авто — сначала выберите корпус",
             eamf_back_panel_no_match: "Авто — нет HDF для этого декора",
+            eamf_back_panel_standard: "стандарт",
+            eamf_back_panel_auto_standard: "Авто · {code} ({standard})",
             eamf_back_panel_recommended: "рекомендуется",
             back_panel_carcass: "Задняя стенка из материала корпуса",
             back_panel_fit: "Посадка задней стенки:",
@@ -1858,6 +1860,8 @@
             eamf_back_panel_auto: "Auto (from carcass)",
             eamf_back_panel_auto_none: "Auto — select carcass material",
             eamf_back_panel_no_match: "Auto — no HDF for this decor",
+            eamf_back_panel_standard: "standard",
+            eamf_back_panel_auto_standard: "Auto · {code} ({standard})",
             eamf_back_panel_recommended: "recommended",
             back_panel_carcass: "Back panel from carcass material",
             back_panel_fit: "Back panel fit:",
@@ -2655,7 +2659,13 @@
         return !!(partRow && partRow.backPanelCarcass);
     }
 
-    function resolveHdfBackPanelArticle(referenceMaterial) {
+    function getDefaultHdfBackPanelArticle() {
+        if (!eamfCatalog) return EAMF_DEFAULT_HDF_BACK_PANEL;
+        const found = findEamfBackPanel(EAMF_DEFAULT_HDF_BACK_PANEL);
+        return found ? eamfItemId(found) : EAMF_DEFAULT_HDF_BACK_PANEL;
+    }
+
+    function resolveHdfBackPanelArticleExact(referenceMaterial) {
         if (!eamfCatalog || !referenceMaterial || CONFIG_MODE === 'beds') return '';
         const plateId = eamfItemId(referenceMaterial);
         const plateMap = eamfCatalog.plateToBackPanel || {};
@@ -2670,6 +2680,16 @@
             }
         }
         return '';
+    }
+
+    function resolveHdfBackPanelArticle(referenceMaterial) {
+        return resolveHdfBackPanelArticleExact(referenceMaterial) || getDefaultHdfBackPanelArticle();
+    }
+
+    function isAutoHdfBackPanelStandardFallback() {
+        const ref = getSelectedEamfCarcassMaterial() || getSelectedEamfFacadeMaterial();
+        if (!ref) return false;
+        return !resolveHdfBackPanelArticleExact(ref);
     }
 
     function resolveClosetPartMaterialLabel(partRow) {
@@ -2699,6 +2719,7 @@
     function getAutoHdfBackPanelArticle() {
         if (CONFIG_MODE === 'beds') return '';
         const ref = getSelectedEamfCarcassMaterial() || getSelectedEamfFacadeMaterial();
+        if (!ref) return '';
         return resolveHdfBackPanelArticle(ref);
     }
 
@@ -2712,26 +2733,39 @@
         const opts = options || {};
         const autoArticle = getAutoHdfBackPanelArticle();
         const manual = opts.forceAutoDefault ? false : isEamfBackPanelManualSelection();
-        const carcassSelected = !!getSelectedEamfCarcassMaterial();
+        const refMaterial = getSelectedEamfCarcassMaterial() || getSelectedEamfFacadeMaterial();
+        const standardFallback = isAutoHdfBackPanelStandardFallback();
         selectEl.disabled = false;
         selectEl.innerHTML = '';
 
         const autoOpt = document.createElement('option');
         autoOpt.value = '__auto__';
-        autoOpt.textContent = autoArticle
-            ? ((T.eamf_back_panel_auto || 'Auto (from carcass)') + ' · ' + autoArticle)
-            : (!carcassSelected
-                ? (T.eamf_back_panel_auto_none || 'Auto — select carcass material')
-                : (T.eamf_back_panel_no_match || 'Auto — no HDF for this decor'));
+        if (autoArticle && standardFallback) {
+            autoOpt.textContent = (T.eamf_back_panel_auto_standard || 'Auto · {code} ({standard})')
+                .replace('{code}', autoArticle)
+                .replace('{standard}', T.eamf_back_panel_standard || 'standard');
+        } else if (autoArticle) {
+            autoOpt.textContent = (T.eamf_back_panel_auto || 'Auto (from carcass)') + ' · ' + autoArticle;
+        } else if (!refMaterial) {
+            autoOpt.textContent = T.eamf_back_panel_auto_none || 'Auto — select carcass material';
+        } else {
+            autoOpt.textContent = T.eamf_back_panel_no_match || 'Auto — no HDF for this decor';
+        }
         selectEl.appendChild(autoOpt);
 
         getEamfBackPanelsList().forEach(function(bp) {
             const id = eamfItemId(bp);
             const opt = document.createElement('option');
             opt.value = id;
-            opt.textContent = id === autoArticle && autoArticle
-                ? id + ' · ' + (T.eamf_back_panel_recommended || 'recommended')
-                : id;
+            const exactMatch = autoArticle && !standardFallback && id === autoArticle;
+            const isStandard = id === getDefaultHdfBackPanelArticle();
+            if (exactMatch) {
+                opt.textContent = id + ' · ' + (T.eamf_back_panel_recommended || 'recommended');
+            } else if (isStandard) {
+                opt.textContent = id + ' · ' + (T.eamf_back_panel_standard || 'standard');
+            } else {
+                opt.textContent = id;
+            }
             selectEl.appendChild(opt);
         });
 
@@ -2951,6 +2985,7 @@
 
     const COUNTERTOP_EXCLUDED = { '76.0077.8': true };
     const COUNTERTOP_HPL12_ARTICLES = { '76.F206.C.920': true, '76.F274.C.920': true };
+    const EAMF_DEFAULT_HDF_BACK_PANEL = '75.U999';
 
     function isEamfCountertopHpl12(material) {
         if (!material) return false;
