@@ -2508,6 +2508,7 @@
 
     let eamfCatalog = null;
     let eamfCatalogReady = null;
+    let eamfMaterialsReady = false;
 
     async function loadEamfCatalog() {
         if (eamfCatalog) return eamfCatalog;
@@ -2652,7 +2653,7 @@
         if (!isClosetBackPanelPart(partName, partMat, partRow)) return false;
         if (partRow && partRow.backPanelCarcass) return false;
         if (usesCarcassBackPanel()) return false;
-        return partMat === 'HDF';
+        return partMat === 'HDF' || /^75\./.test(String(partMat || ''));
     }
 
     function isClosetCarcassBackPanelPart(partRow) {
@@ -2692,6 +2693,26 @@
         return !resolveHdfBackPanelArticleExact(ref);
     }
 
+    function hasEamfCarcassOrFacadeArticleSelected() {
+        const carcassArticle = (document.getElementById('eamfCarcassMaterial')?.value)
+            || loadEamfSelection(EAMF_STORAGE_KEYS.carcassMaterial);
+        const facadeArticle = (document.getElementById('eamfFacadeMaterial')?.value)
+            || loadEamfSelection(EAMF_STORAGE_KEYS.facadeMaterial);
+        return !!(carcassArticle || facadeArticle);
+    }
+
+    /** Article code for HDF back panels (Tellimus / Amflex); never returns generic "HDF". */
+    function resolveHdfBackPanelMaterialCode(partMat) {
+        const selected = getSelectedEamfBackPanelArticle();
+        if (selected) return selected;
+        const matStr = String(partMat || '').trim();
+        if (/^75\./.test(matStr)) return matStr;
+        if ((matStr === 'HDF' || matStr === '') && hasEamfCarcassOrFacadeArticleSelected()) {
+            return getDefaultHdfBackPanelArticle();
+        }
+        return '';
+    }
+
     function resolveClosetPartMaterialLabel(partRow) {
         const partName = partRow && partRow.name;
         const partMat = partRow && partRow.mat;
@@ -2699,7 +2720,7 @@
             return getEamfMaterialLabel('carcass') || partMat || '';
         }
         if (!isClosetHdfBackPanelPart(partName, partMat, partRow)) return partMat || '';
-        return getSelectedEamfBackPanelArticle() || partMat || '';
+        return resolveHdfBackPanelMaterialCode(partMat) || partMat || '';
     }
 
     function getEamfBackPanelsList() {
@@ -2783,13 +2804,22 @@
 
     function getSelectedEamfBackPanelArticle() {
         if (CONFIG_MODE === 'beds') return '';
+        if (usesCarcassBackPanel()) return '';
+        const stored = loadEamfSelection(EAMF_STORAGE_KEYS.backPanel);
+        let article = '';
         if (!isEamfBackPanelManualSelection()) {
-            return getAutoHdfBackPanelArticle();
+            article = getAutoHdfBackPanelArticle();
+        } else {
+            const el = document.getElementById('eamfBackPanel');
+            const val = (el && el.value) || stored;
+            if (val && val !== '__auto__') article = val;
+            else article = getAutoHdfBackPanelArticle();
         }
-        const el = document.getElementById('eamfBackPanel');
-        const val = el ? el.value : loadEamfSelection(EAMF_STORAGE_KEYS.backPanel);
-        if (val && val !== '__auto__') return val;
-        return getAutoHdfBackPanelArticle();
+        if (!article && stored && stored !== '__auto__') article = stored;
+        if (!article && hasEamfCarcassOrFacadeArticleSelected()) {
+            article = getDefaultHdfBackPanelArticle();
+        }
+        return article;
     }
 
     function refreshEamfBackPanelSelect(options) {
@@ -3485,8 +3515,7 @@
             };
         }
         if (isClosetHdfBackPanelPart(partName, partMat, partRow)) {
-            const hdfArticle = getSelectedEamfBackPanelArticle();
-            return { materialCode: hdfArticle, edgeCode: '' };
+            return { materialCode: resolveHdfBackPanelMaterialCode(partMat), edgeCode: '' };
         }
         const isCountertop = partName && /countertop|столешниц/i.test(partName);
         if (isCountertop && sel.countertopMat) {
@@ -3646,6 +3675,7 @@
     }
 
     async function initEamfMaterialsUI() {
+        eamfMaterialsReady = false;
         await loadEamfCatalog();
         const facadeMatEl = document.getElementById('eamfFacadeMaterial');
         const facadeEdgeEl = document.getElementById('eamfFacadeEdge');
@@ -3714,6 +3744,9 @@
                 }
             });
         }
+        eamfMaterialsReady = true;
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+        scheduleAmflexPriceRefresh();
     }
 
     function refreshEamfMaterialSelectLabels() {
@@ -4136,12 +4169,15 @@
     }
 
     function scheduleAmflexPriceRefresh() {
+        if (!eamfMaterialsReady) return;
         clearTimeout(amflexPriceTimer);
         amflexPriceTimer = setTimeout(refreshAmflexPrice, 800);
     }
 
     async function refreshAmflexPrice() {
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        if (!eamfMaterialsReady) return;
+        await loadEamfCatalog();
         if (!canRequestAmflexPrice()) {
             amflexPriceState.loading = false;
             amflexPriceState.error = '';
@@ -5039,8 +5075,8 @@
     // Initialize UI Logic
     // ==========================================
     document.querySelectorAll('input, select').forEach(el => {
-        el.addEventListener('input', updateConfigurator);
-        el.addEventListener('change', updateConfigurator);
+        el.addEventListener('input', scheduleUpdate);
+        el.addEventListener('change', scheduleUpdate);
     });
 
     document.getElementById('hasCountertop').addEventListener('change', function() {
