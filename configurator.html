@@ -1470,6 +1470,7 @@
             eamf_back_panel: "Задняя стенка (HDF):",
             eamf_back_panel_auto: "Авто (по корпусу)",
             eamf_back_panel_auto_none: "Авто — сначала выберите корпус",
+            eamf_back_panel_no_match: "Авто — нет HDF для этого декора",
             eamf_back_panel_recommended: "рекомендуется",
             back_panel_carcass: "Задняя стенка из материала корпуса",
             back_panel_fit: "Посадка задней стенки:",
@@ -1530,6 +1531,8 @@
             price_items: "Деталей",
             price_loading: "Расчёт цены…",
             price_unavailable: "Выберите материалы EAMF для расчёта цены",
+            price_unavailable_back_panel: "Нет HDF для этого декора — выберите заднюю стенку вручную или включите «из материала корпуса»",
+            price_partial_hint: "без {n} дет. (нет артикула материала)",
             price_error: "Не удалось получить цену",
             price_stale_hint: "последняя успешная оценка",
             table1_title: "Таблица 1: Детали корпуса",
@@ -1713,6 +1716,8 @@
             price_items: "Parts",
             price_loading: "Calculating price…",
             price_unavailable: "Select EAMF materials to calculate price",
+            price_unavailable_back_panel: "No HDF for this decor — pick a back panel manually or use carcass material",
+            price_partial_hint: "excludes {n} part(s) without material code",
             price_error: "Could not fetch price",
             price_stale_hint: "last successful estimate",
             table1_title: "Table 1: Carcass Parts",
@@ -1852,6 +1857,7 @@
             eamf_back_panel: "Back panel (HDF):",
             eamf_back_panel_auto: "Auto (from carcass)",
             eamf_back_panel_auto_none: "Auto — select carcass material",
+            eamf_back_panel_no_match: "Auto — no HDF for this decor",
             eamf_back_panel_recommended: "recommended",
             back_panel_carcass: "Back panel from carcass material",
             back_panel_fit: "Back panel fit:",
@@ -2706,6 +2712,7 @@
         const opts = options || {};
         const autoArticle = getAutoHdfBackPanelArticle();
         const manual = opts.forceAutoDefault ? false : isEamfBackPanelManualSelection();
+        const carcassSelected = !!getSelectedEamfCarcassMaterial();
         selectEl.disabled = false;
         selectEl.innerHTML = '';
 
@@ -2713,7 +2720,9 @@
         autoOpt.value = '__auto__';
         autoOpt.textContent = autoArticle
             ? ((T.eamf_back_panel_auto || 'Auto (from carcass)') + ' · ' + autoArticle)
-            : (T.eamf_back_panel_auto_none || 'Auto — select carcass material');
+            : (!carcassSelected
+                ? (T.eamf_back_panel_auto_none || 'Auto — select carcass material')
+                : (T.eamf_back_panel_no_match || 'Auto — no HDF for this decor'));
         selectEl.appendChild(autoOpt);
 
         getEamfBackPanelsList().forEach(function(bp) {
@@ -3985,20 +3994,51 @@
         return '€ ' + n.toFixed(2);
     }
 
-    function canRequestAmflexPrice() {
+    function getAmflexPriceExportStats() {
         const partRows = getTellimusExportRows();
-        if (!partRows.length) return false;
         const matFacadeLabel = getEamfMaterialLabel('facade');
         const matCarcassLabel = getEamfMaterialLabel('carcass');
         const eamfSel = getEamfSelections();
-        if (CONFIG_MODE !== 'shelves') {
-            if (!eamfSel.facadeMat || !eamfSel.carcassMat) return false;
-        }
+        let withCode = 0;
+        let missingBackPanel = 0;
+        const missingNames = [];
         for (let i = 0; i < partRows.length; i++) {
-            const codes = resolvePartExportCodes(partRows[i], matFacadeLabel, matCarcassLabel, eamfSel);
-            if (!codes.materialCode) return false;
+            const row = partRows[i];
+            const codes = resolvePartExportCodes(row, matFacadeLabel, matCarcassLabel, eamfSel);
+            if (codes.materialCode) {
+                withCode++;
+                continue;
+            }
+            missingNames.push(row.name || ('#' + (i + 1)));
+            if (isClosetHdfBackPanelPart(row.name, row.mat, row)) missingBackPanel++;
         }
-        return true;
+        return { partRows, withCode, missingBackPanel, missingNames, eamfSel };
+    }
+
+    function canRequestAmflexPrice() {
+        const stats = getAmflexPriceExportStats();
+        if (!stats.partRows.length) return false;
+        if (CONFIG_MODE !== 'shelves') {
+            if (!stats.eamfSel.facadeMat || !stats.eamfSel.carcassMat) return false;
+        }
+        const hasCT = !!document.getElementById('hasCountertop')?.checked;
+        if (hasCT && !stats.eamfSel.countertopMat) return false;
+        return stats.withCode > 0;
+    }
+
+    function getAmflexPriceUnavailableMessage(T) {
+        T = T || TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        const stats = getAmflexPriceExportStats();
+        if (!stats.partRows.length) return T.price_unavailable;
+        if (CONFIG_MODE !== 'shelves' && (!stats.eamfSel.facadeMat || !stats.eamfSel.carcassMat)) {
+            return T.price_unavailable;
+        }
+        const hasCT = !!document.getElementById('hasCountertop')?.checked;
+        if (hasCT && !stats.eamfSel.countertopMat) return T.price_unavailable;
+        if (stats.missingBackPanel > 0 && stats.withCode === 0) {
+            return T.price_unavailable_back_panel;
+        }
+        return T.price_unavailable;
     }
 
     function renderPriceSummary(T) {
@@ -4020,7 +4060,7 @@
 
         if (!canRequestAmflexPrice()) {
             tbody.innerHTML = '';
-            meta.textContent = T.price_unavailable;
+            meta.textContent = getAmflexPriceUnavailableMessage(T);
             return;
         }
 
@@ -4044,6 +4084,14 @@
         `;
 
         let metaText = T.price_items + ': ' + (q.itemCount || 0);
+        const exportStats = getAmflexPriceExportStats();
+        const skipped = exportStats.partRows.length - exportStats.withCode;
+        if (skipped > 0) {
+            metaText += ' · ' + (T.price_partial_hint || 'excludes {n} part(s)').replace('{n}', String(skipped));
+        }
+        if (exportStats.missingBackPanel > 0) {
+            metaText += ' · ' + T.price_unavailable_back_panel;
+        }
         if (amflexPriceState.stale) metaText += ' · ' + T.price_stale_hint;
         if (amflexPriceState.error) {
             wrap.classList.add('is-error');
