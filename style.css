@@ -202,7 +202,7 @@ tr:hover td        { background-color: #ddf0dd !important; }
 }
 
 .price-hinge-row .price-summary {
-  margin: 56px 0 0 0 !important;
+  margin: 0 !important;
 }
 
 .hinge-specs-panel {
