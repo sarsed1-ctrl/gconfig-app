@@ -205,6 +205,22 @@ tr:hover td        { background-color: #ddf0dd !important; }
   margin: 56px 0 0 0 !important;
 }
 
+.hinge-specs-panel {
+  flex: 1 1 0 !important;
+  min-width: 280px !important;
+}
+
+.hinge-specs-panel table {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+}
+
+.hinge-specs-panel table th:first-child,
+.hinge-specs-panel table td:first-child {
+  width: 42% !important;
+}
+
 .hinge-specs-panel > h3:first-child {
   margin-top: 0 !important;
 }
