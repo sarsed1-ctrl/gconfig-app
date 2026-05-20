@@ -711,6 +711,8 @@
             padding: 14px 18px;
             margin: 16px 0 20px;
             font-size: 0.9em;
+            width: fit-content;
+            max-width: 100%;
         }
 
         .price-summary h4 {
@@ -722,7 +724,7 @@
         .price-summary table {
             margin: 0;
             font-size: 0.95em;
-            width: 100%;
+            width: auto;
             border-collapse: collapse;
             background: var(--price-fill);
         }
@@ -751,19 +753,23 @@
             text-align: left;
             font-weight: normal;
             color: #6b4423;
-            padding-right: 24px;
+            padding-right: 12px;
+            white-space: nowrap;
         }
 
         .price-summary .price-value {
             text-align: right;
             white-space: nowrap;
             color: #333;
+            padding-left: 4px;
+            width: 1%;
         }
 
         .price-summary .price-total-row .price-label {
             padding-top: 10px;
             font-weight: 600;
             color: #7a3e00;
+            border-top: 1px solid #e0b88a;
         }
 
         .price-summary .price-total-row .price-value {

@@ -165,8 +165,13 @@ tr:hover td        { background-color: #ddf0dd !important; }
   --price-fill: #fff8ef;
   background: var(--price-fill) !important;
   border-color: #e0b88a !important;
+  width: fit-content !important;
+  max-width: 100% !important;
 }
 .price-summary h4 { color: #9a5b12 !important; }
+.price-summary table {
+  width: auto !important;
+}
 .price-summary table,
 .price-summary tbody,
 .price-summary tr,
@@ -182,8 +187,6 @@ tr:hover td        { background-color: #ddf0dd !important; }
 .price-summary .price-total-row .price-label,
 .price-summary .price-total-row .price-value {
   color: #7a3e00 !important;
-}
-.price-summary .price-total-row .price-value {
   border-top: 1px solid #e0b88a !important;
 }
 .price-summary .price-meta { color: #8a6a4a !important; }
