@@ -193,6 +193,23 @@ tr:hover td        { background-color: #ddf0dd !important; }
 .price-summary.is-loading .price-meta { color: #9a5b12 !important; }
 .price-summary.is-error .price-meta { color: #b94a48 !important; }
 
+.price-hinge-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 16px 24px !important;
+  margin: 16px 0 20px !important;
+}
+
+.price-hinge-row .price-summary {
+  margin: 0 !important;
+}
+
+.hinge-specs-panel > h3:first-child,
+.hinge-specs-panel > #hingeTableHeading {
+  margin-top: 0 !important;
+}
+
 /* ── 12. Recommendations / warnings block ─────────────────── */
 .recommendations-block {
   background-color: var(--warning-bg) !important;

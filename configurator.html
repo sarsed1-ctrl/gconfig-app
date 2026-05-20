@@ -793,6 +793,59 @@
         .price-summary.is-error .price-meta {
             color: #b94a48;
         }
+
+        .price-hinge-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 16px 24px;
+            margin: 16px 0 20px;
+        }
+
+        .price-hinge-row .price-summary {
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .hinge-specs-panel {
+            flex: 1 1 300px;
+            min-width: 260px;
+            max-width: 100%;
+        }
+
+        .hinge-specs-panel > h3:first-child,
+        .hinge-specs-panel > #hingeTableHeading {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .hinge-specs-panel h3[data-i18n="upper_hinge_specs"],
+        .hinge-specs-panel h3[data-i18n="lower_hinge_specs"],
+        .hinge-specs-panel #upperGasSpecsHeading,
+        .hinge-specs-panel #lowerGasSpecsHeading {
+            margin: 10px 0 6px 0;
+            color: #1a6b2f;
+            font-size: 0.92em;
+        }
+
+        .hinge-specs-panel table {
+            width: auto;
+            min-width: 280px;
+            max-width: 100%;
+            margin: 0 0 10px 0;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 720px) {
+            .price-hinge-row {
+                flex-direction: column;
+            }
+
+            .hinge-specs-panel {
+                min-width: 0;
+            }
+        }
     </style>
     <link rel="stylesheet" href="style.css">
     <meta property="og:title" content="GConfig — Closet Configurator">
@@ -1357,56 +1410,60 @@
         <canvas id="schematicCanvas" width="800" height="500"></canvas>
         <div id="hingeTooltip" style="position:fixed;display:none;background:#222;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:9999;"></div>
 
-        <div class="price-summary" id="priceSummary">
-            <h4 data-i18n="price_summary_title">Price (Amflex)</h4>
-            <table id="priceTable">
-                <tbody id="priceTableBody"></tbody>
-            </table>
-            <div class="price-meta" id="priceSummaryMeta"></div>
+        <div class="price-hinge-row">
+            <div class="price-summary" id="priceSummary">
+                <h4 data-i18n="price_summary_title">Price (Amflex)</h4>
+                <table id="priceTable">
+                    <tbody id="priceTableBody"></tbody>
+                </table>
+                <div class="price-meta" id="priceSummaryMeta"></div>
+            </div>
+
+            <div class="hinge-specs-panel" id="hingeSpecsPanel">
+                <h3 style="display:none;" id="hingeTableHeading">Hinge Specifications</h3>
+                <h3 data-i18n="upper_hinge_specs" style="display:none;">Upper Closet Hinges</h3>
+                <table id="hingeSpecTableUpper" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_hinge_position">Position</th>
+                            <th data-i18n="col_sku">SKU / Article</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hingeSpecBodyUpper"></tbody>
+                </table>
+                <h3 data-i18n="upper_gas_specs" id="upperGasSpecsHeading" style="display:none;">Upper Closet Gas Lifts</h3>
+                <table id="upperGasSpecTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_hinge_position">Position</th>
+                            <th data-i18n="col_sku">SKU / Article</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upperGasSpecBody"></tbody>
+                </table>
+
+                <h3 data-i18n="lower_hinge_specs" style="display:none;">Lower Closet Hinges</h3>
+                <table id="hingeSpecTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_hinge_position">Position</th>
+                            <th data-i18n="col_sku">SKU / Article</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hingeSpecBody"></tbody>
+                </table>
+                <h3 data-i18n="lower_gas_specs" id="lowerGasSpecsHeading" style="display:none;">Lower Closet Gas Lifts</h3>
+                <table id="gasSpecTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_hinge_position">Position</th>
+                            <th data-i18n="col_sku">SKU / Article</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gasSpecBody"></tbody>
+                </table>
+            </div>
         </div>
-
-        <h3 style="margin-top:12px;display:none;" id="hingeTableHeading">Hinge Specifications</h3>
-        <h3 data-i18n="upper_hinge_specs" style="display:none;">Upper Closet Hinges</h3>
-        <table id="hingeSpecTableUpper" style="display:none;">
-            <thead>
-                <tr>
-                    <th data-i18n="col_hinge_position">Position</th>
-                    <th data-i18n="col_sku">SKU / Article</th>
-                </tr>
-            </thead>
-            <tbody id="hingeSpecBodyUpper"></tbody>
-        </table>
-        <h3 data-i18n="upper_gas_specs" id="upperGasSpecsHeading" style="display:none;">Upper Closet Gas Lifts</h3>
-        <table id="upperGasSpecTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th data-i18n="col_hinge_position">Position</th>
-                    <th data-i18n="col_sku">SKU / Article</th>
-                </tr>
-            </thead>
-            <tbody id="upperGasSpecBody"></tbody>
-        </table>
-
-        <h3 data-i18n="lower_hinge_specs" style="display:none;">Lower Closet Hinges</h3>
-        <table id="hingeSpecTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th data-i18n="col_hinge_position">Position</th>
-                    <th data-i18n="col_sku">SKU / Article</th>
-                </tr>
-            </thead>
-            <tbody id="hingeSpecBody"></tbody>
-        </table>
-        <h3 data-i18n="lower_gas_specs" id="lowerGasSpecsHeading" style="display:none;">Lower Closet Gas Lifts</h3>
-        <table id="gasSpecTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th data-i18n="col_hinge_position">Position</th>
-                    <th data-i18n="col_sku">SKU / Article</th>
-                </tr>
-            </thead>
-            <tbody id="gasSpecBody"></tbody>
-        </table>
 
         <!-- Decorative divider -->
         <svg class="section-divider" width="100%" height="20" aria-hidden="true"><use href="#divider"/></svg>
@@ -6643,6 +6700,7 @@
 
     function updateHingeSpecsSectionVisibility() {
         const mainHeading = document.getElementById('hingeTableHeading');
+        const panel = document.getElementById('hingeSpecsPanel');
         const upperTable = document.getElementById('hingeSpecTableUpper');
         const lowerTable = document.getElementById('hingeSpecTable');
         const upperGasTable = document.getElementById('upperGasSpecTable');
@@ -6653,7 +6711,9 @@
         const lowerVisible = !!lowerTable && lowerTable.style.display !== 'none';
         const upperGasVisible = !!upperGasTable && upperGasTable.style.display !== 'none';
         const gasVisible = !!gasTable && gasTable.style.display !== 'none';
-        mainHeading.style.display = (upperVisible || lowerVisible || upperGasVisible || gasVisible) ? '' : 'none';
+        const showSection = upperVisible || lowerVisible || upperGasVisible || gasVisible;
+        mainHeading.style.display = showSection ? '' : 'none';
+        if (panel) panel.style.display = showSection ? '' : 'none';
     }
 
     function renderHingeSpecTableUpper(rows, lang = 'ru') {
