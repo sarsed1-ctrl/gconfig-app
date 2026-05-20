@@ -17,6 +17,15 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "eamf-catalog.json"
 DEPLOY_OUT = ROOT / "deploy" / "assets" / "eamf-catalog.json"
 
+# BEDS mode MDF carcass — not in ALL MATERIALS.xlsx plate column; always inject.
+BED_MDF_CARCASS_ARTICLES = [
+    ("77.124.D.16", 16),
+    ("77.124.D.18", 18),
+    ("77.124.D.19", 19),
+    ("77.124.D.25", 25),
+    ("77.124.D.28", 28),
+]
+
 
 def resolve_source_path() -> Path:
     for candidate in SRC_CANDIDATES:
@@ -149,6 +158,23 @@ def main() -> int:
         if p["decor"] and p["thick"] is not None:
             edge_codes |= decor_thick_edges.get((p["decor"], p["thick"]), set())
         materials.append({**p, "edgeCodes": sorted(edge_codes)})
+
+    for code, thick in BED_MDF_CARCASS_ARTICLES:
+        if code in seen_m:
+            continue
+        seen_m.add(code)
+        materials.append({
+            "code": code,
+            "article": code,
+            "decor": "124",
+            "thick": thick,
+            "thickness": thick,
+            "postform": False,
+            "feelWood": False,
+            "bedMdfCarcass": True,
+            "label": code,
+            "edgeCodes": [],
+        })
 
     edges = sorted(edges_set.values(), key=lambda x: x["code"])
     materials.sort(key=lambda m: (m.get("thick") or 0, m.get("decor") or "", m["code"]))

@@ -3,7 +3,7 @@
   "sheet": "Отсортированная_таблица_материа",
   "generated": "2026-05-20",
   "counts": {
-    "materials": 988,
+    "materials": 993,
     "edges": 2444,
     "backPanels": 17
   },
@@ -2202,6 +2202,18 @@
       "edgeCodes": [
         "74.F021.1.5.43"
       ]
+    },
+    {
+      "code": "77.124.D.16",
+      "article": "77.124.D.16",
+      "decor": "124",
+      "thick": 16,
+      "thickness": 16,
+      "postform": false,
+      "feelWood": false,
+      "bedMdfCarcass": true,
+      "label": "77.124.D.16",
+      "edgeCodes": []
     },
     {
       "code": "73.F186.16",
@@ -5141,6 +5153,18 @@
       "edgeCodes": [
         "74P.U337.2.23"
       ]
+    },
+    {
+      "code": "77.124.D.18",
+      "article": "77.124.D.18",
+      "decor": "124",
+      "thick": 18,
+      "thickness": 18,
+      "postform": false,
+      "feelWood": false,
+      "bedMdfCarcass": true,
+      "label": "77.124.D.18",
+      "edgeCodes": []
     },
     {
       "code": "73.B026.0J.18",
@@ -10485,6 +10509,18 @@
       ]
     },
     {
+      "code": "77.124.D.19",
+      "article": "77.124.D.19",
+      "decor": "124",
+      "thick": 19,
+      "thickness": 19,
+      "postform": false,
+      "feelWood": false,
+      "bedMdfCarcass": true,
+      "label": "77.124.D.19",
+      "edgeCodes": []
+    },
+    {
       "code": "73.F128.PA.19",
       "article": "73.F128.PA.19",
       "decor": "F128",
@@ -11304,6 +11340,18 @@
       "edgeCodes": [
         "74.F352.1.5.43"
       ]
+    },
+    {
+      "code": "77.124.D.25",
+      "article": "77.124.D.25",
+      "decor": "124",
+      "thick": 25,
+      "thickness": 25,
+      "postform": false,
+      "feelWood": false,
+      "bedMdfCarcass": true,
+      "label": "77.124.D.25",
+      "edgeCodes": []
     },
     {
       "code": "73.F186.25",
@@ -13126,6 +13174,18 @@
         "74R.F302.1.23",
         "74R.F416.2.23"
       ]
+    },
+    {
+      "code": "77.124.D.28",
+      "article": "77.124.D.28",
+      "decor": "124",
+      "thick": 28,
+      "thickness": 28,
+      "postform": false,
+      "feelWood": false,
+      "bedMdfCarcass": true,
+      "label": "77.124.D.28",
+      "edgeCodes": []
     },
     {
       "code": "73.W980.30",

@@ -883,6 +883,23 @@
             <label data-i18n="eamf_carcass_edge">Carcass edge (ABS):</label>
             <select id="eamfCarcassEdge" disabled></select>
         </div>
+        <div class="form-group" id="eamfBackPanelRow">
+            <label data-i18n="eamf_back_panel">Back panel (HDF):</label>
+            <select id="eamfBackPanel"></select>
+        </div>
+        <div class="form-group" id="eamfCarcassBackPanelRow">
+            <label style="display:flex; align-items:center; gap:8px; width:100%;">
+                <input type="checkbox" id="useCarcassBackPanel" style="width:auto;">
+                <span data-i18n="back_panel_carcass">Back panel from carcass material</span>
+            </label>
+        </div>
+        <div class="form-group" id="eamfBackPanelFitRow" style="display:none;">
+            <label data-i18n="back_panel_fit">Back panel fit:</label>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="overlay" checked style="width:auto;"> <span data-i18n="overlay_label">Overlay</span></label>
+                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="inset" style="width:auto;"> <span data-i18n="inset_label">Inset</span></label>
+            </div>
+        </div>
     </div>
 
     <div class="block">
@@ -1391,6 +1408,12 @@
             eamf_facade_edge: "Кант фасада (ABS):",
             eamf_carcass_material: "Материал корпуса:",
             eamf_carcass_edge: "Кант корпуса (ABS):",
+            eamf_back_panel: "Задняя стенка (HDF):",
+            eamf_back_panel_auto: "Авто (по корпусу)",
+            eamf_back_panel_auto_none: "Авто — сначала выберите корпус",
+            eamf_back_panel_recommended: "рекомендуется",
+            back_panel_carcass: "Задняя стенка из материала корпуса",
+            back_panel_fit: "Посадка задней стенки:",
             eamf_select_material: "— Выберите материал —",
             eamf_select_edge: "— Выберите кант —",
             eamf_select_material_first: "Сначала выберите материал",
@@ -1744,6 +1767,12 @@
             eamf_facade_edge: "Facade edge (ABS):",
             eamf_carcass_material: "Carcass material:",
             eamf_carcass_edge: "Carcass edge (ABS):",
+            eamf_back_panel: "Back panel (HDF):",
+            eamf_back_panel_auto: "Auto (from carcass)",
+            eamf_back_panel_auto_none: "Auto — select carcass material",
+            eamf_back_panel_recommended: "recommended",
+            back_panel_carcass: "Back panel from carcass material",
+            back_panel_fit: "Back panel fit:",
             eamf_select_material: "— Select material —",
             eamf_select_edge: "— Select edge —",
             eamf_select_material_first: "Select material first",
@@ -1804,6 +1833,12 @@
         if (row) row.style.display = visible ? '' : 'none';
     }
 
+    function setEamfBackPanelRowVisible(visible) {
+        const row = document.getElementById('eamfBackPanelRow')
+            || document.getElementById('eamfBackPanel')?.closest('.form-group');
+        if (row) row.style.display = visible ? '' : 'none';
+    }
+
     function applyConfiguratorMode(lang) {
         if (CONFIG_MODE !== 'beds') return;
 
@@ -1815,6 +1850,8 @@
         }
 
         setEamfCarcassEdgeRowVisible(false);
+        setEamfBackPanelRowVisible(false);
+        setEamfCarcassBackPanelOptionsVisible(false);
 
         // Switch UI dictionary to bed-oriented naming for BEDS page.
         TRANSLATIONS.en.upper_cabinet_title = "Upper Bed (Lift-up)";
@@ -2012,16 +2049,29 @@
         return material && isBedMdfCarcassArticle(eamfItemId(material));
     }
 
+    function getBedMdfCarcassMaterialStub(article, mm) {
+        return {
+            code: article,
+            article: article,
+            decor: '124',
+            thick: mm,
+            thickness: mm,
+            label: article,
+            bedMdfCarcass: true,
+            edgeCodes: []
+        };
+    }
+
     function getBedMdfCarcassMaterials() {
-        if (!eamfCatalog) return [];
         return BED_MDF_CARCASS_THICKNESS_MM.map(function(mm) {
-            return findEamfMaterial(BED_MDF_CARCASS_ARTICLE_BY_MM[mm]);
-        }).filter(Boolean);
+            const article = BED_MDF_CARCASS_ARTICLE_BY_MM[mm];
+            return findEamfMaterial(article) || getBedMdfCarcassMaterialStub(article, mm);
+        });
     }
 
     /** BEDS: set #eamfCarcassMaterial (and edge UI) from #carcassThick. */
     function syncBedCarcassMaterialFromThickness() {
-        if (CONFIG_MODE !== 'beds' || !eamfCatalog) return;
+        if (CONFIG_MODE !== 'beds') return;
         const carcassMatEl = document.getElementById('eamfCarcassMaterial');
         if (!carcassMatEl) return;
         const article = getBedMdfCarcassArticle(
@@ -2222,8 +2272,9 @@
 
     function estimateMainEdge(partName, l, w, qty, t) {
         const name = (partName || '').toLowerCase();
-        if (t <= 3 || name.includes('back panel') || name.includes('задняя стенка')) {
-            return { edgeType: 'none', edgeLenMm: 0 };
+        if (name.includes('back panel') || name.includes('задняя стенка')) {
+            if (t <= 3) return { edgeType: 'none', edgeLenMm: 0 };
+            return { edgeType: '2mm PVC', edgeLenMm: (2 * (l + w)) * qty };
         }
         if (name.includes('facade') || name.includes('door') || name.includes('фасад')) {
             return { edgeType: '2mm PVC', edgeLenMm: (2 * (l + w)) * qty };
@@ -2350,7 +2401,11 @@
         facadeEdgeManual: 'eamfFacadeEdgeManual',
         carcassMaterial: 'eamfCarcassMaterial',
         carcassEdge: 'eamfCarcassEdge',
-        carcassEdgeManual: 'eamfCarcassEdgeManual'
+        carcassEdgeManual: 'eamfCarcassEdgeManual',
+        backPanel: 'eamfBackPanel',
+        backPanelManual: 'eamfBackPanelManual',
+        useCarcassBackPanel: 'eamfUseCarcassBackPanel',
+        backPanelFitType: 'eamfBackPanelFitType'
     };
 
     let eamfCatalog = null;
@@ -2404,13 +2459,106 @@
         return '';
     }
 
-    function isClosetHdfBackPanelPart(partName, partMat) {
+    function setEamfBackPanelRowVisible(visible) {
+        const row = document.getElementById('eamfBackPanelRow')
+            || document.getElementById('eamfBackPanel')?.closest('.form-group');
+        if (row) row.style.display = visible ? '' : 'none';
+    }
+
+    function setEamfCarcassBackPanelOptionsVisible(visible) {
+        const carcassRow = document.getElementById('eamfCarcassBackPanelRow');
+        const fitRow = document.getElementById('eamfBackPanelFitRow');
+        if (carcassRow) carcassRow.style.display = visible ? '' : 'none';
+        if (fitRow) fitRow.style.display = visible ? '' : 'none';
+    }
+
+    function usesCarcassBackPanel() {
+        return CONFIG_MODE !== 'beds' && !!document.getElementById('useCarcassBackPanel')?.checked;
+    }
+
+    function getBackPanelFitType() {
+        const stored = loadEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType);
+        const checked = document.querySelector('input[name="backPanelFitType"]:checked')?.value;
+        const val = checked || stored || 'overlay';
+        return val === 'inset' ? 'inset' : 'overlay';
+    }
+
+    function calcBackPanelFacadeDims(cabW, cabH, carcassT, fitType, overlayGap, insetGap) {
+        const openingW = Math.max(0, cabW - 2 * carcassT);
+        const openingH = Math.max(0, cabH - 2 * carcassT);
+        const width = fitType === 'overlay'
+            ? Math.max(0, cabW - 2 * overlayGap)
+            : Math.max(0, openingW - 2 * insetGap);
+        const height = fitType === 'overlay'
+            ? Math.max(0, cabH - 2 * overlayGap)
+            : Math.max(0, openingH - 2 * insetGap);
+        return { width: width, height: height };
+    }
+
+    function syncCarcassBackPanelUI() {
+        if (CONFIG_MODE === 'beds') {
+            setEamfBackPanelRowVisible(false);
+            setEamfCarcassBackPanelOptionsVisible(false);
+            return;
+        }
+        const useCarcass = usesCarcassBackPanel();
+        setEamfBackPanelRowVisible(!useCarcass);
+        setEamfCarcassBackPanelOptionsVisible(true);
+        const fitRow = document.getElementById('eamfBackPanelFitRow');
+        if (fitRow) fitRow.style.display = useCarcass ? '' : 'none';
+        const hdfSelect = document.getElementById('eamfBackPanel');
+        if (hdfSelect) hdfSelect.disabled = useCarcass;
+    }
+
+    function onCarcassBackPanelOptionChange() {
+        const useEl = document.getElementById('useCarcassBackPanel');
+        if (useEl) saveEamfSelection(EAMF_STORAGE_KEYS.useCarcassBackPanel, useEl.checked ? '1' : '');
+        const fit = getBackPanelFitType();
+        saveEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType, fit);
+        syncCarcassBackPanelUI();
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+    }
+
+    function initCarcassBackPanelUI() {
+        if (CONFIG_MODE === 'beds') {
+            syncCarcassBackPanelUI();
+            return;
+        }
+        const useEl = document.getElementById('useCarcassBackPanel');
+        const savedUse = loadEamfSelection(EAMF_STORAGE_KEYS.useCarcassBackPanel) === '1';
+        if (useEl) useEl.checked = savedUse;
+        const savedFit = loadEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType) || 'overlay';
+        document.querySelectorAll('input[name="backPanelFitType"]').forEach(function(radio) {
+            radio.checked = radio.value === savedFit;
+        });
+        syncCarcassBackPanelUI();
+        if (!useEl || useEl.dataset.eamfBackBound) return;
+        useEl.dataset.eamfBackBound = '1';
+        useEl.addEventListener('change', onCarcassBackPanelOptionChange);
+        document.querySelectorAll('input[name="backPanelFitType"]').forEach(function(radio) {
+            radio.addEventListener('change', onCarcassBackPanelOptionChange);
+        });
+    }
+
+    function isClosetBackPanelPart(partName, partMat, partRow) {
         if (CONFIG_MODE === 'beds') return false;
+        if (partRow && partRow.backPanelCarcass) return true;
         if (partMat === 'HDF') return true;
         if (!partName) return false;
         const n = partName.toLowerCase();
         if (/rail|планка/.test(n)) return false;
         return /back panel|задняя стенка/.test(n);
+    }
+
+    function isClosetHdfBackPanelPart(partName, partMat, partRow) {
+        if (!isClosetBackPanelPart(partName, partMat, partRow)) return false;
+        if (partRow && partRow.backPanelCarcass) return false;
+        if (usesCarcassBackPanel()) return false;
+        return partMat === 'HDF';
+    }
+
+    function isClosetCarcassBackPanelPart(partRow) {
+        return !!(partRow && partRow.backPanelCarcass);
     }
 
     function resolveHdfBackPanelArticle(referenceMaterial) {
@@ -2433,10 +2581,96 @@
     function resolveClosetPartMaterialLabel(partRow) {
         const partName = partRow && partRow.name;
         const partMat = partRow && partRow.mat;
-        if (!isClosetHdfBackPanelPart(partName, partMat)) return partMat || '';
-        const sel = getEamfSelections();
-        const ref = sel.carcassMat || sel.facadeMat;
-        return resolveHdfBackPanelArticle(ref) || partMat || '';
+        if (isClosetCarcassBackPanelPart(partRow)) {
+            return getEamfMaterialLabel('carcass') || partMat || '';
+        }
+        if (!isClosetHdfBackPanelPart(partName, partMat, partRow)) return partMat || '';
+        return getSelectedEamfBackPanelArticle() || partMat || '';
+    }
+
+    function getEamfBackPanelsList() {
+        if (!eamfCatalog) return [];
+        return (eamfCatalog.backPanels || []).slice().sort(function(a, b) {
+            return eamfItemId(a).localeCompare(eamfItemId(b));
+        });
+    }
+
+    function findEamfBackPanel(article) {
+        if (!article || !eamfCatalog) return null;
+        return (eamfCatalog.backPanels || []).find(function(bp) {
+            return eamfItemId(bp) === article;
+        }) || null;
+    }
+
+    function getAutoHdfBackPanelArticle() {
+        if (CONFIG_MODE === 'beds') return '';
+        const ref = getSelectedEamfCarcassMaterial() || getSelectedEamfFacadeMaterial();
+        return resolveHdfBackPanelArticle(ref);
+    }
+
+    function isEamfBackPanelManualSelection() {
+        return loadEamfSelection(EAMF_STORAGE_KEYS.backPanelManual) === '1';
+    }
+
+    function populateEamfBackPanelSelect(selectEl, selectedArticle, options) {
+        if (!selectEl || !eamfCatalog || CONFIG_MODE === 'beds') return;
+        const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        const opts = options || {};
+        const autoArticle = getAutoHdfBackPanelArticle();
+        const manual = opts.forceAutoDefault ? false : isEamfBackPanelManualSelection();
+        selectEl.disabled = false;
+        selectEl.innerHTML = '';
+
+        const autoOpt = document.createElement('option');
+        autoOpt.value = '__auto__';
+        autoOpt.textContent = autoArticle
+            ? ((T.eamf_back_panel_auto || 'Auto (from carcass)') + ' · ' + autoArticle)
+            : (T.eamf_back_panel_auto_none || 'Auto — select carcass material');
+        selectEl.appendChild(autoOpt);
+
+        getEamfBackPanelsList().forEach(function(bp) {
+            const id = eamfItemId(bp);
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = id === autoArticle && autoArticle
+                ? id + ' · ' + (T.eamf_back_panel_recommended || 'recommended')
+                : id;
+            selectEl.appendChild(opt);
+        });
+
+        let chosen = selectedArticle || '';
+        if (!manual || opts.forceAutoDefault) {
+            chosen = autoArticle || '__auto__';
+        }
+
+        if (chosen && chosen !== '__auto__' && [...selectEl.options].some(function(o) { return o.value === chosen; })) {
+            selectEl.value = chosen;
+        } else {
+            selectEl.value = '__auto__';
+        }
+    }
+
+    function getSelectedEamfBackPanelArticle() {
+        if (CONFIG_MODE === 'beds') return '';
+        if (!isEamfBackPanelManualSelection()) {
+            return getAutoHdfBackPanelArticle();
+        }
+        const el = document.getElementById('eamfBackPanel');
+        const val = el ? el.value : loadEamfSelection(EAMF_STORAGE_KEYS.backPanel);
+        if (val && val !== '__auto__') return val;
+        return getAutoHdfBackPanelArticle();
+    }
+
+    function refreshEamfBackPanelSelect(options) {
+        if (CONFIG_MODE === 'beds') return;
+        const backPanelEl = document.getElementById('eamfBackPanel');
+        if (!backPanelEl) return;
+        const autoArticle = getAutoHdfBackPanelArticle();
+        const preferred = isEamfBackPanelManualSelection() && !options?.forceAutoDefault
+            ? (backPanelEl.value || loadEamfSelection(EAMF_STORAGE_KEYS.backPanel))
+            : (autoArticle || '__auto__');
+        populateEamfBackPanelSelect(backPanelEl, preferred, options || {});
+        saveEamfSelection(EAMF_STORAGE_KEYS.backPanel, backPanelEl.value || '');
     }
 
     function eamfEdgesMatchDecor(edge, material) {
@@ -2682,7 +2916,8 @@
     }
 
     function populateEamfMaterialSelect(selectEl, selectedArticle, kind) {
-        if (!selectEl || !eamfCatalog) return;
+        if (!selectEl) return;
+        if (!(CONFIG_MODE === 'beds' && kind === 'carcass') && !eamfCatalog) return;
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
 
         if (CONFIG_MODE === 'beds' && kind === 'carcass') {
@@ -2694,6 +2929,7 @@
             const pick = prev && materials.some(function(m) { return eamfItemId(m) === prev; })
                 ? prev
                 : targetArticle;
+            selectEl.disabled = false;
             selectEl.innerHTML = '';
             materials.forEach(function(m) {
                 const opt = document.createElement('option');
@@ -2828,9 +3064,14 @@
         if (carcassId && partMat && partMat.indexOf(carcassId) >= 0) {
             return { materialCode: carcassId, edgeCode: eamfItemId(sel.carcassEdge) };
         }
-        if (isClosetHdfBackPanelPart(partName, partMat)) {
-            const ref = sel.carcassMat || sel.facadeMat;
-            const hdfArticle = resolveHdfBackPanelArticle(ref);
+        if (isClosetCarcassBackPanelPart(partRow)) {
+            return {
+                materialCode: sel.carcassMat ? eamfItemId(sel.carcassMat) : '',
+                edgeCode: eamfItemId(sel.carcassEdge)
+            };
+        }
+        if (isClosetHdfBackPanelPart(partName, partMat, partRow)) {
+            const hdfArticle = getSelectedEamfBackPanelArticle();
             return { materialCode: hdfArticle, edgeCode: '' };
         }
         return { materialCode: '', edgeCode: '' };
@@ -2863,6 +3104,9 @@
         populateEamfEdgeSelect(edgeEl, material, '', { forceAutoDefault: true });
         if (edgeEl && edgeEl.value) saveEamfSelection(EAMF_STORAGE_KEYS.facadeEdge, edgeEl.value);
         syncEamfThicknessFromMaterial(material, 'facadeThick');
+        if (CONFIG_MODE !== 'beds' && !isEamfBackPanelManualSelection()) {
+            refreshEamfBackPanelSelect({ forceAutoDefault: true });
+        }
         if (typeof updateConfigurator === 'function') updateConfigurator();
     }
 
@@ -2872,10 +3116,27 @@
         const article = el ? el.value : '';
         saveEamfSelection(EAMF_STORAGE_KEYS.carcassMaterial, article);
         saveEamfSelection(EAMF_STORAGE_KEYS.carcassEdgeManual, '');
+        saveEamfSelection(EAMF_STORAGE_KEYS.backPanelManual, '');
         const material = findEamfMaterial(article);
         populateEamfEdgeSelect(edgeEl, material, '', { forceAutoDefault: true });
         if (edgeEl && edgeEl.value) saveEamfSelection(EAMF_STORAGE_KEYS.carcassEdge, edgeEl.value);
         syncEamfThicknessFromMaterial(material, 'carcassThick');
+        if (CONFIG_MODE !== 'beds') {
+            refreshEamfBackPanelSelect({ forceAutoDefault: true });
+        }
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+    }
+
+    function onEamfBackPanelChange() {
+        const el = document.getElementById('eamfBackPanel');
+        const val = el ? el.value : '';
+        const autoArticle = getAutoHdfBackPanelArticle();
+        saveEamfSelection(EAMF_STORAGE_KEYS.backPanel, val);
+        if (!val || val === '__auto__' || (autoArticle && val === autoArticle)) {
+            saveEamfSelection(EAMF_STORAGE_KEYS.backPanelManual, '');
+        } else {
+            saveEamfSelection(EAMF_STORAGE_KEYS.backPanelManual, '1');
+        }
         if (typeof updateConfigurator === 'function') updateConfigurator();
     }
 
@@ -2942,6 +3203,9 @@
             loadEamfSelection(EAMF_STORAGE_KEYS.carcassEdge),
             getEamfEdgeSelectOptions('carcass')
         );
+        if (CONFIG_MODE !== 'beds') {
+            refreshEamfBackPanelSelect();
+        }
     }
 
     async function initEamfMaterialsUI() {
@@ -2950,6 +3214,7 @@
         const facadeEdgeEl = document.getElementById('eamfFacadeEdge');
         const carcassMatEl = document.getElementById('eamfCarcassMaterial');
         const carcassEdgeEl = document.getElementById('eamfCarcassEdge');
+        const backPanelEl = document.getElementById('eamfBackPanel');
         if (!facadeMatEl || !carcassMatEl) return;
 
         populateEamfMaterialSelect(facadeMatEl, loadEamfSelection(EAMF_STORAGE_KEYS.facadeMaterial), 'facade');
@@ -2969,6 +3234,18 @@
             loadEamfSelection(EAMF_STORAGE_KEYS.carcassEdge),
             getEamfEdgeSelectOptions('carcass')
         );
+        if (CONFIG_MODE !== 'beds') {
+            populateEamfBackPanelSelect(
+                backPanelEl,
+                isEamfBackPanelManualSelection()
+                    ? loadEamfSelection(EAMF_STORAGE_KEYS.backPanel)
+                    : '__auto__'
+            );
+            if (backPanelEl) saveEamfSelection(EAMF_STORAGE_KEYS.backPanel, backPanelEl.value || '');
+            initCarcassBackPanelUI();
+        } else {
+            initCarcassBackPanelUI();
+        }
 
         if (!facadeMatEl.dataset.eamfBound) {
             facadeMatEl.dataset.eamfBound = '1';
@@ -2976,6 +3253,7 @@
             facadeEdgeEl.addEventListener('change', onEamfFacadeEdgeChange);
             carcassMatEl.addEventListener('change', onEamfCarcassMaterialChange);
             carcassEdgeEl.addEventListener('change', onEamfCarcassEdgeChange);
+            if (backPanelEl) backPanelEl.addEventListener('change', onEamfBackPanelChange);
 
             ['facadeThick', 'carcassThick'].forEach(function(id) {
                 const thickEl = document.getElementById(id);
@@ -3002,6 +3280,7 @@
             const mat = findEamfMaterial(document.getElementById(matId)?.value);
             populateEamfEdgeSelect(el, mat, prev, getEamfEdgeSelectOptions(isFacade ? 'facade' : 'carcass'));
         });
+        if (CONFIG_MODE !== 'beds') refreshEamfBackPanelSelect();
     }
 
     const TELLIMUS_SHEET_PATH = 'xl/worksheets/sheet1.xml';
@@ -3271,6 +3550,8 @@
     function initBedsModeUI() {
         if (CONFIG_MODE !== 'beds') return;
         setEamfCarcassEdgeRowVisible(false);
+        setEamfBackPanelRowVisible(false);
+        setEamfCarcassBackPanelOptionsVisible(false);
         const sidebar = document.querySelector('.sidebar');
         if (!sidebar) return;
         if (document.getElementById('beds-controls')) return;
@@ -4982,9 +5263,31 @@
             const upperHorizArea = panelAreaM2(upperInnerW, d2);
             parts.push({ name: T.part_roof_bottom_upper, qty: 2, l: upperInnerW, w: d2, t: carcassT, mat: matCarcass });
             wtUpperCarcass += 2 * upperHorizArea * carcassWpm2;
-            
-            // Upper cabinet back panel
-            parts.push({ name: T.part_back_upper, qty: 1, l: h2 - 4, w: w2 - 4, t: 3, mat: 'HDF' });
+
+            const upperOpeningW = Math.max(0, w2 - 2 * carcassT);
+            const upperOpeningH = Math.max(0, h2 - 2 * carcassT);
+            const upperDoorType = document.querySelector('input[name="upperDoorType"]:checked')?.value || 'overlay';
+            const upperOverlayGap = parseFloat(document.getElementById('upperOverlayGap').value) || 2;
+            const upperInsetGap = parseFloat(document.getElementById('upperInsetGap').value) || 2;
+            const backPanelFit = getBackPanelFitType();
+
+            if (usesCarcassBackPanel()) {
+                const upperBackDims = calcBackPanelFacadeDims(
+                    w2, h2, carcassT, backPanelFit, upperOverlayGap, upperInsetGap
+                );
+                parts.push({
+                    name: T.part_back_upper,
+                    qty: 1,
+                    l: upperBackDims.width,
+                    w: upperBackDims.height,
+                    t: carcassT,
+                    mat: matCarcass,
+                    backPanelCarcass: true
+                });
+                wtUpperCarcass += panelAreaM2(upperBackDims.width, upperBackDims.height) * carcassWpm2;
+            } else {
+                parts.push({ name: T.part_back_upper, qty: 1, l: h2 - 4, w: w2 - 4, t: 3, mat: 'HDF' });
+            }
             
             // Upper cabinet shelves
             const upperShelvesH = parseInt(document.getElementById('upperShelvesH').value) || 0;
@@ -5021,20 +5324,14 @@
             }
             
             // UPPER CABINET FACADE - CORRECTED ORDER L and W
-            const upperOpeningW = Math.max(0, w2 - 2 * carcassT);
-            const upperOpeningH = Math.max(0, h2 - 2 * carcassT);
-            const upperDoorType = document.querySelector('input[name="upperDoorType"]:checked')?.value || 'overlay';
-            const upperOverlayGap = parseFloat(document.getElementById('upperOverlayGap').value) || 2;
-            const upperInsetGap = parseFloat(document.getElementById('upperInsetGap').value) || 2;
-            const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
-            const upperSplitFacade = !!document.getElementById('upperSplitFacade')?.checked;
-            
             const upperBaseFacadeW = upperDoorType === 'overlay'
                 ? Math.max(0, w2 - 2 * upperOverlayGap)
                 : Math.max(0, upperOpeningW - 2 * upperInsetGap);
             const upperBaseFacadeH = upperDoorType === 'overlay'
                 ? Math.max(0, h2 - 2 * upperOverlayGap)
                 : Math.max(0, upperOpeningH - 2 * upperInsetGap);
+            const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
+            const upperSplitFacade = !!document.getElementById('upperSplitFacade')?.checked;
             
             // Handle split facade into two doors
             let upperDoors = [{ name: T.part_facade_upper, width: upperBaseFacadeW, height: upperBaseFacadeH }];
@@ -5088,8 +5385,24 @@
             wtVanityCarcass += roofArea * carcassWpm2;
         }
 
-        // Back panel (3mm HDF — lighter)
-        parts.push({ name: T.part_back, qty: 1, l: h1 - 4, w: w1 - 4, t: 3, mat: 'HDF' });
+        // Back panel — HDF default, or carcass LDSP sized like facade (overlay/inset)
+        if (usesCarcassBackPanel()) {
+            const lowerBackDims = calcBackPanelFacadeDims(
+                w1, h1, carcassT, getBackPanelFitType(), lowerOverlayGap, lowerInsetGap
+            );
+            parts.push({
+                name: T.part_back,
+                qty: 1,
+                l: lowerBackDims.height,
+                w: lowerBackDims.width,
+                t: carcassT,
+                mat: matCarcass,
+                backPanelCarcass: true
+            });
+            wtVanityCarcass += panelAreaM2(lowerBackDims.height, lowerBackDims.width) * carcassWpm2;
+        } else {
+            parts.push({ name: T.part_back, qty: 1, l: h1 - 4, w: w1 - 4, t: 3, mat: 'HDF' });
+        }
 
         // ==========================================
         // DRAWER SYSTEM (AxisPro & MatrixBox only, HORIZON removed per TZ)
