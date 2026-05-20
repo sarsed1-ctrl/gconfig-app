@@ -702,6 +702,65 @@
         .weight-summary th {
             background: transparent;
         }
+
+        .price-summary {
+            background: #fff8ef;
+            border: 1px solid #c47a2c;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .price-summary h4 {
+            margin: 0 0 8px 0;
+            color: #9a5b12;
+        }
+
+        .price-summary table {
+            margin: 0;
+            font-size: 0.9em;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .price-summary th, .price-summary td {
+            border: none;
+            padding: 3px 8px;
+        }
+
+        .price-summary th {
+            background: transparent;
+            text-align: left;
+            font-weight: normal;
+        }
+
+        .price-summary td {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .price-summary .price-total-row td {
+            border-top: 2px solid #c47a2c;
+            padding-top: 8px;
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #7a3e00;
+        }
+
+        .price-summary .price-meta {
+            margin-top: 6px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .price-summary.is-loading .price-meta {
+            color: #9a5b12;
+        }
+
+        .price-summary.is-error .price-meta {
+            color: #b94a48;
+        }
     </style>
     <link rel="stylesheet" href="style.css">
     <meta property="og:title" content="GConfig — Closet Configurator">
@@ -1091,15 +1150,7 @@
             <!-- REPLACED: Simple thickness -> material selector with embedded thickness/weight -->
             <div class="form-group">
                 <label data-i18n="ct_material">Countertop Material:</label>
-                <select id="countertopMaterial" style="width: 175px;">
-                    <option value="12_hpl" data-thick="12" data-weight="17.5">12mm HPL Compact</option>
-                    <option value="13_hdf" data-thick="13" data-weight="11.2">13mm HDF</option>
-                    <option value="16_ldsp" data-thick="16" data-weight="12.5" selected>16mm MFC Chipboard (M)</option>
-                    <option value="18_ldsp" data-thick="18" data-weight="14.0">18mm MFC Chipboard (M)</option>
-                    <option value="20_ldsp" data-thick="20" data-weight="15.0">20mm LFC Chipboard (L)</option>
-                    <option value="25_ldsp" data-thick="25" data-weight="19.0">25mm MFC Chipboard (M)</option>
-                    <option value="38_ldsp" data-thick="38" data-weight="28.0">38mm LFC Chipboard (L)</option>
-                </select>
+                <select id="countertopMaterial" style="width: 220px;"></select>
             </div>
             <div class="form-group">
                 <label data-i18n="ct_front_overhang">Front Overhang (mm):</label>
@@ -1366,6 +1417,14 @@
             </table>
         </div>
 
+        <div class="price-summary" id="priceSummary">
+            <h4 data-i18n="price_summary_title">Price (Amflex)</h4>
+            <table id="priceTable">
+                <tbody id="priceTableBody"></tbody>
+            </table>
+            <div class="price-meta" id="priceSummaryMeta"></div>
+        </div>
+
         <svg class="section-divider" width="100%" height="20" aria-hidden="true"><use href="#divider"/></svg>
 
         <h2 id="hardwareTitle" style="color:#1a6b2f;border-bottom:2px solid #1a6b2f;padding-bottom:6px;" data-i18n="hardware_title">Furniture</h2>
@@ -1416,6 +1475,11 @@
             back_panel_fit: "Посадка задней стенки:",
             eamf_select_material: "— Выберите материал —",
             eamf_select_edge: "— Выберите кант —",
+            eamf_countertop_depth: "Глубина {n} см · 38 мм ЛДСП",
+            eamf_countertop_depth_unknown: "38 мм ЛДСП",
+            eamf_countertop_hpl12: "HPL 12 мм",
+            eamf_countertop_ldsp20: "ЛДСП 20 мм",
+            eamf_countertop_hdf13: "HDF 13 мм",
             eamf_select_material_first: "Сначала выберите материал",
             eamf_edges_airtec: "AirTec Technology",
             eamf_edges_same_color: "Тот же код цвета",
@@ -1459,6 +1523,15 @@
             nav_beds: "Кровати",
             btn_download_apk: "Скачать приложение",
             weight_summary_title: "Расчёт масс",
+            price_summary_title: "Стоимость (Amflex)",
+            price_subtotal: "Итого без НДС",
+            price_vat: "НДС",
+            price_total: "Сумма с НДС",
+            price_items: "Деталей",
+            price_loading: "Расчёт цены…",
+            price_unavailable: "Выберите материалы EAMF для расчёта цены",
+            price_error: "Не удалось получить цену",
+            price_stale_hint: "последняя успешная оценка",
             table1_title: "Таблица 1: Детали корпуса",
             table2_title: "Таблица 2: Фурнитура и направляющие",
             col_part_name: "Название детали",
@@ -1633,6 +1706,15 @@
             nav_beds: "Beds",
             btn_download_apk: "Download App",
             weight_summary_title: "Weight Summary",
+            price_summary_title: "Price (Amflex)",
+            price_subtotal: "Subtotal (excl. VAT)",
+            price_vat: "VAT",
+            price_total: "Total (incl. VAT)",
+            price_items: "Parts",
+            price_loading: "Calculating price…",
+            price_unavailable: "Select EAMF materials to calculate price",
+            price_error: "Could not fetch price",
+            price_stale_hint: "last successful estimate",
             table1_title: "Table 1: Carcass Parts",
             table2_title: "Table 2: Furniture & Runners",
             col_part_name: "Part Name",
@@ -1775,6 +1857,11 @@
             back_panel_fit: "Back panel fit:",
             eamf_select_material: "— Select material —",
             eamf_select_edge: "— Select edge —",
+            eamf_countertop_depth: "Depth {n} cm · 38 mm LMFC",
+            eamf_countertop_depth_unknown: "38 mm LMFC",
+            eamf_countertop_hpl12: "HPL 12 mm",
+            eamf_countertop_ldsp20: "LMFC 20 mm",
+            eamf_countertop_hdf13: "HDF 13 mm",
             eamf_select_material_first: "Select material first",
             eamf_edges_airtec: "AirTec Technology",
             eamf_edges_same_color: "Same color code",
@@ -2405,7 +2492,8 @@
         backPanel: 'eamfBackPanel',
         backPanelManual: 'eamfBackPanelManual',
         useCarcassBackPanel: 'eamfUseCarcassBackPanel',
-        backPanelFitType: 'eamfBackPanelFitType'
+        backPanelFitType: 'eamfBackPanelFitType',
+        countertopMaterial: 'eamfCountertopMaterial'
     };
 
     let eamfCatalog = null;
@@ -2425,7 +2513,7 @@
             })
             .catch(function(err) {
                 console.error('EAMF catalog load failed:', err);
-                eamfCatalog = { materials: [], edges: [], backPanels: [], plateToBackPanel: {}, decorToBackPanel: {} };
+                eamfCatalog = { materials: [], edges: [], backPanels: [], countertops: [], plateToBackPanel: {}, decorToBackPanel: {} };
                 return eamfCatalog;
             });
         return eamfCatalogReady;
@@ -2778,6 +2866,13 @@
         }) || null;
     }
 
+    function findEamfCountertop(article) {
+        if (!article || !eamfCatalog) return null;
+        return (eamfCatalog.countertops || []).find(function(ct) {
+            return ct.article === article || ct.code === article;
+        }) || null;
+    }
+
     function saveEamfSelection(key, value) {
         try {
             if (value) sessionStorage.setItem(key, value);
@@ -2813,6 +2908,12 @@
         return findEamfEdge(article);
     }
 
+    function getSelectedEamfCountertopMaterial() {
+        const el = document.getElementById('countertopMaterial');
+        const article = (el && el.value) || loadEamfSelection(EAMF_STORAGE_KEYS.countertopMaterial);
+        return findEamfCountertop(article);
+    }
+
     function eamfDisplayLabel(item) {
         return eamfItemId(item);
     }
@@ -2827,7 +2928,8 @@
             facadeMat: getSelectedEamfFacadeMaterial(),
             facadeEdge: getSelectedEamfFacadeEdge(),
             carcassMat: getSelectedEamfCarcassMaterial(),
-            carcassEdge: getSelectedEamfCarcassEdge()
+            carcassEdge: getSelectedEamfCarcassEdge(),
+            countertopMat: getSelectedEamfCountertopMaterial()
         };
     }
 
@@ -2836,6 +2938,102 @@
         const el = document.getElementById(thickId);
         const t = el ? parseInt(el.value, 10) : NaN;
         return Number.isFinite(t) ? t : null;
+    }
+
+    const COUNTERTOP_EXCLUDED = { '76.0077.8': true };
+    const COUNTERTOP_HPL12_ARTICLES = { '76.F206.C.920': true, '76.F274.C.920': true };
+
+    function isEamfCountertopHpl12(material) {
+        if (!material) return false;
+        const id = eamfItemId(material);
+        if (material.hpl12 === true || COUNTERTOP_HPL12_ARTICLES[id]) return true;
+        const parts = id.split('.');
+        return parts.length >= 3 && parts[parts.length - 1] === '12';
+    }
+
+    function isEamfCountertopHdf13(material) {
+        if (!material) return false;
+        if (material.hdf13 === true) return true;
+        const parts = eamfItemId(material).split('.');
+        return parts.length >= 3 && parts[parts.length - 1] === '13';
+    }
+
+    function isEamfCountertopLdsp20(material) {
+        if (!material) return false;
+        if (material.ldsp20 === true) return true;
+        const parts = eamfItemId(material).split('.');
+        return parts.length >= 3 && parts[parts.length - 1] === '20';
+    }
+
+    function isEamfCountertopLdsp38(code) {
+        const parts = String(code || '').split('.');
+        if (!parts.length || parts[0] !== '76' || parts.length < 3) return false;
+        const last = parts[parts.length - 1];
+        if (last === '8' || last === '12' || last === '13' || last === '20') return false;
+        if (parts.length >= 2 && parts[parts.length - 2] === '1' && parts[parts.length - 1] === '5') return true;
+        return parts.slice(1).some(function(p) { return p === '60' || p === '65' || p === '90' || p === '92'; });
+    }
+
+    function getEamfCountertopDepth(material) {
+        if (!material) return null;
+        if (material.depth != null && Number.isFinite(Number(material.depth))) return Number(material.depth);
+        const parts = eamfItemId(material).split('.');
+        if (parts.length >= 4 &&
+            (parts[parts.length - 1] === '12' || parts[parts.length - 1] === '13' || parts[parts.length - 1] === '20') &&
+            (parts[parts.length - 2] === '60' || parts[parts.length - 2] === '65' ||
+             parts[parts.length - 2] === '90' || parts[parts.length - 2] === '92')) {
+            return parseInt(parts[parts.length - 2], 10);
+        }
+        if (parts.length >= 4 && parts[parts.length - 2] === '1' && parts[parts.length - 1] === '5') {
+            const v = parts[parts.length - 3];
+            if (v === '60' || v === '65' || v === '90' || v === '92') return parseInt(v, 10);
+        }
+        for (let i = 1; i < parts.length; i++) {
+            if (parts[i] === '60' || parts[i] === '65' || parts[i] === '90' || parts[i] === '92') {
+                return parseInt(parts[i], 10);
+            }
+        }
+        return null;
+    }
+
+    function getEamfCountertopThick(material) {
+        if (!material) return null;
+        if (isEamfCountertopHpl12(material)) return 12;
+        if (isEamfCountertopLdsp20(material)) return 20;
+        if (isEamfCountertopHdf13(material)) return 13;
+        const id = eamfItemId(material);
+        if (material.ldsp38 === true || isEamfCountertopLdsp38(id)) return 38;
+        const t = material.thick != null ? material.thick : material.thickness;
+        if (t != null && Number.isFinite(Number(t))) return Number(t);
+        const parts = id.split('.');
+        const last = parts[parts.length - 1];
+        if (/^\d+$/.test(last)) return parseInt(last, 10);
+        return null;
+    }
+
+    function getEamfCountertopGroupKey(ct) {
+        if (isEamfCountertopHpl12(ct)) return 'h:12';
+        if (isEamfCountertopLdsp20(ct)) return 'l:20';
+        if (isEamfCountertopHdf13(ct)) return 'f:13';
+        const isLdsp38 = ct.ldsp38 === true || isEamfCountertopLdsp38(eamfItemId(ct));
+        if (isLdsp38) {
+            const depth = getEamfCountertopDepth(ct);
+            return depth != null ? ('d:' + depth) : 'd:?';
+        }
+        const t = getEamfCountertopThick(ct);
+        return t != null ? ('t:' + t) : 't:?';
+    }
+
+    function sortEamfCountertopGroupKeys(a, b) {
+        function rank(key) {
+            if (key === 'h:12') return '000';
+            if (key === 'l:20') return '001';
+            if (key === 'f:13') return '002';
+            if (key.startsWith('d:')) return '1' + String(parseInt(key.slice(2), 10) || 0).padStart(3, '0');
+            if (key.startsWith('t:')) return '2' + String(parseInt(key.slice(2), 10) || 0).padStart(3, '0');
+            return '999';
+        }
+        return rank(a).localeCompare(rank(b));
     }
 
     function getEamfMaterialPlateThick(material) {
@@ -2960,6 +3158,75 @@
         }
     }
 
+    function populateEamfCountertopSelect(selectEl, selectedArticle) {
+        if (!selectEl || !eamfCatalog) return;
+        const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        const hasCT = !!document.getElementById('hasCountertop')?.checked;
+        const countertops = (eamfCatalog.countertops || []).slice().filter(function(ct) {
+            return !COUNTERTOP_EXCLUDED[eamfItemId(ct)];
+        });
+        const prev = selectedArticle || selectEl.value;
+        selectEl.disabled = !hasCT;
+        selectEl.innerHTML = '<option value="">' + (T.eamf_select_material || '—') + '</option>';
+        if (!hasCT || !countertops.length) return;
+
+        const byGroup = {};
+        countertops.forEach(function(ct) {
+            const key = getEamfCountertopGroupKey(ct);
+            if (!byGroup[key]) byGroup[key] = [];
+            byGroup[key].push(ct);
+        });
+
+        Object.keys(byGroup).sort(sortEamfCountertopGroupKeys).forEach(function(groupKey) {
+            const og = document.createElement('optgroup');
+            const val = groupKey.split(':')[1];
+            if (groupKey === 'h:12') {
+                og.label = T.eamf_countertop_hpl12 || 'HPL 12 mm';
+            } else if (groupKey === 'l:20') {
+                og.label = T.eamf_countertop_ldsp20 || 'LMFC 20 mm';
+            } else if (groupKey === 'f:13') {
+                og.label = T.eamf_countertop_hdf13 || 'HDF 13 mm';
+            } else if (groupKey.startsWith('d:')) {
+                og.label = val === '?'
+                    ? (T.eamf_countertop_depth_unknown || '38 mm LMFC')
+                    : ((T.eamf_countertop_depth || 'Depth {n} cm · 38 mm LMFC').replace('{n}', val));
+            } else {
+                og.label = val === '?' ? '—' : (val + ' mm');
+            }
+            byGroup[groupKey].sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+            byGroup[groupKey].forEach(function(ct) {
+                const opt = document.createElement('option');
+                opt.value = eamfItemId(ct);
+                opt.textContent = eamfDisplayLabel(ct);
+                og.appendChild(opt);
+            });
+            selectEl.appendChild(og);
+        });
+
+        if (prev && countertops.some(function(ct) { return eamfItemId(ct) === prev; })) {
+            selectEl.value = prev;
+        } else {
+            const preferred = countertops.find(function(ct) { return isEamfCountertopHpl12(ct); })
+                || countertops.find(function(ct) { return getEamfCountertopThick(ct) === 38; })
+                || countertops.find(function(ct) { return getEamfCountertopThick(ct) === 16; })
+                || countertops[0];
+            if (preferred) selectEl.value = eamfItemId(preferred);
+        }
+    }
+
+    function syncCountertopMaterialControls() {
+        const hasCT = !!document.getElementById('hasCountertop')?.checked;
+        const opts = document.getElementById('countertopOptions');
+        const sel = document.getElementById('countertopMaterial');
+        if (opts) opts.style.display = hasCT ? 'block' : 'none';
+        if (sel) {
+            populateEamfCountertopSelect(
+                sel,
+                hasCT ? (sel.value || loadEamfSelection(EAMF_STORAGE_KEYS.countertopMaterial)) : ''
+            );
+        }
+    }
+
     function populateEamfEdgeSelect(selectEl, material, selectedArticle, options) {
         if (!selectEl) return;
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
@@ -3004,6 +3271,109 @@
         appendGroup(T.eamf_edges_other || 'Other edges', groups.other);
 
         if (chosen) selectEl.value = chosen;
+    }
+
+    function isEamfCountertopLmfc(material) {
+        if (!material) return false;
+        if (material.ldsp38 === true || material.ldsp20 === true) return true;
+        const id = eamfItemId(material);
+        return isEamfCountertopLdsp38(id) || isEamfCountertopLdsp20(material);
+    }
+
+    function getEamfEdgeWidth(edge) {
+        if (!edge) return null;
+        if (edge.width != null && Number.isFinite(Number(edge.width))) return Number(edge.width);
+        const parts = eamfItemId(edge).split('.');
+        const last = parts[parts.length - 1];
+        return /^\d+$/.test(last) ? parseInt(last, 10) : null;
+    }
+
+    function getEamfCountertopDecor(countertopMat) {
+        if (!countertopMat) return '';
+        if (countertopMat.decor) return normalizeEamfDecor(countertopMat.decor);
+        const parts = eamfItemId(countertopMat).split('.');
+        if (parts.length < 3) return '';
+        const depth = getEamfCountertopDepth(countertopMat);
+        if (depth != null) {
+            for (let i = 1; i < parts.length; i++) {
+                if (parts[i] === String(depth)) {
+                    if (i > 1) return normalizeEamfDecor(parts.slice(1, i).join('.'));
+                    if (i === 1 && parts.length > 2) return normalizeEamfDecor(parts[1]);
+                    break;
+                }
+            }
+        }
+        return normalizeEamfDecor(parts[1]);
+    }
+
+    function eamfCountertopDecorMatchesEdge(countertopDecor, edgeDecor) {
+        if (!countertopDecor || !edgeDecor) return false;
+        if (countertopDecor === edgeDecor) return true;
+        return countertopDecor.indexOf(edgeDecor) === 0 || edgeDecor.indexOf(countertopDecor) === 0;
+    }
+
+    function findEamfCountertopLmfcEdgeByWidth(countertopMat, edgeWidth) {
+        if (!countertopMat || !eamfCatalog || edgeWidth == null) return '';
+        const ctDecor = getEamfCountertopDecor(countertopMat);
+        if (!ctDecor) return '';
+        const candidates = (eamfCatalog.edges || []).filter(function(edge) {
+            if (getEamfEdgeWidth(edge) !== edgeWidth) return false;
+            const edgeDecor = getEamfEdgeDecor(edge);
+            return eamfCountertopDecorMatchesEdge(ctDecor, edgeDecor);
+        });
+        if (!candidates.length) return '';
+        candidates.sort(function(a, b) {
+            const aDecor = getEamfEdgeDecor(a);
+            const bDecor = getEamfEdgeDecor(b);
+            if (bDecor.length !== aDecor.length) return bDecor.length - aDecor.length;
+            const aAir = isEamfAirTecEdge(a) ? 1 : 0;
+            const bAir = isEamfAirTecEdge(b) ? 1 : 0;
+            if (aAir !== bAir) return aAir - bAir;
+            return eamfItemId(a).localeCompare(eamfItemId(b));
+        });
+        return eamfItemId(candidates[0]);
+    }
+
+    function getEamfCountertopLmfcEdgeWidth(countertopMat) {
+        if (isEamfCountertopLdsp20(countertopMat)) return 24;
+        return 43;
+    }
+
+    function resolveCountertopTellimusEdges(countertopMat) {
+        const edges = { y1: '', y2: '', x1: '', x2: '' };
+        if (!countertopMat) return edges;
+        if (isEamfCountertopHpl12(countertopMat)) {
+            edges.y1 = 'COMP45';
+            edges.y2 = 'COMP45';
+            edges.x1 = 'COMP45';
+            edges.x2 = 'COMP45';
+            return edges;
+        }
+        if (!isEamfCountertopLmfc(countertopMat)) return edges;
+        const depth = getEamfCountertopDepth(countertopMat);
+        const colorEdge = findEamfCountertopLmfcEdgeByWidth(
+            countertopMat,
+            getEamfCountertopLmfcEdgeWidth(countertopMat)
+        );
+        if (depth === 60 || depth === 65) {
+            edges.y1 = 'ORG';
+            if (colorEdge) {
+                edges.y2 = colorEdge;
+                edges.x1 = colorEdge;
+                edges.x2 = colorEdge;
+            }
+        } else if (depth === 90 || depth === 92 || depth === 95) {
+            edges.y1 = 'ORG';
+            edges.y2 = 'ORG';
+            if (colorEdge) {
+                edges.x1 = colorEdge;
+                edges.x2 = colorEdge;
+            }
+        } else if (colorEdge) {
+            edges.x1 = colorEdge;
+            edges.x2 = colorEdge;
+        }
+        return edges;
     }
 
     function resolvePartExportCodes(partRow, matFacadeLabel, matCarcassLabel, selections) {
@@ -3073,6 +3443,23 @@
         if (isClosetHdfBackPanelPart(partName, partMat, partRow)) {
             const hdfArticle = getSelectedEamfBackPanelArticle();
             return { materialCode: hdfArticle, edgeCode: '' };
+        }
+        const isCountertop = partName && /countertop|столешниц/i.test(partName);
+        if (isCountertop && sel.countertopMat) {
+            return {
+                materialCode: eamfItemId(sel.countertopMat),
+                edgeCode: '',
+                countertopEdges: resolveCountertopTellimusEdges(sel.countertopMat)
+            };
+        }
+        const ctId = sel.countertopMat ? eamfItemId(sel.countertopMat) : '';
+        const ctLabel = sel.countertopMat ? eamfDisplayLabel(sel.countertopMat) : '';
+        if (ctId && partMat && (partMat === ctLabel || partMat === ctId || partMat.indexOf(ctId) >= 0)) {
+            return {
+                materialCode: ctId,
+                edgeCode: '',
+                countertopEdges: resolveCountertopTellimusEdges(sel.countertopMat)
+            };
         }
         return { materialCode: '', edgeCode: '' };
     }
@@ -3150,6 +3537,12 @@
             EAMF_STORAGE_KEYS.facadeEdgeManual,
             (mat && edge && !eamfEdgesMatchDecor(edge, mat)) ? '1' : ''
         );
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+    }
+
+    function onEamfCountertopMaterialChange() {
+        const el = document.getElementById('countertopMaterial');
+        saveEamfSelection(EAMF_STORAGE_KEYS.countertopMaterial, el ? el.value : '');
         if (typeof updateConfigurator === 'function') updateConfigurator();
     }
 
@@ -3247,6 +3640,20 @@
             initCarcassBackPanelUI();
         }
 
+        const ctEl = document.getElementById('countertopMaterial');
+        if (ctEl) {
+            populateEamfCountertopSelect(
+                ctEl,
+                loadEamfSelection(EAMF_STORAGE_KEYS.countertopMaterial)
+            );
+            if (ctEl.value) saveEamfSelection(EAMF_STORAGE_KEYS.countertopMaterial, ctEl.value);
+            if (!ctEl.dataset.eamfBound) {
+                ctEl.dataset.eamfBound = '1';
+                ctEl.addEventListener('change', onEamfCountertopMaterialChange);
+            }
+        }
+        syncCountertopMaterialControls();
+
         if (!facadeMatEl.dataset.eamfBound) {
             facadeMatEl.dataset.eamfBound = '1';
             facadeMatEl.addEventListener('change', onEamfFacadeMaterialChange);
@@ -3281,6 +3688,9 @@
             populateEamfEdgeSelect(el, mat, prev, getEamfEdgeSelectOptions(isFacade ? 'facade' : 'carcass'));
         });
         if (CONFIG_MODE !== 'beds') refreshEamfBackPanelSelect();
+        syncCarcassBackPanelUI();
+        const ctEl = document.getElementById('countertopMaterial');
+        if (ctEl) populateEamfCountertopSelect(ctEl, ctEl.value);
     }
 
     const TELLIMUS_SHEET_PATH = 'xl/worksheets/sheet1.xml';
@@ -3493,7 +3903,17 @@
             tellimusSetCellNumber(sheetDoc, 5, rowNum, laiusX);
             tellimusSetCellNumber(sheetDoc, 6, rowNum, r.qty);
             tellimusSetCellSharedIndex(sheetDoc, 7, rowNum, TELLIMUS_GRAIN_SS[grainKey]);
-            if (codes.edgeCode) {
+            if (codes.countertopEdges) {
+                const ce = codes.countertopEdges;
+                if (ce.y1) tellimusSetCellShared(sheetDoc, shared, 8, rowNum, ce.y1);
+                else tellimusClearCell(sheetDoc, 8, rowNum);
+                if (ce.y2) tellimusSetCellShared(sheetDoc, shared, 9, rowNum, ce.y2);
+                else tellimusClearCell(sheetDoc, 9, rowNum);
+                if (ce.x1) tellimusSetCellShared(sheetDoc, shared, 10, rowNum, ce.x1);
+                else tellimusClearCell(sheetDoc, 10, rowNum);
+                if (ce.x2) tellimusSetCellShared(sheetDoc, shared, 11, rowNum, ce.x2);
+                else tellimusClearCell(sheetDoc, 11, rowNum);
+            } else if (codes.edgeCode) {
                 tellimusSetCellShared(sheetDoc, shared, 8, rowNum, codes.edgeCode);
                 tellimusSetCellShared(sheetDoc, shared, 9, rowNum, codes.edgeCode);
                 tellimusSetCellShared(sheetDoc, shared, 10, rowNum, codes.edgeCode);
@@ -3544,6 +3964,146 @@
             showToast((T.toast_excel_error || 'Excel export error') + ': ' + (err.message || String(err)), true);
         } finally {
             if (btn) btn.disabled = false;
+        }
+    }
+
+    const AMFLEX_PRICE_URL = '/api/amflex-price';
+    const AMFLEX_PRICE_COUNTRY = 'EE';
+    let amflexPriceTimer = null;
+    /** @type {AbortController|null} */
+    let amflexPriceAbort = null;
+    let amflexPriceState = {
+        loading: false,
+        error: '',
+        quote: null,
+        stale: false
+    };
+
+    function formatEuroAmount(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return '—';
+        return '€ ' + n.toFixed(2);
+    }
+
+    function canRequestAmflexPrice() {
+        const partRows = getTellimusExportRows();
+        if (!partRows.length) return false;
+        const matFacadeLabel = getEamfMaterialLabel('facade');
+        const matCarcassLabel = getEamfMaterialLabel('carcass');
+        const eamfSel = getEamfSelections();
+        if (CONFIG_MODE !== 'shelves') {
+            if (!eamfSel.facadeMat || !eamfSel.carcassMat) return false;
+        }
+        for (let i = 0; i < partRows.length; i++) {
+            const codes = resolvePartExportCodes(partRows[i], matFacadeLabel, matCarcassLabel, eamfSel);
+            if (!codes.materialCode) return false;
+        }
+        return true;
+    }
+
+    function renderPriceSummary(T) {
+        T = T || TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        const wrap = document.getElementById('priceSummary');
+        const tbody = document.getElementById('priceTableBody');
+        const meta = document.getElementById('priceSummaryMeta');
+        if (!wrap || !tbody || !meta) return;
+
+        wrap.classList.remove('is-loading', 'is-error');
+        const q = amflexPriceState.quote;
+
+        if (amflexPriceState.loading) {
+            wrap.classList.add('is-loading');
+            tbody.innerHTML = '';
+            meta.textContent = T.price_loading;
+            return;
+        }
+
+        if (!canRequestAmflexPrice()) {
+            tbody.innerHTML = '';
+            meta.textContent = T.price_unavailable;
+            return;
+        }
+
+        if (amflexPriceState.error && !q) {
+            wrap.classList.add('is-error');
+            tbody.innerHTML = '';
+            meta.textContent = T.price_error + ': ' + amflexPriceState.error;
+            return;
+        }
+
+        if (!q) {
+            tbody.innerHTML = '';
+            meta.textContent = T.price_loading;
+            return;
+        }
+
+        tbody.innerHTML = `
+            <tr><th>${T.price_subtotal}</th><td>${formatEuroAmount(q.subtotal)}</td></tr>
+            <tr><th>${T.price_vat}</th><td>${formatEuroAmount(q.vat)}</td></tr>
+            <tr class="price-total-row"><th>${T.price_total}</th><td>${formatEuroAmount(q.total)}</td></tr>
+        `;
+
+        let metaText = T.price_items + ': ' + (q.itemCount || 0);
+        if (amflexPriceState.stale) metaText += ' · ' + T.price_stale_hint;
+        if (amflexPriceState.error) {
+            wrap.classList.add('is-error');
+            metaText = T.price_error + ': ' + amflexPriceState.error + ' · ' + metaText;
+        }
+        meta.textContent = metaText;
+    }
+
+    function scheduleAmflexPriceRefresh() {
+        clearTimeout(amflexPriceTimer);
+        amflexPriceTimer = setTimeout(refreshAmflexPrice, 800);
+    }
+
+    async function refreshAmflexPrice() {
+        const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        if (!canRequestAmflexPrice()) {
+            amflexPriceState.loading = false;
+            amflexPriceState.error = '';
+            renderPriceSummary(T);
+            return;
+        }
+
+        if (amflexPriceAbort) amflexPriceAbort.abort();
+        amflexPriceAbort = new AbortController();
+        const signal = amflexPriceAbort.signal;
+        const previousQuote = amflexPriceState.quote;
+
+        amflexPriceState.loading = true;
+        amflexPriceState.error = '';
+        amflexPriceState.stale = !!previousQuote;
+        renderPriceSummary(T);
+
+        try {
+            const blob = await buildTellimusXlsxBlob({ project: getProjectName() });
+            if (!blob) throw new Error(T.price_unavailable);
+            const res = await fetch(AMFLEX_PRICE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'X-Country-Code': AMFLEX_PRICE_COUNTRY
+                },
+                body: blob,
+                signal
+            });
+            const data = await res.json().catch(function() { return {}; });
+            if (!res.ok) {
+                throw new Error(data.error || ('HTTP ' + res.status));
+            }
+            amflexPriceState.quote = data;
+            amflexPriceState.stale = false;
+            amflexPriceState.error = '';
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            amflexPriceState.error = (err && err.message) ? err.message : String(err);
+            if (!previousQuote) amflexPriceState.quote = null;
+        } finally {
+            if (!signal.aborted) {
+                amflexPriceState.loading = false;
+                renderPriceSummary(T);
+            }
         }
     }
 
@@ -4107,6 +4667,21 @@
         28: 21.1
     };
 
+    // Countertop weight by thickness (kg/m²) — last segment of 76.* article code
+    const CT_WEIGHT_MAP = {
+        5: 8.0,
+        8: 10.0,
+        10: 11.0,
+        12: 17.5,
+        13: 11.2,
+        16: 12.5,
+        18: 14.0,
+        20: 15.0,
+        25: 19.0,
+        30: 22.0,
+        38: 28.0
+    };
+
     // Door/hinge planner runtime state
     const hingePlannerState = {
         hingeCountManual: false,
@@ -4386,7 +4961,8 @@
     });
 
     document.getElementById('hasCountertop').addEventListener('change', function() {
-        document.getElementById('countertopOptions').style.display = this.checked ? 'block' : 'none';
+        syncCountertopMaterialControls();
+        if (typeof updateConfigurator === 'function') updateConfigurator();
     });
 
     // Show/hide spacing sliders when shelf count changes + update label
@@ -4579,10 +5155,10 @@
         const wallType  = document.getElementById('wallType').value;
         
         const hasCT = document.getElementById('hasCountertop').checked;
-        const ctMaterialSel = document.getElementById('countertopMaterial');
-        const ctMaterialOpt = ctMaterialSel.options[ctMaterialSel.selectedIndex];
-        const ctT       = hasCT ? parseInt(ctMaterialOpt.getAttribute('data-thick')) : 0;
-        const ctWeightM2 = hasCT ? parseFloat(ctMaterialOpt.getAttribute('data-weight')) : 0;
+        const ctMat = hasCT ? getSelectedEamfCountertopMaterial() : null;
+        const ctT = hasCT && ctMat ? (getEamfCountertopThick(ctMat) || 0) : 0;
+        const ctWeightM2 = hasCT && ctT ? (CT_WEIGHT_MAP[ctT] || 12.5) : 0;
+        const ctMatLabel = ctMat ? eamfDisplayLabel(ctMat) : '';
         const ctFrontOverhang = parseInt(document.getElementById('ctFrontOverhang').value) || 0;
         const ctSideOverhang  = parseInt(document.getElementById('ctSideOverhang').value) || 0;
 
@@ -5033,6 +5609,7 @@
                     wtCountertop: 0,
                     hasCT: false
                 }, T);
+                scheduleAmflexPriceRefresh();
                 drawSchematic(totalW, totalH, depthD, 0, 0, 0, false, 0, 0, 0, cellW, thickT, thickT, null, currentLang);
                 return;
             }
@@ -5244,6 +5821,7 @@
                 wtCountertop: 0,
                 hasCT: false
             }, T);
+            scheduleAmflexPriceRefresh();
 
             drawSchematic(totalW, totalH, depthD, sideW, centerRows, sideRows, false, 0, 0, 0, centerShelfLen, thickT, thickT, null, currentLang);
             return;
@@ -5581,10 +6159,10 @@
         }
 
         // Countertop
-        if (hasCT) {
+        if (hasCT && ctMat && ctT) {
             const ctW = w1 + (ctSideOverhang * 2);
             const ctD = d1 + ctFrontOverhang;
-            parts.push({ name: T.part_countertop, qty: 1, l: ctW, w: ctD, t: ctT, mat: ctMaterialOpt.text });
+            parts.push({ name: T.part_countertop, qty: 1, l: ctW, w: ctD, t: ctT, mat: ctMatLabel });
             wtCountertop = panelAreaM2(ctW, ctD) * ctWeightM2;
         }
 
@@ -5821,6 +6399,7 @@
         renderTables(parts, hardware, T, { lowerEnabled, upperEnabled }, currentLang);
         renderWarnings(warnings);
         renderWeightSummary({ wtVanityCarcass, wtUpperCarcass, wtFacadesVanity, wtFacadeUpper, wtCountertop, hasCT }, T);
+        scheduleAmflexPriceRefresh();
         drawSchematic(w1, h1, d1, w2, h2, d2, hasCT, ctT, ctFrontOverhang, ctSideOverhang, upFW, upFH, carcassT, upperDoorPlanner, currentLang);
     }
 
