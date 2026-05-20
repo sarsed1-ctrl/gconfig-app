@@ -202,7 +202,12 @@ tr:hover td        { background-color: #ddf0dd !important; }
 }
 
 .price-hinge-row .price-summary {
-  margin: 0 !important;
+  margin: 32px 0 0 0 !important;
+}
+
+.hinge-specs-panel > h3:first-child,
+.hinge-specs-panel > #upperGasSpecsHeading:first-child {
+  margin-top: 0 !important;
 }
 
 .hinge-specs-panel {
