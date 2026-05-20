@@ -815,11 +815,8 @@
             max-width: 100%;
         }
 
-        .hinge-specs-panel > h3:first-child,
-        .hinge-specs-panel > #hingeTableHeading {
-            margin: 0 0 10px 0;
-            color: #333;
-            font-size: 1em;
+        .hinge-specs-panel > h3:first-child {
+            margin-top: 0;
         }
 
         .hinge-specs-panel h3[data-i18n="upper_hinge_specs"],
@@ -1422,7 +1419,6 @@
             </div>
 
             <div class="hinge-specs-panel" id="hingeSpecsPanel">
-                <h3 style="display:none;" id="hingeTableHeading">Hinge Specifications</h3>
                 <h3 data-i18n="upper_hinge_specs" style="display:none;">Upper Closet Hinges</h3>
                 <table id="hingeSpecTableUpper" style="display:none;">
                     <thead>
@@ -4806,9 +4802,6 @@
         if (plabel) plabel.textContent = TRANSLATIONS[lang].project_label || 'Project:';
         
         // Update section headings
-        const hingeTableHeading = document.getElementById('hingeTableHeading');
-        if (hingeTableHeading) hingeTableHeading.textContent = TRANSLATIONS[lang].hinge_table_title || 'Hinge Specifications';
-        
         const upperCabinetHeading = document.getElementById('upperCabinetHeading');
         if (upperCabinetHeading) upperCabinetHeading.textContent = TRANSLATIONS[lang].upper_cabinet_section || 'Upper Closet';
         
@@ -5700,7 +5693,7 @@
 
             // Hide closet-only hinge/gas spec tables
             ['hingeSpecTableUpper','hingeSpecTable','upperGasSpecTable','gasSpecTable',
-             'hingeTableHeading','upperGasSpecsHeading','lowerGasSpecsHeading'].forEach(id => {
+             'upperGasSpecsHeading','lowerGasSpecsHeading'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
@@ -6701,20 +6694,17 @@
 
 
     function updateHingeSpecsSectionVisibility() {
-        const mainHeading = document.getElementById('hingeTableHeading');
         const panel = document.getElementById('hingeSpecsPanel');
         const upperTable = document.getElementById('hingeSpecTableUpper');
         const lowerTable = document.getElementById('hingeSpecTable');
         const upperGasTable = document.getElementById('upperGasSpecTable');
         const gasTable = document.getElementById('gasSpecTable');
-        if (!mainHeading) return;
 
         const upperVisible = !!upperTable && upperTable.style.display !== 'none';
         const lowerVisible = !!lowerTable && lowerTable.style.display !== 'none';
         const upperGasVisible = !!upperGasTable && upperGasTable.style.display !== 'none';
         const gasVisible = !!gasTable && gasTable.style.display !== 'none';
         const showSection = upperVisible || lowerVisible || upperGasVisible || gasVisible;
-        mainHeading.style.display = showSection ? '' : 'none';
         if (panel) panel.style.display = showSection ? '' : 'none';
     }
 
