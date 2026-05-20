@@ -2370,7 +2370,7 @@
             })
             .catch(function(err) {
                 console.error('EAMF catalog load failed:', err);
-                eamfCatalog = { materials: [], edges: [] };
+                eamfCatalog = { materials: [], edges: [], backPanels: [], plateToBackPanel: {}, decorToBackPanel: {} };
                 return eamfCatalog;
             });
         return eamfCatalogReady;
@@ -2392,6 +2392,51 @@
         if (edge.decor) return normalizeEamfDecor(edge.decor);
         const parts = eamfItemId(edge).split('.');
         return parts.length >= 2 ? normalizeEamfDecor(parts[1]) : '';
+    }
+
+    function getEamfBackPanelDecor(item) {
+        if (!item) return '';
+        if (item.decor) return normalizeEamfDecor(item.decor);
+        const parts = eamfItemId(item).split('.');
+        for (let i = 1; i < parts.length; i++) {
+            if (/^[A-Z]{1,2}\d{3,4}$/.test(parts[i])) return normalizeEamfDecor(parts[i]);
+        }
+        return '';
+    }
+
+    function isClosetHdfBackPanelPart(partName, partMat) {
+        if (CONFIG_MODE === 'beds') return false;
+        if (partMat === 'HDF') return true;
+        if (!partName) return false;
+        const n = partName.toLowerCase();
+        if (/rail|планка/.test(n)) return false;
+        return /back panel|задняя стенка/.test(n);
+    }
+
+    function resolveHdfBackPanelArticle(referenceMaterial) {
+        if (!eamfCatalog || !referenceMaterial || CONFIG_MODE === 'beds') return '';
+        const plateId = eamfItemId(referenceMaterial);
+        const plateMap = eamfCatalog.plateToBackPanel || {};
+        if (plateMap[plateId]) return plateMap[plateId];
+        const decor = getEamfMaterialDecor(referenceMaterial);
+        if (decor) {
+            const decorMap = eamfCatalog.decorToBackPanel || {};
+            if (decorMap[decor]) return decorMap[decor];
+            const panels = eamfCatalog.backPanels || [];
+            for (let i = 0; i < panels.length; i++) {
+                if (getEamfBackPanelDecor(panels[i]) === decor) return eamfItemId(panels[i]);
+            }
+        }
+        return '';
+    }
+
+    function resolveClosetPartMaterialLabel(partRow) {
+        const partName = partRow && partRow.name;
+        const partMat = partRow && partRow.mat;
+        if (!isClosetHdfBackPanelPart(partName, partMat)) return partMat || '';
+        const sel = getEamfSelections();
+        const ref = sel.carcassMat || sel.facadeMat;
+        return resolveHdfBackPanelArticle(ref) || partMat || '';
     }
 
     function eamfEdgesMatchDecor(edge, material) {
@@ -2782,6 +2827,11 @@
         }
         if (carcassId && partMat && partMat.indexOf(carcassId) >= 0) {
             return { materialCode: carcassId, edgeCode: eamfItemId(sel.carcassEdge) };
+        }
+        if (isClosetHdfBackPanelPart(partName, partMat)) {
+            const ref = sel.carcassMat || sel.facadeMat;
+            const hdfArticle = resolveHdfBackPanelArticle(ref);
+            return { materialCode: hdfArticle, edgeCode: '' };
         }
         return { materialCode: '', edgeCode: '' };
     }
@@ -5419,7 +5469,7 @@
                     l: Math.round(p.l),
                     w: Math.round(p.w),
                     t: Math.round(p.t),
-                    mat: p.mat || '',
+                    mat: resolveClosetPartMaterialLabel(p) || p.mat || '',
                     edgeType: edge.edgeType,
                     edgeLenMm: edge.edgeLenMm
                 };
@@ -5751,22 +5801,26 @@
         
         const unit = lang === 'en' ? 'mm' : 'мм';
         
-        tbody1.innerHTML = upperParts.map(p => `
+        tbody1.innerHTML = upperParts.map(p => {
+            const matLabel = resolveClosetPartMaterialLabel(p) || p.mat;
+            return `
             <tr>
                 <td><strong>${p.name}</strong></td>
                 <td>${p.l} × ${p.w} × ${p.t} ${unit}</td>
                 <td>${p.qty}</td>
-                <td>${p.mat}</td>
-            </tr>
-        `).join('');
-        tbodyLower.innerHTML = lowerParts.map(p => `
+                <td>${matLabel}</td>
+            </tr>`;
+        }).join('');
+        tbodyLower.innerHTML = lowerParts.map(p => {
+            const matLabel = resolveClosetPartMaterialLabel(p) || p.mat;
+            return `
             <tr>
                 <td><strong>${p.name}</strong></td>
                 <td>${p.l} × ${p.w} × ${p.t} ${unit}</td>
                 <td>${p.qty}</td>
-                <td>${p.mat}</td>
-            </tr>
-        `).join('');
+                <td>${matLabel}</td>
+            </tr>`;
+        }).join('');
 
         const tbody2 = document.getElementById('hardwareTableBody');
         tbody2.innerHTML = hardware.map(h => `

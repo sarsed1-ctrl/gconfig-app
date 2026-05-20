@@ -9,8 +9,20 @@ from pathlib import Path
 
 import openpyxl
 
-SRC = Path(r"C:\Users\georgi\OneDrive - AM furnitura\Desktop\ALL MATERIALS.xlsx")
-OUT = Path(__file__).resolve().parent.parent / "assets" / "eamf-catalog.json"
+SRC_CANDIDATES = [
+    Path(r"C:\Users\georgi\OneDrive - AM furnitura\Desktop\ALL MATERIALS.xlsx"),
+    Path(r"C:\Users\georgi\Downloads\ALL MATERIALS.xlsx"),
+]
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "assets" / "eamf-catalog.json"
+DEPLOY_OUT = ROOT / "deploy" / "assets" / "eamf-catalog.json"
+
+
+def resolve_source_path() -> Path:
+    for candidate in SRC_CANDIDATES:
+        if candidate.is_file():
+            return candidate
+    return SRC_CANDIDATES[0]
 
 
 def parse_plate(code: str) -> dict:
@@ -26,7 +38,8 @@ def parse_plate(code: str) -> dict:
         if re.match(r"^[A-Z]{1,2}\d{3,4}$", p):
             decor = p
             break
-    label = f"{decor or code} · {thick} mm" if decor and thick else code
+    label = code
+    feel_wood = bool(re.search(r"\.TM\d+\.", code, re.I))
     return {
         "code": code,
         "article": code,
@@ -34,7 +47,31 @@ def parse_plate(code: str) -> dict:
         "thick": thick,
         "thickness": thick,
         "postform": ".P." in code,
+        "feelWood": feel_wood,
         "label": label,
+    }
+
+
+def parse_hdf_back(code: str) -> dict:
+    code = str(code).strip()
+    parts = code.split(".")
+    decor = None
+    for p in parts[1:]:
+        if re.match(r"^[A-Z]{1,2}\d{3,4}$", p):
+            decor = p
+            break
+    thick = None
+    if len(parts) > 2 and re.fullmatch(r"\d+\.?\d*", parts[-1] or ""):
+        try:
+            thick = float(parts[-1]) if "." in parts[-1] else int(parts[-1])
+        except ValueError:
+            thick = None
+    return {
+        "code": code,
+        "article": code,
+        "decor": decor,
+        "thick": thick,
+        "label": code,
     }
 
 
@@ -46,25 +83,23 @@ def parse_edge(code: str) -> dict:
     if len(nums) >= 2:
         thick, width = nums[-2], nums[-1]
     decor = parts[1] if len(parts) > 1 else None
-    label = code
-    if decor and thick is not None and width is not None:
-        label = f"{decor} · {thick}×{width} mm"
     return {
         "code": code,
         "article": code,
         "decor": decor,
         "thick": thick,
         "width": width,
-        "label": label,
+        "label": code,
     }
 
 
 def main() -> int:
-    if not SRC.is_file():
-        print("Source not found:", SRC, file=sys.stderr)
+    src = resolve_source_path()
+    if not src.is_file():
+        print("Source not found. Tried:", ", ".join(str(p) for p in SRC_CANDIDATES), file=sys.stderr)
         return 1
 
-    wb = openpyxl.load_workbook(SRC, read_only=True, data_only=True)
+    wb = openpyxl.load_workbook(src, read_only=True, data_only=True)
     sheet_name = wb.sheetnames[0]
     rows = list(wb.active.iter_rows(values_only=True))[1:]
     wb.close()
@@ -73,10 +108,19 @@ def main() -> int:
     row_pair: dict[str, str] = {}
     plates_raw: list[dict] = []
     edges_set: dict[str, dict] = {}
+    back_panels_set: dict[str, dict] = {}
+    plate_to_back_panel: dict[str, str] = {}
+    decor_to_back_panel: dict[str, str] = {}
 
     for r in rows:
         plate = str(r[0]).strip() if r[0] else ""
         edge = str(r[3]).strip() if len(r) > 3 and r[3] else ""
+        hdf = str(r[4]).strip() if len(r) > 4 and r[4] else ""
+        if hdf:
+            bp = parse_hdf_back(hdf)
+            back_panels_set[bp["code"]] = bp
+            if bp["decor"]:
+                decor_to_back_panel[bp["decor"]] = bp["code"]
         if edge:
             e = parse_edge(edge)
             edges_set[e["code"]] = e
@@ -84,6 +128,10 @@ def main() -> int:
             continue
         p = parse_plate(plate)
         plates_raw.append(p)
+        if hdf:
+            plate_to_back_panel[p["code"]] = hdf
+            if p["decor"]:
+                decor_to_back_panel[p["decor"]] = hdf
         if edge:
             row_pair[p["code"]] = e["code"]
             if p["decor"] and p["thick"] is not None:
@@ -104,22 +152,34 @@ def main() -> int:
 
     edges = sorted(edges_set.values(), key=lambda x: x["code"])
     materials.sort(key=lambda m: (m.get("thick") or 0, m.get("decor") or "", m["code"]))
+    back_panels = sorted(back_panels_set.values(), key=lambda x: x["code"])
 
     catalog = {
-        "source": SRC.name,
+        "source": src.name,
         "sheet": sheet_name,
         "generated": date.today().isoformat(),
-        "counts": {"materials": len(materials), "edges": len(edges)},
+        "counts": {
+            "materials": len(materials),
+            "edges": len(edges),
+            "backPanels": len(back_panels),
+        },
         "materials": materials,
         "edges": edges,
+        "backPanels": back_panels,
+        "plateToBackPanel": dict(sorted(plate_to_back_panel.items())),
+        "decorToBackPanel": dict(sorted(decor_to_back_panel.items())),
     }
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    with OUT.open("w", encoding="utf-8") as f:
-        json.dump(catalog, f, ensure_ascii=False, indent=2)
+    for out_path in (OUT, DEPLOY_OUT):
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with out_path.open("w", encoding="utf-8") as f:
+            json.dump(catalog, f, ensure_ascii=False, indent=2)
+        print(f"Wrote {out_path}")
 
-    print(f"Wrote {OUT}")
-    print(f"materials={len(materials)} edges={len(edges)}")
+    print(
+        f"materials={len(materials)} edges={len(edges)} "
+        f"backPanels={len(back_panels)} platePairs={len(plate_to_back_panel)}"
+    )
     return 0
 
 
