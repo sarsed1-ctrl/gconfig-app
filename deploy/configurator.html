@@ -704,7 +704,8 @@
         }
 
         .price-summary {
-            background: #fff8ef;
+            --price-fill: #fff8ef;
+            background: var(--price-fill);
             border: 1px solid #e0b88a;
             border-radius: 8px;
             padding: 14px 18px;
@@ -722,18 +723,28 @@
             margin: 0;
             font-size: 0.95em;
             width: 100%;
-            max-width: 380px;
             border-collapse: collapse;
+            background: var(--price-fill);
         }
 
-        .price-summary tr {
-            background: transparent !important;
+        .price-summary tbody {
+            background: var(--price-fill);
+        }
+
+        .price-summary tr,
+        .price-summary tr:nth-child(even),
+        .price-summary tr:nth-child(odd) {
+            background: var(--price-fill) !important;
         }
 
         .price-summary td {
-            border: none;
+            border: none !important;
             padding: 5px 0;
-            background: transparent;
+            background: var(--price-fill) !important;
+        }
+
+        .price-summary tr:hover td {
+            background: var(--price-fill) !important;
         }
 
         .price-summary .price-label {

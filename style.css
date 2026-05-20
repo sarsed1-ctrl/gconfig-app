@@ -160,6 +160,36 @@ tr:hover td        { background-color: #ddf0dd !important; }
 }
 .weight-summary h4 { color: var(--primary) !important; }
 
+/* ── 11b. Price summary box ───────────────────────────────── */
+.price-summary {
+  --price-fill: #fff8ef;
+  background: var(--price-fill) !important;
+  border-color: #e0b88a !important;
+}
+.price-summary h4 { color: #9a5b12 !important; }
+.price-summary table,
+.price-summary tbody,
+.price-summary tr,
+.price-summary tr:nth-child(even),
+.price-summary tr:nth-child(odd),
+.price-summary td,
+.price-summary tr:hover td {
+  background-color: var(--price-fill) !important;
+  border: none !important;
+}
+.price-summary .price-label { color: #6b4423 !important; }
+.price-summary .price-value { color: #333 !important; }
+.price-summary .price-total-row .price-label,
+.price-summary .price-total-row .price-value {
+  color: #7a3e00 !important;
+}
+.price-summary .price-total-row .price-value {
+  border-top: 1px solid #e0b88a !important;
+}
+.price-summary .price-meta { color: #8a6a4a !important; }
+.price-summary.is-loading .price-meta { color: #9a5b12 !important; }
+.price-summary.is-error .price-meta { color: #b94a48 !important; }
+
 /* ── 12. Recommendations / warnings block ─────────────────── */
 .recommendations-block {
   background-color: var(--warning-bg) !important;
