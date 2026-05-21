@@ -328,7 +328,7 @@
                 <span data-lang="en">Furniture Configurator</span>
             </h1>
             <div class="top-actions" id="topActions">
-                <a class="version-link" href="index-v2.html" title="GConfig v2 wizard">
+                <a class="version-link" id="v2ThemeLink" href="welcome.html?theme=future" title="GConfig v2 Neon theme">
                     <span data-lang="ru" class="inline">v2.0</span>
                     <span data-lang="en" class="inline">v2.0</span>
                 </a>
@@ -543,6 +543,12 @@
             });
         }
 
+        function updateV2ThemeLink() {
+            var link = document.getElementById('v2ThemeLink');
+            if (!link) return;
+            link.href = 'welcome.html?theme=future';
+        }
+
         function applyTheme(theme) {
             var isFuture = theme === 'future';
             document.documentElement.classList.toggle('theme-future', isFuture);
@@ -550,6 +556,7 @@
             if (btn) btn.textContent = isFuture ? 'Classic' : 'Neon';
             try { localStorage.setItem(THEME_KEY, isFuture ? 'future' : 'classic'); } catch (e) { /* ignore */ }
             updateV2Links();
+            updateV2ThemeLink();
         }
 
         function toggleTheme() {
@@ -568,9 +575,11 @@
                     applyTheme('future');
                 } else {
                     updateV2Links();
+                    updateV2ThemeLink();
                 }
             } catch (e) {
                 updateV2Links();
+                updateV2ThemeLink();
             }
             var btn = document.getElementById('themeToggle');
             if (btn) btn.addEventListener('click', toggleTheme);
