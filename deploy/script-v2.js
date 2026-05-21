@@ -23,6 +23,7 @@
     const TOTAL_STEPS = 4;
 
     const STEP_STORAGE_KEY = 'gconfig-v2-step';
+    const THEME_STORAGE_KEY = 'gconfig-v2-theme';
 
     let iframeReady = false;
 
@@ -1356,6 +1357,50 @@
 
 
 
+    function applyTheme(theme) {
+
+        const isFuture = theme === 'future';
+
+        document.body.classList.toggle('theme-future', isFuture);
+
+        const btn = document.getElementById('themeToggle');
+
+        if (btn) btn.textContent = isFuture ? 'Classic' : 'Neon';
+
+        try {
+
+            localStorage.setItem(THEME_STORAGE_KEY, isFuture ? 'future' : 'classic');
+
+        } catch (_) { /* ignore */ }
+
+    }
+
+
+
+    function restoreTheme() {
+
+        try {
+
+            const saved = localStorage.getItem(THEME_STORAGE_KEY);
+
+            if (saved === 'future') return 'future';
+
+        } catch (_) { /* ignore */ }
+
+        return 'classic';
+
+    }
+
+
+
+    function toggleTheme() {
+
+        applyTheme(document.body.classList.contains('theme-future') ? 'classic' : 'future');
+
+    }
+
+
+
     function bindUI() {
 
         document.getElementById('modeClosets').addEventListener('click', () => setProductMode('closets'));
@@ -1367,6 +1412,10 @@
         document.getElementById('langRu').addEventListener('click', () => setLang('ru'));
 
         document.getElementById('langEn').addEventListener('click', () => setLang('en'));
+
+
+
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
 
 
@@ -1415,6 +1464,8 @@
         document.getElementById('modeBeds').classList.toggle('active', productMode === 'beds');
 
         updateV1Link();
+
+        applyTheme(restoreTheme());
 
         applyI18n();
 

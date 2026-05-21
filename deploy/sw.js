@@ -12,6 +12,7 @@ const PRECACHE = [
     './manifest.json',
     './style.css',
     './styles-v2.css',
+    './styles-v2-future.css',
     './script-v2.js',
     './alien-logo.png'
 ];
