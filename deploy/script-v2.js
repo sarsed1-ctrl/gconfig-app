@@ -1737,6 +1737,18 @@
 
 
 
+    function updateV1WelcomeLink() {
+
+        const link = document.getElementById('v1WelcomeLink');
+
+        if (!link) return;
+
+        link.href = 'welcome.html?theme=classic';
+
+    }
+
+
+
     function updateV1Link() {
 
         const link = document.getElementById('openV1Link');
@@ -2184,6 +2196,8 @@
         document.getElementById('modeBeds').classList.toggle('active', productMode === 'beds');
 
         updateV1Link();
+
+        updateV1WelcomeLink();
 
         const themeParam = params.get('theme');
 

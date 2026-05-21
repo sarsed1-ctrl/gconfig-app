@@ -283,8 +283,10 @@
         var KEY = 'gconfig-v2-theme';
         try {
             var q = new URLSearchParams(location.search);
-            var theme = q.get('theme') === 'future' ? 'future' : localStorage.getItem(KEY);
-            if (theme === 'future') {
+            var qTheme = (q.get('theme') || '').toLowerCase();
+            if (qTheme === 'future') {
+                document.documentElement.classList.add('theme-future');
+            } else if (qTheme !== 'classic' && qTheme !== 'v1' && localStorage.getItem(KEY) === 'future') {
                 document.documentElement.classList.add('theme-future');
             }
         } catch (e) { /* ignore */ }
@@ -557,8 +559,11 @@
         (function initTheme() {
             try {
                 var q = new URLSearchParams(location.search);
-                if (q.get('theme') === 'future') {
+                var qTheme = (q.get('theme') || '').toLowerCase();
+                if (qTheme === 'future') {
                     applyTheme('future');
+                } else if (qTheme === 'classic' || qTheme === 'v1') {
+                    applyTheme('classic');
                 } else if (localStorage.getItem(THEME_KEY) === 'future') {
                     applyTheme('future');
                 } else {
