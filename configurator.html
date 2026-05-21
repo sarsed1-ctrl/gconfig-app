@@ -4903,7 +4903,12 @@
         manufacturers: []
     };
     let hingeMarkers = [];
+    let schematicHingeDots = [];
     let lastDrawArgs = null;
+
+    function registerSchematicHingeDot(x, y, radius) {
+        schematicHingeDots.push({ x, y, r: radius || 5 });
+    }
 
     // ==========================================
     // HELPER: Hinge count based on door height
@@ -7709,14 +7714,17 @@
         const width = canvas.width, height = canvas.height;
         ctx.clearRect(0, 0, width, height);
         hingeMarkers = [];
+        schematicHingeDots = [];
 
         if (CONFIG_MODE === 'shelves') {
             drawShelfSchematic(ctx, width, height, lang);
+            window.__gconfigSchematicHingeDots = [];
             return;
         }
 
         if (CONFIG_MODE === 'beds') {
             drawBedSchematic(ctx, width, height, w1, h1, d1, w2, h2, lang);
+            window.__gconfigSchematicHingeDots = [];
             return;
         }
 
@@ -7911,6 +7919,7 @@
                     ctx.arc(hingeXLeft, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(hingeXLeft, y, 5);
                 }
                 
                 // Draw right if "right" or "both" selected
@@ -7921,6 +7930,7 @@
                     ctx.arc(hingeXRight, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(hingeXRight, y, 5);
                 }
             });
         }
@@ -7983,12 +7993,14 @@
                     ctx.arc(leftHingeX, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(leftHingeX, y, 5);
                     
                     // Петля справа
                     ctx.beginPath();
                     ctx.arc(rightHingeX, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(rightHingeX, y, 5);
                 });
             } else {
                 // Одна дверца - рисуем петли в зависимости от выбора (слева/спраleft/both)
@@ -8010,6 +8022,7 @@
                         ctx.arc(hingeXLeft, y, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.stroke();
+                        registerSchematicHingeDot(hingeXLeft, y, 5);
                     }
                     
                     // Draw right if "right" or "both" selected
@@ -8020,6 +8033,7 @@
                         ctx.arc(hingeXRight, y, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.stroke();
+                        registerSchematicHingeDot(hingeXRight, y, 5);
                     }
                 });
             }
@@ -8153,6 +8167,7 @@
         ctx.font = "10px 'Segoe UI', Arial";
         if (d1 > 0) ctx.fillText(`D: ${d1} ${unit}`, rightEdge, vY + vH / 2 + 18);
         if (d2 > 0) ctx.fillText(`D: ${d2} ${unit}`, rightEdge, wY + wH / 2 + 18);
+        window.__gconfigSchematicHingeDots = schematicHingeDots.slice();
     }
 
     // Helper: draw a simple double-headed arrow

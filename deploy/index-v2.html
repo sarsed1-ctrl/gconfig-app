@@ -351,7 +351,14 @@
                     <h2 data-i18n="preview">Превью</h2>
                 </div>
                 <div class="preview-canvas-wrap">
-                    <canvas id="previewCanvas" width="800" height="500" aria-label="Schematic preview"></canvas>
+                    <div class="scheme-hud-frame hud-frame">
+                        <span class="hud-corner hud-corner-tl" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-tr" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-bl" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-br" aria-hidden="true"></span>
+                        <span class="hud-scanline scheme-scanline" aria-hidden="true"></span>
+                        <canvas id="previewCanvas" width="800" height="500" aria-label="Schematic preview"></canvas>
+                    </div>
                 </div>
                 <p class="preview-meta" id="previewMeta"></p>
                 <div class="price-mirror-wrap" id="priceMirrorWrap">

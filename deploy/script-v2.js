@@ -993,6 +993,340 @@
 
 
 
+    let neonSoftBuffer = null;
+
+
+
+    function mixChannel(a, b, t) {
+
+        return Math.round(a + (b - a) * t);
+
+    }
+
+
+
+    function smoothstep(edge0, edge1, x) {
+
+        const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+
+        return t * t * (3 - 2 * t);
+
+    }
+
+
+
+    function recolorSchematicForNeon(ctx, w, h) {
+
+        const img = ctx.getImageData(0, 0, w, h);
+
+        const d = img.data;
+
+        const BG = [8, 12, 20];
+
+        const PANEL = [18, 28, 42];
+
+        const LINE = [36, 175, 138];
+
+        const LINE_HI = [92, 255, 200];
+
+        const TEXT = [118, 178, 164];
+
+        const TEXT_HI = [168, 228, 210];
+
+        const DOT = [48, 220, 175];
+
+        const DOT_HI = [120, 255, 210];
+
+
+
+        for (let i = 0; i < d.length; i += 4) {
+
+            const r = d[i];
+
+            const g = d[i + 1];
+
+            const b = d[i + 2];
+
+            const a = d[i + 3];
+
+            if (a < 8) continue;
+
+
+
+            const max = Math.max(r, g, b);
+
+            const min = Math.min(r, g, b);
+
+            const lum = max / 255;
+
+            const sat = max === 0 ? 0 : (max - min) / max;
+
+
+
+            if (b > r + 35 && b > g + 15 && b > 60) {
+
+                d[i] = BG[0];
+
+                d[i + 1] = BG[1];
+
+                d[i + 2] = BG[2];
+
+                continue;
+
+            }
+
+
+
+            const bgWeight = smoothstep(0.66, 0.95, lum) * (1 - Math.min(1, sat * 1.4));
+
+            const panelWeight = smoothstep(0.52, 0.84, lum) * (1 - Math.min(1, sat * 1.1));
+
+            if (bgWeight > 0.04 || panelWeight > 0.08) {
+
+                const fillWeight = Math.max(bgWeight, panelWeight * 0.85);
+
+                const tr = mixChannel(PANEL[0], BG[0], bgWeight);
+
+                const tg = mixChannel(PANEL[1], BG[1], bgWeight);
+
+                const tb = mixChannel(PANEL[2], BG[2], bgWeight);
+
+                d[i] = mixChannel(r, tr, fillWeight);
+
+                d[i + 1] = mixChannel(g, tg, fillWeight);
+
+                d[i + 2] = mixChannel(b, tb, fillWeight);
+
+                continue;
+
+            }
+
+
+
+            if (sat > 0.18 && lum > 0.1 && lum < 0.88) {
+
+                const accentSoft = 0.78;
+
+                const nr = Math.min(255, Math.round(r * 0.92 + 10));
+
+                const ng = Math.min(255, Math.round(g * 0.94 + 14));
+
+                const nb = Math.min(255, Math.round(b * 0.92 + 12));
+
+                d[i] = mixChannel(r, nr, accentSoft);
+
+                d[i + 1] = mixChannel(g, ng, accentSoft);
+
+                d[i + 2] = mixChannel(b, nb, accentSoft);
+
+                continue;
+
+            }
+
+
+
+            const lineWeight = (1 - smoothstep(0.1, 0.5, lum)) * (1 - sat * 0.28);
+
+            if (lineWeight > 0.04) {
+
+                const lr = mixChannel(LINE[0], LINE_HI[0], lineWeight);
+
+                const lg = mixChannel(LINE[1], LINE_HI[1], lineWeight);
+
+                const lb = mixChannel(LINE[2], LINE_HI[2], lineWeight);
+
+                const blend = lineWeight * 0.88;
+
+                d[i] = mixChannel(r, lr, blend);
+
+                d[i + 1] = mixChannel(g, lg, blend);
+
+                d[i + 2] = mixChannel(b, lb, blend);
+
+                continue;
+
+            }
+
+
+
+            const textWeight = smoothstep(0.24, 0.66, lum) * (1 - sat) * 0.72;
+
+            if (textWeight > 0.04) {
+
+                const tr = mixChannel(TEXT[0], TEXT_HI[0], textWeight);
+
+                const tg = mixChannel(TEXT[1], TEXT_HI[1], textWeight);
+
+                const tb = mixChannel(TEXT[2], TEXT_HI[2], textWeight);
+
+                d[i] = mixChannel(r, tr, textWeight);
+
+                d[i + 1] = mixChannel(g, tg, textWeight);
+
+                d[i + 2] = mixChannel(b, tb, textWeight);
+
+            }
+
+        }
+
+
+
+        ctx.putImageData(img, 0, 0);
+
+    }
+
+
+
+    function collectHingeDotsFromIframe() {
+
+        const win = iframeWin();
+
+        if (!win || !Array.isArray(win.__gconfigSchematicHingeDots)) return [];
+
+        return win.__gconfigSchematicHingeDots.map((dot) => ({
+
+            x: dot.x,
+
+            y: dot.y,
+
+            radius: dot.r || 5,
+
+        }));
+
+    }
+
+
+
+    function drawSoftNeonHingeDots(ctx, dots) {
+
+        if (!dots.length) return;
+
+
+
+        dots.forEach(({ x, y, radius }) => {
+
+            const r = radius || 5;
+
+
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = 'destination-out';
+
+            ctx.beginPath();
+
+            ctx.arc(x, y, r + 3, 0, Math.PI * 2);
+
+            ctx.fill();
+
+            ctx.restore();
+
+
+
+            ctx.save();
+
+            const glow = ctx.createRadialGradient(x, y, 0, x, y, r + 6);
+
+            glow.addColorStop(0, 'rgba(0, 229, 160, 0.5)');
+
+            glow.addColorStop(0.65, 'rgba(0, 229, 160, 0.14)');
+
+            glow.addColorStop(1, 'rgba(0, 229, 160, 0)');
+
+            ctx.fillStyle = glow;
+
+            ctx.beginPath();
+
+            ctx.arc(x, y, r + 6, 0, Math.PI * 2);
+
+            ctx.fill();
+
+            ctx.restore();
+
+
+
+            ctx.save();
+
+            const core = ctx.createRadialGradient(x, y, 0, x, y, r + 0.5);
+
+            core.addColorStop(0, '#eafff8');
+
+            core.addColorStop(0.55, '#5cffc8');
+
+            core.addColorStop(1, '#00c888');
+
+            ctx.fillStyle = core;
+
+            ctx.beginPath();
+
+            ctx.arc(x, y, r + 0.5, 0, Math.PI * 2);
+
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(180, 255, 230, 0.4)';
+
+            ctx.lineWidth = 1;
+
+            ctx.stroke();
+
+            ctx.restore();
+
+        });
+
+    }
+
+
+
+    function applyNeonSchematicSoftening(ctx, w, h) {
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+
+
+        if (!neonSoftBuffer) neonSoftBuffer = document.createElement('canvas');
+
+        if (neonSoftBuffer.width !== w || neonSoftBuffer.height !== h) {
+
+            neonSoftBuffer.width = w;
+
+            neonSoftBuffer.height = h;
+
+        }
+
+        const sctx = neonSoftBuffer.getContext('2d');
+
+        if (!sctx) return;
+
+        sctx.clearRect(0, 0, w, h);
+
+        sctx.drawImage(ctx.canvas, 0, 0);
+
+
+
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.save();
+
+        ctx.filter = 'blur(1.8px)';
+
+        ctx.globalAlpha = 0.38;
+
+        ctx.drawImage(neonSoftBuffer, 0, 0);
+
+        ctx.restore();
+
+        ctx.save();
+
+        ctx.globalAlpha = 0.9;
+
+        ctx.drawImage(neonSoftBuffer, 0, 0);
+
+        ctx.restore();
+
+    }
+
+
+
     function syncCanvas() {
 
         const doc = iframeDoc();
@@ -1016,6 +1350,18 @@
         try {
 
             ctx.drawImage(src, 0, 0);
+
+            if (document.documentElement.classList.contains('theme-future')) {
+
+                const hingeDots = collectHingeDotsFromIframe();
+
+                recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+
+                applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+
+                drawSoftNeonHingeDots(ctx, hingeDots);
+
+            }
 
         } catch (_) { /* tainted or not ready */ }
 
@@ -1390,6 +1736,8 @@
             localStorage.setItem(THEME_STORAGE_KEY, isFuture ? 'future' : 'classic');
 
         } catch (_) { /* ignore */ }
+
+        syncCanvas();
 
     }
 

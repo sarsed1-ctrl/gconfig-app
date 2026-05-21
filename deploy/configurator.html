@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4903,7 +4903,12 @@
         manufacturers: []
     };
     let hingeMarkers = [];
+    let schematicHingeDots = [];
     let lastDrawArgs = null;
+
+    function registerSchematicHingeDot(x, y, radius) {
+        schematicHingeDots.push({ x, y, r: radius || 5 });
+    }
 
     // ==========================================
     // HELPER: Hinge count based on door height
@@ -6089,29 +6094,40 @@
             const upperShelfWpm2 = CARCASS_WEIGHT_MAP[upperShelfThick] || 12.5;
             
             if (upperShelvesH > 0) {
-                const upperShelfW = upperInnerW;
                 const upperShelfD = d2 - 4;
+                const xSegments = getShelfOpenIntervals(upperInnerW, upperShelvesV, upperSpacingV, upperShelfThick);
                 for (let i = 0; i < upperShelvesH; i++) {
                     const posFromBottom = upperSpacingH * (i + 1);
-                    parts.push({
-                        name: `${T.part_shelf_h_upper} #${i+1} (+${posFromBottom}mm)`,
-                        qty: 1, l: upperShelfW, w: upperShelfD, t: upperShelfThick, mat: matCarcass
+                    xSegments.forEach((seg, sIdx) => {
+                        const segW = seg.end - seg.start;
+                        if (segW <= 0) return;
+                        const suffix = xSegments.length > 1 ? `.${sIdx + 1}` : '';
+                        parts.push({
+                            name: `${T.part_shelf_h_upper} #${i + 1}${suffix} (+${posFromBottom}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                            qty: 1, l: segW, w: upperShelfD, t: upperShelfThick, mat: matCarcass
+                        });
+                        wtUpperCarcass += panelAreaM2(segW, upperShelfD) * upperShelfWpm2;
                     });
                 }
-                wtUpperCarcass += upperShelvesH * panelAreaM2(upperShelfW, upperShelfD) * upperShelfWpm2;
             }
-            
+
             if (upperShelvesV > 0) {
-                const upperDivH = h2 - 2 * carcassT;
+                const upperInnerH = h2 - 2 * carcassT;
                 const upperDivD = d2 - 4;
+                const ySegments = getShelfOpenIntervals(upperInnerH, upperShelvesH, upperSpacingH, upperShelfThick);
                 for (let i = 0; i < upperShelvesV; i++) {
                     const posFromLeft = upperSpacingV * (i + 1);
-                    parts.push({
-                        name: `${T.part_shelf_v_upper} #${i+1} (+${posFromLeft}mm)`,
-                        qty: 1, l: upperDivH, w: upperDivD, t: upperShelfThick, mat: matCarcass
+                    ySegments.forEach((seg, sIdx) => {
+                        const segH = seg.end - seg.start;
+                        if (segH <= 0) return;
+                        const suffix = ySegments.length > 1 ? `.${sIdx + 1}` : '';
+                        parts.push({
+                            name: `${T.part_shelf_v_upper} #${i + 1}${suffix} (+${posFromLeft}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                            qty: 1, l: segH, w: upperDivD, t: upperShelfThick, mat: matCarcass
+                        });
+                        wtUpperCarcass += panelAreaM2(segH, upperDivD) * upperShelfWpm2;
                     });
                 }
-                wtUpperCarcass += upperShelvesV * panelAreaM2(upperDivH, upperDivD) * upperShelfWpm2;
             }
             
             // UPPER CABINET FACADE - CORRECTED ORDER L and W
@@ -6390,30 +6406,39 @@
         const shelfWpm2 = CARCASS_WEIGHT_MAP[vanityShelfT] || 12.5;
 
         if (vanityShelvesH > 0) {
-            const shelfW = innerW1;
             const shelfD = d1 - 4;
-            const shelfNote = `${T.shelf_note_h}: ${vanitySpacingH} mm`;
+            const xSegments = getShelfOpenIntervals(innerW1, vanityShelvesV, vanitySpacingV, vanityShelfT);
             for (let i = 0; i < vanityShelvesH; i++) {
-                // Each shelf at a different height position
                 const posFromBottom = vanitySpacingH * (i + 1);
-                parts.push({
-                    name: `${T.part_shelf_h} #${i+1} (+${posFromBottom}mm from bottom)`,
-                    qty: 1, l: shelfW, w: shelfD, t: vanityShelfT, mat: matCarcass
+                xSegments.forEach((seg, sIdx) => {
+                    const segW = seg.end - seg.start;
+                    if (segW <= 0) return;
+                    const suffix = xSegments.length > 1 ? `.${sIdx + 1}` : '';
+                    parts.push({
+                        name: `${T.part_shelf_h} #${i + 1}${suffix} (+${posFromBottom}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                        qty: 1, l: segW, w: shelfD, t: vanityShelfT, mat: matCarcass
+                    });
+                    wtVanityCarcass += panelAreaM2(segW, shelfD) * shelfWpm2;
                 });
             }
-            wtVanityCarcass += vanityShelvesH * panelAreaM2(shelfW, shelfD) * shelfWpm2;
         }
         if (vanityShelvesV > 0) {
-            const divH = h1 - 2 * carcassT;
+            const innerH1 = h1 - 2 * carcassT;
             const divD = d1 - 4;
+            const ySegments = getShelfOpenIntervals(innerH1, vanityShelvesH, vanitySpacingH, vanityShelfT);
             for (let i = 0; i < vanityShelvesV; i++) {
                 const posFromLeft = vanitySpacingV * (i + 1);
-                parts.push({
-                    name: `${T.part_shelf_v} #${i+1} (+${posFromLeft}mm from left)`,
-                    qty: 1, l: divH, w: divD, t: vanityShelfT, mat: matCarcass
+                ySegments.forEach((seg, sIdx) => {
+                    const segH = seg.end - seg.start;
+                    if (segH <= 0) return;
+                    const suffix = ySegments.length > 1 ? `.${sIdx + 1}` : '';
+                    parts.push({
+                        name: `${T.part_shelf_v} #${i + 1}${suffix} (+${posFromLeft}mm from left, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                        qty: 1, l: segH, w: divD, t: vanityShelfT, mat: matCarcass
+                    });
+                    wtVanityCarcass += panelAreaM2(segH, divD) * shelfWpm2;
                 });
             }
-            wtVanityCarcass += vanityShelvesV * panelAreaM2(divH, divD) * shelfWpm2;
         }
 
         // Upper facade using corrected gap logic (single door)
@@ -6980,6 +7005,100 @@
             <td><strong>${T.wt_total}</strong></td>
             <td><strong>${total.toFixed(2)} ${T.wt_kg}</strong></td>
         </tr>`;
+    }
+
+    /**
+     * Open intervals along one inner axis (mm, origin at bottom/left inner edge)
+     * after subtracting perpendicular shelf/divider bands (position + thickness).
+     */
+    function getShelfOpenIntervals(totalInnerMm, perpCount, spacingMm, shelfThickMm) {
+        const total = Math.max(0, totalInnerMm);
+        if (total <= 0) return [];
+        if (!perpCount || perpCount <= 0) return [{ start: 0, end: total }];
+
+        const thick = Math.max(1, shelfThickMm || 16);
+        const blocks = [];
+        for (let i = 0; i < perpCount; i++) {
+            const start = Math.min(total, Math.max(0, spacingMm * (i + 1)));
+            const end = Math.min(total, start + thick);
+            if (end > start) blocks.push({ start, end });
+        }
+        blocks.sort((a, b) => a.start - b.start);
+
+        const merged = [];
+        blocks.forEach((b) => {
+            if (!merged.length || b.start > merged[merged.length - 1].end) {
+                merged.push({ start: b.start, end: b.end });
+            } else {
+                merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, b.end);
+            }
+        });
+
+        const open = [];
+        let cursor = 0;
+        merged.forEach((b) => {
+            if (b.start > cursor) open.push({ start: cursor, end: b.start });
+            cursor = Math.max(cursor, b.end);
+        });
+        if (cursor < total) open.push({ start: cursor, end: total });
+        return open.length ? open : [{ start: 0, end: total }];
+    }
+
+    function drawCabinetInteriorShelves(ctx, innerL, innerT, innerR, innerB, scale, hCount, hSpacing, vCount, vSpacing, shelfThickMm) {
+        const innerWmm = (innerR - innerL) / scale;
+        const innerHmm = (innerB - innerT) / scale;
+        if (innerWmm <= 0 || innerHmm <= 0) return;
+
+        const thick = Math.max(1, shelfThickMm || 16);
+        const xOpen = getShelfOpenIntervals(innerWmm, vCount, vSpacing, thick);
+        const yOpen = getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
+        const segmentColors = ['#2980b9', '#d35400', '#8e44ad', '#16a085', '#c0392b', '#2c3e50'];
+
+        ctx.lineWidth = 1.5;
+
+        // Horizontal shelf segments — split at vertical dividers
+        for (let i = 0; i < hCount; i++) {
+            const posFromBottom = hSpacing * (i + 1);
+            const y = innerB - (posFromBottom + thick / 2) * scale;
+            if (y <= innerT || y >= innerB) continue;
+            xOpen.forEach((seg, segIdx) => {
+                const x1 = innerL + seg.start * scale;
+                const x2 = innerL + seg.end * scale;
+                if (x2 - x1 <= 2) return;
+                const isSplit = xOpen.length > 1;
+                ctx.strokeStyle = isSplit
+                    ? segmentColors[segIdx % segmentColors.length]
+                    : '#1a6b2f';
+                ctx.setLineDash(isSplit ? [7, 4, 2, 4] : [4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+            });
+        }
+
+        // Vertical divider segments — split at horizontal shelves
+        for (let i = 0; i < vCount; i++) {
+            const posFromLeft = vSpacing * (i + 1);
+            const x = innerL + (posFromLeft + thick / 2) * scale;
+            if (x <= innerL || x >= innerR) continue;
+            yOpen.forEach((seg, segIdx) => {
+                const y1 = innerB - seg.end * scale;
+                const y2 = innerB - seg.start * scale;
+                if (y2 - y1 <= 2) return;
+                const isSplit = yOpen.length > 1;
+                ctx.strokeStyle = isSplit
+                    ? segmentColors[segIdx % segmentColors.length]
+                    : '#2980b9';
+                ctx.setLineDash(isSplit ? [7, 4, 2, 4] : [6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+            });
+        }
+
+        ctx.setLineDash([]);
     }
 
     // ==========================================
@@ -7595,14 +7714,17 @@
         const width = canvas.width, height = canvas.height;
         ctx.clearRect(0, 0, width, height);
         hingeMarkers = [];
+        schematicHingeDots = [];
 
         if (CONFIG_MODE === 'shelves') {
             drawShelfSchematic(ctx, width, height, lang);
+            window.__gconfigSchematicHingeDots = [];
             return;
         }
 
         if (CONFIG_MODE === 'beds') {
             drawBedSchematic(ctx, width, height, w1, h1, d1, w2, h2, lang);
+            window.__gconfigSchematicHingeDots = [];
             return;
         }
 
@@ -7797,6 +7919,7 @@
                     ctx.arc(hingeXLeft, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(hingeXLeft, y, 5);
                 }
                 
                 // Draw right if "right" or "both" selected
@@ -7807,6 +7930,7 @@
                     ctx.arc(hingeXRight, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(hingeXRight, y, 5);
                 }
             });
         }
@@ -7869,12 +7993,14 @@
                     ctx.arc(leftHingeX, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(leftHingeX, y, 5);
                     
                     // Петля справа
                     ctx.beginPath();
                     ctx.arc(rightHingeX, y, 5, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    registerSchematicHingeDot(rightHingeX, y, 5);
                 });
             } else {
                 // Одна дверца - рисуем петли в зависимости от выбора (слева/спраleft/both)
@@ -7896,6 +8022,7 @@
                         ctx.arc(hingeXLeft, y, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.stroke();
+                        registerSchematicHingeDot(hingeXLeft, y, 5);
                     }
                     
                     // Draw right if "right" or "both" selected
@@ -7906,6 +8033,7 @@
                         ctx.arc(hingeXRight, y, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.stroke();
+                        registerSchematicHingeDot(hingeXRight, y, 5);
                     }
                 });
             }
@@ -7984,44 +8112,23 @@
         const _uShV    = parseInt(document.getElementById('upperShelvesV').value)   || 0;
         const _uSpH    = parseInt(document.getElementById('upperSpacingH').value)   || 100;
         const _uSpV    = parseInt(document.getElementById('upperSpacingV').value)   || 200;
+        const _vShelfT = parseInt(document.getElementById('vanityShelfThick')?.value) || 16;
+        const _uShelfT = parseInt(document.getElementById('upperShelfThick')?.value) || 16;
 
         ctx.save();
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
 
-        // Vanity horizontal shelves — lines inside vanity rect
-        for (let i = 0; i < _vShH; i++) {
-            const shelfYoff = (_vSpH * (i + 1)) * scale;
-            const shelfY = startY - shelfYoff;
-            if (shelfY > vY && shelfY < startY) {
-                ctx.beginPath(); ctx.moveTo(vX + 2, shelfY); ctx.lineTo(vX + vW - 2, shelfY); ctx.stroke();
-            }
-        }
-        // Vanity vertical dividers
-        for (let i = 0; i < _vShV; i++) {
-            const divXoff = (_vSpV * (i + 1)) * scale;
-            const divX = vX + divXoff;
-            if (divX > vX && divX < vX + vW) {
-                ctx.beginPath(); ctx.moveTo(divX, vY + 2); ctx.lineTo(divX, startY - 2); ctx.stroke();
-            }
-        }
-        // Upper cabinet horizontal shelves
-        for (let i = 0; i < _uShH; i++) {
-            const shelfYoff = (_uSpH * (i + 1)) * scale;
-            const shelfY = wY + wH - shelfYoff;
-            if (shelfY > wY && shelfY < wY + wH) {
-                ctx.beginPath(); ctx.moveTo(wX + 2, shelfY); ctx.lineTo(wX + wW - 2, shelfY); ctx.stroke();
-            }
-        }
-        // Upper cabinet vertical dividers
-        for (let i = 0; i < _uShV; i++) {
-            const divXoff = (_uSpV * (i + 1)) * scale;
-            const divX = wX + divXoff;
-            if (divX > wX && divX < wX + wW) {
-                ctx.beginPath(); ctx.moveTo(divX, wY + 2); ctx.lineTo(divX, wY + wH - 2); ctx.stroke();
-            }
-        }
+        const vInnerL = vX + carcassT * scale;
+        const vInnerR = vX + vW - carcassT * scale;
+        const vInnerT = vY + carcassT * scale;
+        const vInnerB = startY - carcassT * scale;
+        drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vSpH, _vShV, _vSpV, _vShelfT);
+
+        const uInnerL = wX + carcassT * scale;
+        const uInnerR = wX + wW - carcassT * scale;
+        const uInnerT = wY + carcassT * scale;
+        const uInnerB = wY + wH - carcassT * scale;
+        drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+
         ctx.restore();
 
         // Height arrows for vanity
@@ -8060,6 +8167,7 @@
         ctx.font = "10px 'Segoe UI', Arial";
         if (d1 > 0) ctx.fillText(`D: ${d1} ${unit}`, rightEdge, vY + vH / 2 + 18);
         if (d2 > 0) ctx.fillText(`D: ${d2} ${unit}`, rightEdge, wY + wH / 2 + 18);
+        window.__gconfigSchematicHingeDots = schematicHingeDots.slice();
     }
 
     // Helper: draw a simple double-headed arrow
