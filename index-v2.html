@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GConfig v2 — Конфигуратор</title>
+    <link rel="icon" type="image/png" href="alien-logo.png">
+    <link rel="stylesheet" href="styles-v2.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner" aria-hidden="true"></div>
+        <p data-i18n="loading">Загрузка конфигуратора…</p>
+    </div>
+
+    <iframe id="v1Frame" class="hidden-iframe" title="GConfig v1 engine"></iframe>
+
+    <div class="app-shell" id="appShell">
+        <header class="top-bar">
+            <a href="index-v1.html" class="version-toggle" data-i18n="to_v1">← v1</a>
+            <div class="brand">GConfig <span>v2.0</span></div>
+            <div class="top-actions">
+                <div class="lang-toggle" role="group" aria-label="Language">
+                    <button type="button" id="langRu" class="active">RU</button>
+                    <button type="button" id="langEn">EN</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="workspace">
+            <aside class="wizard-panel">
+                <nav class="stepper" aria-label="Wizard steps">
+                    <button type="button" class="stepper-item active" data-step="1">
+                        <span class="stepper-dot">1</span>
+                        <span class="stepper-label" data-i18n="step1_short">Размеры</span>
+                    </button>
+                    <button type="button" class="stepper-item" data-step="2">
+                        <span class="stepper-dot">2</span>
+                        <span class="stepper-label" data-i18n="step2_short">Полки</span>
+                    </button>
+                    <button type="button" class="stepper-item" data-step="3">
+                        <span class="stepper-dot">3</span>
+                        <span class="stepper-label" data-i18n="step3_short">Фурнитура</span>
+                    </button>
+                    <button type="button" class="stepper-item" data-step="4">
+                        <span class="stepper-dot">4</span>
+                        <span class="stepper-label" data-i18n="step4_short">Материалы</span>
+                    </button>
+                </nav>
+
+                <div class="wizard-body">
+                    <!-- Step 1 -->
+                    <section class="wizard-step active" data-step="1">
+                        <h2 class="step-title" data-i18n="step1_title">Размеры</h2>
+                        <p class="step-desc" data-i18n="step1_desc">Габариты секций, толщины и тип стены.</p>
+
+                        <div class="mode-toggle" role="group" aria-label="Product mode">
+                            <button type="button" id="modeClosets" class="active" data-mode="closets" data-i18n="mode_closets">Шкафы</button>
+                            <button type="button" id="modeBeds" data-mode="beds" data-i18n="mode_beds">Кровати</button>
+                        </div>
+
+                        <div class="closets-only">
+                            <div class="card">
+                                <h3 data-i18n="lower_section">Нижний шкаф</h3>
+                                <div class="field-grid cols-3">
+                                    <div class="field"><label data-i18n="width">Ширина (W)</label><input type="number" id="w-lower-w" data-iframe="w1" min="300" step="1"></div>
+                                    <div class="field"><label data-i18n="height">Высота (H)</label><input type="number" id="w-lower-h" data-iframe="h1" min="200" step="1"></div>
+                                    <div class="field"><label data-i18n="depth">Глубина (D)</label><input type="number" id="w-lower-d" data-iframe="d1" min="200" step="1"></div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3 data-i18n="upper_section">Верхний шкаф</h3>
+                                <div class="field-grid cols-3">
+                                    <div class="field"><label data-i18n="width">Ширина (W2)</label><input type="number" id="w-upper-w" data-iframe="upper_w" min="300" step="1"></div>
+                                    <div class="field"><label data-i18n="height">Высота (H2)</label><input type="number" id="w-upper-h" data-iframe="upper_h" min="200" step="1"></div>
+                                    <div class="field"><label data-i18n="depth">Глубина (D2)</label><input type="number" id="w-upper-d" data-iframe="upper_d" min="200" step="1"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="beds-only">
+                            <div class="card">
+                                <h3 data-i18n="bed_dims">Кровать</h3>
+                                <div class="field full">
+                                    <label data-i18n="bed_preset">Пресет</label>
+                                    <select id="w-bedPreset" data-iframe="bedPreset"></select>
+                                </div>
+                                <div class="field-grid cols-3">
+                                    <div class="field"><label data-i18n="mattress_w">Ширина матраса</label><input type="number" id="w-bedMattressW" data-iframe="bedMattressW" step="10"></div>
+                                    <div class="field"><label data-i18n="bed_length">Длина</label><input type="number" id="w-bedLength" data-iframe="bedLength" step="10"></div>
+                                    <div class="field"><label data-i18n="frame_h">Высота каркаса</label><input type="number" id="w-bedFrameH" data-iframe="bedFrameH" step="5"></div>
+                                    <div class="field"><label data-i18n="headboard_h">Изголовье</label><input type="number" id="w-bedHeadboardH" data-iframe="bedHeadboardH" step="10"></div>
+                                    <div class="field"><label data-i18n="footboard_h">Изножье</label><input type="number" id="w-bedFootboardH" data-iframe="bedFootboardH" step="10"></div>
+                                    <div class="field"><label data-i18n="bed_base">Основание</label><select id="w-bedBaseType" data-iframe="bedBaseType"></select></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card closets-only">
+                            <h3 data-i18n="countertop">Столешница</h3>
+                            <label class="checkbox-field">
+                                <input type="checkbox" id="w-hasCountertop" data-iframe="hasCountertop">
+                                <span data-i18n="include_countertop">Включить столешницу</span>
+                            </label>
+                            <div class="field-grid countertop-fields" id="countertopFields">
+                                <div class="field full">
+                                    <label data-i18n="ct_material">Материал столешницы</label>
+                                    <select id="w-countertopMaterial" data-iframe="countertopMaterial"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="ct_front_overhang">Выступ спереди (мм)</label>
+                                    <input type="number" id="w-ctFrontOverhang" data-iframe="ctFrontOverhang" min="0" step="1">
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="ct_side_overhang">Выступ сбоку (мм)</label>
+                                    <input type="number" id="w-ctSideOverhang" data-iframe="ctSideOverhang" min="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 data-i18n="general_thick">Общие параметры</h3>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label data-i18n="facade_thick">Толщина фасада</label>
+                                    <select id="w-facadeThick" data-iframe="facadeThick"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="carcass_thick">Толщина корпуса</label>
+                                    <select id="w-carcassThick" data-iframe="carcassThick"></select>
+                                </div>
+                                <div class="field full closets-only">
+                                    <label data-i18n="wall_type">Тип стены</label>
+                                    <select id="w-wallType" data-iframe="wallType"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Step 2 -->
+                    <section class="wizard-step" data-step="2">
+                        <h2 class="step-title" data-i18n="step2_title">Полки и двери</h2>
+                        <p class="step-desc" data-i18n="step2_desc">Количество полок и режим фурнитуры дверей.</p>
+
+                        <div class="closets-only">
+                            <div class="card">
+                                <h3 data-i18n="shelves">Полки</h3>
+                                <div class="field-grid">
+                                    <div class="field">
+                                        <label data-i18n="upper_shelves_h">Верх — гориз.</label>
+                                        <input type="number" id="w-upperShelvesH" data-iframe="upperShelvesH" min="0" max="5">
+                                    </div>
+                                    <div class="field">
+                                        <label data-i18n="upper_shelves_v">Верх — верт.</label>
+                                        <input type="number" id="w-upperShelvesV" data-iframe="upperShelvesV" min="0" max="4">
+                                    </div>
+                                    <div class="field">
+                                        <label data-i18n="lower_shelves_h">Низ — гориз.</label>
+                                        <input type="number" id="w-vanityShelvesH" data-iframe="vanityShelvesH" min="0" max="5">
+                                    </div>
+                                    <div class="field">
+                                        <label data-i18n="lower_shelves_v">Низ — верт.</label>
+                                        <input type="number" id="w-vanityShelvesV" data-iframe="vanityShelvesV" min="0" max="4">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3 data-i18n="hardware_mode">Фурнитура дверей</h3>
+                                <div class="hw-group">
+                                    <label data-i18n="upper_hw">Верхний шкаф</label>
+                                    <div class="hw-chips" id="upperHwChips" data-radio="upperHardwareMode">
+                                        <button type="button" class="hw-chip" data-value="gas" data-i18n="gas">Газлифты</button>
+                                        <button type="button" class="hw-chip" data-value="hinge" data-i18n="hinge">Петли</button>
+                                    </div>
+                                </div>
+                                <div class="hw-group">
+                                    <label data-i18n="lower_hw">Нижний шкаф</label>
+                                    <div class="hw-chips" id="lowerHwChips" data-radio="lowerHardwareMode">
+                                        <button type="button" class="hw-chip" data-value="hinge" data-i18n="hinge">Петли</button>
+                                        <button type="button" class="hw-chip" data-value="gas" data-i18n="gas">Газлифты</button>
+                                        <button type="button" class="hw-chip" data-value="drawer" data-i18n="drawer">Ящики</button>
+                                    </div>
+                                </div>
+                                <label class="checkbox-field" id="lowerSplitWrap">
+                                    <input type="checkbox" id="w-lowerSplitFacade" data-iframe="lowerSplitFacade">
+                                    <span data-i18n="lower_split_door">Разделить дверь на две створки</span>
+                                </label>
+                                <div class="drawer-fields" id="drawerFields">
+                                    <div class="field-grid">
+                                        <div class="field">
+                                            <label data-i18n="drawer_system">Система ящиков</label>
+                                            <select id="w-lowerDrawerSystem" data-iframe="lowerDrawerSystem"></select>
+                                        </div>
+                                        <div class="field">
+                                            <label data-i18n="drawer_count">Количество ящиков</label>
+                                            <select id="w-lowerDrawerCount" data-iframe="lowerDrawerCount"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="step-desc beds-only" data-i18n="beds_step2_skip">Для кроватей этот шаг не применяется.</p>
+                    </section>
+
+                    <!-- Step 3 -->
+                    <section class="wizard-step" data-step="3">
+                        <h2 class="step-title" data-i18n="step3_title">Задняя стенка и петли</h2>
+                        <p class="step-desc" data-i18n="step3_desc">Задняя панель EAMF и настройки петель.</p>
+
+                        <div class="card closets-only">
+                            <h3 data-i18n="back_panel">Задняя панель</h3>
+                            <label class="checkbox-field">
+                                <input type="checkbox" id="w-useCarcassBackPanel" data-iframe="useCarcassBackPanel">
+                                <span data-i18n="use_carcass_back">Корпусная задняя стенка</span>
+                            </label>
+                            <div class="field full" style="margin-top:10px;">
+                                <label data-i18n="eamf_back">EAMF задняя панель</label>
+                                <select id="w-eamfBackPanel" data-iframe="eamfBackPanel"></select>
+                            </div>
+                            <div class="back-fit-row" id="backFitRow">
+                                <label data-i18n="back_panel_fit">Посадка задней панели</label>
+                                <div class="hw-chips" id="backFitChips" data-radio="backPanelFitType">
+                                    <button type="button" class="hw-chip" data-value="overlay" data-i18n="overlay">Накладная</button>
+                                    <button type="button" class="hw-chip" data-value="inset" data-i18n="inset">Вкладная</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card closets-only">
+                            <h3 data-i18n="hinges">Петли и газлифты</h3>
+                            <div class="field-grid">
+                                <div class="field hinge-upper-field">
+                                    <label data-i18n="upper_hinge_brand">Верх — бренд</label>
+                                    <select id="w-upperHingeBrand" data-iframe="upperHingeBrand"></select>
+                                </div>
+                                <div class="field hinge-upper-field">
+                                    <label data-i18n="upper_hinge_type">Верх — тип</label>
+                                    <select id="w-upperHingeType" data-iframe="upperHingeType"></select>
+                                </div>
+                                <div class="field hinge-upper-field">
+                                    <label data-i18n="upper_hinge_count">Верх — кол-во петель</label>
+                                    <select id="w-upperHingeCount" data-iframe="upperHingeCount"></select>
+                                </div>
+                                <div class="field hinge-lower-field">
+                                    <label data-i18n="lower_hinge_brand">Низ — бренд</label>
+                                    <select id="w-lowerHingeBrand" data-iframe="lowerHingeBrand"></select>
+                                </div>
+                                <div class="field hinge-lower-field">
+                                    <label data-i18n="lower_hinge_type">Низ — тип</label>
+                                    <select id="w-lowerHingeType" data-iframe="lowerHingeType"></select>
+                                </div>
+                                <div class="field hinge-lower-field">
+                                    <label data-i18n="lower_hinge_count">Низ — кол-во петель</label>
+                                    <select id="w-lowerHingeCount" data-iframe="lowerHingeCount"></select>
+                                </div>
+                            </div>
+                            <p class="gas-hint" id="gasHint" data-i18n="gas_auto_hint">Газлифты GTV HORIZON подбираются автоматически по весу фасада.</p>
+                        </div>
+                        <p class="step-desc beds-only" data-i18n="beds_step3_skip">Для кроватей задняя панель и петли скрыты в v1.</p>
+                    </section>
+
+                    <!-- Step 4 -->
+                    <section class="wizard-step" data-step="4">
+                        <h2 class="step-title" data-i18n="step4_title">Материалы и цена</h2>
+                        <p class="step-desc" data-i18n="step4_desc">Отделка EAMF и итоговая стоимость Amflex.</p>
+
+                        <div class="card">
+                            <h3 data-i18n="materials">Материалы EAMF</h3>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label data-i18n="facade_mat">Фасад</label>
+                                    <select id="w-eamfFacadeMaterial" data-iframe="eamfFacadeMaterial"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="facade_edge">Кромка фасада</label>
+                                    <select id="w-eamfFacadeEdge" data-iframe="eamfFacadeEdge"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="carcass_mat">Корпус</label>
+                                    <select id="w-eamfCarcassMaterial" data-iframe="eamfCarcassMaterial"></select>
+                                </div>
+                                <div class="field closets-only">
+                                    <label data-i18n="carcass_edge">Кромка корпуса</label>
+                                    <select id="w-eamfCarcassEdge" data-iframe="eamfCarcassEdge"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 data-i18n="project">Проект</h3>
+                            <div class="field full">
+                                <label data-i18n="project_name">Название проекта</label>
+                                <input type="text" id="w-project-name-input" data-iframe="project-name-input" placeholder="">
+                            </div>
+                        </div>
+                        <p class="step-desc" data-i18n="price_on_right">Сводка цены отображается справа. Экспорт — кнопки под превью.</p>
+                        <p class="wizard-v1-link"><a href="configurator.html" id="openV1Link" data-i18n="open_v1_full">Полный конфигуратор v1 →</a></p>
+                    </section>
+                </div>
+
+                <div class="wizard-nav">
+                    <button type="button" class="btn-back" id="btnPrev" disabled data-i18n="back">Назад</button>
+                    <button type="button" class="btn-next" id="btnNext" data-i18n="next">Далее</button>
+                </div>
+            </aside>
+
+            <main class="preview-panel">
+                <div class="preview-header">
+                    <h2 data-i18n="preview">Превью</h2>
+                </div>
+                <div class="preview-canvas-wrap">
+                    <canvas id="previewCanvas" width="800" height="500" aria-label="Schematic preview"></canvas>
+                </div>
+                <p class="preview-meta" id="previewMeta"></p>
+                <div class="price-mirror-wrap" id="priceMirrorWrap">
+                    <div id="priceMirror" class="price-summary"></div>
+                </div>
+                <div class="export-actions" id="exportActions">
+                    <button type="button" class="btn-pdf" id="btnPdf" data-i18n="pdf">PDF</button>
+                    <button type="button" class="btn-excel" id="btnExcel" data-i18n="excel">Excel</button>
+                    <button type="button" class="btn-order" id="btnOrder" data-i18n="order">Заказ</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="script-v2.js"></script>
+</body>
+</html>

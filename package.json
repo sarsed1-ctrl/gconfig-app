@@ -3,5 +3,9 @@
   "private": true,
   "engines": {
     "node": ">=18"
+  },
+  "scripts": {
+    "dev": "python -m http.server 8080",
+    "dev:vercel": "npx vercel dev --listen 8080"
   }
 }

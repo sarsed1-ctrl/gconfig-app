@@ -1,14 +1,18 @@
-const CACHE = 'gconfig-v4';
+const CACHE = 'gconfig-v5';
 
 const PRECACHE = [
     './',
     './index.html',
+    './index-v1.html',
+    './index-v2.html',
     './welcome.html',
     './app.html',
     './configurator.html',
     './beds.html',
     './manifest.json',
     './style.css',
+    './styles-v2.css',
+    './script-v2.js',
     './alien-logo.png'
 ];
 
