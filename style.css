@@ -342,44 +342,44 @@ input[type="range"] { accent-color: var(--primary) !important; }
 ::-webkit-scrollbar-thumb { background: #c0c8c0; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-/* ── 25. Welcome page cards ───────────────────────────────── */
-.card {
+/* ── 25. Welcome page cards (classic theme only) ──────────── */
+html:not(.theme-future) body.welcome-page .card {
   background: var(--panel-bg) !important;
   border-color: rgba(26,107,47,0.15) !important;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
 }
-.card:hover {
+html:not(.theme-future) body.welcome-page .card:hover {
   border-color: var(--primary) !important;
   box-shadow: 0 8px 28px rgba(26,107,47,0.14) !important;
   transform: translateY(-4px);
 }
-.card-icon-area {
+html:not(.theme-future) body.welcome-page .card-icon-area {
   background: linear-gradient(135deg, var(--primary-pale) 0%, #d6ead9 100%) !important;
 }
-.card-icon-area svg { color: var(--primary) !important; }
-.card-title { color: var(--primary) !important; }
-.card-desc  { color: var(--text-muted) !important; }
-.card-btn {
+html:not(.theme-future) body.welcome-page .card-icon-area svg { color: var(--primary) !important; }
+html:not(.theme-future) body.welcome-page .card-title { color: var(--primary) !important; }
+html:not(.theme-future) body.welcome-page .card-desc  { color: var(--text-muted) !important; }
+html:not(.theme-future) body.welcome-page .card-btn {
   background: var(--primary) !important;
   color: #fff !important;
 }
-.card-btn:hover { background: var(--primary-light) !important; }
+html:not(.theme-future) body.welcome-page .card-btn:hover { background: var(--primary-light) !important; }
 
-/* ── 26. Welcome hero & footer ────────────────────────────── */
-.hero p { color: var(--text-muted) !important; }
-footer {
+/* ── 26. Welcome hero & footer (classic theme only) ───────── */
+html:not(.theme-future) body.welcome-page .hero p { color: var(--text-muted) !important; }
+html:not(.theme-future) body.welcome-page footer {
   background: var(--panel-bg) !important;
   border-top-color: var(--border) !important;
   color: var(--text-muted) !important;
 }
-header {
+html:not(.theme-future) body.welcome-page header {
   background: var(--panel-bg) !important;
   border-bottom-color: rgba(26,107,47,0.12) !important;
 }
-.header-page-title { color: var(--primary) !important; }
+html:not(.theme-future) body.welcome-page .header-page-title { color: var(--primary) !important; }
 
-/* ── 27. Loader overlay ───────────────────────────────────── */
-#loader { background: var(--bg) !important; }
+/* ── 27. Loader overlay (classic theme only) ──────────────── */
+html:not(.theme-future) body.welcome-page #loader { background: var(--bg) !important; }
 
 /* ── 28. Unrecommended note ───────────────────────────────── */
 .unrecommended-note { color: var(--text-muted) !important; }

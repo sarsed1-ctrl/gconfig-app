@@ -1,8 +1,10 @@
-/* GConfig welcome — Neon Glass overlay (uses html.theme-future from styles-v2-future.css) */
+/* GConfig welcome — Neon Glass (full v2.0 aesthetic when html.theme-future) */
 
 html.theme-future body.welcome-page {
     position: relative;
     z-index: 0;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
 }
 
 html.theme-future body.welcome-page > header,
@@ -13,184 +15,306 @@ html.theme-future body.welcome-page > footer {
     z-index: 1;
 }
 
+/* ── Header (matches v2 top-bar) ── */
 html.theme-future body.welcome-page > header {
-    background: rgba(8, 12, 20, 0.88);
+    background: rgba(8, 12, 20, 0.85) !important;
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0, 229, 160, 0.2);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0, 229, 160, 0.18) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    padding: 10px 0;
 }
 
-html.theme-future .welcome-page .header-page-title {
-    color: var(--green-light);
-    text-shadow: 0 0 20px rgba(0, 229, 160, 0.35);
-    letter-spacing: 0.04em;
-}
-
-html.theme-future .welcome-page .header-brand svg text:nth-of-type(1) {
-    fill: #5cffc8;
-}
-
-html.theme-future .welcome-page .header-brand svg text:nth-of-type(2) {
-    fill: #e8f4f0;
-}
-
-html.theme-future .welcome-page .header-brand svg text:nth-of-type(3) {
-    fill: #7a8f99;
-}
-
-html.theme-future .welcome-page .hero p {
-    color: var(--muted);
-}
-
-html.theme-future .welcome-page .card {
-    background: rgba(12, 18, 28, 0.82);
-    border: 1px solid rgba(0, 229, 160, 0.18);
-    box-shadow:
-        0 0 32px rgba(0, 229, 160, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(10px);
-}
-
-html.theme-future .welcome-page .card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(0, 229, 160, 0.4);
-    box-shadow:
-        0 8px 36px rgba(0, 229, 160, 0.14),
-        0 0 0 1px rgba(0, 180, 255, 0.08);
-}
-
-html.theme-future .welcome-page .card-icon-area {
-    background:
-        radial-gradient(ellipse 80% 80% at 50% 20%, rgba(0, 229, 160, 0.18), transparent 60%),
-        linear-gradient(180deg, rgba(0, 229, 160, 0.08) 0%, rgba(8, 12, 20, 0.4) 100%);
-}
-
-html.theme-future .welcome-page .card-icon-area svg [stroke] {
-    stroke: #5cffc8;
-}
-
-html.theme-future .welcome-page .card-icon-area svg [fill="#fff"],
-html.theme-future .welcome-page .card-icon-area svg [fill="#ffffff"] {
-    fill: rgba(8, 14, 22, 0.9);
-}
-
-html.theme-future .welcome-page .card-icon-area svg [fill="#1a6b2f"] {
-    fill: rgba(0, 229, 160, 0.55);
-}
-
-html.theme-future .welcome-page .card-title {
-    color: var(--green-light);
-}
-
-html.theme-future .welcome-page .card-desc {
-    color: var(--muted);
-}
-
-html.theme-future .welcome-page .card-btn {
-    background: linear-gradient(135deg, #00a870, #00e5a0 50%, #00c4ff);
-    box-shadow: 0 4px 18px rgba(0, 229, 160, 0.3);
-    color: #041410;
+html.theme-future body.welcome-page .header-page-title {
+    background: linear-gradient(90deg, var(--green-light), #7dd3fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    text-shadow: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     font-weight: 700;
 }
 
-html.theme-future .welcome-page .card-btn:hover {
-    filter: brightness(1.08);
-    box-shadow: 0 6px 24px rgba(0, 229, 160, 0.4);
+html.theme-future body.welcome-page .header-brand svg text:nth-of-type(1) {
+    fill: #5cffc8;
 }
 
-html.theme-future .welcome-page footer {
-    background: rgba(8, 12, 20, 0.9);
-    border-top: 1px solid rgba(0, 229, 160, 0.15);
-    color: var(--muted);
+html.theme-future body.welcome-page .header-brand svg text:nth-of-type(2) {
+    fill: #e8f4f0;
 }
 
-html.theme-future .welcome-page #lang-bar {
-    gap: 8px;
+html.theme-future body.welcome-page .header-brand svg text:nth-of-type(3) {
+    fill: #7a8f99;
 }
 
-html.theme-future .welcome-page .lang-btn {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--muted);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.72rem;
+html.theme-future body.welcome-page .header-brand svg image,
+html.theme-future body.welcome-page #loader-alien svg image {
+    filter: drop-shadow(0 0 8px rgba(0, 229, 160, 0.45));
 }
 
-html.theme-future .welcome-page .lang-btn.active {
-    background: linear-gradient(135deg, #00b87a, #00e5a0);
-    border-color: rgba(0, 229, 160, 0.5);
-    color: #041410;
-    box-shadow: 0 0 12px rgba(0, 229, 160, 0.35);
-}
-
-html.theme-future .welcome-page .lang-btn:hover:not(.active) {
-    border-color: rgba(0, 229, 160, 0.35);
-    color: var(--green-light);
-    background: rgba(0, 229, 160, 0.08);
-}
-
-html.theme-future .welcome-page .theme-toggle {
-    background: rgba(0, 229, 160, 0.08);
-    border: 1px solid rgba(0, 229, 160, 0.35);
-    color: var(--green-light);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-
-html.theme-future .welcome-page .theme-toggle:hover {
-    background: rgba(0, 229, 160, 0.16);
-    box-shadow: 0 0 16px rgba(0, 229, 160, 0.25);
-}
-
-html.theme-future .welcome-page .version-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 229, 160, 0.28);
-    color: var(--green-light);
-    text-decoration: none;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    background: rgba(0, 229, 160, 0.06);
-    transition: background 0.2s, box-shadow 0.2s;
-}
-
-html.theme-future .welcome-page .version-link:hover {
-    background: rgba(0, 229, 160, 0.14);
-    box-shadow: 0 0 14px rgba(0, 229, 160, 0.2);
-}
-
-html.theme-future .welcome-page #loader {
-    background: #06080d;
-}
-
-html.theme-future .welcome-page #loader-msg {
-    color: var(--green-light) !important;
-}
-
-html.theme-future .welcome-page .top-actions {
+/* ── Top actions (v2 link, theme toggle, lang) ── */
+html.theme-future body.welcome-page .top-actions {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
 }
 
+html.theme-future body.welcome-page .version-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 229, 160, 0.35);
+    color: var(--green-light) !important;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: rgba(0, 229, 160, 0.06) !important;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+html.theme-future body.welcome-page .version-link:hover {
+    background: rgba(0, 229, 160, 0.14) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 160, 0.2);
+    color: var(--green-light) !important;
+}
+
+html.theme-future body.welcome-page .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 180, 255, 0.35) !important;
+    background: rgba(0, 180, 255, 0.08) !important;
+    color: #7dd3fc !important;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+html.theme-future body.welcome-page .theme-toggle:hover {
+    background: rgba(0, 180, 255, 0.16) !important;
+    box-shadow: 0 0 16px rgba(0, 180, 255, 0.25);
+}
+
+html.theme-future body.welcome-page #lang-bar {
+    display: flex;
+    gap: 0;
+    border: 1px solid rgba(0, 229, 160, 0.18);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+html.theme-future body.welcome-page .lang-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--muted) !important;
+    border-radius: 0;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+html.theme-future body.welcome-page .lang-btn.active {
+    background: linear-gradient(135deg, #00b87a, #00e5a0) !important;
+    color: #041410 !important;
+    box-shadow: 0 0 14px rgba(0, 229, 160, 0.4);
+}
+
+html.theme-future body.welcome-page .lang-btn:hover:not(.active) {
+    background: rgba(0, 229, 160, 0.08) !important;
+    color: var(--green-light) !important;
+}
+
+/* ── Hero glass panel ── */
+html.theme-future body.welcome-page .hero {
+    padding: 28px 24px 36px;
+}
+
+html.theme-future body.welcome-page .hero p {
+    color: var(--muted) !important;
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 22px 28px;
+    background: rgba(12, 18, 28, 0.72);
+    border: 1px solid rgba(0, 229, 160, 0.15);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+        0 0 32px rgba(0, 229, 160, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    line-height: 1.65;
+    letter-spacing: 0.02em;
+    font-size: 15px;
+}
+
+/* ── HUD glass cards ── */
+html.theme-future body.welcome-page .cards {
+    gap: 22px;
+    padding-bottom: 56px;
+}
+
+html.theme-future body.welcome-page .card {
+    background: rgba(12, 18, 28, 0.78) !important;
+    border: 1px solid rgba(0, 229, 160, 0.18) !important;
+    border-radius: var(--radius);
+    box-shadow:
+        0 0 32px rgba(0, 229, 160, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+html.theme-future body.welcome-page .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 229, 160, 0.42) !important;
+    box-shadow:
+        0 8px 36px rgba(0, 229, 160, 0.14),
+        0 0 0 1px rgba(0, 180, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+html.theme-future body.welcome-page .card-icon-area {
+    background:
+        radial-gradient(ellipse 80% 80% at 50% 20%, rgba(0, 229, 160, 0.2), transparent 60%),
+        linear-gradient(180deg, rgba(0, 229, 160, 0.1) 0%, rgba(8, 12, 20, 0.5) 100%) !important;
+    border-bottom: 1px solid rgba(0, 229, 160, 0.1);
+}
+
+html.theme-future body.welcome-page .card-icon-area svg {
+    color: #5cffc8 !important;
+    filter: drop-shadow(0 0 10px rgba(0, 229, 160, 0.35));
+}
+
+html.theme-future body.welcome-page .card-icon-area svg [stroke] {
+    stroke: #5cffc8;
+}
+
+html.theme-future body.welcome-page .card-icon-area svg [fill="#fff"],
+html.theme-future body.welcome-page .card-icon-area svg [fill="#ffffff"] {
+    fill: rgba(8, 14, 22, 0.92);
+}
+
+html.theme-future body.welcome-page .card-icon-area svg [fill="#1a6b2f"] {
+    fill: rgba(0, 229, 160, 0.55);
+}
+
+html.theme-future body.welcome-page .card-body {
+    background: transparent;
+}
+
+html.theme-future body.welcome-page .card-title {
+    color: var(--green-light) !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+html.theme-future body.welcome-page .card-desc {
+    color: var(--muted) !important;
+    font-size: 0.85rem;
+}
+
+html.theme-future body.welcome-page .card-btn {
+    background: linear-gradient(135deg, #00a870, #00e5a0 50%, #00c4ff) !important;
+    box-shadow: 0 4px 18px rgba(0, 229, 160, 0.3);
+    color: #041410 !important;
+    font-weight: 700;
+    border-radius: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+}
+
+html.theme-future body.welcome-page .card-btn:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 24px rgba(0, 229, 160, 0.45) !important;
+    background: linear-gradient(135deg, #00a870, #00e5a0 50%, #00c4ff) !important;
+    color: #041410 !important;
+}
+
+/* ── Footer (matches v2 wizard-nav tone) ── */
+html.theme-future body.welcome-page footer {
+    background: rgba(8, 12, 20, 0.92) !important;
+    border-top: 1px solid rgba(0, 229, 160, 0.15) !important;
+    color: var(--muted) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    letter-spacing: 0.04em;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+/* ── Neon loader ── */
+html.theme-future body.welcome-page #loader {
+    background: rgba(6, 8, 13, 0.96) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+html.theme-future body.welcome-page #loader-alien {
+    animation: welcomeLoaderPulse 2s ease-in-out infinite;
+}
+
+html.theme-future body.welcome-page #loader-alien svg {
+    filter: drop-shadow(0 0 24px rgba(0, 229, 160, 0.45));
+}
+
+html.theme-future body.welcome-page .loader-spinner {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(0, 229, 160, 0.15);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: welcomeSpin 0.75s linear infinite;
+    box-shadow: 0 0 20px rgba(0, 229, 160, 0.3);
+}
+
+html.theme-future body.welcome-page #loader-msg {
+    color: var(--green-light) !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+@keyframes welcomeSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes welcomeLoaderPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.85; }
+}
+
 @media (max-width: 720px) {
-    html.theme-future .welcome-page .top-actions {
+    html.theme-future body.welcome-page .top-actions {
         order: 2;
+    }
+
+    html.theme-future body.welcome-page .hero p {
+        padding: 18px 20px;
+        font-size: 14px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     html.theme-future body::before {
+        animation: none;
+    }
+
+    html.theme-future body.welcome-page .loader-spinner,
+    html.theme-future body.welcome-page #loader-alien {
         animation: none;
     }
 }

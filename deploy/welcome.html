@@ -271,10 +271,13 @@
         @keyframes loaderPulse {
             0%, 100% { transform: scale(1);   opacity: 1; }
             50%       { transform: scale(1.08); opacity: 0.75; }
-        }    </style>
+        }
+        .loader-spinner { display: none; }
+    </style>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="styles-v2-future.css">
     <link rel="stylesheet" href="styles-welcome-future.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
     <script>
     (function () {
         var KEY = 'gconfig-v2-theme';
@@ -294,6 +297,7 @@
     <!-- Loading screen -->
     <div id="loader">
         <div style="display:flex;flex-direction:column;align-items:center;gap:24px;">
+            <div class="loader-spinner" aria-hidden="true"></div>
             <div id="loader-alien">
                 <svg width="440" height="440" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
                     <use href="#logo-horizontal"/>
@@ -302,7 +306,7 @@
             <div id="loader-msg" style="font-family:'Segoe UI',sans-serif;font-size:15px;color:#1a6b2f;opacity:0;transition:opacity 0.4s ease;letter-spacing:0.3px;"></div>
         </div>
     </div>
-    <header>
+    <header class="top-bar">
         <svg width="0" height="0" style="position:absolute">
           <defs>
             <symbol id="logo-horizontal" viewBox="0 0 220 52">
