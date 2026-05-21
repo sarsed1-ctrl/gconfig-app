@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="alien-logo.png">
     <link rel="stylesheet" href="styles-v2.css">
     <link rel="stylesheet" href="styles-v2-future.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
     <script>
     (function () {
         var KEY = 'gconfig-v2-theme';
@@ -354,7 +355,14 @@
                 </div>
                 <p class="preview-meta" id="previewMeta"></p>
                 <div class="price-mirror-wrap" id="priceMirrorWrap">
-                    <div id="priceMirror" class="price-summary"></div>
+                    <div class="hud-frame">
+                        <span class="hud-corner hud-corner-tl" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-tr" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-bl" aria-hidden="true"></span>
+                        <span class="hud-corner hud-corner-br" aria-hidden="true"></span>
+                        <span class="hud-scanline" aria-hidden="true"></span>
+                        <div id="priceMirror" class="price-summary"></div>
+                    </div>
                 </div>
                 <div class="export-actions" id="exportActions">
                     <button type="button" class="btn-pdf" id="btnPdf" data-i18n="pdf">PDF</button>

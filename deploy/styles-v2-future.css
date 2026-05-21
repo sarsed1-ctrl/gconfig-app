@@ -11,19 +11,36 @@ html.theme-future {
     --border: rgba(0, 229, 160, 0.18);
     --shadow: 0 0 32px rgba(0, 229, 160, 0.12);
     --radius: 14px;
-    --price-fill: rgba(20, 16, 8, 0.85);
-    --price-border: rgba(255, 180, 80, 0.45);
+    --price-fill: rgba(10, 16, 24, 0.88);
+    --price-border: rgba(0, 229, 160, 0.35);
+    --price-accent: #5cffc8;
+    --price-value: #e8f4f0;
+    --price-muted: #7a8f99;
+    --font-mono: "JetBrains Mono", "Cascadia Code", "SF Mono", Consolas, monospace;
     color-scheme: dark;
 }
 
 html.theme-future,
 html.theme-future body {
     font-family: "Segoe UI", "SF Pro Display", system-ui, sans-serif;
+    background: var(--bg);
+}
+
+html.theme-future body::before {
+    content: "";
+    position: fixed;
+    inset: -25%;
+    pointer-events: none;
+    z-index: 0;
     background:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0, 229, 160, 0.14), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 180, 255, 0.1), transparent 50%),
-        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(120, 0, 255, 0.08), transparent 45%),
-        var(--bg);
+        radial-gradient(circle at 18% 28%, rgba(0, 229, 160, 0.38) 0%, transparent 42%),
+        radial-gradient(circle at 78% 18%, rgba(0, 180, 255, 0.32) 0%, transparent 40%),
+        radial-gradient(circle at 88% 72%, rgba(130, 50, 255, 0.26) 0%, transparent 38%),
+        radial-gradient(circle at 32% 82%, rgba(0, 229, 160, 0.22) 0%, transparent 36%),
+        radial-gradient(circle at 52% 48%, rgba(0, 140, 200, 0.14) 0%, transparent 45%);
+    filter: blur(72px);
+    animation: futureMeshDrift 22s ease-in-out infinite alternate;
+    will-change: transform;
 }
 
 html.theme-future::before {
@@ -32,12 +49,19 @@ html.theme-future::before {
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.35;
+    opacity: 0.32;
     background-image:
         linear-gradient(rgba(0, 229, 160, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 229, 160, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
     mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black, transparent);
+}
+
+@keyframes futureMeshDrift {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(4%, -3%) scale(1.06) rotate(1deg); }
+    66% { transform: translate(-3%, 4%) scale(0.97) rotate(-0.5deg); }
+    100% { transform: translate(2%, 2%) scale(1.04) rotate(0.5deg); }
 }
 
 html.theme-future .app-shell {
@@ -113,6 +137,49 @@ html.theme-future .stepper::after {
 html.theme-future .stepper-item {
     position: relative;
     z-index: 1;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+html.theme-future .stepper-item:not(.active):not(:disabled):hover {
+    transform: translateY(-2px);
+}
+
+html.theme-future .stepper-item:not(.active):not(:disabled):hover .stepper-dot {
+    border-color: rgba(0, 229, 160, 0.55);
+    box-shadow: 0 0 12px rgba(0, 229, 160, 0.25);
+}
+
+html.theme-future .stepper-item.done .stepper-dot {
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html.theme-future .stepper-item.active .stepper-label {
+    transition: color 0.3s ease, text-shadow 0.3s ease, letter-spacing 0.3s ease;
+}
+
+html.theme-future .stepper-item.step-enter .stepper-dot {
+    animation: futureStepPop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+html.theme-future .wizard-step.step-enter {
+    animation: futureStepContentIn 0.35s ease-out;
+}
+
+@keyframes futureStepPop {
+    0% { transform: rotate(45deg) scale(0.85); }
+    60% { transform: rotate(45deg) scale(1.12); }
+    100% { transform: rotate(45deg) scale(1); }
+}
+
+@keyframes futureStepContentIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 html.theme-future .stepper-dot {
@@ -122,6 +189,7 @@ html.theme-future .stepper-dot {
     border-color: rgba(0, 229, 160, 0.35);
     background: rgba(0, 0, 0, 0.4);
     transform: rotate(45deg);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
 }
 
 html.theme-future .stepper-dot {
@@ -201,6 +269,17 @@ html.theme-future .field select {
     background: rgba(0, 0, 0, 0.35);
     border-color: rgba(255, 255, 255, 0.08);
     color: var(--text);
+}
+
+html.theme-future .field input[type="number"],
+html.theme-future #w-facadeThick,
+html.theme-future #w-carcassThick,
+html.theme-future .spacing-val,
+html.theme-future .price-mirror-wrap .price-value,
+html.theme-future .price-mirror-wrap .price-total-row .price-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
 }
 
 html.theme-future .field input:focus,
@@ -294,25 +373,153 @@ html.theme-future .preview-canvas-wrap canvas {
     background: rgba(255, 255, 255, 0.97);
 }
 
+html.theme-future .price-mirror-wrap {
+    position: relative;
+}
+
+html.theme-future .price-mirror-wrap .hud-frame {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    padding: 6px;
+    border: 1px solid rgba(0, 229, 160, 0.12);
+    border-radius: calc(var(--radius) + 4px);
+    background: rgba(0, 229, 160, 0.03);
+    box-shadow: 0 0 24px rgba(0, 229, 160, 0.06);
+}
+
+html.theme-future .price-mirror-wrap .hud-corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    z-index: 2;
+    border-color: rgba(0, 229, 160, 0.85);
+    border-style: solid;
+    animation: futureHudPulse 3s ease-in-out infinite;
+}
+
+html.theme-future .price-mirror-wrap .hud-corner-tl {
+    top: 0;
+    left: 0;
+    border-width: 2px 0 0 2px;
+}
+
+html.theme-future .price-mirror-wrap .hud-corner-tr {
+    top: 0;
+    right: 0;
+    border-width: 2px 2px 0 0;
+}
+
+html.theme-future .price-mirror-wrap .hud-corner-bl {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 2px 2px;
+}
+
+html.theme-future .price-mirror-wrap .hud-corner-br {
+    bottom: 0;
+    right: 0;
+    border-width: 0 2px 2px 0;
+}
+
+html.theme-future .price-mirror-wrap .hud-scanline {
+    position: absolute;
+    inset: 8px;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+html.theme-future .price-mirror-wrap .hud-scanline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 229, 160, 0.45), rgba(0, 180, 255, 0.35), transparent);
+    animation: futureHudScan 4s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes futureHudPulse {
+    0%, 100% { opacity: 0.6; box-shadow: 0 0 6px rgba(0, 229, 160, 0.2); }
+    50% { opacity: 1; box-shadow: 0 0 16px rgba(0, 229, 160, 0.5), 0 0 8px rgba(0, 180, 255, 0.25); }
+}
+
+@keyframes futureHudScan {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
 html.theme-future .price-mirror-wrap .price-summary {
-    background: var(--price-fill);
-    border-color: var(--price-border);
-    box-shadow: 0 0 24px rgba(255, 160, 60, 0.12);
-    backdrop-filter: blur(8px);
+    position: relative;
+    z-index: 0;
+    --price-fill: rgba(10, 16, 24, 0.92);
+    background: var(--price-fill) !important;
+    border: 1px solid var(--price-border) !important;
+    border-radius: var(--radius);
+    box-shadow:
+        0 0 32px rgba(0, 229, 160, 0.1),
+        0 0 0 1px rgba(0, 180, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
 }
 
 html.theme-future .price-mirror-wrap .price-summary h4 {
-    color: #ffb347;
+    color: var(--price-accent) !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-shadow: 0 0 12px rgba(0, 229, 160, 0.35);
+}
+
+html.theme-future .price-mirror-wrap table,
+html.theme-future .price-mirror-wrap tbody,
+html.theme-future .price-mirror-wrap tr,
+html.theme-future .price-mirror-wrap tr:nth-child(even),
+html.theme-future .price-mirror-wrap tr:nth-child(odd),
+html.theme-future .price-mirror-wrap th,
+html.theme-future .price-mirror-wrap td,
+html.theme-future .price-mirror-wrap tr:hover td {
+    background: transparent !important;
 }
 
 html.theme-future .price-mirror-wrap .price-label {
-    color: #c9a87a;
+    color: var(--price-muted) !important;
+}
+
+html.theme-future .price-mirror-wrap .price-value {
+    color: var(--price-value) !important;
 }
 
 html.theme-future .price-mirror-wrap .price-total-row .price-label,
 html.theme-future .price-mirror-wrap .price-total-row .price-value {
-    color: #ffcc80;
-    border-top-color: var(--price-border);
+    color: var(--green-light) !important;
+    border-top-color: rgba(0, 229, 160, 0.25) !important;
+    text-shadow: 0 0 10px rgba(0, 229, 160, 0.25);
+}
+
+html.theme-future .price-mirror-wrap .price-total-row .price-value {
+    font-size: 1.2em;
+    color: #fff !important;
+    text-shadow: 0 0 16px rgba(0, 229, 160, 0.45);
+}
+
+html.theme-future .price-mirror-wrap .price-meta {
+    color: var(--price-muted) !important;
+}
+
+html.theme-future .price-mirror-wrap.is-loading .price-meta,
+html.theme-future .price-mirror-wrap .price-summary.is-loading .price-meta {
+    color: var(--green) !important;
+}
+
+html.theme-future .price-mirror-wrap.is-error .price-meta,
+html.theme-future .price-mirror-wrap .price-summary.is-error .price-meta {
+    color: #ff6b8a !important;
 }
 
 html.theme-future .export-actions .btn-pdf {
@@ -393,5 +600,19 @@ html.theme-future .theme-toggle {
     html.theme-future .stepper {
         background: rgba(8, 12, 20, 0.92);
         backdrop-filter: blur(12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-future body::before,
+    html.theme-future .stepper-item.active .stepper-dot,
+    html.theme-future .price-mirror-wrap .hud-corner,
+    html.theme-future .price-mirror-wrap .hud-scanline::after {
+        animation: none;
+    }
+
+    html.theme-future .stepper-item.step-enter .stepper-dot,
+    html.theme-future .wizard-step.step-enter {
+        animation: none;
     }
 }

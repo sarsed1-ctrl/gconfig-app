@@ -1141,7 +1141,17 @@
 
 
 
+    function triggerStepEnter(el) {
+        if (!el || !document.documentElement.classList.contains('theme-future')) return;
+        el.classList.remove('step-enter');
+        void el.offsetWidth;
+        el.classList.add('step-enter');
+        el.addEventListener('animationend', () => el.classList.remove('step-enter'), { once: true });
+    }
+
     function goToStep(step) {
+
+        const prevStep = currentStep;
 
         currentStep = Math.max(1, Math.min(TOTAL_STEPS, step));
 
@@ -1149,7 +1159,11 @@
 
         document.querySelectorAll('.wizard-step').forEach((s) => {
 
-            s.classList.toggle('active', Number(s.dataset.step) === currentStep);
+            const isActive = Number(s.dataset.step) === currentStep;
+
+            s.classList.toggle('active', isActive);
+
+            if (isActive && currentStep !== prevStep) triggerStepEnter(s);
 
         });
 
@@ -1160,6 +1174,8 @@
             item.classList.toggle('active', n === currentStep);
 
             item.classList.toggle('done', n < currentStep);
+
+            if (n === currentStep && currentStep !== prevStep) triggerStepEnter(item);
 
         });
 
