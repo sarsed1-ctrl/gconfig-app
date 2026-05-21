@@ -70,6 +70,42 @@
 
 
 
+    const EAMF_IFRAME_HANDLERS = {
+
+        eamfFacadeMaterial: 'onEamfFacadeMaterialChange',
+
+        eamfCarcassMaterial: 'onEamfCarcassMaterialChange',
+
+        eamfFacadeEdge: 'onEamfFacadeEdgeChange',
+
+        eamfCarcassEdge: 'onEamfCarcassEdgeChange',
+
+        eamfBackPanel: 'onEamfBackPanelChange',
+
+        countertopMaterial: 'onEamfCountertopMaterialChange'
+
+    };
+
+
+
+    const EAMF_EDGE_SELECT_IDS = ['eamfFacadeEdge', 'eamfCarcassEdge'];
+
+
+
+    const SPACING_SLIDER_PAIRS = [
+
+        ['w-upperSpacingH', 'w-upperSpacingHVal'],
+
+        ['w-upperSpacingV', 'w-upperSpacingVVal'],
+
+        ['w-vanitySpacingH', 'w-vanitySpacingHVal'],
+
+        ['w-vanitySpacingV', 'w-vanitySpacingVVal']
+
+    ];
+
+
+
     const I18N = {
 
         ru: {
@@ -143,6 +179,14 @@
             lower_shelves_h: 'Низ — гориз.',
 
             lower_shelves_v: 'Низ — верт.',
+
+            shelf_spacing_h: 'Вертикальный шаг (верх)',
+
+            shelf_spacing_v: 'Горизонтальный шаг (верх)',
+
+            shelf_spacing_h_lower: 'Вертикальный шаг (низ)',
+
+            shelf_spacing_v_lower: 'Горизонтальный шаг (низ)',
 
             hardware_mode: 'Фурнитура дверей',
 
@@ -319,6 +363,14 @@
             lower_shelves_h: 'Lower — horiz.',
 
             lower_shelves_v: 'Lower — vert.',
+
+            shelf_spacing_h: 'Vertical spacing (upper)',
+
+            shelf_spacing_v: 'Horizontal spacing (upper)',
+
+            shelf_spacing_h_lower: 'Vertical spacing (lower)',
+
+            shelf_spacing_v_lower: 'Horizontal spacing (lower)',
 
             hardware_mode: 'Door hardware',
 
@@ -628,6 +680,24 @@
 
 
 
+    function cloneOptionElement(opt) {
+
+        const o = document.createElement('option');
+
+        o.value = opt.value;
+
+        o.textContent = opt.textContent;
+
+        o.disabled = opt.disabled;
+
+        o.selected = opt.selected;
+
+        return o;
+
+    }
+
+
+
     function cloneSelectOptions(fromId, toSelect) {
 
         const doc = iframeDoc();
@@ -642,19 +712,29 @@
 
         toSelect.innerHTML = '';
 
-        Array.from(src.options).forEach((opt) => {
+        toSelect.disabled = src.disabled;
 
-            const o = document.createElement('option');
+        Array.from(src.childNodes).forEach((node) => {
 
-            o.value = opt.value;
+            if (node.nodeName === 'OPTION') {
 
-            o.textContent = opt.textContent;
+                toSelect.appendChild(cloneOptionElement(node));
 
-            o.disabled = opt.disabled;
+            } else if (node.nodeName === 'OPTGROUP') {
 
-            o.selected = opt.selected;
+                const og = document.createElement('optgroup');
 
-            toSelect.appendChild(o);
+                og.label = node.label;
+
+                Array.from(node.children).forEach((opt) => {
+
+                    if (opt.nodeName === 'OPTION') og.appendChild(cloneOptionElement(opt));
+
+                });
+
+                toSelect.appendChild(og);
+
+            }
 
         });
 
@@ -667,6 +747,60 @@
             toSelect.value = src.value;
 
         }
+
+    }
+
+
+
+    function refreshEamfEdgeSelects() {
+
+        EAMF_EDGE_SELECT_IDS.forEach((id) => {
+
+            const wEl = document.querySelector(`[data-iframe="${id}"]`);
+
+            if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
+
+        });
+
+    }
+
+
+
+    function syncSpacingLabels() {
+
+        SPACING_SLIDER_PAIRS.forEach(([sliderId, labelId]) => {
+
+            const slider = document.getElementById(sliderId);
+
+            const label = document.getElementById(labelId);
+
+            if (!slider || !label) return;
+
+            label.textContent = `${slider.value} mm`;
+
+        });
+
+    }
+
+
+
+    function syncShelfSpacingVisibility() {
+
+        const upperH = parseInt(document.getElementById('w-upperShelvesH')?.value, 10) || 0;
+
+        const upperV = parseInt(document.getElementById('w-upperShelvesV')?.value, 10) || 0;
+
+        const lowerH = parseInt(document.getElementById('w-vanityShelvesH')?.value, 10) || 0;
+
+        const lowerV = parseInt(document.getElementById('w-vanityShelvesV')?.value, 10) || 0;
+
+        document.getElementById('upperHSpacingBlock')?.classList.toggle('hidden', upperH <= 0);
+
+        document.getElementById('upperVSpacingBlock')?.classList.toggle('hidden', upperV <= 0);
+
+        document.getElementById('vanityHSpacingBlock')?.classList.toggle('hidden', lowerH <= 0);
+
+        document.getElementById('vanityVSpacingBlock')?.classList.toggle('hidden', lowerV <= 0);
 
     }
 
@@ -744,6 +878,12 @@
 
         if (backFitRow) backFitRow.classList.toggle('hidden', !!useCarcassBack);
 
+
+
+        syncShelfSpacingVisibility();
+
+        syncSpacingLabels();
+
     }
 
 
@@ -784,6 +924,10 @@
 
         syncHardwareChips('backPanelFitType', 'backFitChips');
 
+        refreshEamfEdgeSelects();
+
+        syncSpacingLabels();
+
         syncPaused = false;
 
         updateConditionalUI();
@@ -800,9 +944,27 @@
 
         if (!id) return;
 
+
+
+        const handlerName = EAMF_IFRAME_HANDLERS[id];
+
         if (fromEl.type === 'checkbox') setIframeValue(id, fromEl.checked);
 
         else setIframeValue(id, fromEl.value);
+
+
+
+        if (handlerName) {
+
+            const win = iframeWin();
+
+            if (win && typeof win[handlerName] === 'function') win[handlerName]();
+
+            setTimeout(refreshEamfEdgeSelects, 0);
+
+        }
+
+
 
         updateConditionalUI();
 
@@ -1008,6 +1170,8 @@
 
         exportActions.classList.toggle('visible', iframeReady);
 
+        if (currentStep === 4) refreshEamfEdgeSelects();
+
         updateNavLabels();
 
         schedulePreviewSync();
@@ -1096,6 +1260,16 @@
 
         }, 1200);
 
+
+
+        setTimeout(() => {
+
+            pullFromIframe();
+
+            refreshEamfEdgeSelects();
+
+        }, 2500);
+
     }
 
 
@@ -1138,9 +1312,21 @@
 
         document.querySelectorAll('[data-iframe]').forEach((el) => {
 
-            el.addEventListener('input', () => pushToIframe(el));
+            el.addEventListener('input', () => {
 
-            el.addEventListener('change', () => pushToIframe(el));
+                if (el.type === 'range') syncSpacingLabels();
+
+                pushToIframe(el);
+
+            });
+
+            el.addEventListener('change', () => {
+
+                if (el.type === 'range') return;
+
+                pushToIframe(el);
+
+            });
 
         });
 
