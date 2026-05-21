@@ -7,6 +7,18 @@
     <link rel="icon" type="image/png" href="alien-logo.png">
     <link rel="stylesheet" href="styles-v2.css">
     <link rel="stylesheet" href="styles-v2-future.css">
+    <script>
+    (function () {
+        var KEY = 'gconfig-v2-theme';
+        try {
+            var q = new URLSearchParams(location.search);
+            var theme = q.get('theme') === 'future' ? 'future' : localStorage.getItem(KEY);
+            if (theme === 'future') {
+                document.documentElement.classList.add('theme-future');
+            }
+        } catch (e) { /* ignore */ }
+    })();
+    </script>
 </head>
 <body>
     <div class="loading-overlay" id="loadingOverlay">

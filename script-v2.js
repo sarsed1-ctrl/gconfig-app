@@ -1361,6 +1361,8 @@
 
         const isFuture = theme === 'future';
 
+        document.documentElement.classList.toggle('theme-future', isFuture);
+
         document.body.classList.toggle('theme-future', isFuture);
 
         const btn = document.getElementById('themeToggle');
@@ -1395,7 +1397,9 @@
 
     function toggleTheme() {
 
-        applyTheme(document.body.classList.contains('theme-future') ? 'classic' : 'future');
+        const isFuture = document.documentElement.classList.contains('theme-future');
+
+        applyTheme(isFuture ? 'classic' : 'future');
 
     }
 
@@ -1415,7 +1419,11 @@
 
 
 
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        const themeBtn = document.getElementById('themeToggle');
+
+        if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+        window.__gconfigToggleTheme = toggleTheme;
 
 
 
@@ -1465,7 +1473,17 @@
 
         updateV1Link();
 
-        applyTheme(params.get('theme') === 'future' ? 'future' : restoreTheme());
+        const themeParam = params.get('theme');
+
+        if (themeParam === 'future' || themeParam === 'classic') {
+
+            applyTheme(themeParam);
+
+        } else {
+
+            applyTheme(restoreTheme());
+
+        }
 
         applyI18n();
 
