@@ -1,4 +1,4 @@
-const CACHE = 'gconfig-v21';
+const CACHE = 'gconfig-v22';
 
 const PRECACHE = [
     './',
@@ -13,6 +13,7 @@ const PRECACHE = [
     './style.css',
     './styles-v2.css',
     './styles-v2-future.css',
+    './styles-welcome-future.css',
     './script-v2.js',
     './alien-logo.png'
 ];

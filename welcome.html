@@ -159,6 +159,39 @@
         }
         .lang-btn.active { background: var(--primary); color: #fff; }
         .lang-btn:hover:not(.active) { background: var(--primary-pale); }
+        .top-actions {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .theme-toggle {
+            background: var(--panel-bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 3px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.04em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .theme-toggle:hover { background: var(--primary-pale); }
+        .version-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.02em;
+            background: var(--primary-pale);
+        }
+        .version-link:hover { background: var(--primary); color: #fff; }
         /* ── Centering wrapper ── */
         .inner-wrap {
             max-width: 1200px;
@@ -199,7 +232,7 @@
                 gap: 10px;
             }
             .header-brand { order: 1; }
-            #lang-bar { order: 2; }
+            .top-actions { order: 2; }
             .header-page-title {
                 position: static;
                 transform: none;
@@ -240,8 +273,22 @@
             50%       { transform: scale(1.08); opacity: 0.75; }
         }    </style>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles-v2-future.css">
+    <link rel="stylesheet" href="styles-welcome-future.css">
+    <script>
+    (function () {
+        var KEY = 'gconfig-v2-theme';
+        try {
+            var q = new URLSearchParams(location.search);
+            var theme = q.get('theme') === 'future' ? 'future' : localStorage.getItem(KEY);
+            if (theme === 'future') {
+                document.documentElement.classList.add('theme-future');
+            }
+        } catch (e) { /* ignore */ }
+    })();
+    </script>
 </head>
-<body class="lang-en">
+<body class="welcome-page lang-en">
 
     
     <!-- Loading screen -->
@@ -274,9 +321,16 @@
                 <span data-lang="ru">Конфигуратор мебели</span>
                 <span data-lang="en">Furniture Configurator</span>
             </h1>
-            <div id="lang-bar">
-                <button class="lang-btn" onclick="setLang('ru')">RU</button>
-                <button class="lang-btn active" onclick="setLang('en')">EN</button>
+            <div class="top-actions" id="topActions">
+                <a class="version-link" href="index-v2.html" title="GConfig v2 wizard">
+                    <span data-lang="ru" class="inline">v2.0</span>
+                    <span data-lang="en" class="inline">v2.0</span>
+                </a>
+                <button type="button" class="theme-toggle" id="themeToggle" title="Switch visual theme">Neon</button>
+                <div id="lang-bar">
+                    <button class="lang-btn" onclick="setLang('ru')">RU</button>
+                    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+                </div>
             </div>
         </div>
     </header>
@@ -459,11 +513,38 @@
             }
         });
         function setLang(lang) {
-            document.body.className = 'lang-' + lang;
+            document.body.className = 'welcome-page lang-' + lang;
             document.querySelectorAll('.lang-btn').forEach(b => {
                 b.classList.toggle('active', b.textContent.toLowerCase() === lang);
             });
         }
+
+        var THEME_KEY = 'gconfig-v2-theme';
+
+        function applyTheme(theme) {
+            var isFuture = theme === 'future';
+            document.documentElement.classList.toggle('theme-future', isFuture);
+            var btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = isFuture ? 'Classic' : 'Neon';
+            try { localStorage.setItem(THEME_KEY, isFuture ? 'future' : 'classic'); } catch (e) { /* ignore */ }
+        }
+
+        function toggleTheme() {
+            applyTheme(document.documentElement.classList.contains('theme-future') ? 'classic' : 'future');
+        }
+
+        (function initTheme() {
+            try {
+                var q = new URLSearchParams(location.search);
+                if (q.get('theme') === 'future') {
+                    applyTheme('future');
+                    return;
+                }
+                if (localStorage.getItem(THEME_KEY) === 'future') applyTheme('future');
+            } catch (e) { /* ignore */ }
+            var btn = document.getElementById('themeToggle');
+            if (btn) btn.addEventListener('click', toggleTheme);
+        })();
     </script>
 </body>
 </html>
