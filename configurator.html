@@ -6089,15 +6089,20 @@
             const upperShelfWpm2 = CARCASS_WEIGHT_MAP[upperShelfThick] || 12.5;
             
             if (upperShelvesH > 0) {
-                const upperShelfW = upperInnerW;
                 const upperShelfD = d2 - 4;
+                const xSegments = getShelfOpenIntervals(upperInnerW, upperShelvesV, upperSpacingV, upperShelfThick);
                 for (let i = 0; i < upperShelvesH; i++) {
                     const posFromBottom = upperSpacingH * (i + 1);
-                    parts.push({
-                        name: `${T.part_shelf_h_upper} #${i + 1} (+${posFromBottom}mm)`,
-                        qty: 1, l: upperShelfW, w: upperShelfD, t: upperShelfThick, mat: matCarcass
+                    xSegments.forEach((seg, sIdx) => {
+                        const segW = seg.end - seg.start;
+                        if (segW <= 0) return;
+                        const suffix = xSegments.length > 1 ? `.${sIdx + 1}` : '';
+                        parts.push({
+                            name: `${T.part_shelf_h_upper} #${i + 1}${suffix} (+${posFromBottom}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                            qty: 1, l: segW, w: upperShelfD, t: upperShelfThick, mat: matCarcass
+                        });
+                        wtUpperCarcass += panelAreaM2(segW, upperShelfD) * upperShelfWpm2;
                     });
-                    wtUpperCarcass += panelAreaM2(upperShelfW, upperShelfD) * upperShelfWpm2;
                 }
             }
 
@@ -6396,15 +6401,20 @@
         const shelfWpm2 = CARCASS_WEIGHT_MAP[vanityShelfT] || 12.5;
 
         if (vanityShelvesH > 0) {
-            const shelfW = innerW1;
             const shelfD = d1 - 4;
+            const xSegments = getShelfOpenIntervals(innerW1, vanityShelvesV, vanitySpacingV, vanityShelfT);
             for (let i = 0; i < vanityShelvesH; i++) {
                 const posFromBottom = vanitySpacingH * (i + 1);
-                parts.push({
-                    name: `${T.part_shelf_h} #${i + 1} (+${posFromBottom}mm from bottom)`,
-                    qty: 1, l: shelfW, w: shelfD, t: vanityShelfT, mat: matCarcass
+                xSegments.forEach((seg, sIdx) => {
+                    const segW = seg.end - seg.start;
+                    if (segW <= 0) return;
+                    const suffix = xSegments.length > 1 ? `.${sIdx + 1}` : '';
+                    parts.push({
+                        name: `${T.part_shelf_h} #${i + 1}${suffix} (+${posFromBottom}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                        qty: 1, l: segW, w: shelfD, t: vanityShelfT, mat: matCarcass
+                    });
+                    wtVanityCarcass += panelAreaM2(segW, shelfD) * shelfWpm2;
                 });
-                wtVanityCarcass += panelAreaM2(shelfW, shelfD) * shelfWpm2;
             }
         }
         if (vanityShelvesV > 0) {
@@ -7030,29 +7040,39 @@
     }
 
     function drawCabinetInteriorShelves(ctx, innerL, innerT, innerR, innerB, scale, hCount, hSpacing, vCount, vSpacing, shelfThickMm) {
+        const innerWmm = (innerR - innerL) / scale;
         const innerHmm = (innerB - innerT) / scale;
-        if (innerR - innerL <= 0 || innerHmm <= 0) return;
+        if (innerWmm <= 0 || innerHmm <= 0) return;
 
         const thick = Math.max(1, shelfThickMm || 16);
+        const xOpen = getShelfOpenIntervals(innerWmm, vCount, vSpacing, thick);
         const yOpen = getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
         const segmentColors = ['#2980b9', '#d35400', '#8e44ad', '#16a085', '#c0392b', '#2c3e50'];
 
         ctx.lineWidth = 1.5;
 
-        // Horizontal shelves — green dashed
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.setLineDash([4, 3]);
+        // Horizontal shelf segments — split at vertical dividers
         for (let i = 0; i < hCount; i++) {
             const posFromBottom = hSpacing * (i + 1);
             const y = innerB - (posFromBottom + thick / 2) * scale;
             if (y <= innerT || y >= innerB) continue;
-            ctx.beginPath();
-            ctx.moveTo(innerL, y);
-            ctx.lineTo(innerR, y);
-            ctx.stroke();
+            xOpen.forEach((seg, segIdx) => {
+                const x1 = innerL + seg.start * scale;
+                const x2 = innerL + seg.end * scale;
+                if (x2 - x1 <= 2) return;
+                const isSplit = xOpen.length > 1;
+                ctx.strokeStyle = isSplit
+                    ? segmentColors[segIdx % segmentColors.length]
+                    : '#1a6b2f';
+                ctx.setLineDash(isSplit ? [7, 4, 2, 4] : [4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+            });
         }
 
-        // Vertical divider segments — accent colors, distinct dash per segment
+        // Vertical divider segments — split at horizontal shelves
         for (let i = 0; i < vCount; i++) {
             const posFromLeft = vSpacing * (i + 1);
             const x = innerL + (posFromLeft + thick / 2) * scale;
