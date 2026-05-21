@@ -120,6 +120,13 @@ html, body {
 
 
 
+.top-bar-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
 .version-toggle {
 
     display: inline-flex;

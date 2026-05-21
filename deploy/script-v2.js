@@ -113,6 +113,8 @@
 
             loading: 'Загрузка конфигуратора…',
 
+            to_home: 'Главная',
+
             to_v1: '← v1',
 
             step1_short: 'Размеры',
@@ -296,6 +298,8 @@
         en: {
 
             loading: 'Loading configurator…',
+
+            to_home: 'Home',
 
             to_v1: '← v1',
 
@@ -2059,7 +2063,29 @@
 
         } catch (_) { /* ignore */ }
 
+        updateHomeLink();
+
         syncCanvas();
+
+    }
+
+
+
+    function updateHomeLink() {
+
+        const link = document.getElementById('homeLink');
+
+        if (!link) return;
+
+        const url = new URL('welcome.html', location.href);
+
+        if (document.documentElement.classList.contains('theme-future')) {
+
+            url.searchParams.set('theme', 'future');
+
+        }
+
+        link.href = url.pathname + url.search;
 
     }
 
