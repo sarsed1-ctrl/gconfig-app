@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6094,24 +6094,30 @@
                 for (let i = 0; i < upperShelvesH; i++) {
                     const posFromBottom = upperSpacingH * (i + 1);
                     parts.push({
-                        name: `${T.part_shelf_h_upper} #${i+1} (+${posFromBottom}mm)`,
+                        name: `${T.part_shelf_h_upper} #${i + 1} (+${posFromBottom}mm)`,
                         qty: 1, l: upperShelfW, w: upperShelfD, t: upperShelfThick, mat: matCarcass
                     });
+                    wtUpperCarcass += panelAreaM2(upperShelfW, upperShelfD) * upperShelfWpm2;
                 }
-                wtUpperCarcass += upperShelvesH * panelAreaM2(upperShelfW, upperShelfD) * upperShelfWpm2;
             }
-            
+
             if (upperShelvesV > 0) {
-                const upperDivH = h2 - 2 * carcassT;
+                const upperInnerH = h2 - 2 * carcassT;
                 const upperDivD = d2 - 4;
+                const ySegments = getShelfOpenIntervals(upperInnerH, upperShelvesH, upperSpacingH, upperShelfThick);
                 for (let i = 0; i < upperShelvesV; i++) {
                     const posFromLeft = upperSpacingV * (i + 1);
-                    parts.push({
-                        name: `${T.part_shelf_v_upper} #${i+1} (+${posFromLeft}mm)`,
-                        qty: 1, l: upperDivH, w: upperDivD, t: upperShelfThick, mat: matCarcass
+                    ySegments.forEach((seg, sIdx) => {
+                        const segH = seg.end - seg.start;
+                        if (segH <= 0) return;
+                        const suffix = ySegments.length > 1 ? `.${sIdx + 1}` : '';
+                        parts.push({
+                            name: `${T.part_shelf_v_upper} #${i + 1}${suffix} (+${posFromLeft}mm, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                            qty: 1, l: segH, w: upperDivD, t: upperShelfThick, mat: matCarcass
+                        });
+                        wtUpperCarcass += panelAreaM2(segH, upperDivD) * upperShelfWpm2;
                     });
                 }
-                wtUpperCarcass += upperShelvesV * panelAreaM2(upperDivH, upperDivD) * upperShelfWpm2;
             }
             
             // UPPER CABINET FACADE - CORRECTED ORDER L and W
@@ -6392,28 +6398,32 @@
         if (vanityShelvesH > 0) {
             const shelfW = innerW1;
             const shelfD = d1 - 4;
-            const shelfNote = `${T.shelf_note_h}: ${vanitySpacingH} mm`;
             for (let i = 0; i < vanityShelvesH; i++) {
-                // Each shelf at a different height position
                 const posFromBottom = vanitySpacingH * (i + 1);
                 parts.push({
-                    name: `${T.part_shelf_h} #${i+1} (+${posFromBottom}mm from bottom)`,
+                    name: `${T.part_shelf_h} #${i + 1} (+${posFromBottom}mm from bottom)`,
                     qty: 1, l: shelfW, w: shelfD, t: vanityShelfT, mat: matCarcass
                 });
+                wtVanityCarcass += panelAreaM2(shelfW, shelfD) * shelfWpm2;
             }
-            wtVanityCarcass += vanityShelvesH * panelAreaM2(shelfW, shelfD) * shelfWpm2;
         }
         if (vanityShelvesV > 0) {
-            const divH = h1 - 2 * carcassT;
+            const innerH1 = h1 - 2 * carcassT;
             const divD = d1 - 4;
+            const ySegments = getShelfOpenIntervals(innerH1, vanityShelvesH, vanitySpacingH, vanityShelfT);
             for (let i = 0; i < vanityShelvesV; i++) {
                 const posFromLeft = vanitySpacingV * (i + 1);
-                parts.push({
-                    name: `${T.part_shelf_v} #${i+1} (+${posFromLeft}mm from left)`,
-                    qty: 1, l: divH, w: divD, t: vanityShelfT, mat: matCarcass
+                ySegments.forEach((seg, sIdx) => {
+                    const segH = seg.end - seg.start;
+                    if (segH <= 0) return;
+                    const suffix = ySegments.length > 1 ? `.${sIdx + 1}` : '';
+                    parts.push({
+                        name: `${T.part_shelf_v} #${i + 1}${suffix} (+${posFromLeft}mm from left, ${Math.round(seg.start)}–${Math.round(seg.end)}mm)`,
+                        qty: 1, l: segH, w: divD, t: vanityShelfT, mat: matCarcass
+                    });
+                    wtVanityCarcass += panelAreaM2(segH, divD) * shelfWpm2;
                 });
             }
-            wtVanityCarcass += vanityShelvesV * panelAreaM2(divH, divD) * shelfWpm2;
         }
 
         // Upper facade using corrected gap logic (single door)
@@ -6980,6 +6990,76 @@
             <td><strong>${T.wt_total}</strong></td>
             <td><strong>${total.toFixed(2)} ${T.wt_kg}</strong></td>
         </tr>`;
+    }
+
+    /**
+     * Open intervals along one inner axis (mm, origin at bottom/left inner edge)
+     * after subtracting perpendicular shelf/divider bands (position + thickness).
+     */
+    function getShelfOpenIntervals(totalInnerMm, perpCount, spacingMm, shelfThickMm) {
+        const total = Math.max(0, totalInnerMm);
+        if (total <= 0) return [];
+        if (!perpCount || perpCount <= 0) return [{ start: 0, end: total }];
+
+        const thick = Math.max(1, shelfThickMm || 16);
+        const blocks = [];
+        for (let i = 0; i < perpCount; i++) {
+            const start = Math.min(total, Math.max(0, spacingMm * (i + 1)));
+            const end = Math.min(total, start + thick);
+            if (end > start) blocks.push({ start, end });
+        }
+        blocks.sort((a, b) => a.start - b.start);
+
+        const merged = [];
+        blocks.forEach((b) => {
+            if (!merged.length || b.start > merged[merged.length - 1].end) {
+                merged.push({ start: b.start, end: b.end });
+            } else {
+                merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, b.end);
+            }
+        });
+
+        const open = [];
+        let cursor = 0;
+        merged.forEach((b) => {
+            if (b.start > cursor) open.push({ start: cursor, end: b.start });
+            cursor = Math.max(cursor, b.end);
+        });
+        if (cursor < total) open.push({ start: cursor, end: total });
+        return open.length ? open : [{ start: 0, end: total }];
+    }
+
+    function drawCabinetInteriorShelves(ctx, innerL, innerT, innerR, innerB, scale, hCount, hSpacing, vCount, vSpacing, shelfThickMm) {
+        const innerHmm = (innerB - innerT) / scale;
+        if (innerR - innerL <= 0 || innerHmm <= 0) return;
+
+        const thick = Math.max(1, shelfThickMm || 16);
+        const yOpen = getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
+
+        for (let i = 0; i < hCount; i++) {
+            const posFromBottom = hSpacing * (i + 1);
+            const y = innerB - (posFromBottom + thick / 2) * scale;
+            if (y <= innerT || y >= innerB) continue;
+            ctx.beginPath();
+            ctx.moveTo(innerL, y);
+            ctx.lineTo(innerR, y);
+            ctx.stroke();
+        }
+
+        for (let i = 0; i < vCount; i++) {
+            const posFromLeft = vSpacing * (i + 1);
+            const x = innerL + (posFromLeft + thick / 2) * scale;
+            if (x <= innerL || x >= innerR) continue;
+            yOpen.forEach((seg) => {
+                const y1 = innerB - seg.end * scale;
+                const y2 = innerB - seg.start * scale;
+                if (y2 - y1 <= 2) return;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+            });
+        }
     }
 
     // ==========================================
@@ -7984,44 +8064,26 @@
         const _uShV    = parseInt(document.getElementById('upperShelvesV').value)   || 0;
         const _uSpH    = parseInt(document.getElementById('upperSpacingH').value)   || 100;
         const _uSpV    = parseInt(document.getElementById('upperSpacingV').value)   || 200;
+        const _vShelfT = parseInt(document.getElementById('vanityShelfThick')?.value) || 16;
+        const _uShelfT = parseInt(document.getElementById('upperShelfThick')?.value) || 16;
 
         ctx.save();
         ctx.strokeStyle = '#1a6b2f';
         ctx.lineWidth = 1.5;
         ctx.setLineDash([3, 3]);
 
-        // Vanity horizontal shelves — lines inside vanity rect
-        for (let i = 0; i < _vShH; i++) {
-            const shelfYoff = (_vSpH * (i + 1)) * scale;
-            const shelfY = startY - shelfYoff;
-            if (shelfY > vY && shelfY < startY) {
-                ctx.beginPath(); ctx.moveTo(vX + 2, shelfY); ctx.lineTo(vX + vW - 2, shelfY); ctx.stroke();
-            }
-        }
-        // Vanity vertical dividers
-        for (let i = 0; i < _vShV; i++) {
-            const divXoff = (_vSpV * (i + 1)) * scale;
-            const divX = vX + divXoff;
-            if (divX > vX && divX < vX + vW) {
-                ctx.beginPath(); ctx.moveTo(divX, vY + 2); ctx.lineTo(divX, startY - 2); ctx.stroke();
-            }
-        }
-        // Upper cabinet horizontal shelves
-        for (let i = 0; i < _uShH; i++) {
-            const shelfYoff = (_uSpH * (i + 1)) * scale;
-            const shelfY = wY + wH - shelfYoff;
-            if (shelfY > wY && shelfY < wY + wH) {
-                ctx.beginPath(); ctx.moveTo(wX + 2, shelfY); ctx.lineTo(wX + wW - 2, shelfY); ctx.stroke();
-            }
-        }
-        // Upper cabinet vertical dividers
-        for (let i = 0; i < _uShV; i++) {
-            const divXoff = (_uSpV * (i + 1)) * scale;
-            const divX = wX + divXoff;
-            if (divX > wX && divX < wX + wW) {
-                ctx.beginPath(); ctx.moveTo(divX, wY + 2); ctx.lineTo(divX, wY + wH - 2); ctx.stroke();
-            }
-        }
+        const vInnerL = vX + carcassT * scale;
+        const vInnerR = vX + vW - carcassT * scale;
+        const vInnerT = vY + carcassT * scale;
+        const vInnerB = startY - carcassT * scale;
+        drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vSpH, _vShV, _vSpV, _vShelfT);
+
+        const uInnerL = wX + carcassT * scale;
+        const uInnerR = wX + wW - carcassT * scale;
+        const uInnerT = wY + carcassT * scale;
+        const uInnerB = wY + wH - carcassT * scale;
+        drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+
         ctx.restore();
 
         // Height arrows for vanity
