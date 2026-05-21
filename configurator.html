@@ -7035,7 +7035,13 @@
 
         const thick = Math.max(1, shelfThickMm || 16);
         const yOpen = getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
+        const segmentColors = ['#2980b9', '#d35400', '#8e44ad', '#16a085', '#c0392b', '#2c3e50'];
 
+        ctx.lineWidth = 1.5;
+
+        // Horizontal shelves — green dashed
+        ctx.strokeStyle = '#1a6b2f';
+        ctx.setLineDash([4, 3]);
         for (let i = 0; i < hCount; i++) {
             const posFromBottom = hSpacing * (i + 1);
             const y = innerB - (posFromBottom + thick / 2) * scale;
@@ -7046,20 +7052,28 @@
             ctx.stroke();
         }
 
+        // Vertical divider segments — accent colors, distinct dash per segment
         for (let i = 0; i < vCount; i++) {
             const posFromLeft = vSpacing * (i + 1);
             const x = innerL + (posFromLeft + thick / 2) * scale;
             if (x <= innerL || x >= innerR) continue;
-            yOpen.forEach((seg) => {
+            yOpen.forEach((seg, segIdx) => {
                 const y1 = innerB - seg.end * scale;
                 const y2 = innerB - seg.start * scale;
                 if (y2 - y1 <= 2) return;
+                const isSplit = yOpen.length > 1;
+                ctx.strokeStyle = isSplit
+                    ? segmentColors[segIdx % segmentColors.length]
+                    : '#2980b9';
+                ctx.setLineDash(isSplit ? [7, 4, 2, 4] : [6, 4]);
                 ctx.beginPath();
                 ctx.moveTo(x, y1);
                 ctx.lineTo(x, y2);
                 ctx.stroke();
             });
         }
+
+        ctx.setLineDash([]);
     }
 
     // ==========================================
@@ -8068,9 +8082,6 @@
         const _uShelfT = parseInt(document.getElementById('upperShelfThick')?.value) || 16;
 
         ctx.save();
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
 
         const vInnerL = vX + carcassT * scale;
         const vInnerR = vX + vW - carcassT * scale;
