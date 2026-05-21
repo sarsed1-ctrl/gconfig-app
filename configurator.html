@@ -4904,10 +4904,15 @@
     };
     let hingeMarkers = [];
     let schematicHingeDots = [];
+    let schematicShelfSegments = [];
     let lastDrawArgs = null;
 
     function registerSchematicHingeDot(x, y, radius) {
         schematicHingeDots.push({ x, y, r: radius || 5 });
+    }
+
+    function registerSchematicShelfSegment(x1, y1, x2, y2, segIdx, isSplit, orientation) {
+        schematicShelfSegments.push({ x1, y1, x2, y2, segIdx, isSplit, orientation });
     }
 
     // ==========================================
@@ -7074,6 +7079,7 @@
                 ctx.moveTo(x1, y);
                 ctx.lineTo(x2, y);
                 ctx.stroke();
+                registerSchematicShelfSegment(x1, y, x2, y, segIdx, isSplit, 'h');
             });
         }
 
@@ -7095,6 +7101,7 @@
                 ctx.moveTo(x, y1);
                 ctx.lineTo(x, y2);
                 ctx.stroke();
+                registerSchematicShelfSegment(x, y1, x, y2, segIdx, isSplit, 'v');
             });
         }
 
@@ -7715,16 +7722,20 @@
         ctx.clearRect(0, 0, width, height);
         hingeMarkers = [];
         schematicHingeDots = [];
+        schematicShelfSegments = [];
+        window.__gconfigParallelLiftRect = null;
 
         if (CONFIG_MODE === 'shelves') {
             drawShelfSchematic(ctx, width, height, lang);
             window.__gconfigSchematicHingeDots = [];
+            window.__gconfigSchematicShelfSegments = [];
             return;
         }
 
         if (CONFIG_MODE === 'beds') {
             drawBedSchematic(ctx, width, height, w1, h1, d1, w2, h2, lang);
             window.__gconfigSchematicHingeDots = [];
+            window.__gconfigSchematicShelfSegments = [];
             return;
         }
 
@@ -8073,6 +8084,7 @@
                 ctx.beginPath(); ctx.moveTo(ax, wY - 4); ctx.lineTo(ax, arrowTip + 10); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(ax, arrowTip); ctx.lineTo(ax - 5, arrowTip + 8); ctx.lineTo(ax + 5, arrowTip + 8); ctx.closePath(); ctx.fill();
             });
+            window.__gconfigParallelLiftRect = { fdX, fdY, fdW, fdH, wY };
             ctx.restore();
 
             // ---- LABELS FOR GASLIFT DOOR ----
@@ -8168,6 +8180,7 @@
         if (d1 > 0) ctx.fillText(`D: ${d1} ${unit}`, rightEdge, vY + vH / 2 + 18);
         if (d2 > 0) ctx.fillText(`D: ${d2} ${unit}`, rightEdge, wY + wH / 2 + 18);
         window.__gconfigSchematicHingeDots = schematicHingeDots.slice();
+        window.__gconfigSchematicShelfSegments = schematicShelfSegments.slice();
     }
 
     // Helper: draw a simple double-headed arrow

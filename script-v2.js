@@ -1015,6 +1015,104 @@
 
 
 
+    function colorDistance(r, g, b, ir, ig, ib) {
+
+        const dr = r - ir;
+
+        const dg = g - ig;
+
+        const db = b - ib;
+
+        return dr * dr + dg * dg + db * db;
+
+    }
+
+
+
+    function mapSegmentColorToNeon(r, g, b) {
+
+        const palette = [
+
+            { in: [41, 128, 185], out: [82, 203, 255] },
+
+            { in: [211, 84, 0], out: [255, 166, 62] },
+
+            { in: [142, 68, 173], out: [210, 130, 255] },
+
+            { in: [22, 160, 133], out: [48, 232, 186] },
+
+            { in: [192, 57, 43], out: [255, 110, 98] },
+
+            { in: [44, 62, 80], out: [150, 180, 210] },
+
+            { in: [26, 107, 47], out: [92, 255, 200] },
+
+        ];
+
+        let best = null;
+
+        let bestDist = 6500;
+
+        for (const entry of palette) {
+
+            const dist = colorDistance(r, g, b, entry.in[0], entry.in[1], entry.in[2]);
+
+            if (dist < bestDist) {
+
+                bestDist = dist;
+
+                best = entry;
+
+            }
+
+        }
+
+        if (best && bestDist < 3600) return best.out;
+
+
+
+        const max = Math.max(r, g, b);
+
+        const min = Math.min(r, g, b);
+
+        const sat = max === 0 ? 0 : (max - min) / max;
+
+        if (sat > 0.2) {
+
+            const scale = 1.42;
+
+            const lift = 38;
+
+            let nr = Math.min(255, Math.round(r * scale + lift));
+
+            let ng = Math.min(255, Math.round(g * scale + lift));
+
+            let nb = Math.min(255, Math.round(b * scale + lift));
+
+            const maxOut = Math.max(nr, ng, nb);
+
+            if (maxOut < 195) {
+
+                const s = 195 / maxOut;
+
+                nr = Math.min(255, Math.round(nr * s));
+
+                ng = Math.min(255, Math.round(ng * s));
+
+                nb = Math.min(255, Math.round(nb * s));
+
+            }
+
+            return [nr, ng, nb];
+
+        }
+
+        return [r, g, b];
+
+    }
+
+
+
     function recolorSchematicForNeon(ctx, w, h) {
 
         const img = ctx.getImageData(0, 0, w, h);
@@ -1032,10 +1130,6 @@
         const TEXT = [118, 178, 164];
 
         const TEXT_HI = [168, 228, 210];
-
-        const DOT = [48, 220, 175];
-
-        const DOT_HI = [120, 255, 210];
 
 
 
@@ -1077,6 +1171,34 @@
 
 
 
+            if (sat > 0.22 && lum > 0.1 && lum < 0.72 && g > r + 18 && r < 120) {
+
+                d[i] = BG[0];
+
+                d[i + 1] = BG[1];
+
+                d[i + 2] = BG[2];
+
+                continue;
+
+            }
+
+
+
+            if (sat > 0.22 && lum > 0.1 && lum < 0.72 && b > g + 18 && r < 120) {
+
+                d[i] = BG[0];
+
+                d[i + 1] = BG[1];
+
+                d[i + 2] = BG[2];
+
+                continue;
+
+            }
+
+
+
             const bgWeight = smoothstep(0.66, 0.95, lum) * (1 - Math.min(1, sat * 1.4));
 
             const panelWeight = smoothstep(0.52, 0.84, lum) * (1 - Math.min(1, sat * 1.1));
@@ -1103,21 +1225,15 @@
 
 
 
-            if (sat > 0.18 && lum > 0.1 && lum < 0.88) {
+            if (sat > 0.16 && lum > 0.08 && lum < 0.92) {
 
-                const accentSoft = 0.78;
+                const neon = mapSegmentColorToNeon(r, g, b);
 
-                const nr = Math.min(255, Math.round(r * 0.92 + 10));
+                d[i] = neon[0];
 
-                const ng = Math.min(255, Math.round(g * 0.94 + 14));
+                d[i + 1] = neon[1];
 
-                const nb = Math.min(255, Math.round(b * 0.92 + 12));
-
-                d[i] = mixChannel(r, nr, accentSoft);
-
-                d[i + 1] = mixChannel(g, ng, accentSoft);
-
-                d[i + 2] = mixChannel(b, nb, accentSoft);
+                d[i + 2] = neon[2];
 
                 continue;
 
@@ -1172,6 +1288,208 @@
 
 
         ctx.putImageData(img, 0, 0);
+
+    }
+
+
+
+    const NEON_SEGMENT_COLORS = ['#62d8ff', '#ffb25e', '#de9cff', '#58ffda', '#ff8a8a', '#c8dcf5'];
+
+
+
+    function drawNeonShelfSegmentsOverlay(ctx) {
+
+        const win = iframeWin();
+
+        const segments = win?.__gconfigSchematicShelfSegments;
+
+        if (!segments?.length) return;
+
+
+
+        const dashSplit = [8, 5, 3, 5];
+
+        const dashSingle = [9, 6];
+
+
+
+        segments.forEach(({ x1, y1, x2, y2, segIdx, isSplit, orientation }) => {
+
+            const dash = isSplit ? dashSplit : dashSingle;
+
+            let color;
+
+
+
+            if (isSplit) {
+
+                color = NEON_SEGMENT_COLORS[segIdx % NEON_SEGMENT_COLORS.length];
+
+            } else {
+
+                color = '#5cffc8';
+
+            }
+
+
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = 'destination-out';
+
+            ctx.lineWidth = 4.5;
+
+            ctx.lineCap = 'round';
+
+            ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+
+            ctx.setLineDash(dash);
+
+            ctx.beginPath();
+
+            ctx.moveTo(x1, y1);
+
+            ctx.lineTo(x2, y2);
+
+            ctx.stroke();
+
+            ctx.restore();
+
+
+
+            ctx.save();
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.lineWidth = 2.6;
+
+            ctx.lineCap = 'round';
+
+            ctx.strokeStyle = color;
+
+            ctx.shadowColor = color;
+
+            ctx.shadowBlur = 12;
+
+            ctx.setLineDash(dash);
+
+            ctx.beginPath();
+
+            ctx.moveTo(x1, y1);
+
+            ctx.lineTo(x2, y2);
+
+            ctx.stroke();
+
+            ctx.restore();
+
+        });
+
+    }
+
+
+
+    function drawNeonParallelLiftOverlay(ctx) {
+
+        const win = iframeWin();
+
+        const data = win?.__gconfigParallelLiftRect;
+
+        if (!data) return;
+
+        const { fdX, fdY, fdW, fdH, wY } = data;
+
+
+
+        ctx.save();
+
+        ctx.globalCompositeOperation = 'destination-out';
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+
+        ctx.fillRect(fdX - 1, fdY - 1, fdW + 2, fdH + 2);
+
+        ctx.restore();
+
+
+
+        ctx.save();
+
+        ctx.fillStyle = 'rgba(0, 229, 160, 0.16)';
+
+        ctx.strokeStyle = 'rgba(92, 255, 200, 0.9)';
+
+        ctx.lineWidth = 2;
+
+        ctx.setLineDash([6, 4]);
+
+        ctx.fillRect(fdX, fdY, fdW, fdH);
+
+        ctx.strokeRect(fdX, fdY, fdW, fdH);
+
+
+
+        ctx.strokeStyle = 'rgba(0, 229, 160, 0.5)';
+
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+
+        ctx.moveTo(fdX, wY);
+
+        ctx.lineTo(fdX, fdY);
+
+        ctx.stroke();
+
+        ctx.beginPath();
+
+        ctx.moveTo(fdX + fdW, wY);
+
+        ctx.lineTo(fdX + fdW, fdY);
+
+        ctx.stroke();
+
+
+
+        ctx.strokeStyle = 'rgba(92, 255, 200, 0.88)';
+
+        ctx.fillStyle = 'rgba(92, 255, 200, 0.88)';
+
+        ctx.lineWidth = 2;
+
+        ctx.setLineDash([]);
+
+        const arrowX1 = fdX + fdW * 0.3;
+
+        const arrowX2 = fdX + fdW * 0.7;
+
+        const arrowTip = fdY - 8;
+
+        [arrowX1, arrowX2].forEach((ax) => {
+
+            ctx.beginPath();
+
+            ctx.moveTo(ax, wY - 4);
+
+            ctx.lineTo(ax, arrowTip + 10);
+
+            ctx.stroke();
+
+            ctx.beginPath();
+
+            ctx.moveTo(ax, arrowTip);
+
+            ctx.lineTo(ax - 5, arrowTip + 8);
+
+            ctx.lineTo(ax + 5, arrowTip + 8);
+
+            ctx.closePath();
+
+            ctx.fill();
+
+        });
+
+        ctx.restore();
 
     }
 
@@ -1307,9 +1625,9 @@
 
         ctx.save();
 
-        ctx.filter = 'blur(1.8px)';
+        ctx.filter = 'blur(1.35px)';
 
-        ctx.globalAlpha = 0.38;
+        ctx.globalAlpha = 0.26;
 
         ctx.drawImage(neonSoftBuffer, 0, 0);
 
@@ -1317,7 +1635,7 @@
 
         ctx.save();
 
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.88;
 
         ctx.drawImage(neonSoftBuffer, 0, 0);
 
@@ -1358,6 +1676,10 @@
                 recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
                 applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+
+                drawNeonParallelLiftOverlay(ctx);
+
+                drawNeonShelfSegmentsOverlay(ctx);
 
                 drawSoftNeonHingeDots(ctx, hingeDots);
 
