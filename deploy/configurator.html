@@ -1978,7 +1978,7 @@
     // ==========================================
     // LANGUAGE SYSTEM
     // ==========================================
-    let currentLang = localStorage.getItem('configurator_lang') || 'en';
+    let currentLang = localStorage.getItem('gconfig-v2-lang') || localStorage.getItem('configurator_lang') || 'en';
     const CONFIG_MODE_RAW = new URLSearchParams(window.location.search).get('mode') || 'closets';
     if (CONFIG_MODE_RAW === 'shelves') {
         const sp = new URLSearchParams(window.location.search);
@@ -4274,8 +4274,10 @@
     async function refreshAmflexPrice() {
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
         if (!eamfMaterialsReady) return;
+        const requestId = ++amflexPriceRequestId;
         await loadEamfCatalog();
         if (!canRequestAmflexPrice()) {
+            if (requestId !== amflexPriceRequestId) return;
             amflexPriceState.loading = false;
             amflexPriceState.error = '';
             renderPriceSummary(T);
@@ -4316,10 +4318,9 @@
             amflexPriceState.error = (err && err.message) ? err.message : String(err);
             if (!previousQuote) amflexPriceState.quote = null;
         } finally {
-            if (!signal.aborted) {
-                amflexPriceState.loading = false;
-                renderPriceSummary(T);
-            }
+            if (requestId !== amflexPriceRequestId) return;
+            amflexPriceState.loading = false;
+            renderPriceSummary(T);
         }
     }
 
@@ -4783,7 +4784,10 @@
 
     function setLang(lang) {
         currentLang = lang;
-        localStorage.setItem('configurator_lang', lang);
+        try {
+            localStorage.setItem('gconfig-v2-lang', lang);
+            localStorage.setItem('configurator_lang', lang);
+        } catch (_) { /* ignore */ }
         applyConfiguratorMode(lang);
 
         // Update button states

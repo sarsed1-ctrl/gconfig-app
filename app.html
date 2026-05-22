@@ -1847,7 +1847,7 @@
     // ==========================================
     // LANGUAGE SYSTEM
     // ==========================================
-    let currentLang = localStorage.getItem('configurator_lang') || 'en';
+    let currentLang = localStorage.getItem('gconfig-v2-lang') || localStorage.getItem('configurator_lang') || 'en';
 
     function updateNavActiveState() {
         const path = (window.location.pathname || '').toLowerCase();
@@ -1883,6 +1883,7 @@
     function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('configurator_lang', lang);
+        try { localStorage.setItem('gconfig-v2-lang', lang); } catch (_) { /* ignore */ }
 
         // Update button states
         document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');

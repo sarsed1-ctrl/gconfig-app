@@ -55,6 +55,25 @@ html.theme-future body.welcome-page .logo-alien {
     filter: drop-shadow(0 0 4px rgba(92, 255, 200, 0.85))
             drop-shadow(0 0 10px rgba(0, 229, 160, 0.55))
             drop-shadow(0 0 18px rgba(0, 229, 160, 0.28));
+    transition: filter 0.35s ease;
+}
+
+html.theme-future body.welcome-page .header-brand .logo-g,
+html.theme-future body.welcome-page .header-brand .logo-config {
+    transition: filter 0.35s ease;
+}
+
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-alien {
+    filter: drop-shadow(0 0 8px rgba(92, 255, 200, 1))
+            drop-shadow(0 0 18px rgba(0, 229, 160, 0.85))
+            drop-shadow(0 0 32px rgba(0, 229, 160, 0.45));
+}
+
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-g,
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-config {
+    filter: drop-shadow(0 0 6px rgba(92, 255, 200, 0.95))
+            drop-shadow(0 0 14px rgba(0, 229, 160, 0.65))
+            drop-shadow(0 0 24px rgba(125, 211, 252, 0.4));
 }
 
 html.theme-future body.welcome-page .header-brand,
@@ -65,74 +84,110 @@ html.theme-future body.welcome-page #loader {
     overflow: visible;
 }
 
-/* ── Top actions (v2 link, theme toggle, lang) — glass HUD, beats style.css !important ── */
-html.theme-future body.welcome-page .top-actions {
+/* ── Top actions slide toggles — neon glass HUD (beats style.css + inline classic) ── */
+html.theme-future body.welcome-page #topActions.top-actions,
+html.theme-future body.welcome-page #topActions {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle {
-    border: 1px solid rgba(0, 229, 160, 0.35) !important;
-    border-radius: 8px;
-    background: rgba(12, 18, 28, 0.55) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 0 12px rgba(0, 229, 160, 0.08);
+html.theme-future body.welcome-page #topActions .slide-toggle,
+html.theme-future body.welcome-page #topActions #lang-bar.slide-toggle {
+    position: relative;
+    padding: 2px;
+    border: 1px solid rgba(92, 255, 200, 0.32) !important;
+    border-radius: 8px !important;
+    background: rgba(8, 14, 22, 0.62) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 0 14px rgba(0, 229, 160, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     overflow: hidden;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+html.theme-future body.welcome-page #topActions .slide-toggle:hover,
+html.theme-future body.welcome-page #topActions #lang-bar.slide-toggle:hover {
+    border-color: rgba(92, 255, 200, 0.5) !important;
+    box-shadow:
+        0 0 20px rgba(0, 229, 160, 0.22),
+        0 0 36px rgba(0, 180, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 html.theme-future body.welcome-page #topActions .slide-toggle-thumb {
-    border-radius: 6px;
+    top: 2px !important;
+    bottom: 2px !important;
+    left: 2px !important;
+    width: calc(50% - 2px) !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, #00b87a, #00e5a0) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 160, 0.45);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--version .slide-toggle-thumb {
-    background: linear-gradient(135deg, #00b87a, #00e5a0) !important;
-    box-shadow: 0 0 14px rgba(0, 229, 160, 0.4);
+html.theme-future body.welcome-page #topActions .slide-toggle[data-active="1"] .slide-toggle-thumb {
+    transform: translateX(calc(100% + 4px)) !important;
+}
+
+html.theme-future body.welcome-page #topActions .slide-toggle--version .slide-toggle-thumb,
+html.theme-future body.welcome-page #topActions .slide-toggle--lang .slide-toggle-thumb {
+    background: linear-gradient(135deg, #00b87a, #00e5a0 55%, #5cffc8) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 160, 0.45);
 }
 
 html.theme-future body.welcome-page #topActions .slide-toggle--theme .slide-toggle-thumb {
-    background: linear-gradient(135deg, #0099cc, #7dd3fc) !important;
-    box-shadow: 0 0 14px rgba(0, 180, 255, 0.35);
+    background: linear-gradient(135deg, #5cffc8, #7dd3fc) !important;
+    box-shadow: 0 0 16px rgba(125, 211, 252, 0.4);
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--lang .slide-toggle-thumb {
-    background: linear-gradient(135deg, #00b87a, #00e5a0) !important;
-    box-shadow: 0 0 14px rgba(0, 229, 160, 0.4);
-}
-
-html.theme-future body.welcome-page #topActions .slide-toggle-btn {
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn,
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn.lang-btn {
     background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
-    padding: 6px 12px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted) !important;
-    transition: color 0.2s;
+    box-shadow: none !important;
+    padding: 6px 12px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: rgba(122, 143, 153, 0.95) !important;
+    transition: color 0.2s ease, text-shadow 0.2s ease !important;
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--version .slide-toggle-btn.active {
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn.active,
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn.lang-btn.active {
+    background: transparent !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+
+html.theme-future body.welcome-page #topActions .slide-toggle--version button.slide-toggle-btn.active,
+html.theme-future body.welcome-page #topActions .slide-toggle--lang button.slide-toggle-btn.active {
     color: #041410 !important;
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--theme .slide-toggle-btn.active {
+html.theme-future body.welcome-page #topActions .slide-toggle--theme button.slide-toggle-btn.active {
     color: #041018 !important;
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--lang .slide-toggle-btn.active {
-    color: #041410 !important;
-}
-
-html.theme-future body.welcome-page #topActions .slide-toggle-btn:hover:not(.active) {
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn:hover:not(.active),
+html.theme-future body.welcome-page #topActions button.slide-toggle-btn.lang-btn:hover:not(.active) {
+    background: transparent !important;
+    background-color: transparent !important;
     color: var(--green-light) !important;
+    text-shadow: 0 0 10px rgba(92, 255, 200, 0.35);
 }
 
-html.theme-future body.welcome-page #topActions .slide-toggle--theme .slide-toggle-btn:hover:not(.active) {
+html.theme-future body.welcome-page #topActions .slide-toggle--theme button.slide-toggle-btn:hover:not(.active) {
     color: #7dd3fc !important;
+    text-shadow: 0 0 10px rgba(125, 211, 252, 0.35);
 }
 
 /* ── Hero glass panel ── */
@@ -214,6 +269,14 @@ html.theme-future body.welcome-page .card-icon-area svg [fill="#1a6b2f"] {
     fill: rgba(0, 229, 160, 0.55);
 }
 
+html.theme-future body.welcome-page .card-icon-area .beds-card-icon [fill-opacity="0.12"] {
+    fill: rgba(0, 229, 160, 0.14);
+}
+
+html.theme-future body.welcome-page .card-icon-area .beds-card-icon [fill-opacity="0.42"] {
+    fill: rgba(0, 229, 160, 0.48);
+}
+
 html.theme-future body.welcome-page .card-body {
     background: transparent;
 }
@@ -246,6 +309,23 @@ html.theme-future body.welcome-page .card-btn:hover {
     box-shadow: 0 6px 24px rgba(0, 229, 160, 0.45) !important;
     background: linear-gradient(135deg, #00a870, #00e5a0 50%, #00c4ff) !important;
     color: #041410 !important;
+}
+
+@media (max-width: 520px) {
+    html.theme-future body.welcome-page .cards {
+        padding: 0 18px 88px;
+        gap: 18px;
+    }
+
+    html.theme-future body.welcome-page .card-body {
+        padding: 18px 16px 20px;
+    }
+
+    html.theme-future body.welcome-page .card-btn {
+        margin-top: 4px;
+        padding: 12px 16px;
+        min-height: 44px;
+    }
 }
 
 /* ── Footer (matches v2 wizard-nav tone) ── */

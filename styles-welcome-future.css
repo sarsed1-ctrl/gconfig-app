@@ -55,6 +55,25 @@ html.theme-future body.welcome-page .logo-alien {
     filter: drop-shadow(0 0 4px rgba(92, 255, 200, 0.85))
             drop-shadow(0 0 10px rgba(0, 229, 160, 0.55))
             drop-shadow(0 0 18px rgba(0, 229, 160, 0.28));
+    transition: filter 0.35s ease;
+}
+
+html.theme-future body.welcome-page .header-brand .logo-g,
+html.theme-future body.welcome-page .header-brand .logo-config {
+    transition: filter 0.35s ease;
+}
+
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-alien {
+    filter: drop-shadow(0 0 8px rgba(92, 255, 200, 1))
+            drop-shadow(0 0 18px rgba(0, 229, 160, 0.85))
+            drop-shadow(0 0 32px rgba(0, 229, 160, 0.45));
+}
+
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-g,
+html.theme-future body.welcome-page .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-config {
+    filter: drop-shadow(0 0 6px rgba(92, 255, 200, 0.95))
+            drop-shadow(0 0 14px rgba(0, 229, 160, 0.65))
+            drop-shadow(0 0 24px rgba(125, 211, 252, 0.4));
 }
 
 html.theme-future body.welcome-page .header-brand,
@@ -250,6 +269,14 @@ html.theme-future body.welcome-page .card-icon-area svg [fill="#1a6b2f"] {
     fill: rgba(0, 229, 160, 0.55);
 }
 
+html.theme-future body.welcome-page .card-icon-area .beds-card-icon [fill-opacity="0.12"] {
+    fill: rgba(0, 229, 160, 0.14);
+}
+
+html.theme-future body.welcome-page .card-icon-area .beds-card-icon [fill-opacity="0.42"] {
+    fill: rgba(0, 229, 160, 0.48);
+}
+
 html.theme-future body.welcome-page .card-body {
     background: transparent;
 }
@@ -282,6 +309,23 @@ html.theme-future body.welcome-page .card-btn:hover {
     box-shadow: 0 6px 24px rgba(0, 229, 160, 0.45) !important;
     background: linear-gradient(135deg, #00a870, #00e5a0 50%, #00c4ff) !important;
     color: #041410 !important;
+}
+
+@media (max-width: 520px) {
+    html.theme-future body.welcome-page .cards {
+        padding: 0 18px 88px;
+        gap: 18px;
+    }
+
+    html.theme-future body.welcome-page .card-body {
+        padding: 18px 16px 20px;
+    }
+
+    html.theme-future body.welcome-page .card-btn {
+        margin-top: 4px;
+        padding: 12px 16px;
+        min-height: 44px;
+    }
 }
 
 /* ── Footer (matches v2 wizard-nav tone) ── */

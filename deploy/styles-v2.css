@@ -387,6 +387,73 @@ html, body {
 
 .stepper-item.done .stepper-dot { background: var(--green-light); }
 
+.stepper-item.done .stepper-dot::after {
+    content: '✓';
+    font-size: 0.7rem;
+}
+
+.stepper-item.done .stepper-dot {
+    font-size: 0;
+}
+
+/* Wizard progress */
+.wizard-progress {
+    padding: 8px 20px 12px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+}
+
+.wizard-progress-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.wizard-progress-track {
+    height: 4px;
+    background: var(--green-muted);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.wizard-progress-fill {
+    height: 100%;
+    width: 25%;
+    background: linear-gradient(90deg, var(--green), var(--green-light));
+    border-radius: 999px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-step-title {
+    display: none;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--green);
+}
+
+.field-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+:focus-visible {
+    outline: 2px solid var(--green-light);
+    outline-offset: 2px;
+}
+
+.lang-toggle button:focus-visible,
+.hw-chip:focus-visible,
+.stepper-item:focus-visible {
+    outline: 2px solid var(--green-light);
+    outline-offset: 2px;
+}
+
 
 
 /* Step content */
@@ -503,6 +570,16 @@ html, body {
 
     margin-bottom: 12px;
 
+    transition: box-shadow var(--transition);
+
+}
+
+.card:hover {
+    box-shadow: var(--shadow);
+}
+
+.card:focus-within {
+    box-shadow: 0 0 0 2px rgba(26, 107, 47, 0.15);
 }
 
 .card h3 {
@@ -1272,7 +1349,18 @@ html, body {
 
     .stepper-label { display: none; }
 
-    .field-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    .mobile-step-title { display: block; }
+
+    .wizard-progress-label { display: none; }
+
+    .wizard-nav {
+        position: sticky;
+        bottom: 0;
+        z-index: 6;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .wizard-body { padding-bottom: 8px; }
 
     .export-actions.visible { grid-template-columns: 1fr; }
 

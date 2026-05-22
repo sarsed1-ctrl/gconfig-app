@@ -16,14 +16,24 @@
 
     let productMode = params.get('type') === 'beds' ? 'beds' : 'closets';
 
-    let currentLang = 'ru';
-
     let currentStep = 1;
 
     const TOTAL_STEPS = 4;
 
     const STEP_STORAGE_KEY = 'gconfig-v2-step';
     const THEME_STORAGE_KEY = 'gconfig-v2-theme';
+    const LANG_STORAGE_KEY = 'gconfig-v2-lang';
+    const V1_LANG_STORAGE_KEY = 'configurator_lang';
+
+    function restoreLang() {
+        try {
+            const saved = localStorage.getItem(LANG_STORAGE_KEY) || localStorage.getItem(V1_LANG_STORAGE_KEY);
+            if (saved === 'en' || saved === 'ru') return saved;
+        } catch (_) { /* ignore */ }
+        return 'en';
+    }
+
+    let currentLang = restoreLang();
 
     let iframeReady = false;
 
@@ -313,7 +323,21 @@
 
             sm_not_ready: 'Конфигуратор ещё загружается.',
 
-            sm_sending: '⏳ Отправка…'
+            sm_sending: '⏳ Отправка…',
+
+            hint_drawer_sink: 'Ящики отключают мойку в нижнем шкафу (правило v1).',
+
+            hint_drawer_preview: 'Каждый ящик — отдельная панель фасада в превью.',
+
+            hint_edge_override: 'Подбирается при смене материала; можно изменить вручную.',
+
+            hint_spacing_upper_h: 'Расстояние между горизонтальными полками верхнего шкафа.',
+
+            hint_spacing_upper_v: 'Расстояние между вертикальными перегородками верхнего шкафа.',
+
+            hint_spacing_lower_h: 'Расстояние между горизонтальными полками нижнего шкафа.',
+
+            hint_spacing_lower_v: 'Расстояние между вертикальными перегородками нижнего шкафа.'
 
         },
 
@@ -521,7 +545,21 @@
 
             sm_not_ready: 'Configurator is still loading.',
 
-            sm_sending: '⏳ Sending…'
+            sm_sending: '⏳ Sending…',
+
+            hint_drawer_sink: 'Drawers disable sink in the lower cabinet (v1 rule).',
+
+            hint_drawer_preview: 'Each drawer becomes a separate facade panel in the preview.',
+
+            hint_edge_override: 'Auto-selected when material changes; you can override.',
+
+            hint_spacing_upper_h: 'Distance between horizontal shelves in the upper cabinet.',
+
+            hint_spacing_upper_v: 'Distance between vertical shelf dividers in the upper cabinet.',
+
+            hint_spacing_lower_h: 'Distance between horizontal shelves in the lower cabinet.',
+
+            hint_spacing_lower_v: 'Distance between vertical shelf dividers in the lower cabinet.'
 
         }
 
@@ -531,9 +569,9 @@
 
     function t(key) {
 
-        const dict = I18N[currentLang] || I18N.ru;
+        const dict = I18N[currentLang] || I18N.en;
 
-        return dict[key] || I18N.ru[key] || key;
+        return dict[key] || I18N.en[key] || key;
 
     }
 
@@ -921,6 +959,20 @@
 
 
 
+    function refreshEamfBackPanelSelect() {
+
+        const wEl = document.querySelector('[data-iframe="eamfBackPanel"]');
+
+        if (wEl && wEl.tagName === 'SELECT') {
+
+            cloneSelectOptions('eamfBackPanel', wEl, { preferSourceValue: true });
+
+        }
+
+    }
+
+
+
     function refreshDrawerSelects() {
 
         if (getLowerHardwareMode() !== 'drawer') return;
@@ -1175,7 +1227,17 @@
 
             if (win && typeof win[handlerName] === 'function') win[handlerName]();
 
-            setTimeout(refreshEamfEdgeSelects, 0);
+            setTimeout(() => {
+
+                refreshEamfEdgeSelects();
+
+                if (id === 'eamfCarcassMaterial' || id === 'eamfFacadeMaterial' || id === 'eamfBackPanel') {
+
+                    refreshEamfBackPanelSelect();
+
+                }
+
+            }, 0);
 
         }
 
@@ -2109,6 +2171,8 @@
 
             refreshDrawerSelects();
 
+            refreshEamfBackPanelSelect();
+
             ensureLowerDrawerModeInIframe();
 
             triggerV1Update();
@@ -2127,10 +2191,23 @@
 
     function updateNavLabels() {
 
-        if (previewMeta) {
+        const stepText = t('step_of').replace('{n}', String(currentStep));
 
-            previewMeta.textContent = t('step_of').replace('{n}', String(currentStep));
+        if (previewMeta) previewMeta.textContent = stepText;
 
+        const progressLabel = document.getElementById('wizardProgressLabel');
+        if (progressLabel) progressLabel.textContent = stepText;
+
+        const progressFill = document.getElementById('wizardProgressFill');
+        if (progressFill) progressFill.style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+
+        const progressTrack = document.querySelector('.wizard-progress-track');
+        if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(currentStep));
+
+        const mobileTitle = document.getElementById('mobileStepTitle');
+        if (mobileTitle) {
+            const stepKey = `step${currentStep}_title`;
+            mobileTitle.textContent = t(stepKey);
         }
 
     }
@@ -2140,6 +2217,11 @@
     function setLang(lang) {
 
         currentLang = lang === 'en' ? 'en' : 'ru';
+
+        try {
+            localStorage.setItem(LANG_STORAGE_KEY, currentLang);
+            localStorage.setItem(V1_LANG_STORAGE_KEY, currentLang);
+        } catch (_) { /* ignore */ }
 
         document.getElementById('langRu').classList.toggle('active', currentLang === 'ru');
 
@@ -2193,27 +2275,11 @@
 
             startPreviewLoop();
 
-        }, 600);
-
-
-
-        setTimeout(() => {
-
-            pullFromIframe();
-
-            syncPriceMirror();
-
-        }, 1200);
-
-
-
-        setTimeout(() => {
-
-            pullFromIframe();
-
             refreshEamfEdgeSelects();
 
-        }, 2500);
+            refreshEamfBackPanelSelect();
+
+        }, 800);
 
     }
 
@@ -2221,7 +2287,9 @@
 
     function startPreviewLoop() {
 
-        setInterval(() => {
+        if (previewTimer) clearInterval(previewTimer);
+
+        previewTimer = setInterval(() => {
 
             if (!iframeReady) return;
 
@@ -2603,9 +2671,12 @@
 
         document.getElementById('btnNext').addEventListener('click', () => {
 
-            if (currentStep < TOTAL_STEPS) goToStep(currentStep + 1);
+            if (currentStep < TOTAL_STEPS) {
+                goToStep(currentStep + 1);
+                return;
+            }
 
-            else goToStep(1);
+            exportActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
         });
 
@@ -2679,7 +2750,7 @@
 
         }
 
-        applyI18n();
+        setLang(currentLang);
 
         bindUI();
 

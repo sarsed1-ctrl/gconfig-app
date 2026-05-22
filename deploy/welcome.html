@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GConfig — Добро пожаловать</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GConfig — Welcome</title>
     <link rel="icon" type="image/png" href="alien-logo.png">
     <style>
         :root {
@@ -46,6 +46,20 @@
             height: calc(var(--welcome-header-title) * 1.2);
             width: auto;
             overflow: visible;
+        }
+        .header-brand .logo-alien,
+        .header-brand .logo-g,
+        .header-brand .logo-config {
+            transition: filter 0.35s ease;
+        }
+        .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-alien {
+            filter: drop-shadow(0 0 5px rgba(26, 107, 47, 0.55))
+                    drop-shadow(0 0 12px rgba(26, 107, 47, 0.35));
+        }
+        .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-g,
+        .header-brand:has(.logo-alien:hover, .logo-g:hover, .logo-config:hover) .logo-config {
+            filter: drop-shadow(0 0 4px rgba(26, 107, 47, 0.45))
+                    drop-shadow(0 0 10px rgba(26, 107, 47, 0.25));
         }
         .header-page-title {
             position: absolute;
@@ -328,20 +342,14 @@
         <div style="display:flex;flex-direction:column;align-items:center;gap:24px;">
             <div class="loader-spinner" aria-hidden="true"></div>
             <div id="loader-alien">
-                <svg width="440" height="104" viewBox="-20 -16 240 68" overflow="visible" xmlns="http://www.w3.org/2000/svg">
+                <svg width="440" height="116" viewBox="-12 -24 232 96" overflow="visible" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="logoConfigGradientLoader" gradientUnits="userSpaceOnUse" x1="54" y1="24" x2="155" y2="24">
                             <stop offset="0%" stop-color="#5cffc8"/>
                             <stop offset="100%" stop-color="#7dd3fc"/>
                         </linearGradient>
-                        <filter id="alienGlowLoader" filterUnits="objectBoundingBox" x="-1.5" y="-1.5" width="4" height="4" color-interpolation-filters="sRGB">
-                            <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#5cffc8" flood-opacity="0.7"/>
-                            <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#00e5a0" flood-opacity="0.35"/>
-                        </filter>
                     </defs>
-                    <svg class="logo-alien-wrap" x="-8" y="-4" width="64" height="64" viewBox="-19 -36 495 575" overflow="visible" aria-hidden="true">
-                        <image class="logo-alien" href="alien-logo.png" width="432" height="496" filter="url(#alienGlowLoader)"/>
-                    </svg>
+                    <image class="logo-alien" href="alien-logo-padded.png" x="-12" y="-8" width="72" height="72" preserveAspectRatio="xMidYMid meet"/>
                     <text class="logo-g" x="54" y="24" font-family="'Segoe UI',system-ui,sans-serif" font-size="22" font-weight="400" fill="url(#logoConfigGradientLoader)" letter-spacing="-0.5">G</text>
                     <text class="logo-config" x="70" y="24" font-family="'Segoe UI',system-ui,sans-serif" font-size="22" font-weight="400" fill="url(#logoConfigGradientLoader)">Config</text>
                     <text class="logo-tagline" x="54" y="38" font-family="'Segoe UI',system-ui,sans-serif" font-size="8.5" font-weight="400" fill="#888" letter-spacing="1.8">CONFIGURATION MANAGER</text>
@@ -437,26 +445,27 @@
 
         <div class="card">
             <div class="card-icon-area">
-                <svg class="beds-card-icon" width="96" height="80" viewBox="0 0 96 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <rect x="14" y="4" width="68" height="40" rx="3" stroke="#1a6b2f" stroke-width="2.5"/>
-                    <line x1="21.5" y1="8" x2="21.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="26" y1="8" x2="26" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="30.5" y1="8" x2="30.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="35" y1="8" x2="35" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="39.5" y1="8" x2="39.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="44" y1="8" x2="44" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="48.5" y1="8" x2="48.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="53" y1="8" x2="53" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="57.5" y1="8" x2="57.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="62" y1="8" x2="62" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="66.5" y1="8" x2="66.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="71" y1="8" x2="71" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <line x1="75.5" y1="8" x2="75.5" y2="40" stroke="#1a6b2f" stroke-width="1.5"/>
-                    <rect x="9" y="44" width="78" height="14" stroke="#1a6b2f" stroke-width="2.5" fill="#fff"/>
-                    <rect x="13" y="46" width="20" height="7" rx="2.5" stroke="#1a6b2f" stroke-width="2" fill="#1a6b2f" opacity="0.38"/>
-                    <path d="M56 44H84V51H79V58H56V44Z" stroke="#1a6b2f" stroke-width="2" fill="#1a6b2f" opacity="0.38"/>
-                    <rect x="8" y="59" width="80" height="17" rx="2" stroke="#1a6b2f" stroke-width="2.5" fill="#1a6b2f" opacity="0.14"/>
-                    <line x1="8" y1="67.5" x2="88" y2="67.5" stroke="#1a6b2f" stroke-width="2"/>
+                <svg class="beds-card-icon" width="96" height="80" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="15" y="4" width="90" height="48" rx="6" stroke="#1a6b2f" stroke-width="2.8" fill="#1a6b2f" fill-opacity="0.12"/>
+                    <g stroke="#1a6b2f" stroke-width="1.6">
+                        <line x1="24" y1="9" x2="24" y2="47"/>
+                        <line x1="30" y1="9" x2="30" y2="47"/>
+                        <line x1="36" y1="9" x2="36" y2="47"/>
+                        <line x1="42" y1="9" x2="42" y2="47"/>
+                        <line x1="48" y1="9" x2="48" y2="47"/>
+                        <line x1="54" y1="9" x2="54" y2="47"/>
+                        <line x1="60" y1="9" x2="60" y2="47"/>
+                        <line x1="66" y1="9" x2="66" y2="47"/>
+                        <line x1="72" y1="9" x2="72" y2="47"/>
+                        <line x1="78" y1="9" x2="78" y2="47"/>
+                        <line x1="84" y1="9" x2="84" y2="47"/>
+                        <line x1="90" y1="9" x2="90" y2="47"/>
+                        <line x1="96" y1="9" x2="96" y2="47"/>
+                    </g>
+                    <rect x="20" y="42" width="30" height="14" rx="3.5" stroke="#1a6b2f" stroke-width="2.2" fill="#1a6b2f" fill-opacity="0.42"/>
+                    <rect x="70" y="42" width="30" height="14" rx="3.5" stroke="#1a6b2f" stroke-width="2.2" fill="#1a6b2f" fill-opacity="0.42"/>
+                    <rect x="12" y="58" width="96" height="16" stroke="#1a6b2f" stroke-width="2.8" fill="#fff"/>
+                    <rect x="10" y="76" width="100" height="20" rx="3" stroke="#1a6b2f" stroke-width="2.8" fill="#fff"/>
                 </svg>
             </div>
             <div class="card-body">
@@ -591,7 +600,23 @@
                 setTimeout(function() { window.location.href = href; }, 350);
             }
         });
+        var LANG_KEY = 'gconfig-v2-lang';
+        var V1_LANG_KEY = 'configurator_lang';
+
+        function restoreWelcomeLang() {
+            try {
+                var saved = localStorage.getItem(LANG_KEY) || localStorage.getItem(V1_LANG_KEY);
+                if (saved === 'en' || saved === 'ru') return saved;
+            } catch (e) { /* ignore */ }
+            return 'en';
+        }
+
         function setLang(lang) {
+            if (lang !== 'en' && lang !== 'ru') lang = 'en';
+            try {
+                localStorage.setItem(LANG_KEY, lang);
+                localStorage.setItem(V1_LANG_KEY, lang);
+            } catch (e) { /* ignore */ }
             document.body.className = 'welcome-page lang-' + lang;
             var langBar = document.getElementById('lang-bar');
             if (langBar) {
@@ -655,6 +680,8 @@
                 applyTheme(btn.getAttribute('data-theme'));
             });
         }
+
+        setLang(restoreWelcomeLang());
 
         (function initTheme() {
             try {
