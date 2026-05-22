@@ -7540,7 +7540,7 @@
 
         const padX = 48;
         const padTop = 18;
-        const footerH = 62;
+        const footerH = 72;
         const viewGapY = 48;
         const titleRow = 16;
         const sideRightLabel = 62;
@@ -7826,8 +7826,8 @@
         ctx.fillText(llLab, -ctx.measureText(llLab).width / 2, 0);
         ctx.restore();
 
-        ctx.fillStyle = TEXT_MID;
-        ctx.font = "9px 'Segoe UI', Arial";
+        ctx.fillStyle = '#888';
+        ctx.font = "12px 'Segoe UI', Arial";
         const recLab = lang === 'en'
             ? (bedVert.protrusionAboveRailMm > 0.5
                 ? `mattress protrusion ≈ ${Math.round(bedVert.protrusionAboveRailMm)} mm (max ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm)`
@@ -7841,16 +7841,16 @@
                 ? `${stripsTotal} × ${stripLengthL}×${STRIP_W} mm strips · ${STRIP_SIDE_CLEARANCE} mm side clearance · max ${stripLayout.MAX_STRIP_LENGTH} mm`
                 : `${stripsTotal} × ${stripLengthL}×${STRIP_W} мм планок · зазор ${STRIP_SIDE_CLEARANCE} мм/стор · макс ${stripLayout.MAX_STRIP_LENGTH} мм`)
             : (lang === 'en' ? 'solid LDSP base' : 'листовое ЛДСП');
+        const footerLineH = 15;
         const footerLines = useCenterBeam ? 3 : 2;
-        const footerStartY = canvasH - (footerLines - 1) * 12 - 8;
+        const footerStartY = canvasH - (footerLines - 1) * footerLineH - 10;
         ctx.fillText(recLab, padX, footerStartY);
-        ctx.font = "10px 'Segoe UI', Arial";
-        ctx.fillText(callout, padX, footerStartY + 12);
+        ctx.fillText(callout, padX, footerStartY + footerLineH);
         if (useCenterBeam) {
             const beamCallout = lang === 'en'
                 ? `${centerSupportCount} center longitudinal support${centerSupportCount > 1 ? 's' : ''}`
                 : `${centerSupportCount} центр. продольн. опор(ы)`;
-            ctx.fillText(beamCallout, padX, footerStartY + 24);
+            ctx.fillText(beamCallout, padX, footerStartY + footerLineH * 2);
         }
     }
 

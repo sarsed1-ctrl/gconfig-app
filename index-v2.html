@@ -54,19 +54,19 @@
             <aside class="wizard-panel">
                 <nav class="stepper" aria-label="Wizard steps">
                     <button type="button" class="stepper-item active" data-step="1">
-                        <span class="stepper-dot">1</span>
+                        <span class="stepper-dot" data-num="1">1</span>
                         <span class="stepper-label" data-i18n="step1_short">Size</span>
                     </button>
                     <button type="button" class="stepper-item" data-step="2">
-                        <span class="stepper-dot">2</span>
+                        <span class="stepper-dot" data-num="2">2</span>
                         <span class="stepper-label" data-i18n="step2_short">Shelves</span>
                     </button>
                     <button type="button" class="stepper-item" data-step="3">
-                        <span class="stepper-dot">3</span>
+                        <span class="stepper-dot" data-num="3">3</span>
                         <span class="stepper-label" data-i18n="step3_short">Hardware</span>
                     </button>
                     <button type="button" class="stepper-item" data-step="4">
-                        <span class="stepper-dot">4</span>
+                        <span class="stepper-dot" data-num="4">4</span>
                         <span class="stepper-label" data-i18n="step4_short">Materials</span>
                     </button>
                 </nav>
@@ -386,15 +386,17 @@
                         <canvas id="previewCanvas" width="800" height="500" aria-label="Schematic preview"></canvas>
                     </div>
                 </div>
-                <p class="preview-meta" id="previewMeta"></p>
-                <div class="price-mirror-wrap" id="priceMirrorWrap">
-                    <div class="hud-frame">
-                        <span class="hud-corner hud-corner-tl" aria-hidden="true"></span>
-                        <span class="hud-corner hud-corner-tr" aria-hidden="true"></span>
-                        <span class="hud-corner hud-corner-bl" aria-hidden="true"></span>
-                        <span class="hud-corner hud-corner-br" aria-hidden="true"></span>
-                        <span class="hud-scanline" aria-hidden="true"></span>
-                        <div id="priceMirror" class="price-summary"></div>
+                <div class="preview-dock">
+                    <p class="preview-meta" id="previewMeta"></p>
+                    <div class="price-mirror-wrap" id="priceMirrorWrap">
+                        <div class="hud-frame">
+                            <span class="hud-corner hud-corner-tl" aria-hidden="true"></span>
+                            <span class="hud-corner hud-corner-tr" aria-hidden="true"></span>
+                            <span class="hud-corner hud-corner-bl" aria-hidden="true"></span>
+                            <span class="hud-corner hud-corner-br" aria-hidden="true"></span>
+                            <span class="hud-scanline" aria-hidden="true"></span>
+                            <div id="priceMirror" class="price-summary"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="export-actions" id="exportActions">

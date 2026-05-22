@@ -20,6 +20,36 @@
 
     const TOTAL_STEPS = 4;
 
+    function getTotalSteps() {
+        return productMode === 'beds' ? 2 : TOTAL_STEPS;
+    }
+
+    function getDisplayStepNumber(step) {
+        if (productMode === 'beds') return step === 4 ? 2 : 1;
+        return step;
+    }
+
+    function getNextStep(step) {
+        if (productMode === 'beds') return step === 1 ? 4 : step;
+        return step + 1;
+    }
+
+    function getPrevStep(step) {
+        if (productMode === 'beds') return step === 4 ? 1 : step - 1;
+        return step - 1;
+    }
+
+    function isLastStep(step) {
+        return productMode === 'beds' ? step === 4 : step === TOTAL_STEPS;
+    }
+
+    function normalizeStep(step) {
+        if (productMode === 'beds' && (step === 2 || step === 3)) {
+            return step > currentStep ? 4 : 1;
+        }
+        return step;
+    }
+
     const STEP_STORAGE_KEY = 'gconfig-v2-step';
     const THEME_STORAGE_KEY = 'gconfig-v2-theme';
     const LANG_STORAGE_KEY = 'gconfig-v2-lang';
@@ -331,7 +361,7 @@
 
             preview_updating: 'Обновление превью…',
 
-            step_of: 'Шаг {n} из 4',
+            step_of: 'Шаг {n} из {total}',
 
             sm_title: 'Заказ проекта',
 
@@ -553,7 +583,7 @@
 
             preview_updating: 'Updating preview…',
 
-            step_of: 'Step {n} of 4',
+            step_of: 'Step {n} of {total}',
 
             sm_title: 'Order Project',
 
@@ -2195,6 +2225,12 @@
 
         window.history.replaceState({}, '', url);
 
+        if (mode === 'beds' && (currentStep === 2 || currentStep === 3)) {
+            goToStep(1);
+        } else {
+            updateNavLabels();
+        }
+
         loadIframe();
 
     }
@@ -2223,7 +2259,10 @@
 
                 const n = Number(saved);
 
-                if (n >= 1 && n <= TOTAL_STEPS) return n;
+                if (n >= 1 && n <= TOTAL_STEPS) {
+                    if (productMode === 'beds' && (n === 2 || n === 3)) return 1;
+                    return n;
+                }
 
             }
 
@@ -2247,6 +2286,8 @@
 
         const prevStep = currentStep;
 
+        step = normalizeStep(step);
+
         currentStep = Math.max(1, Math.min(TOTAL_STEPS, step));
 
         persistStep(currentStep);
@@ -2265,11 +2306,23 @@
 
             const n = Number(item.dataset.step);
 
-            item.classList.toggle('active', n === currentStep);
+            if (productMode === 'beds' && (n === 2 || n === 3)) return;
 
-            item.classList.toggle('done', n < currentStep);
+            let isActive;
+            let isDone;
+            if (productMode === 'beds') {
+                isActive = (n === 1 && currentStep === 1) || (n === 4 && currentStep === 4);
+                isDone = n === 1 && currentStep === 4;
+            } else {
+                isActive = n === currentStep;
+                isDone = n < currentStep;
+            }
 
-            if (n === currentStep && currentStep !== prevStep) triggerStepEnter(item);
+            item.classList.toggle('active', isActive);
+
+            item.classList.toggle('done', isDone);
+
+            if (isActive && currentStep !== prevStep) triggerStepEnter(item);
 
         });
 
@@ -2277,7 +2330,7 @@
 
         const btnNext = document.getElementById('btnNext');
 
-        btnNext.textContent = currentStep === TOTAL_STEPS ? t('finish') : t('next');
+        btnNext.textContent = isLastStep(currentStep) ? t('finish') : t('next');
 
         exportActions.classList.toggle('visible', iframeReady);
 
@@ -2305,9 +2358,27 @@
 
 
 
+    function updateStepperDots() {
+        document.querySelectorAll('.stepper-item').forEach((item) => {
+            const n = Number(item.dataset.step);
+            const dot = item.querySelector('.stepper-dot');
+            if (!dot) return;
+            let display = String(n);
+            if (productMode === 'beds' && n === 4) display = '2';
+            dot.setAttribute('data-num', display);
+            dot.textContent = display;
+        });
+    }
+
     function updateNavLabels() {
 
-        const stepText = t('step_of').replace('{n}', String(currentStep));
+        const total = getTotalSteps();
+
+        const displayN = getDisplayStepNumber(currentStep);
+
+        const stepText = t('step_of')
+            .replace('{n}', String(displayN))
+            .replace('{total}', String(total));
 
         if (previewMeta) previewMeta.textContent = stepText;
 
@@ -2315,10 +2386,15 @@
         if (progressLabel) progressLabel.textContent = stepText;
 
         const progressFill = document.getElementById('wizardProgressFill');
-        if (progressFill) progressFill.style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+        if (progressFill) progressFill.style.width = `${(displayN / total) * 100}%`;
 
         const progressTrack = document.querySelector('.wizard-progress-track');
-        if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(currentStep));
+        if (progressTrack) {
+            progressTrack.setAttribute('aria-valuenow', String(displayN));
+            progressTrack.setAttribute('aria-valuemax', String(total));
+        }
+
+        updateStepperDots();
 
         const mobileTitle = document.getElementById('mobileStepTitle');
         if (mobileTitle) {
@@ -2823,16 +2899,16 @@
 
 
 
-        document.getElementById('btnPrev').addEventListener('click', () => goToStep(currentStep - 1));
+        document.getElementById('btnPrev').addEventListener('click', () => goToStep(getPrevStep(currentStep)));
 
         document.getElementById('btnNext').addEventListener('click', () => {
 
-            if (currentStep < TOTAL_STEPS) {
-                goToStep(currentStep + 1);
+            if (isLastStep(currentStep)) {
+                exportActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 return;
             }
 
-            exportActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            goToStep(getNextStep(currentStep));
 
         });
 
