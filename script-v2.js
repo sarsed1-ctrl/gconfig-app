@@ -73,6 +73,8 @@
 
     let previewSyncTimer = null;
 
+    let model3dEnabled = false;
+
 
 
     /** Fields that should redraw the schematic immediately while typing. */
@@ -327,6 +329,14 @@
 
             preview: 'Превью',
 
+            preview_3d: '3D',
+
+            toggle_3d_model: '3D модель',
+
+            toggle_off: 'Выкл',
+
+            toggle_3d: '3D',
+
             back: 'Назад',
 
             next: 'Далее',
@@ -548,6 +558,14 @@
             open_v1_full: 'Open full v1.0 configurator →',
 
             preview: 'Preview',
+
+            preview_3d: '3D',
+
+            toggle_3d_model: '3D model',
+
+            toggle_off: 'Off',
+
+            toggle_3d: '3D',
 
             back: 'Back',
 
@@ -824,6 +842,370 @@
         syncCanvas();
 
         syncPriceMirror();
+
+        schedule3DRebuild();
+
+    }
+
+
+
+    function fieldByIframe(id) {
+
+        return document.querySelector(`[data-iframe="${id}"]`);
+
+    }
+
+
+
+    function fieldNum(id, fallback = 0) {
+
+        const el = fieldByIframe(id);
+
+        if (!el) return fallback;
+
+        if (el.type === 'checkbox') return el.checked ? 1 : 0;
+
+        const v = parseFloat(el.value);
+
+        return Number.isFinite(v) ? v : fallback;
+
+    }
+
+
+
+    function fieldStr(id) {
+
+        const el = fieldByIframe(id);
+
+        return el ? String(el.value || '') : '';
+
+    }
+
+
+
+    function fieldCheck(id) {
+
+        const el = fieldByIframe(id);
+
+        return el?.type === 'checkbox' ? !!el.checked : false;
+
+    }
+
+
+
+    function collect3DParams() {
+
+        const carcassT = fieldNum('carcassThick', 16);
+
+        const facadeT = fieldNum('facadeThick', 16);
+
+        const material = fieldStr('eamfCarcassMaterial');
+
+        const edge = fieldStr('eamfCarcassEdge');
+
+        const facadeMaterial = fieldStr('eamfFacadeMaterial') || material;
+
+
+
+        if (productMode === 'beds') {
+
+            return {
+
+                mode: 'beds',
+
+                width: fieldNum('bedMattressW', 1600),
+
+                length: fieldNum('bedLength', 2000),
+
+                height: fieldNum('bedFrameH', 420),
+
+                headboardH: fieldNum('bedHeadboardH', 900),
+
+                footboardH: fieldNum('bedFootboardH', 420),
+
+                facadeT,
+
+                carcassT,
+
+                baseType: fieldStr('bedBaseType') || 'slats',
+
+                material,
+
+                edge,
+
+                facadeMaterial,
+
+            };
+
+        }
+
+
+
+        const shelves = [
+
+            {
+
+                zone: 'upper',
+
+                horizontal: fieldNum('upperShelvesH', 0),
+
+                vertical: fieldNum('upperShelvesV', 0),
+
+                spacingH: fieldNum('upperSpacingH', 100),
+
+                spacingV: fieldNum('upperSpacingV', 200),
+
+                w: fieldNum('upper_w', 800),
+
+                h: fieldNum('upper_h', 400),
+
+                d: fieldNum('upper_d', 350),
+
+            },
+
+            {
+
+                zone: 'lower',
+
+                horizontal: fieldNum('vanityShelvesH', 0),
+
+                vertical: fieldNum('vanityShelvesV', 0),
+
+                spacingH: fieldNum('vanitySpacingH', 100),
+
+                spacingV: fieldNum('vanitySpacingV', 200),
+
+                w: fieldNum('w1', 800),
+
+                h: fieldNum('h1', 500),
+
+                d: fieldNum('d1', 450),
+
+            },
+
+        ];
+
+
+
+        return {
+
+            mode: 'closets',
+
+            width: fieldNum('w1', 800),
+
+            height: fieldNum('h1', 500),
+
+            depth: fieldNum('d1', 450),
+
+            upperWidth: fieldNum('upper_w', 800),
+
+            upperHeight: fieldNum('upper_h', 400),
+
+            upperDepth: fieldNum('upper_d', 350),
+
+            carcassT,
+
+            facadeT,
+
+            shelves,
+
+            doors: {
+
+                upper: getUpperHardwareMode(),
+
+                lower: getLowerHardwareMode(),
+
+            },
+
+            drawers: {
+
+                enabled: getLowerHardwareMode() === 'drawer',
+
+                count: fieldNum('lowerDrawerCount', 1),
+
+            },
+
+            lowerSplitDoor: fieldCheck('lowerSplitFacade'),
+
+            backWall: fieldCheck('useCarcassBackPanel') || !!fieldStr('eamfBackPanel'),
+
+            countertop: {
+                enabled: fieldCheck('w-hasCountertop'),
+                thickness: 38,
+                frontOverhang: fieldNum('w-ctFrontOverhang', 20),
+                sideOverhang: fieldNum('w-ctSideOverhang', 2),
+                material: fieldStr('w-countertopMaterial') || fieldStr('countertopMaterial'),
+            },
+
+            material,
+
+            edge,
+
+            facadeMaterial,
+
+        };
+
+    }
+
+
+
+    let threeRebuildTimer = null;
+
+
+
+    function schedule3DRebuild() {
+
+        if (!model3dEnabled || !iframeReady || !window.GConfig3D) return;
+
+        if (threeRebuildTimer) clearTimeout(threeRebuildTimer);
+
+        threeRebuildTimer = setTimeout(() => {
+
+            threeRebuildTimer = null;
+
+            window.GConfig3D.scheduleRebuild(collect3DParams());
+
+        }, 100);
+
+    }
+
+
+
+    function setModel3dEnabled(enabled) {
+
+        if (model3dEnabled === enabled) return;
+
+        model3dEnabled = enabled;
+
+        const workspace = document.querySelector('.workspace');
+
+        const panel = document.getElementById('furniture3dPanel');
+
+        updateSlideToggle('toggle3d', enabled ? 1 : 0);
+
+        if (enabled) {
+
+            workspace?.classList.add('has-3d');
+
+            if (panel) {
+
+                panel.hidden = false;
+
+                panel.setAttribute('aria-hidden', 'false');
+
+            }
+
+            waitFor3DModule(() => init3DView());
+
+        } else {
+
+            workspace?.classList.remove('has-3d');
+
+            const modal = document.getElementById('furniture-3d-modal');
+
+            const host = document.getElementById('furniture-3d-modal-host');
+
+            const panelEl = document.getElementById('furniture-3d');
+
+            if (modal && !modal.hidden && host && panelEl) {
+
+                const canvas = host.querySelector('canvas');
+
+                if (canvas) panelEl.appendChild(canvas);
+
+                modal.hidden = true;
+
+            }
+
+            window.GConfig3D?.dispose?.();
+
+            if (panel) {
+
+                panel.hidden = true;
+
+                panel.setAttribute('aria-hidden', 'true');
+
+            }
+
+        }
+
+    }
+
+
+
+    function bind3DToggle() {
+
+        bindSlideToggle('toggle3d', (btn) => {
+
+            setModel3dEnabled(btn.getAttribute('data-3d') === 'on');
+
+        });
+
+    }
+
+
+
+    function init3DView() {
+
+        if (!document.getElementById('furniture-3d') || !window.GConfig3D) return;
+
+        window.GConfig3D.init();
+
+        schedule3DRebuild();
+
+    }
+
+
+
+    function bind3DModal() {
+
+        const btn = document.getElementById('btn3dExpand');
+
+        const modal = document.getElementById('furniture-3d-modal');
+
+        const host = document.getElementById('furniture-3d-modal-host');
+
+        const panel = document.getElementById('furniture-3d');
+
+        const closeBtn = document.getElementById('btn3dModalClose');
+
+        const backdrop = document.getElementById('furniture3dModalBackdrop');
+
+        if (!btn || !modal || !host || !panel) return;
+
+
+
+        const closeModal = () => {
+
+            modal.hidden = true;
+
+            const canvas = host.querySelector('canvas');
+
+            if (canvas) panel.appendChild(canvas);
+
+            if (window.GConfig3D?.resize) window.GConfig3D.resize();
+
+        };
+
+
+
+        btn.addEventListener('click', () => {
+
+            modal.hidden = false;
+
+            const canvas = panel.querySelector('canvas');
+
+            if (canvas) host.appendChild(canvas);
+
+            if (window.GConfig3D?.resize) window.GConfig3D.resize();
+
+        });
+
+
+
+        closeBtn?.addEventListener('click', closeModal);
+
+        backdrop?.addEventListener('click', closeModal);
 
     }
 
@@ -2233,6 +2615,8 @@
 
         loadIframe();
 
+        schedule3DRebuild();
+
     }
 
 
@@ -2462,6 +2846,8 @@
             syncCanvas();
 
             syncPriceMirror();
+
+            schedule3DRebuild();
 
             startPreviewLoop();
 
@@ -2831,6 +3217,8 @@
 
         syncCanvas();
 
+        if (window.GConfig3D?.onThemeChange) window.GConfig3D.onThemeChange();
+
     }
 
 
@@ -2922,6 +3310,12 @@
 
 
 
+        bind3DModal();
+
+        bind3DToggle();
+
+
+
         document.getElementById('btnPdf').addEventListener('click', () => callIframe('generatePDF'));
 
         document.getElementById('btnExcel').addEventListener('click', () => callIframe('downloadTellimusExcel'));
@@ -2989,6 +3383,24 @@
         loadIframe();
 
         goToStep(restoreStep());
+
+    }
+
+
+
+    function waitFor3DModule(cb, attempts = 50) {
+
+        if (window.GConfig3D) {
+
+            cb();
+
+            return;
+
+        }
+
+        if (attempts <= 0) return;
+
+        setTimeout(() => waitFor3DModule(cb, attempts - 1), 60);
 
     }
 

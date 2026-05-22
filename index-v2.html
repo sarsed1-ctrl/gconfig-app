@@ -375,6 +375,14 @@
             <main class="preview-panel">
                 <div class="preview-header">
                     <h2 data-i18n="preview">Preview</h2>
+                    <div class="preview-header-actions">
+                        <span class="preview-3d-toggle-label" data-i18n="toggle_3d_model">3D model</span>
+                        <div class="slide-toggle slide-toggle--3d" id="toggle3d" role="group" aria-label="3D model" data-active="0">
+                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                            <button type="button" class="slide-toggle-btn active" data-3d="off" aria-pressed="true" data-i18n="toggle_off">Off</button>
+                            <button type="button" class="slide-toggle-btn" data-3d="on" aria-pressed="false" data-i18n="toggle_3d">3D</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="preview-canvas-wrap">
                     <div class="scheme-hud-frame hud-frame">
@@ -405,6 +413,14 @@
                     <button type="button" class="btn-order" id="btnOrder" data-i18n="order">Order</button>
                 </div>
             </main>
+
+            <section class="furniture-3d-panel" id="furniture3dPanel" hidden aria-hidden="true" aria-label="3D preview">
+                <div class="furniture-3d-header">
+                    <h2 data-i18n="preview_3d">3D</h2>
+                    <button type="button" class="furniture-3d-expand" id="btn3dExpand" aria-label="Expand 3D view" title="Expand">⛶</button>
+                </div>
+                <div id="furniture-3d" role="img" aria-label="3D furniture model"></div>
+            </section>
         </div>
     </div>
 
@@ -440,6 +456,23 @@
 
     <div id="v2-toast" class="v2-toast" aria-live="polite"></div>
 
+    <div id="furniture-3d-modal" class="furniture-3d-modal" hidden>
+        <div class="furniture-3d-modal-backdrop" id="furniture3dModalBackdrop"></div>
+        <div class="furniture-3d-modal-body">
+            <button type="button" class="furniture-3d-modal-close" id="btn3dModalClose" aria-label="Close">✕</button>
+            <div id="furniture-3d-modal-host"></div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="three-configurator.js"></script>
     <script src="script-v2.js"></script>
 </body>
 </html>
