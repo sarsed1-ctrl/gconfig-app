@@ -745,3 +745,73 @@ html.theme-future .theme-toggle {
         animation: none;
     }
 }
+
+/* Order modal — neon glass */
+html.theme-future .v2-send-modal-overlay {
+    background: rgba(2, 8, 24, 0.72);
+    backdrop-filter: blur(6px);
+}
+
+html.theme-future .v2-send-modal {
+    border: 1px solid rgba(0, 180, 255, 0.35);
+    background: linear-gradient(145deg, rgba(8, 20, 40, 0.95), rgba(4, 12, 28, 0.98));
+    box-shadow:
+        0 0 0 1px rgba(0, 180, 255, 0.12),
+        0 12px 40px rgba(0, 0, 0, 0.55),
+        0 0 32px rgba(0, 180, 255, 0.15);
+}
+
+html.theme-future .v2-send-modal h3 {
+    color: #7dd3fc;
+    border-bottom-color: rgba(0, 180, 255, 0.25);
+}
+
+html.theme-future .v2-sm-field label {
+    color: #94a3b8;
+}
+
+html.theme-future .v2-sm-field input,
+html.theme-future .v2-sm-field textarea {
+    border-color: rgba(0, 180, 255, 0.3);
+    background: rgba(0, 180, 255, 0.06);
+    color: #e2e8f0;
+}
+
+html.theme-future .v2-sm-field input:focus,
+html.theme-future .v2-sm-field textarea:focus {
+    outline: none;
+    border-color: rgba(0, 180, 255, 0.65);
+    box-shadow: 0 0 0 2px rgba(0, 180, 255, 0.15);
+}
+
+html.theme-future .v2-sm-hint {
+    color: #64748b;
+}
+
+html.theme-future .v2-send-modal-close {
+    color: #64748b;
+}
+
+html.theme-future .v2-send-modal-close:hover {
+    color: #7dd3fc;
+}
+
+html.theme-future .v2-sm-actions .btn-cancel {
+    background: rgba(100, 116, 139, 0.35);
+    color: #cbd5e1;
+}
+
+html.theme-future .v2-sm-actions .btn-cancel:hover {
+    background: rgba(100, 116, 139, 0.55);
+}
+
+html.theme-future .v2-toast {
+    border: 1px solid rgba(0, 180, 255, 0.35);
+    background: rgba(8, 20, 40, 0.95);
+    box-shadow: 0 0 24px rgba(0, 180, 255, 0.2);
+}
+
+html.theme-future .v2-toast.error {
+    border-color: rgba(248, 113, 113, 0.45);
+    background: rgba(80, 20, 20, 0.95);
+}

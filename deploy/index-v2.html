@@ -231,18 +231,6 @@
                                     <input type="checkbox" id="w-lowerSplitFacade" data-iframe="lowerSplitFacade">
                                     <span data-i18n="lower_split_door">Разделить дверь на две створки</span>
                                 </label>
-                                <div class="drawer-fields" id="drawerFields">
-                                    <div class="field-grid">
-                                        <div class="field">
-                                            <label data-i18n="drawer_system">Система ящиков</label>
-                                            <select id="w-lowerDrawerSystem" data-iframe="lowerDrawerSystem"></select>
-                                        </div>
-                                        <div class="field">
-                                            <label data-i18n="drawer_count">Количество ящиков</label>
-                                            <select id="w-lowerDrawerCount" data-iframe="lowerDrawerCount"></select>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <p class="step-desc beds-only" data-i18n="beds_step2_skip">Для кроватей этот шаг не применяется.</p>
@@ -301,6 +289,20 @@
                                 </div>
                             </div>
                             <p class="gas-hint" id="gasHint" data-i18n="gas_auto_hint">Газлифты GTV HORIZON подбираются автоматически по весу фасада.</p>
+                        </div>
+
+                        <div class="card closets-only drawer-fields" id="drawerFields">
+                            <h3 data-i18n="drawer_system">Система ящиков</h3>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label data-i18n="drawer_system">Система ящиков</label>
+                                    <select id="w-lowerDrawerSystem" data-iframe="lowerDrawerSystem"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="drawer_count">Количество ящиков</label>
+                                    <select id="w-lowerDrawerCount" data-iframe="lowerDrawerCount"></select>
+                                </div>
+                            </div>
                         </div>
                         <p class="step-desc beds-only" data-i18n="beds_step3_skip">Для кроватей задняя панель и петли скрыты в v1.</p>
                     </section>
@@ -382,6 +384,38 @@
             </main>
         </div>
     </div>
+
+    <div id="v2-send-modal-overlay" class="v2-send-modal-overlay" hidden>
+        <div id="v2-send-modal" class="v2-send-modal" role="dialog" aria-labelledby="v2-send-modal-title">
+            <button type="button" class="v2-send-modal-close" id="v2SendModalClose" aria-label="Close">✕</button>
+            <h3 id="v2-send-modal-title" data-i18n="sm_title">Заказ проекта</h3>
+
+            <div class="v2-sm-field">
+                <label for="v2-sm-project" data-i18n="sm_project">Название проекта</label>
+                <input type="text" id="v2-sm-project" autocomplete="organization">
+            </div>
+            <div class="v2-sm-field">
+                <label for="v2-sm-email" data-i18n="sm_email">Ваш email *</label>
+                <input type="email" id="v2-sm-email" autocomplete="email" required>
+            </div>
+            <div class="v2-sm-field">
+                <label for="v2-sm-phone" data-i18n="sm_phone">Телефон</label>
+                <input type="tel" id="v2-sm-phone" autocomplete="tel">
+            </div>
+            <div class="v2-sm-field">
+                <label for="v2-sm-desc" data-i18n="sm_desc">Описание / комментарий</label>
+                <textarea id="v2-sm-desc" rows="3"></textarea>
+            </div>
+            <p class="v2-sm-hint" data-i18n="sm_hint">📨 PDF со списком деталей будет отправлен в Telegram</p>
+
+            <div class="v2-sm-actions">
+                <button type="button" class="btn-cancel" id="v2SendModalCancel" data-i18n="sm_cancel">Отмена</button>
+                <button type="button" class="btn-order" id="v2-sm-send" data-i18n="sm_send">Отправить →</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v2-toast" class="v2-toast" aria-live="polite"></div>
 
     <script src="script-v2.js"></script>
 </body>

@@ -5358,6 +5358,163 @@
     }
     // MAIN CALCULATION
     // ==========================================
+
+    function calcLowerFacadePanels(w1, h1, carcassT) {
+        const lowerDoorType = document.querySelector('input[name="lowerDoorType"]:checked')?.value || 'overlay';
+        const lowerOverlayGap = parseFloat(document.getElementById('lowerOverlayGap')?.value) || 2;
+        const lowerInsetGap = parseFloat(document.getElementById('lowerInsetGap')?.value) || 2;
+        const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
+        const lowerSplitFacade = !!document.getElementById('lowerSplitFacade')?.checked;
+
+        const lowerOpeningW = Math.max(0, w1 - 2 * carcassT);
+        const lowerOpeningH = Math.max(0, h1 - 2 * carcassT);
+        const baseFacadeW = lowerDoorType === 'overlay'
+            ? Math.max(0, w1 - 2 * lowerOverlayGap)
+            : Math.max(0, lowerOpeningW - 2 * lowerInsetGap);
+        const baseFacadeH = lowerDoorType === 'overlay'
+            ? Math.max(0, h1 - 2 * lowerOverlayGap)
+            : Math.max(0, lowerOpeningH - 2 * lowerInsetGap);
+
+        const drawerCount = lowerHardwareMode === 'drawer'
+            ? Math.max(1, parseInt(document.getElementById('lowerDrawerCount')?.value, 10) || 2)
+            : 1;
+
+        let layout = 'single';
+        let gapBetween = 0;
+        let panels = [{ width: baseFacadeW, height: baseFacadeH, side: 'left' }];
+
+        if (lowerHardwareMode === 'hinge' && lowerSplitFacade) {
+            const leftInput = document.getElementById('lowerLeftDoorW');
+            const rightInput = document.getElementById('lowerRightDoorW');
+            const autoHalf = Math.max(50, Math.round((baseFacadeW - 3) / 2));
+            let leftW = parseInt(leftInput?.value, 10) || autoHalf;
+            let rightW = parseInt(rightInput?.value, 10) || autoHalf;
+            if (!leftInput?.dataset.userEdited && !rightInput?.dataset.userEdited) {
+                leftW = autoHalf;
+                rightW = Math.max(50, baseFacadeW - leftW - 3);
+                if (leftInput) leftInput.value = String(leftW);
+                if (rightInput) rightInput.value = String(rightW);
+            }
+            if (leftW + rightW > baseFacadeW) {
+                rightW = Math.max(50, baseFacadeW - leftW);
+                if (rightInput) rightInput.value = String(rightW);
+            }
+            layout = 'splitHorizontal';
+            panels = [
+                { width: leftW, height: baseFacadeH, side: 'left' },
+                { width: rightW, height: baseFacadeH, side: 'right' }
+            ];
+        } else if (lowerHardwareMode === 'drawer' && drawerCount > 1) {
+            gapBetween = lowerOverlayGap;
+            const drawerFacadeH = Math.max(50,
+                Math.floor((baseFacadeH - (drawerCount - 1) * gapBetween) / drawerCount));
+            layout = 'drawerStack';
+            panels = [];
+            for (let i = 0; i < drawerCount; i++) {
+                panels.push({ width: baseFacadeW, height: drawerFacadeH, side: 'left', index: i });
+            }
+        }
+
+        return {
+            lowerDoorType,
+            lowerOverlayGap,
+            lowerInsetGap,
+            lowerHardwareMode,
+            baseFacadeW,
+            baseFacadeH,
+            gapBetween,
+            layout,
+            panels,
+            drawerCount
+        };
+    }
+
+    function lowerFacadePanelsToDoors(facadeCalc, T) {
+        if (facadeCalc.layout === 'splitHorizontal') {
+            return facadeCalc.panels.map((p) => ({
+                name: (T.part_facade_vanity || 'Facade') + ' (' + (p.side === 'left' ? T.left_door : T.right_door) + ')',
+                width: p.width,
+                height: p.height,
+                qty: 1,
+                side: p.side
+            }));
+        }
+        if (facadeCalc.layout === 'drawerStack') {
+            const p = facadeCalc.panels[0];
+            return [{
+                name: T.part_facade_vanity,
+                width: p.width,
+                height: p.height,
+                qty: facadeCalc.panels.length,
+                side: 'left'
+            }];
+        }
+        return [{
+            name: T.part_facade_vanity,
+            width: facadeCalc.baseFacadeW,
+            height: facadeCalc.baseFacadeH,
+            qty: 1,
+            side: 'left'
+        }];
+    }
+
+    function drawLowerFacadePanels(ctx, vX, vY, vW, vH, w1, h1, carcassT, scale) {
+        const calc = calcLowerFacadePanels(w1, h1, carcassT);
+        const { lowerDoorType, lowerOverlayGap, lowerInsetGap, panels, layout, gapBetween } = calc;
+
+        const openingX = vX + (carcassT * scale);
+        const openingY = vY + (carcassT * scale);
+
+        let areaX;
+        let areaY;
+        let areaW;
+        let areaH;
+        if (lowerDoorType === 'overlay') {
+            areaX = vX + (lowerOverlayGap * scale);
+            areaY = vY + (lowerOverlayGap * scale);
+            areaW = calc.baseFacadeW * scale;
+            areaH = calc.baseFacadeH * scale;
+        } else {
+            areaX = openingX + (lowerInsetGap * scale);
+            areaY = openingY + (lowerInsetGap * scale);
+            areaW = calc.baseFacadeW * scale;
+            areaH = calc.baseFacadeH * scale;
+        }
+
+        const drawPanel = (px, py, pw, ph) => {
+            ctx.fillStyle = 'rgba(80, 80, 80, 0.09)';
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([]);
+            ctx.fillRect(px, py, pw, ph);
+            ctx.strokeRect(px, py, pw, ph);
+        };
+
+        if (layout === 'drawerStack') {
+            const gapPx = gapBetween * scale;
+            let y = areaY;
+            panels.forEach((p) => {
+                const ph = p.height * scale;
+                drawPanel(areaX, y, areaW, ph);
+                y += ph + gapPx;
+            });
+            return;
+        }
+
+        if (layout === 'splitHorizontal') {
+            const gapPx = 3 * scale;
+            let x = areaX;
+            panels.forEach((p, i) => {
+                const pw = p.width * scale;
+                drawPanel(x, areaY, pw, areaH);
+                x += pw + (i < panels.length - 1 ? gapPx : 0);
+            });
+            return;
+        }
+
+        drawPanel(areaX, areaY, areaW, areaH);
+    }
+
     function updateConfigurator() {
         const T = TRANSLATIONS[currentLang];
 
@@ -6258,60 +6415,11 @@
             note: `${T.hw_gap_note}${drawerGap / 2}${T.hw_gap_note2}`
         });
 
-        // Lower cabinet facade geometry with selectable door type:
-        // Overlay: from external dimensions - side gaps.
-        // Inset: from internal opening dimensions - inset gaps.
-        const lowerOpeningW = Math.max(0, w1 - 2 * carcassT);
-        const lowerOpeningH = Math.max(0, h1 - 2 * carcassT);
-        const baseFacadeW = lowerDoorType === 'overlay'
-            ? Math.max(0, w1 - 2 * lowerOverlayGap)
-            : Math.max(0, lowerOpeningW - 2 * lowerInsetGap);
-        const baseFacadeH = lowerDoorType === 'overlay'
-            ? Math.max(0, h1 - 2 * lowerOverlayGap)
-            : Math.max(0, lowerOpeningH - 2 * lowerInsetGap);
-
-        // Number of drawers (relevant only when lowerHardwareMode === 'drawer')
-        const drawerCount = lowerHardwareMode === 'drawer'
-            ? Math.max(1, parseInt(document.getElementById('lowerDrawerCount')?.value) || 2)
-            : 1;
-
-        let lowerDoors = [{ name: T.part_facade_vanity, width: baseFacadeW, height: baseFacadeH, qty: 1, side: 'left' }];
-
-        if (lowerHardwareMode === 'hinge' && lowerSplitFacade) {
-            // Split facade into two side-by-side door leaves
-            const leftInput = document.getElementById('lowerLeftDoorW');
-            const rightInput = document.getElementById('lowerRightDoorW');
-            const autoHalf = Math.max(50, Math.round((baseFacadeW - 3) / 2));
-            let leftW = parseInt(leftInput?.value) || autoHalf;
-            let rightW = parseInt(rightInput?.value) || autoHalf;
-            if (!leftInput?.dataset.userEdited && !rightInput?.dataset.userEdited) {
-                leftW = autoHalf;
-                rightW = Math.max(50, baseFacadeW - leftW - 3);
-                if (leftInput) leftInput.value = String(leftW);
-                if (rightInput) rightInput.value = String(rightW);
-            }
-            if (leftW + rightW > baseFacadeW) {
-                rightW = Math.max(50, baseFacadeW - leftW);
-                if (rightInput) rightInput.value = String(rightW);
-            }
-            lowerDoors = [
-                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.left_door + ')', width: leftW, height: baseFacadeH, qty: 1, side: 'left' },
-                { name: (T.part_facade_vanity || 'Facade') + ' (' + T.right_door + ')', width: rightW, height: baseFacadeH, qty: 1, side: 'right' }
-            ];
-        } else if (lowerHardwareMode === 'drawer' && drawerCount > 1) {
-            // Split facade into N equal horizontal strips (one per drawer)
-            // Gap between adjacent drawer facades = lowerOverlayGap (default 2 mm)
-            const gapBetween = lowerOverlayGap;
-            const drawerFacadeH = Math.max(50,
-                Math.floor((baseFacadeH - (drawerCount - 1) * gapBetween) / drawerCount));
-            lowerDoors = [{
-                name: T.part_facade_vanity,
-                width: baseFacadeW,
-                height: drawerFacadeH,
-                qty: drawerCount,
-                side: 'left'
-            }];
-        }
+        // Lower cabinet facade geometry (shared with schematic preview)
+        const facadeCalc = calcLowerFacadePanels(w1, h1, carcassT);
+        const baseFacadeW = facadeCalc.baseFacadeW;
+        const baseFacadeH = facadeCalc.baseFacadeH;
+        const lowerDoors = lowerFacadePanelsToDoors(facadeCalc, T);
 
         lowerDoors.forEach(d => {
             const q = d.qty || 1;
@@ -7776,29 +7884,10 @@
         ctx.fillStyle = '#f5f5f5';
         ctx.fillRect(vX, vY, vW, vH);
         ctx.strokeRect(vX, vY, vW, vH);
-        
-        // Draw drawer division lines if drawer system selected
-        const lowerMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value;
-        if (lowerMode === 'drawer') {
-            const drawCount = parseInt(document.getElementById('lowerDrawerCount')?.value || 1);
-            if (drawCount > 1) {
-                const lineH = vH / drawCount;
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 1.5;
-                for (let i = 1; i < drawCount; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(vX, vY + lineH * i);
-                    ctx.lineTo(vX + vW, vY + lineH * i);
-                    ctx.stroke();
-                }
-            }
-        }
-        
-        // drawer split line
-        ctx.setLineDash([4, 3]);
-        ctx.strokeStyle = '#aaa';
-        ctx.beginPath(); ctx.moveTo(vX + 1, vY + vH / 2); ctx.lineTo(vX + vW - 1, vY + vH / 2); ctx.stroke();
-        ctx.setLineDash([]);
+
+        drawLowerFacadePanels(ctx, vX, vY, vW, vH, w1, h1, carcassT, scale);
+
+        ctx.lineWidth = 1.5;
         ctx.strokeStyle = '#333';
 
         // ---- 2. COUNTERTOP ----

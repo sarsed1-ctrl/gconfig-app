@@ -621,19 +621,10 @@ html, body {
 
 
 
-.drawer-fields {
+.drawer-fields { display: none; }
 
-    display: none;
-
-    margin-top: 10px;
-
-    padding-top: 10px;
-
-    border-top: 1px dashed var(--border);
-
-}
-
-.drawer-fields.visible { display: block; }
+.drawer-fields.visible,
+.card.drawer-fields.visible { display: block; }
 
 
 
@@ -1300,5 +1291,127 @@ html, body {
     .brand { font-size: 1rem; }
 
 }
+
+/* ── Order modal (v2 shell) ─────────────────────────────── */
+.v2-send-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.v2-send-modal-overlay[hidden] { display: none; }
+
+.v2-send-modal {
+    position: relative;
+    width: min(420px, 95vw);
+    padding: 28px 32px;
+    border-radius: 10px;
+    background: var(--panel-bg, #fff);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.v2-send-modal h3 {
+    margin: 0 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bg, #eee);
+    color: var(--green, #1a7f37);
+    font-size: 1.2em;
+}
+
+.v2-send-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    border: none;
+    background: none;
+    color: #999;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.v2-send-modal-close:hover { color: #333; }
+
+.v2-sm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+    font-size: 0.9em;
+}
+
+.v2-sm-field label { font-weight: 600; color: #444; }
+
+.v2-sm-field input,
+.v2-sm-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 0.95em;
+}
+
+.v2-sm-field textarea { min-height: 70px; resize: vertical; }
+
+.v2-sm-hint {
+    margin: 8px 0 0;
+    color: #888;
+    font-size: 0.8em;
+}
+
+.v2-sm-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.v2-sm-actions button {
+    flex: 1;
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.v2-sm-actions .btn-cancel {
+    background: #aaa;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.v2-sm-actions .btn-cancel:hover { background: #888; }
+
+.v2-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 2100;
+    max-width: min(90vw, 420px);
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: var(--green, #1a7f37);
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.v2-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.v2-toast.error { background: #c0392b; }
 
 

@@ -291,7 +291,29 @@
 
             preview_updating: 'Обновление превью…',
 
-            step_of: 'Шаг {n} из 4'
+            step_of: 'Шаг {n} из 4',
+
+            sm_title: 'Заказ проекта',
+
+            sm_project: 'Название проекта',
+
+            sm_email: 'Ваш email *',
+
+            sm_phone: 'Телефон',
+
+            sm_desc: 'Описание / комментарий',
+
+            sm_hint: '📨 PDF со списком деталей будет отправлен в Telegram',
+
+            sm_cancel: 'Отмена',
+
+            sm_send: 'Отправить →',
+
+            sm_email_invalid: 'Введите корректный email.',
+
+            sm_not_ready: 'Конфигуратор ещё загружается.',
+
+            sm_sending: '⏳ Отправка…'
 
         },
 
@@ -477,7 +499,29 @@
 
             preview_updating: 'Updating preview…',
 
-            step_of: 'Step {n} of 4'
+            step_of: 'Step {n} of 4',
+
+            sm_title: 'Order Project',
+
+            sm_project: 'Project Name',
+
+            sm_email: 'Your email *',
+
+            sm_phone: 'Phone',
+
+            sm_desc: 'Description / comment',
+
+            sm_hint: '📨 PDF with full parts list will be sent to Telegram',
+
+            sm_cancel: 'Cancel',
+
+            sm_send: 'Send →',
+
+            sm_email_invalid: 'Please enter a valid email address.',
+
+            sm_not_ready: 'Configurator is still loading.',
+
+            sm_sending: '⏳ Sending…'
 
         }
 
@@ -577,7 +621,57 @@
 
 
 
+    function prepareIframeForDrawerMode() {
+
+        const doc = iframeDoc();
+
+        if (!doc) return;
+
+        const sink = doc.getElementById('sinkType');
+
+        if (sink && sink.value !== 'none') {
+
+            sink.value = 'none';
+
+            dispatchEl(sink);
+
+        }
+
+        const siphon = doc.getElementById('hasSiphon');
+
+        if (siphon && siphon.checked) {
+
+            siphon.checked = false;
+
+            dispatchEl(siphon);
+
+        }
+
+    }
+
+
+
+    function ensureLowerDrawerModeInIframe() {
+
+        if (!iframeReady) return;
+
+        if (getLowerHardwareMode() !== 'drawer') return;
+
+        prepareIframeForDrawerMode();
+
+        if (getIframeRadio('lowerHardwareMode') !== 'drawer') {
+
+            setIframeRadio('lowerHardwareMode', 'drawer');
+
+        }
+
+    }
+
+
+
     function triggerV1Update() {
+
+        ensureLowerDrawerModeInIframe();
 
         const win = iframeWin();
 
@@ -592,6 +686,34 @@
             win.updateConfigurator();
 
         }
+
+    }
+
+
+
+    let _deferredTriggerTimer = null;
+
+    function deferredTriggerV1Update() {
+
+        if (_deferredTriggerTimer) clearTimeout(_deferredTriggerTimer);
+
+        _deferredTriggerTimer = setTimeout(() => {
+
+            _deferredTriggerTimer = null;
+
+            if (syncPaused) {
+
+                deferredTriggerV1Update();
+
+                return;
+
+            }
+
+            triggerV1Update();
+
+            schedulePreviewSync();
+
+        }, 50);
 
     }
 
@@ -771,6 +893,22 @@
 
 
 
+    function refreshDrawerSelects() {
+
+        if (getLowerHardwareMode() !== 'drawer') return;
+
+        ['lowerDrawerSystem', 'lowerDrawerCount'].forEach((id) => {
+
+            const wEl = document.querySelector(`[data-iframe="${id}"]`);
+
+            if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
+
+        });
+
+    }
+
+
+
     function syncSpacingLabels() {
 
         SPACING_SLIDER_PAIRS.forEach(([sliderId, labelId]) => {
@@ -829,6 +967,40 @@
 
 
 
+    function getHardwareModeFromChips(containerId, fallback) {
+
+        const active = document.getElementById(containerId)?.querySelector('.hw-chip.active');
+
+        return active?.getAttribute('data-value') || fallback;
+
+    }
+
+
+
+    function getLowerHardwareMode() {
+
+        const fromChips = getHardwareModeFromChips('lowerHwChips', null);
+
+        if (fromChips) return fromChips;
+
+        return getIframeRadio('lowerHardwareMode') || 'hinge';
+
+    }
+
+
+
+    function getUpperHardwareMode() {
+
+        const fromChips = getHardwareModeFromChips('upperHwChips', null);
+
+        if (fromChips) return fromChips;
+
+        return getIframeRadio('upperHardwareMode') || 'gas';
+
+    }
+
+
+
     function updateConditionalUI() {
 
         const hasCountertop = document.getElementById('w-hasCountertop')?.checked;
@@ -839,9 +1011,9 @@
 
 
 
-        const lowerMode = getIframeRadio('lowerHardwareMode');
+        const lowerMode = getLowerHardwareMode();
 
-        const upperMode = getIframeRadio('upperHardwareMode');
+        const upperMode = getUpperHardwareMode();
 
         const drawerFields = document.getElementById('drawerFields');
 
@@ -943,11 +1115,19 @@
 
     function pushToIframe(fromEl) {
 
-        if (syncPaused || !iframeReady) return;
+        if (!iframeReady) return;
 
         const id = fromEl.getAttribute('data-iframe');
 
         if (!id) return;
+
+
+
+        if (id === 'lowerDrawerCount' || id === 'lowerDrawerSystem') {
+
+            ensureLowerDrawerModeInIframe();
+
+        }
 
 
 
@@ -973,6 +1153,14 @@
 
         updateConditionalUI();
 
+        if (syncPaused) {
+
+            deferredTriggerV1Update();
+
+            return;
+
+        }
+
         triggerV1Update();
 
         schedulePreviewSync();
@@ -983,11 +1171,25 @@
 
     function pushRadioToIframe(name, value) {
 
-        if (syncPaused || !iframeReady) return;
+        if (!iframeReady) return;
+
+        if (name === 'lowerHardwareMode' && value === 'drawer') {
+
+            prepareIframeForDrawerMode();
+
+        }
 
         setIframeRadio(name, value);
 
         updateConditionalUI();
+
+        if (syncPaused) {
+
+            deferredTriggerV1Update();
+
+            return;
+
+        }
 
         triggerV1Update();
 
@@ -1873,6 +2075,18 @@
 
         if (currentStep === 4) refreshEamfEdgeSelects();
 
+        if (currentStep === 3) {
+
+            refreshDrawerSelects();
+
+            ensureLowerDrawerModeInIframe();
+
+            triggerV1Update();
+
+        }
+
+        updateConditionalUI();
+
         updateNavLabels();
 
         schedulePreviewSync();
@@ -1991,6 +2205,206 @@
 
 
 
+    function showV2Toast(msg, isError) {
+
+        const toast = document.getElementById('v2-toast');
+
+        if (!toast) return;
+
+        toast.textContent = msg;
+
+        toast.className = 'v2-toast show' + (isError ? ' error' : '');
+
+        setTimeout(() => { toast.className = 'v2-toast'; }, 4000);
+
+    }
+
+
+
+    function openOrderModal() {
+
+        const overlay = document.getElementById('v2-send-modal-overlay');
+
+        if (!overlay) return;
+
+        const projectInput = document.getElementById('w-project-name-input');
+
+        const smProject = document.getElementById('v2-sm-project');
+
+        if (projectInput && smProject && !smProject.value.trim()) smProject.value = projectInput.value.trim();
+
+        overlay.hidden = false;
+
+        smProject?.focus();
+
+    }
+
+
+
+    function closeOrderModal() {
+
+        const overlay = document.getElementById('v2-send-modal-overlay');
+
+        if (overlay) overlay.hidden = true;
+
+    }
+
+
+
+    function syncOrderFieldsToIframe(project, email, phone, desc) {
+
+        const doc = iframeDoc();
+
+        if (!doc) return false;
+
+        const setField = (id, val) => {
+
+            const el = doc.getElementById(id);
+
+            if (el) el.value = val;
+
+        };
+
+        setField('sm-project', project);
+
+        setField('sm-email', email);
+
+        setField('sm-phone', phone);
+
+        setField('sm-desc', desc);
+
+        setField('project-name-input', project || 'Untitled');
+
+        return true;
+
+    }
+
+
+
+    async function submitOrder() {
+
+        const win = iframeWin();
+
+        if (!win || typeof win.doSendProject !== 'function') {
+
+            showV2Toast(t('sm_not_ready'), true);
+
+            return;
+
+        }
+
+
+
+        const emailEl = document.getElementById('v2-sm-email');
+
+        const projectEl = document.getElementById('v2-sm-project');
+
+        const phoneEl = document.getElementById('v2-sm-phone');
+
+        const descEl = document.getElementById('v2-sm-desc');
+
+        if (!emailEl || !projectEl) return;
+
+
+
+        const email = emailEl.value.trim();
+
+        const project = projectEl.value.trim();
+
+        const phone = phoneEl?.value.trim() || '';
+
+        const desc = descEl?.value.trim() || '';
+
+
+
+        if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+
+            emailEl.style.borderColor = '#e74c3c';
+
+            emailEl.focus();
+
+            showV2Toast(t('sm_email_invalid'), true);
+
+            return;
+
+        }
+
+        emailEl.style.borderColor = '';
+
+
+
+        if (!syncOrderFieldsToIframe(project, email, phone, desc)) {
+
+            showV2Toast(t('sm_not_ready'), true);
+
+            return;
+
+        }
+
+
+
+        const projectWizard = document.getElementById('w-project-name-input');
+
+        if (projectWizard && project) projectWizard.value = project;
+
+
+
+        const sendBtn = document.getElementById('v2-sm-send');
+
+        const origSendText = sendBtn?.textContent || '';
+
+        if (sendBtn) {
+
+            sendBtn.disabled = true;
+
+            sendBtn.textContent = t('sm_sending');
+
+        }
+
+
+
+        try {
+
+            triggerV1Update();
+
+            await win.doSendProject();
+
+
+
+            await new Promise((resolve) => setTimeout(resolve, 150));
+
+            const iframeToast = iframeDoc()?.getElementById('toast');
+
+            if (iframeToast?.classList.contains('show')) {
+
+                const isError = iframeToast.classList.contains('error');
+
+                showV2Toast(iframeToast.textContent, isError);
+
+                if (!isError) closeOrderModal();
+
+            } else {
+
+                closeOrderModal();
+
+            }
+
+        } finally {
+
+            if (sendBtn) {
+
+                sendBtn.disabled = false;
+
+                sendBtn.textContent = origSendText;
+
+            }
+
+        }
+
+    }
+
+
+
     function callIframe(fnName) {
 
         const win = iframeWin();
@@ -2046,6 +2460,8 @@
                     chip.classList.add('active');
 
                     pushRadioToIframe(radioName, chip.getAttribute('data-value'));
+
+                    updateConditionalUI();
 
                 });
 
@@ -2175,7 +2591,27 @@
 
         document.getElementById('btnExcel').addEventListener('click', () => callIframe('downloadTellimusExcel'));
 
-        document.getElementById('btnOrder').addEventListener('click', () => callIframe('openSendModal'));
+        document.getElementById('btnOrder').addEventListener('click', openOrderModal);
+
+
+
+        const orderOverlay = document.getElementById('v2-send-modal-overlay');
+
+        if (orderOverlay) {
+
+            orderOverlay.addEventListener('click', (e) => {
+
+                if (e.target === orderOverlay) closeOrderModal();
+
+            });
+
+        }
+
+        document.getElementById('v2SendModalClose')?.addEventListener('click', closeOrderModal);
+
+        document.getElementById('v2SendModalCancel')?.addEventListener('click', closeOrderModal);
+
+        document.getElementById('v2-sm-send')?.addEventListener('click', () => { submitOrder(); });
 
 
 
