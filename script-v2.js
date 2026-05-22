@@ -757,6 +757,24 @@
 
 
 
+    function setIframeValueQuiet(id, value) {
+
+        const doc = iframeDoc();
+
+        if (!doc) return;
+
+        const el = doc.getElementById(id);
+
+        if (!el) return;
+
+        if (el.type === 'checkbox') el.checked = !!value;
+
+        else el.value = value;
+
+    }
+
+
+
     function setIframeRadio(name, value) {
 
         const doc = iframeDoc();
@@ -825,7 +843,9 @@
 
 
 
-    function cloneSelectOptions(fromId, toSelect) {
+    function cloneSelectOptions(fromId, toSelect, options) {
+
+        const opts = options || {};
 
         const doc = iframeDoc();
 
@@ -865,7 +885,11 @@
 
         });
 
-        if (prev && Array.from(toSelect.options).some((o) => o.value === prev)) {
+        if (opts.preferSourceValue && src.value) {
+
+            toSelect.value = src.value;
+
+        } else if (prev && Array.from(toSelect.options).some((o) => o.value === prev)) {
 
             toSelect.value = prev;
 
@@ -885,7 +909,11 @@
 
             const wEl = document.querySelector(`[data-iframe="${id}"]`);
 
-            if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
+            if (wEl && wEl.tagName === 'SELECT') {
+
+                cloneSelectOptions(id, wEl, { preferSourceValue: true });
+
+            }
 
         });
 
@@ -1134,6 +1162,8 @@
         const handlerName = EAMF_IFRAME_HANDLERS[id];
 
         if (fromEl.type === 'checkbox') setIframeValue(id, fromEl.checked);
+
+        else if (handlerName) setIframeValueQuiet(id, fromEl.value);
 
         else setIframeValue(id, fromEl.value);
 
@@ -2430,6 +2460,8 @@
             el.addEventListener('input', () => {
 
                 if (el.type === 'range') syncSpacingLabels();
+
+                if (el.tagName === 'SELECT') return;
 
                 pushToIframe(el);
 

@@ -4145,6 +4145,7 @@
     let amflexPriceTimer = null;
     /** @type {AbortController|null} */
     let amflexPriceAbort = null;
+    let amflexPriceRequestId = 0;
     let amflexPriceState = {
         loading: false,
         error: '',
@@ -4273,8 +4274,10 @@
     async function refreshAmflexPrice() {
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
         if (!eamfMaterialsReady) return;
+        const requestId = ++amflexPriceRequestId;
         await loadEamfCatalog();
         if (!canRequestAmflexPrice()) {
+            if (requestId !== amflexPriceRequestId) return;
             amflexPriceState.loading = false;
             amflexPriceState.error = '';
             renderPriceSummary(T);
@@ -4315,10 +4318,9 @@
             amflexPriceState.error = (err && err.message) ? err.message : String(err);
             if (!previousQuote) amflexPriceState.quote = null;
         } finally {
-            if (!signal.aborted) {
-                amflexPriceState.loading = false;
-                renderPriceSummary(T);
-            }
+            if (requestId !== amflexPriceRequestId) return;
+            amflexPriceState.loading = false;
+            renderPriceSummary(T);
         }
     }
 
