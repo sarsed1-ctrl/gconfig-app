@@ -39,7 +39,37 @@
 
     let syncPaused = false;
 
-    let previewTimer = null;
+    let previewLoopInterval = null;
+
+    let previewSyncTimer = null;
+
+
+
+    /** Fields that should redraw the schematic immediately while typing. */
+
+    const DIMENSION_SYNC_IDS = new Set([
+
+        'w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d',
+
+    ]);
+
+
+
+    const INSTANT_PREVIEW_IDS = new Set([
+
+        'w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d',
+
+        'ctFrontOverhang', 'ctSideOverhang',
+
+        'facadeThick', 'carcassThick', 'wallType', 'hasCountertop',
+
+        'upperShelvesH', 'upperShelvesV', 'vanityShelvesH', 'vanityShelvesV',
+
+        'upperSpacingH', 'upperSpacingV', 'vanitySpacingH', 'vanitySpacingV',
+
+        'bedPreset', 'bedMattressW', 'bedLength', 'bedFrameH', 'bedHeadboardH', 'bedFootboardH', 'bedBaseType'
+
+    ]);
 
 
 
@@ -125,7 +155,7 @@
 
             to_home: 'Главная',
 
-            to_v1: '← v1',
+            to_v1: '← v1.0',
 
             step1_short: 'Размеры',
 
@@ -263,7 +293,7 @@
 
             price_on_right: 'Сводка цены справа. Экспорт — кнопки под превью.',
 
-            open_v1_full: 'Полный конфигуратор v1 →',
+            open_v1_full: 'Полный конфигуратор v1.0 →',
 
             preview: 'Превью',
 
@@ -347,7 +377,7 @@
 
             to_home: 'Home',
 
-            to_v1: '← v1',
+            to_v1: '← v1.0',
 
             step1_short: 'Size',
 
@@ -485,7 +515,7 @@
 
             price_on_right: 'Price summary on the right. Export buttons below preview.',
 
-            open_v1_full: 'Open full v1 configurator →',
+            open_v1_full: 'Open full v1.0 configurator →',
 
             preview: 'Preview',
 
@@ -707,6 +737,36 @@
 
 
 
+    function triggerV1UpdateNow(changedId) {
+
+        ensureLowerDrawerModeInIframe();
+
+        const win = iframeWin();
+
+        if (!win) return;
+
+        if (changedId && DIMENSION_SYNC_IDS.has(changedId) && typeof win.__gconfigSyncHingePositionsForDimensions === 'function') {
+
+            win.__gconfigSyncHingePositionsForDimensions(changedId);
+
+        }
+
+        if (typeof win.updateConfigurator === 'function') {
+
+            win.updateConfigurator();
+
+        } else if (typeof win.scheduleUpdate === 'function') {
+
+            win.scheduleUpdate();
+
+        }
+
+        flushPreviewNow();
+
+    }
+
+
+
     function triggerV1Update() {
 
         ensureLowerDrawerModeInIframe();
@@ -724,6 +784,30 @@
             win.updateConfigurator();
 
         }
+
+    }
+
+
+
+    function flushPreviewNow() {
+
+        syncCanvas();
+
+        syncPriceMirror();
+
+    }
+
+
+
+    function schedulePreviewAfterPaint() {
+
+        requestAnimationFrame(() => {
+
+            flushPreviewNow();
+
+            requestAnimationFrame(flushPreviewNow);
+
+        });
 
     }
 
@@ -1213,11 +1297,29 @@
 
         const handlerName = EAMF_IFRAME_HANDLERS[id];
 
-        if (fromEl.type === 'checkbox') setIframeValue(id, fromEl.checked);
+        const instantPreview = INSTANT_PREVIEW_IDS.has(id) && !handlerName;
 
-        else if (handlerName) setIframeValueQuiet(id, fromEl.value);
 
-        else setIframeValue(id, fromEl.value);
+
+        if (fromEl.type === 'checkbox') {
+
+            if (instantPreview) setIframeValueQuiet(id, fromEl.checked);
+
+            else setIframeValue(id, fromEl.checked);
+
+        } else if (handlerName) {
+
+            setIframeValueQuiet(id, fromEl.value);
+
+        } else if (instantPreview) {
+
+            setIframeValueQuiet(id, fromEl.value);
+
+        } else {
+
+            setIframeValue(id, fromEl.value);
+
+        }
 
 
 
@@ -1252,6 +1354,20 @@
             return;
 
         }
+
+
+
+        if (instantPreview) {
+
+            triggerV1UpdateNow(id);
+
+            schedulePreviewAfterPaint();
+
+            return;
+
+        }
+
+
 
         triggerV1Update();
 
@@ -2017,15 +2133,15 @@
 
     function schedulePreviewSync() {
 
-        clearTimeout(previewTimer);
+        if (previewSyncTimer) clearTimeout(previewSyncTimer);
 
-        previewTimer = setTimeout(() => {
+        previewSyncTimer = setTimeout(() => {
 
-            syncCanvas();
+            previewSyncTimer = null;
 
-            syncPriceMirror();
+            flushPreviewNow();
 
-        }, 220);
+        }, 80);
 
     }
 
@@ -2223,9 +2339,7 @@
             localStorage.setItem(V1_LANG_STORAGE_KEY, currentLang);
         } catch (_) { /* ignore */ }
 
-        document.getElementById('langRu').classList.toggle('active', currentLang === 'ru');
-
-        document.getElementById('langEn').classList.toggle('active', currentLang === 'en');
+        updateSlideToggle('langToggle', currentLang === 'en' ? 1 : 0);
 
         applyI18n();
 
@@ -2287,15 +2401,13 @@
 
     function startPreviewLoop() {
 
-        if (previewTimer) clearInterval(previewTimer);
+        if (previewLoopInterval) clearInterval(previewLoopInterval);
 
-        previewTimer = setInterval(() => {
+        previewLoopInterval = setInterval(() => {
 
             if (!iframeReady) return;
 
-            syncCanvas();
-
-            syncPriceMirror();
+            flushPreviewNow();
 
         }, 500);
 
@@ -2573,6 +2685,48 @@
 
 
 
+    function updateSlideToggle(id, activeIndex) {
+
+        const toggle = document.getElementById(id);
+
+        if (!toggle) return;
+
+        toggle.dataset.active = String(activeIndex);
+
+        toggle.querySelectorAll('.slide-toggle-btn').forEach((btn, i) => {
+
+            const isActive = i === activeIndex;
+
+            btn.classList.toggle('active', isActive);
+
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+
+        });
+
+    }
+
+
+
+    function bindSlideToggle(id, onSelect) {
+
+        const toggle = document.getElementById(id);
+
+        if (!toggle) return;
+
+        toggle.addEventListener('click', (e) => {
+
+            const btn = e.target.closest('.slide-toggle-btn');
+
+            if (!btn || btn.classList.contains('active')) return;
+
+            onSelect(btn);
+
+        });
+
+    }
+
+
+
     function applyTheme(theme) {
 
         const isFuture = theme === 'future';
@@ -2581,9 +2735,7 @@
 
         document.body.classList.toggle('theme-future', isFuture);
 
-        const btn = document.getElementById('themeToggle');
-
-        if (btn) btn.textContent = isFuture ? 'Classic' : 'Neon';
+        updateSlideToggle('themeToggle', isFuture ? 0 : 1);
 
         try {
 
@@ -2653,15 +2805,11 @@
 
 
 
-        document.getElementById('langRu').addEventListener('click', () => setLang('ru'));
-
-        document.getElementById('langEn').addEventListener('click', () => setLang('en'));
+        bindSlideToggle('langToggle', (btn) => setLang(btn.getAttribute('data-lang')));
 
 
 
-        const themeBtn = document.getElementById('themeToggle');
-
-        if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+        bindSlideToggle('themeToggle', (btn) => applyTheme(btn.getAttribute('data-theme')));
 
         window.__gconfigToggleTheme = toggleTheme;
 

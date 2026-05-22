@@ -78,17 +78,37 @@ html.theme-future .top-bar {
 
 html.theme-future .brand {
     color: var(--text);
-    text-shadow: 0 0 24px rgba(0, 229, 160, 0.5);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    filter: drop-shadow(0 0 10px rgba(0, 229, 160, 0.35))
+            drop-shadow(0 0 20px rgba(125, 211, 252, 0.15));
+    transition: filter 0.35s ease;
 }
 
-html.theme-future .brand span {
+html.theme-future .brand:hover {
+    filter: drop-shadow(0 0 14px rgba(92, 255, 200, 0.55))
+            drop-shadow(0 0 28px rgba(0, 229, 160, 0.35))
+            drop-shadow(0 0 40px rgba(125, 211, 252, 0.2));
+}
+
+html.theme-future .brand-logo {
+    background: linear-gradient(90deg, #5cffc8 0%, #00e5a0 42%, #7dd3fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+html.theme-future .brand-version {
     background: linear-gradient(135deg, rgba(0, 229, 160, 0.25), rgba(0, 180, 255, 0.2));
     border: 1px solid rgba(0, 229, 160, 0.4);
     color: var(--green-light);
     box-shadow: 0 0 12px rgba(0, 229, 160, 0.25);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 html.theme-future .version-toggle {
@@ -102,14 +122,84 @@ html.theme-future .version-toggle:hover {
     box-shadow: 0 0 16px rgba(0, 229, 160, 0.2);
 }
 
-html.theme-future .lang-toggle {
-    border-color: var(--border);
-    background: rgba(0, 0, 0, 0.25);
+html.theme-future .top-bar .top-actions .slide-toggle {
+    position: relative;
+    padding: 2px;
+    border: 1px solid rgba(92, 255, 200, 0.32) !important;
+    border-radius: 8px !important;
+    background: rgba(8, 14, 22, 0.62) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 0 14px rgba(0, 229, 160, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-html.theme-future .lang-toggle button.active {
-    background: linear-gradient(135deg, #00b87a, #00e5a0);
-    box-shadow: 0 0 14px rgba(0, 229, 160, 0.4);
+html.theme-future .top-bar .top-actions .slide-toggle:hover {
+    border-color: rgba(92, 255, 200, 0.5) !important;
+    box-shadow:
+        0 0 20px rgba(0, 229, 160, 0.22),
+        0 0 36px rgba(0, 180, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle-thumb {
+    top: 2px !important;
+    bottom: 2px !important;
+    left: 2px !important;
+    width: calc(50% - 2px) !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, #00b87a, #00e5a0) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 160, 0.45);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle[data-active="1"] .slide-toggle-thumb {
+    transform: translateX(calc(100% + 4px)) !important;
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle--lang .slide-toggle-thumb {
+    background: linear-gradient(135deg, #00b87a, #00e5a0 55%, #5cffc8) !important;
+    box-shadow: 0 0 16px rgba(0, 229, 160, 0.45);
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle--theme .slide-toggle-thumb {
+    background: linear-gradient(135deg, #5cffc8, #7dd3fc) !important;
+    box-shadow: 0 0 16px rgba(125, 211, 252, 0.4);
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 6px 12px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: rgba(122, 143, 153, 0.95) !important;
+    transition: color 0.2s ease, text-shadow 0.2s ease !important;
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle--lang .slide-toggle-btn.active {
+    color: #041410 !important;
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle--theme .slide-toggle-btn.active {
+    color: #041018 !important;
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle-btn:hover:not(.active) {
+    background: transparent !important;
+    color: var(--green-light) !important;
+    text-shadow: 0 0 10px rgba(92, 255, 200, 0.35);
+}
+
+html.theme-future .top-bar .top-actions .slide-toggle--theme .slide-toggle-btn:hover:not(.active) {
+    color: #7dd3fc !important;
+    text-shadow: 0 0 10px rgba(125, 211, 252, 0.35);
 }
 
 html.theme-future .wizard-panel {
@@ -697,33 +787,7 @@ html.theme-future .shelf-spacing-block {
     border-top-color: rgba(0, 229, 160, 0.15);
 }
 
-/* Classic theme toggle button (visible in both themes) */
-.theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--green);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-}
-
-.theme-toggle:hover {
-    background: var(--green-pale);
-}
-
-html.theme-future .theme-toggle {
-    border-color: rgba(0, 180, 255, 0.35);
-    background: rgba(0, 180, 255, 0.08);
-    color: #7dd3fc;
-}
+/* Classic theme toggle — replaced by slide-toggle in top bar */
 
 @media (max-width: 900px) {
     html.theme-future .stepper {

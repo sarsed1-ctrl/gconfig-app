@@ -6792,7 +6792,66 @@
         });
     }
 
-    
+    function syncHingePositionsForCabinetHeight(cabinetType) {
+        const heightFieldId = cabinetType === 'lower' ? 'h1' : 'upper_h';
+        const heightEl = document.getElementById(heightFieldId);
+        if (!heightEl) return;
+
+        const defaultH = cabinetType === 'lower' ? 500 : 400;
+        const newH = parseInt(heightEl.value, 10) || defaultH;
+        const hingeCountEl = document.getElementById(cabinetType + 'HingeCount');
+        const hingeCount = parseInt(hingeCountEl?.value, 10) || 2;
+
+        if (!document.getElementById(cabinetType + 'HingePos1')) {
+            generateHingeDistanceInputs(cabinetType, currentLang);
+            heightEl.dataset.gconfigHingeRefH = String(newH);
+            return;
+        }
+
+        if (!heightEl.dataset.gconfigHingeRefH) {
+            heightEl.dataset.gconfigHingeRefH = String(newH);
+            return;
+        }
+
+        const prevH = parseInt(heightEl.dataset.gconfigHingeRefH, 10);
+        if (!prevH || prevH === newH) {
+            heightEl.dataset.gconfigHingeRefH = String(newH);
+            return;
+        }
+
+        const scale = newH / prevH;
+        for (let i = 0; i < hingeCount; i++) {
+            const field = document.getElementById(cabinetType + 'HingePos' + (i + 1));
+            if (!field) continue;
+            const oldVal = parseInt(field.value, 10);
+            if (oldVal > 0) {
+                field.value = String(Math.round(oldVal * scale));
+            }
+        }
+        heightEl.dataset.gconfigHingeRefH = String(newH);
+    }
+
+    window.__gconfigSyncHingePositionsForDimensions = function(changedId) {
+        if (CONFIG_MODE === 'beds' || CONFIG_MODE === 'shelves') return;
+        if (changedId === 'h1' || changedId === 'd1' || changedId === 'w1') {
+            syncHingePositionsForCabinetHeight('lower');
+        }
+        if (changedId === 'upper_h' || changedId === 'upper_w' || changedId === 'upper_d') {
+            syncHingePositionsForCabinetHeight('upper');
+        }
+    };
+
+    function initHingeRefHeights() {
+        const h1 = document.getElementById('h1');
+        const upperH = document.getElementById('upper_h');
+        if (h1 && !h1.dataset.gconfigHingeRefH) {
+            h1.dataset.gconfigHingeRefH = String(parseInt(h1.value, 10) || 500);
+        }
+        if (upperH && !upperH.dataset.gconfigHingeRefH) {
+            upperH.dataset.gconfigHingeRefH = String(parseInt(upperH.value, 10) || 400);
+        }
+    }
+
     function generateHingeDistanceInputs(cabinetType, lang = 'ru') {
         const hingeCountEl = document.getElementById(cabinetType + 'HingeCount');
         const distanceEl = document.getElementById(cabinetType + 'HingeDistance');
@@ -6807,7 +6866,7 @@
         // Get cabinet height
         const cabinetHeight = cabinetType === 'lower' ? 
             (parseInt(document.getElementById('h1')?.value) || 500) :
-            (parseInt(document.getElementById('h2')?.value) || 400);
+            (parseInt(document.getElementById('upper_h')?.value) || 400);
         
         // Auto-distribute hinges at equal intervals
         const availableHeight = cabinetHeight - (2 * bottomDist); // Subtract top and bottom margins
@@ -7414,18 +7473,20 @@
     // upFW/upFH = real facade width/height after gap calc
     // ==========================================
     function drawBedSchematic(ctx, canvasW, canvasH, w1, h1, d1, w2, h2, lang = 'ru') {
-        // ----------------------------------------------------------------------------
-        // Bed schematic — matches simple LDSP perimeter-frame references.
-        //
-        // LEFT  : side elevation — headboard (tall), side rail (long), footboard (mid)
-        //         with inner ledger (cleat) and transverse deck strip section
-        //         visible inside the side rail, plus mattress and optional center beam.
-        // RIGHT : top view (plan) — perimeter (headboard + footboard + 2 rails),
-        //         inner ledgers, transverse deck strips, optional center beam.
-        //
-        // Layout keeps both views inside the canvas (no clipping), matching prior
-        // user constraints: side elevation shifted left, top view shifted right.
-        // ----------------------------------------------------------------------------
+        // Bed schematic — neon-safe palette (#333/#f5f5f5 like closets), vertical stack layout.
+        // TOP: side elevation (headboard, rail, footboard, ledger, deck, mattress).
+        // BOTTOM: plan view (perimeter, ledgers, strips/beam). Footer holds strip/base callout.
+        const STROKE = '#333';
+        const STROKE_MID = '#666';
+        const STROKE_LIGHT = '#888';
+        const FILL_PANEL = '#f5f5f5';
+        const FILL_SEC = '#ebebeb';
+        const FILL_SEC2 = '#dcdcdc';
+        const FILL_MATTRESS = '#eeeeee';
+        const TEXT = '#444';
+        const TEXT_MID = '#555';
+        const LW_MAIN = 1.5;
+
         const unit = lang === 'en' ? 'mm' : 'мм';
         const mattressW  = Math.max(500, w1 || 1600);
         const frameH     = Math.max(200, h1 || 420);
@@ -7468,37 +7529,39 @@
             ledgerT: LEDGER_T_MM,
             mattressNominalT: BED_MATTRESS_THICKNESS_NOMINAL_MM
         });
-        const centerSupportH = bedVert.centerSupportHeightMm;
         // Strip span across width = final strip length (rests on ledger seats with
         // STRIP_SIDE_CLEARANCE mm to each rail inner face; capped at MAX_STRIP_LENGTH).
         const stripSpanW = stripLengthL;
 
-        // Side elevation logical dims (looking from side: x = bed length, y = height)
         const sideElevLogicalW = outerL;
         const sideElevLogicalH = headboardH;
-
-        // Top view logical dims (x = width, y = length)
         const topLogicalW = outerW;
         const topLogicalH = outerL;
 
-        // Pick a single scale that fits BOTH views with a horizontal gap and labels
-        const padX = 64, padY = 64;
-        const viewGapX = 64;
-        const combinedLogicalW = sideElevLogicalW + viewGapX / 1 + topLogicalW; // both side by side
-        const combinedLogicalH = Math.max(sideElevLogicalH, topLogicalH);
+        const padX = 48;
+        const padTop = 18;
+        const footerH = 62;
+        const viewGapY = 48;
+        const titleRow = 16;
+        const sideRightLabel = 62;
+        const topLeftLabel = 44;
+        const topBottomLabel = 20;
+        const sideBottomLabel = 34;
+        const sideLabelMinGap = 14;
         const usableW = canvasW - padX * 2;
-        const usableH = canvasH - padY;
+        const usableH = canvasH - padTop - footerH;
         const scale = Math.min(
-            usableW / combinedLogicalW,
-            usableH / combinedLogicalH
+            (usableW - sideRightLabel) / sideElevLogicalW,
+            (usableW - topLeftLabel) / topLogicalW,
+            (usableH - viewGapY - titleRow * 2 - topBottomLabel - sideBottomLabel) / (sideElevLogicalH + topLogicalH)
         );
 
-        // Position side elevation on the LEFT half, baseline near bottom
-        const baselineY = canvasH - 36;
         const sideElevPxW = sideElevLogicalW * scale;
         const sideElevPxH = sideElevLogicalH * scale;
-        const sideElevX = Math.max(24, padX - 24);
-        const sideElevY = baselineY - sideElevPxH;
+        const sideElevX = (canvasW - sideElevPxW) / 2;
+        const sideTitleY = padTop;
+        const sideElevY = padTop + titleRow;
+        const baselineY = sideElevY + sideElevPxH;
 
         // Side elevation pieces
         const hbPxT = Math.max(3, panelT * scale);
@@ -7508,8 +7571,8 @@
         const railPxL = bedLength * scale;
         const railPxH = frameH * scale;
 
-        // Floor line for context
-        ctx.strokeStyle = '#bcc8c0';
+        // Floor line
+        ctx.strokeStyle = '#aaa';
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 4]);
         ctx.beginPath();
@@ -7518,45 +7581,35 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Headboard (left vertical panel, tall)
         const hbX = sideElevX;
         const hbY = baselineY - hbPxH;
-        ctx.fillStyle = '#e1ecde';
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = FILL_PANEL;
+        ctx.strokeStyle = STROKE;
+        ctx.lineWidth = LW_MAIN;
         ctx.fillRect(hbX, hbY, hbPxT, hbPxH);
         ctx.strokeRect(hbX, hbY, hbPxT, hbPxH);
 
-        // Footboard (right vertical panel, shorter)
         const fbX = sideElevX + sideElevPxW - fbPxT;
         const fbY = baselineY - fbPxH;
-        ctx.fillStyle = '#e8efe9';
-        ctx.strokeStyle = '#1a6b2f';
+        ctx.fillStyle = FILL_SEC;
         ctx.fillRect(fbX, fbY, fbPxT, fbPxH);
         ctx.strokeRect(fbX, fbY, fbPxT, fbPxH);
 
-        // Side rail (long horizontal panel between head/footboard)
         const railX = hbX + hbPxT;
         const railY = baselineY - railPxH;
-        ctx.fillStyle = '#f4f7f6';
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1.6;
+        ctx.fillStyle = FILL_PANEL;
         ctx.fillRect(railX, railY, railPxL, railPxH);
         ctx.strokeRect(railX, railY, railPxL, railPxH);
 
-        // Inner ledger (cleat) — strip support plane is ledgerTopInsetMm below inner rail top (same as parts model).
         const ledgerPxH = Math.max(3, LEDGER_T_MM * scale);
-        const ledgerInsetMm = bedVert.ledgerTopInsetMm;
-        const ledgerInset = Math.max(2, ledgerInsetMm * scale);
+        const ledgerInset = Math.max(2, bedVert.ledgerTopInsetMm * scale);
         const ledgerY = railY + ledgerInset;
-        const ledgerSeatY = ledgerY; // top support plane of ledger where strips rest
-        ctx.fillStyle = 'rgba(26,107,47,0.18)';
-        ctx.strokeStyle = '#1a6b2f';
+        const ledgerSeatY = ledgerY;
+        ctx.fillStyle = FILL_SEC;
+        ctx.strokeStyle = STROKE_MID;
         ctx.lineWidth = 1;
         ctx.fillRect(railX, ledgerY, railPxL, ledgerPxH);
         ctx.strokeRect(railX, ledgerY, railPxL, ledgerPxH);
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.moveTo(railX, ledgerSeatY);
         ctx.lineTo(railX + railPxL, ledgerSeatY);
@@ -7568,170 +7621,128 @@
         const deckPxT = Math.max(3, bedVert.deckT * scale);
         const stripsY = ledgerSeatY - deckPxT;
         if (baseType === 'slats') {
-            ctx.fillStyle = '#d6ded8';
-            ctx.strokeStyle = '#556a5c';
+            ctx.fillStyle = FILL_SEC2;
+            ctx.strokeStyle = STROKE_LIGHT;
             ctx.lineWidth = 1;
             const stripRunPx = Math.max(4, Math.min(railPxL - 2, innerBedLength * scale));
             const startX = railX + Math.max(1, (railPxL - stripRunPx) / 2);
-            for (let i = 0; i < stripAlongCount; i++) {
-                const sx = startX + i * stripPitchPx;
+            const drawCount = stripAlongCount > 12 ? 9 : stripAlongCount;
+            const step = stripAlongCount > 12
+                ? stripRunPx / Math.max(1, drawCount - 1)
+                : stripPitchPx;
+            for (let i = 0; i < drawCount; i++) {
+                const sx = stripAlongCount > 12
+                    ? startX + i * step - stripPxW / 2
+                    : startX + i * stripPitchPx;
                 if (sx > startX + stripRunPx) break;
                 const sw = Math.max(1, Math.min(stripPxW, (startX + stripRunPx) - sx));
                 if (sw <= 0) continue;
                 ctx.fillRect(sx, stripsY, sw, deckPxT);
                 ctx.strokeRect(sx, stripsY, sw, deckPxT);
             }
+            if (stripAlongCount > 12) {
+                ctx.save();
+                ctx.strokeStyle = STROKE_LIGHT;
+                ctx.lineWidth = 0.8;
+                ctx.setLineDash([2, 3]);
+                ctx.strokeRect(startX, stripsY, stripRunPx, deckPxT);
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
         } else {
-            // Solid sheet (1 long panel cross-section)
-            ctx.fillStyle = '#dde3df';
-            ctx.strokeStyle = '#556a5c';
+            ctx.fillStyle = FILL_SEC;
+            ctx.strokeStyle = STROKE_LIGHT;
             ctx.lineWidth = 1;
             ctx.fillRect(railX + 2, stripsY, Math.max(0, railPxL - 4), deckPxT);
             ctx.strokeRect(railX + 2, stripsY, Math.max(0, railPxL - 4), deckPxT);
         }
 
-        // Center longitudinal supports in side elevation:
-        // full-height (floor -> strip underside) vertical plates under the deck support plane.
-        if (useCenterBeam) {
-            const centerSupportPxH = Math.max(2, centerSupportH * scale);
-            const centerSupportPxW = Math.max(2, panelT * scale);
-            const topY = baselineY - centerSupportPxH;
-            const supportRunPx = Math.max(1, railPxL - centerSupportPxW);
-            ctx.fillStyle = 'rgba(60,90,60,0.24)';
-            ctx.strokeStyle = '#3a4d3e';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < centerSupportCount; i++) {
-                const x = railX + ((i + 1) * supportRunPx) / (centerSupportCount + 1);
-                ctx.fillRect(x, topY, centerSupportPxW, centerSupportPxH);
-                ctx.strokeRect(x, topY, centerSupportPxW, centerSupportPxH);
-            }
-        }
+        // Center supports: shown in plan view only (not as vertical bars in side elevation).
 
-        // Mattress on top of deck (nominal thickness matches details / getBedVerticalGeometryMm)
         const mattPxL = railPxL;
         const mattPxH = Math.max(18, bedVert.mattressNominalT * scale);
         const mattX = railX;
         const mattY = stripsY - mattPxH;
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#888';
+        ctx.fillStyle = FILL_MATTRESS;
+        ctx.strokeStyle = STROKE_LIGHT;
         ctx.lineWidth = 1.4;
         ctx.fillRect(mattX, mattY, mattPxL, mattPxH);
         ctx.strokeRect(mattX, mattY, mattPxL, mattPxH);
 
-        ctx.fillStyle = '#555';
-        ctx.font = "9px 'Segoe UI', Arial";
-        const recLab = lang === 'en'
-            ? (bedVert.protrusionAboveRailMm > 0.5
-                ? `mattress protrusion ≈ ${Math.round(bedVert.protrusionAboveRailMm)} mm (max ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm)`
-                : `mattress recess ≈ ${Math.round(bedVert.recessBelowRailMm)} mm`)
-            : (bedVert.protrusionAboveRailMm > 0.5
-                ? `вылет матраса ≈ ${Math.round(bedVert.protrusionAboveRailMm)} мм (макс ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм)`
-                : `утопление матраса ≈ ${Math.round(bedVert.recessBelowRailMm)} мм`);
-        ctx.fillText(recLab, mattX + 4, Math.max(railY + 10, mattY - 3));
-
-        // Center beam silhouette (dashed mid-line inside the rail)
-        if (useCenterBeam) {
-            ctx.save();
-            ctx.setLineDash([5, 4]);
-            ctx.strokeStyle = '#7a8a7e';
-            ctx.lineWidth = 1.2;
-            const beamY = railY + railPxH * 0.55;
-            ctx.beginPath();
-            ctx.moveTo(railX, beamY);
-            ctx.lineTo(railX + railPxL, beamY);
-            ctx.stroke();
-            ctx.restore();
-            ctx.fillStyle = '#5e6f63';
-            ctx.font = "italic 10px 'Segoe UI', Arial";
-            const beamLab = lang === 'en' ? 'center beam (behind)' : 'центр. балка (за царгой)';
-            ctx.fillText(beamLab, railX + 4, railY + railPxH * 0.55 - 3);
-        }
-
-        // Side elevation labels
-        ctx.fillStyle = '#1a6b2f';
+        ctx.fillStyle = TEXT_MID;
         ctx.font = "bold 12px 'Segoe UI', Arial";
         const titleSide = lang === 'en' ? 'Side elevation' : 'Вид сбоку';
-        ctx.fillText(titleSide, sideElevX, Math.max(14, hbY - 12));
+        ctx.fillText(titleSide, sideElevX, sideTitleY);
 
-        ctx.fillStyle = '#444';
-        ctx.font = "10px 'Segoe UI', Arial";
-        // Heights
-        ctx.fillText(`${headboardH} ${unit}`, hbX - 2, Math.max(20, hbY - 2));
-        ctx.fillText(`${footboardH} ${unit}`, fbX - 4, Math.max(20, fbY - 4));
-        ctx.fillText(`${frameH} ${unit}`, railX + 4, railY - 3);
-        // Length under floor line
+        ctx.fillStyle = '#888';
         ctx.font = "11px 'Segoe UI', Arial";
+        const sideLabelX = sideElevX + sideElevPxW + 10;
+        const sideDimLabels = [
+            { text: `${headboardH} ${unit}`, y: hbY + hbPxH / 2 + 4 },
+            { text: `${footboardH} ${unit}`, y: fbY + fbPxH / 2 + 4 },
+            { text: `${frameH} ${unit}`, y: railY + railPxH / 2 + 4 },
+        ].sort((a, b) => a.y - b.y);
+        for (let i = 1; i < sideDimLabels.length; i++) {
+            if (sideDimLabels[i].y - sideDimLabels[i - 1].y < sideLabelMinGap) {
+                sideDimLabels[i].y = sideDimLabels[i - 1].y + sideLabelMinGap;
+            }
+        }
+        sideDimLabels.forEach((lab) => ctx.fillText(lab.text, sideLabelX, lab.y));
         const lenLab = `${bedLength} ${unit}`;
-        ctx.fillText(lenLab, railX + railPxL / 2 - ctx.measureText(lenLab).width / 2, baselineY + 16);
+        ctx.fillText(lenLab, railX + railPxL / 2 - ctx.measureText(lenLab).width / 2, baselineY + sideBottomLabel);
 
-        // ----------------------------------------------------------------------------
-        // Top view (plan) on the right
-        // ----------------------------------------------------------------------------
         const topPxW = topLogicalW * scale;
         const topPxH = topLogicalH * scale;
-        const topX = sideElevX + sideElevPxW + viewGapX;
-        const topY = Math.max(24, baselineY - topPxH);
+        const topX = (canvasW - topPxW) / 2;
+        const topTitleY = baselineY + sideBottomLabel + 20;
+        const topY = topTitleY + titleRow;
 
-        // Title
-        ctx.fillStyle = '#1a6b2f';
+        ctx.fillStyle = TEXT_MID;
         ctx.font = "bold 12px 'Segoe UI', Arial";
         const titleTop = lang === 'en' ? 'Top view' : 'Вид сверху';
-        ctx.fillText(titleTop, topX, Math.max(14, topY - 10));
+        ctx.fillText(titleTop, topX, topTitleY);
 
-        // Outer rect (overall footprint background)
-        ctx.fillStyle = '#fafafa';
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1.5;
+        ctx.fillStyle = FILL_PANEL;
+        ctx.strokeStyle = STROKE;
+        ctx.lineWidth = LW_MAIN;
         ctx.fillRect(topX, topY, topPxW, topPxH);
         ctx.strokeRect(topX, topY, topPxW, topPxH);
 
         const panelPxT = Math.max(3, panelT * scale);
         const railPxT = Math.max(2, railT * scale);
 
-        // Headboard panel (top edge of plan)
-        ctx.fillStyle = 'rgba(26,107,47,0.30)';
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 1.4;
+        ctx.fillStyle = FILL_SEC;
         ctx.fillRect(topX, topY, topPxW, panelPxT);
         ctx.strokeRect(topX, topY, topPxW, panelPxT);
-
-        // Footboard panel (bottom edge of plan)
-        ctx.fillStyle = 'rgba(26,107,47,0.18)';
         ctx.fillRect(topX, topY + topPxH - panelPxT, topPxW, panelPxT);
         ctx.strokeRect(topX, topY + topPxH - panelPxT, topPxW, panelPxT);
 
-        // Side rails (left + right vertical strips between head/footboard)
-        ctx.fillStyle = 'rgba(80,80,80,0.20)';
-        ctx.strokeStyle = '#444';
+        ctx.fillStyle = FILL_SEC2;
+        ctx.strokeStyle = STROKE_MID;
         ctx.lineWidth = 1;
         ctx.fillRect(topX, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
         ctx.strokeRect(topX, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
         ctx.fillRect(topX + topPxW - railPxT, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
         ctx.strokeRect(topX + topPxW - railPxT, topY + panelPxT, railPxT, Math.max(0, topPxH - 2 * panelPxT));
 
-        // Inner area (where ledgers + strips + beam live)
         const innerX = topX + railPxT;
         const innerY = topY + panelPxT;
         const innerW = Math.max(10, topPxW - 2 * railPxT);
         const innerH = Math.max(10, topPxH - 2 * panelPxT);
 
-        // Inner ledgers along inside of each side rail
         const ledgerPxW = Math.max(2, LEDGER_W_MM * scale);
         const ledgerSeatLeftX = innerX + ledgerPxW;
         const ledgerSeatRightX = innerX + innerW - ledgerPxW;
-        ctx.fillStyle = 'rgba(26,107,47,0.12)';
-        ctx.strokeStyle = '#1a6b2f';
-        ctx.lineWidth = 1;
+        ctx.fillStyle = FILL_SEC;
+        ctx.strokeStyle = STROKE_MID;
         ctx.fillRect(innerX, innerY, ledgerPxW, innerH);
         ctx.strokeRect(innerX, innerY, ledgerPxW, innerH);
         ctx.fillRect(innerX + innerW - ledgerPxW, innerY, ledgerPxW, innerH);
         ctx.strokeRect(innerX + innerW - ledgerPxW, innerY, ledgerPxW, innerH);
 
-        // Center longitudinal supports (1 / 2 / 3 by width)
         const supportRects = [];
-        let supportPxW = 0;
         if (useCenterBeam) {
-            supportPxW = Math.max(2, panelT * scale);
+            const supportPxW = Math.max(2, panelT * scale);
             const supportZoneW = Math.max(1, ledgerSeatRightX - ledgerSeatLeftX);
             for (let i = 0; i < centerSupportCount; i++) {
                 const centerX = ledgerSeatLeftX + ((i + 1) * supportZoneW) / (centerSupportCount + 1);
@@ -7740,34 +7751,49 @@
             }
         }
 
-        // Deck strips (transverse): explicit side-clearance inset from each rail
-        // inner face. Strip length = stripLengthL = min(MAX_STRIP_LENGTH,
-        // mattressW - 2*STRIP_SIDE_CLEARANCE). Centered between rails so the
-        // overhang on each ledger seat is balanced.
-        const stripPlanLenPx     = Math.max(2, stripSpanW * scale);
-        const stripGapPx         = Math.max(0, stripActualGap * scale);
-        const stripStartY        = innerY + Math.max(0, (innerH - Math.max(2, innerBedLength * scale)) / 2);
-        // Symmetric horizontal offset (px) of each strip end from the rail inner face.
-        const stripInsetPx       = Math.max(0, (innerW - stripPlanLenPx) / 2);
+        const stripPlanLenPx = Math.max(2, stripSpanW * scale);
+        const stripGapPx = Math.max(0, stripActualGap * scale);
+        const stripStartY = innerY + Math.max(0, (innerH - Math.max(2, innerBedLength * scale)) / 2);
+        const stripInsetPx = Math.max(0, (innerW - stripPlanLenPx) / 2);
 
         if (baseType === 'slats') {
-            ctx.fillStyle = '#dde3df';
-            ctx.strokeStyle = '#556a5c';
+            ctx.fillStyle = FILL_SEC2;
+            ctx.strokeStyle = STROKE_LIGHT;
             ctx.lineWidth = 1;
             const stripSpanPx = Math.max(2, Math.min(stripPlanLenPx, innerW));
             const stripX = innerX + stripInsetPx;
             const stripStepY = Math.max(2, Math.max(2, STRIP_W * scale) + stripGapPx);
-            for (let i = 0; i < stripAlongCount; i++) {
-                const sy = stripStartY + i * stripStepY;
-                const sh = Math.max(1, Math.min(Math.max(2, STRIP_W * scale), (innerY + innerH) - sy));
-                if (sh <= 0) break;
-                ctx.fillRect(stripX, sy, stripSpanPx, sh);
-                ctx.strokeRect(stripX, sy, stripSpanPx, sh);
+            const drawCount = stripAlongCount > 12 ? 9 : stripAlongCount;
+            if (stripAlongCount > 12) {
+                const zoneH = Math.max(2, innerBedLength * scale);
+                const hatchTop = stripStartY;
+                ctx.save();
+                ctx.strokeStyle = STROKE_LIGHT;
+                ctx.lineWidth = 0.8;
+                ctx.setLineDash([3, 4]);
+                ctx.strokeRect(stripX, hatchTop, stripSpanPx, zoneH);
+                ctx.setLineDash([]);
+                ctx.restore();
+                const stepY = zoneH / Math.max(1, drawCount - 1);
+                for (let i = 0; i < drawCount; i++) {
+                    const sy = hatchTop + i * stepY - Math.max(2, STRIP_W * scale) / 2;
+                    const sh = Math.max(1, Math.min(Math.max(2, STRIP_W * scale), (hatchTop + zoneH) - sy));
+                    if (sh <= 0) continue;
+                    ctx.fillRect(stripX, sy, stripSpanPx, sh);
+                    ctx.strokeRect(stripX, sy, stripSpanPx, sh);
+                }
+            } else {
+                for (let i = 0; i < stripAlongCount; i++) {
+                    const sy = stripStartY + i * stripStepY;
+                    const sh = Math.max(1, Math.min(Math.max(2, STRIP_W * scale), (innerY + innerH) - sy));
+                    if (sh <= 0) break;
+                    ctx.fillRect(stripX, sy, stripSpanPx, sh);
+                    ctx.strokeRect(stripX, sy, stripSpanPx, sh);
+                }
             }
         } else {
-            // Solid sheet base in plan — one continuous panel between inner ledger seats (center supports below)
-            ctx.fillStyle = '#e6ebe8';
-            ctx.strokeStyle = '#556a5c';
+            ctx.fillStyle = FILL_SEC;
+            ctx.strokeStyle = STROKE_LIGHT;
             ctx.lineWidth = 1;
             const sx = ledgerSeatLeftX;
             const sw = ledgerSeatRightX - ledgerSeatLeftX;
@@ -7775,11 +7801,10 @@
             ctx.strokeRect(sx, innerY, sw, innerH);
         }
 
-        // Draw supports on top so count is always clearly visible in UI
         if (useCenterBeam) {
-            ctx.fillStyle = 'rgba(60,90,60,0.32)';
-            ctx.strokeStyle = '#3a4d3e';
-            ctx.lineWidth = 1.1;
+            ctx.fillStyle = FILL_SEC2;
+            ctx.strokeStyle = STROKE_MID;
+            ctx.lineWidth = 1;
             supportRects.forEach(r => {
                 const w = r.right - r.left;
                 ctx.fillRect(r.left, innerY, w, innerH);
@@ -7787,36 +7812,45 @@
             });
         }
 
-        // Top view dimensions
-        ctx.fillStyle = '#444';
+        ctx.fillStyle = '#888';
         ctx.font = "11px 'Segoe UI', Arial";
         const wLab = `${outerW} ${unit}`;
-        ctx.fillText(wLab, topX + topPxW / 2 - ctx.measureText(wLab).width / 2, topY + topPxH + 14);
+        ctx.fillText(wLab, topX + topPxW / 2 - ctx.measureText(wLab).width / 2, topY + topPxH + topBottomLabel);
 
         ctx.save();
         const llLab = `${outerL} ${unit}`;
-        ctx.translate(topX - 8, topY + topPxH / 2);
+        ctx.fillStyle = '#888';
+        ctx.font = "11px 'Segoe UI', Arial";
+        ctx.translate(topX - 14, topY + topPxH / 2);
         ctx.rotate(-Math.PI / 2);
         ctx.fillText(llLab, -ctx.measureText(llLab).width / 2, 0);
         ctx.restore();
 
-        // Strip / base summary callout next to top view
-        ctx.fillStyle = '#1a6b2f';
-        ctx.font = "italic 10px 'Segoe UI', Arial";
+        ctx.fillStyle = TEXT_MID;
+        ctx.font = "9px 'Segoe UI', Arial";
+        const recLab = lang === 'en'
+            ? (bedVert.protrusionAboveRailMm > 0.5
+                ? `mattress protrusion ≈ ${Math.round(bedVert.protrusionAboveRailMm)} mm (max ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} mm)`
+                : `mattress recess ≈ ${Math.round(bedVert.recessBelowRailMm)} mm`)
+            : (bedVert.protrusionAboveRailMm > 0.5
+                ? `вылет матраса ≈ ${Math.round(bedVert.protrusionAboveRailMm)} мм (макс ${BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM} мм)`
+                : `утопление матраса ≈ ${Math.round(bedVert.recessBelowRailMm)} мм`);
         const stripsTotal = baseType === 'slats' ? stripAlongCount : 0;
         const callout = baseType === 'slats'
             ? (lang === 'en'
                 ? `${stripsTotal} × ${stripLengthL}×${STRIP_W} mm strips · ${STRIP_SIDE_CLEARANCE} mm side clearance · max ${stripLayout.MAX_STRIP_LENGTH} mm`
                 : `${stripsTotal} × ${stripLengthL}×${STRIP_W} мм планок · зазор ${STRIP_SIDE_CLEARANCE} мм/стор · макс ${stripLayout.MAX_STRIP_LENGTH} мм`)
-            : (lang === 'en' ? `solid LDSP base` : `листовое ЛДСП`);
-        const calloutX = Math.min(canvasW - ctx.measureText(callout).width - 4, topX + topPxW + 6);
-        ctx.fillText(callout, calloutX, topY + 12);
+            : (lang === 'en' ? 'solid LDSP base' : 'листовое ЛДСП');
+        const footerLines = useCenterBeam ? 3 : 2;
+        const footerStartY = canvasH - (footerLines - 1) * 12 - 8;
+        ctx.fillText(recLab, padX, footerStartY);
+        ctx.font = "10px 'Segoe UI', Arial";
+        ctx.fillText(callout, padX, footerStartY + 12);
         if (useCenterBeam) {
             const beamCallout = lang === 'en'
                 ? `${centerSupportCount} center longitudinal support${centerSupportCount > 1 ? 's' : ''}`
                 : `${centerSupportCount} центр. продольн. опор(ы)`;
-            const beamCalloutX = Math.min(canvasW - ctx.measureText(beamCallout).width - 4, topX + topPxW + 6);
-            ctx.fillText(beamCallout, beamCalloutX, topY + 26);
+            ctx.fillText(beamCallout, padX, footerStartY + 24);
         }
     }
 
@@ -7825,7 +7859,7 @@
         const canvas = document.getElementById('schematicCanvas');
         const preview = document.getElementById('document-preview');
         const targetCanvasW = Math.max(800, Math.floor((preview?.clientWidth || canvas.clientWidth || 800) - 24));
-        const targetCanvasH = 500;
+        const targetCanvasH = CONFIG_MODE === 'beds' ? 580 : 500;
         if (canvas.width !== targetCanvasW || canvas.height !== targetCanvasH) {
             canvas.width  = targetCanvasW;
             canvas.height = targetCanvasH;
@@ -7851,6 +7885,9 @@
             window.__gconfigSchematicShelfSegments = [];
             return;
         }
+
+        syncHingePositionsForCabinetHeight('lower');
+        syncHingePositionsForCabinetHeight('upper');
 
         const T = TRANSLATIONS[currentLang];
         
@@ -8726,6 +8763,20 @@
         // Инициализировать поля расстояний петель
         generateHingeDistanceInputs('lower', currentLang);
         generateHingeDistanceInputs('upper', currentLang);
+        initHingeRefHeights();
+
+        ['h1', 'upper_h'].forEach((heightId) => {
+            const el = document.getElementById(heightId);
+            if (!el) return;
+            const onHeightChange = () => {
+                if (typeof window.__gconfigSyncHingePositionsForDimensions === 'function') {
+                    window.__gconfigSyncHingePositionsForDimensions(heightId);
+                }
+                scheduleUpdate();
+            };
+            el.addEventListener('input', onHeightChange);
+            el.addEventListener('change', onHeightChange);
+        });
         
         // Функция для управления видимостью блоков нижнего шкафа
         function toggleLowerHardwareControls() {

@@ -167,6 +167,12 @@ html, body {
 
 .brand {
 
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
     font-size: 1.15rem;
 
     font-weight: 700;
@@ -177,7 +183,13 @@ html, body {
 
 }
 
-.brand span {
+.brand-logo {
+
+    letter-spacing: inherit;
+
+}
+
+.brand-version {
 
     font-size: 0.7rem;
 
@@ -189,9 +201,9 @@ html, body {
 
     border-radius: 999px;
 
-    margin-left: 6px;
-
     vertical-align: middle;
+
+    color: var(--green);
 
 }
 
@@ -205,7 +217,115 @@ html, body {
 
     gap: 8px;
 
+    flex-shrink: 0;
+
 }
+
+
+
+/* Slide toggles (welcome-style) */
+
+.slide-toggle {
+
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: stretch;
+
+    flex-shrink: 0;
+
+    border: 2px solid var(--green);
+
+    border-radius: 8px;
+
+    background: var(--panel);
+
+    overflow: hidden;
+
+}
+
+
+
+.slide-toggle-thumb {
+
+    position: absolute;
+
+    top: 0;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: 50%;
+
+    background: var(--green);
+
+    border-radius: 6px;
+
+    transform: translateX(0);
+
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    z-index: 0;
+
+    pointer-events: none;
+
+}
+
+
+
+.slide-toggle[data-active="1"] .slide-toggle-thumb {
+
+    transform: translateX(100%);
+
+}
+
+
+
+.slide-toggle-btn {
+
+    position: relative;
+
+    z-index: 1;
+
+    flex: 1 1 0;
+
+    min-width: 42px;
+
+    border: none;
+
+    background: transparent;
+
+    padding: 6px 12px;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    color: var(--green);
+
+    transition: color 0.2s;
+
+    white-space: nowrap;
+
+    font-family: inherit;
+
+}
+
+
+
+.slide-toggle-btn.active { color: #fff; }
+
+.slide-toggle-btn:hover:not(.active) { color: var(--green-light); }
+
+.slide-toggle--lang .slide-toggle-btn { min-width: 36px; }
 
 
 
@@ -449,7 +569,8 @@ html, body {
 
 .lang-toggle button:focus-visible,
 .hw-chip:focus-visible,
-.stepper-item:focus-visible {
+.stepper-item:focus-visible,
+.slide-toggle-btn:focus-visible {
     outline: 2px solid var(--green-light);
     outline-offset: 2px;
 }

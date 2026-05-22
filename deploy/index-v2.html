@@ -33,14 +33,19 @@
         <header class="top-bar">
             <div class="top-bar-nav">
                 <a href="welcome.html" class="version-toggle home-link" id="homeLink" data-i18n="to_home">Home</a>
-                <a href="welcome.html?theme=classic" class="version-toggle" id="v1WelcomeLink" data-i18n="to_v1">← v1</a>
+                <a href="welcome.html?theme=classic" class="version-toggle" id="v1WelcomeLink" data-i18n="to_v1">← v1.0</a>
             </div>
-            <div class="brand">GConfig <span>v2.0</span></div>
-            <div class="top-actions">
-                <button type="button" class="theme-toggle" id="themeToggle" title="Switch visual theme">Neon</button>
-                <div class="lang-toggle" role="group" aria-label="Language">
-                    <button type="button" id="langRu">RU</button>
-                    <button type="button" id="langEn" class="active">EN</button>
+            <div class="brand"><span class="brand-logo">GConfig</span><span class="brand-version">v2.0</span></div>
+            <div class="top-actions" id="topActions">
+                <div class="slide-toggle slide-toggle--theme" id="themeToggle" role="group" aria-label="Theme" data-active="0">
+                    <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                    <button type="button" class="slide-toggle-btn active" data-theme="future" aria-pressed="true" title="Neon theme">NEON</button>
+                    <button type="button" class="slide-toggle-btn" data-theme="classic" aria-pressed="false" title="Classic theme">CLASSIC</button>
+                </div>
+                <div class="slide-toggle slide-toggle--lang" id="langToggle" role="group" aria-label="Language" data-active="1">
+                    <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                    <button type="button" class="slide-toggle-btn lang-btn" id="langRu" data-lang="ru" aria-pressed="false">RU</button>
+                    <button type="button" class="slide-toggle-btn lang-btn active" id="langEn" data-lang="en" aria-pressed="true">EN</button>
                 </div>
             </div>
         </header>
@@ -357,7 +362,7 @@
                             </div>
                         </div>
                         <p class="step-desc" data-i18n="price_on_right">Price summary on the right. Export buttons below preview.</p>
-                        <p class="wizard-v1-link"><a href="configurator.html" id="openV1Link" data-i18n="open_v1_full">Open full v1 configurator →</a></p>
+                        <p class="wizard-v1-link"><a href="configurator.html" id="openV1Link" data-i18n="open_v1_full">Open full v1.0 configurator →</a></p>
                     </section>
                 </div>
 
