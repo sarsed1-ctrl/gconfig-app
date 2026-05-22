@@ -8331,7 +8331,7 @@
         const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
         const fontFileName = 'NotoSans-Regular.ttf';
         const fontFamily = 'NotoSans';
-        if (!window.__gconfigPdfFontLoaded) {
+        if (!window.__gconfigPdfFontBase64) {
             const res = await fetch(fontUrl);
             if (!res.ok) throw new Error('font_fetch_failed');
             const buf = await res.arrayBuffer();
@@ -8341,13 +8341,10 @@
             for (let i = 0; i < bytes.length; i += chunkSize) {
                 binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
             }
-            const base64 = btoa(binary);
-            pdf.addFileToVFS(fontFileName, base64);
-            pdf.addFont(fontFileName, fontFamily, 'normal');
-            window.__gconfigPdfFontLoaded = true;
-        } else {
-            pdf.addFont(fontFileName, fontFamily, 'normal');
+            window.__gconfigPdfFontBase64 = btoa(binary);
         }
+        pdf.addFileToVFS(fontFileName, window.__gconfigPdfFontBase64);
+        pdf.addFont(fontFileName, fontFamily, 'normal');
         pdf.setFont(fontFamily, 'normal');
     }
 

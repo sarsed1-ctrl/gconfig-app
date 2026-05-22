@@ -2625,7 +2625,15 @@
 
         setTimeout(() => {
 
-            if (typeof win[fnName] === 'function') win[fnName]();
+            if (typeof win[fnName] !== 'function') return;
+
+            Promise.resolve(win[fnName]()).catch((err) => {
+
+                console.error(`iframe ${fnName} failed:`, err);
+
+                showV2Toast(currentLang === 'ru' ? 'Ошибка экспорта' : 'Export failed', true);
+
+            });
 
         }, 100);
 
