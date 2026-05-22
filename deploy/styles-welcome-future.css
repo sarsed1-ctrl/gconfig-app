@@ -36,16 +36,19 @@ html.theme-future body.welcome-page .header-page-title {
     font-weight: 700;
 }
 
+html.theme-future body.welcome-page #logo-horizontal text:nth-of-type(1),
 html.theme-future body.welcome-page .header-brand svg text:nth-of-type(1) {
-    fill: #5cffc8;
+    fill: #5cffc8 !important;
 }
 
+html.theme-future body.welcome-page #logo-horizontal text:nth-of-type(2),
 html.theme-future body.welcome-page .header-brand svg text:nth-of-type(2) {
-    fill: #e8f4f0;
+    fill: #e8f4f0 !important;
 }
 
+html.theme-future body.welcome-page #logo-horizontal text:nth-of-type(3),
 html.theme-future body.welcome-page .header-brand svg text:nth-of-type(3) {
-    fill: #7a8f99;
+    fill: #7a8f99 !important;
 }
 
 html.theme-future body.welcome-page .header-brand svg image,
