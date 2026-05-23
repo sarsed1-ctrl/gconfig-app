@@ -13,8 +13,8 @@
         var KEY = 'gconfig-v2-theme';
         try {
             var q = new URLSearchParams(location.search);
-            var theme = q.get('theme') === 'future' ? 'future' : localStorage.getItem(KEY);
-            if (theme === 'future') {
+            var qTheme = (q.get('theme') || '').toLowerCase();
+            if (qTheme !== 'classic' && (qTheme === 'future' || localStorage.getItem(KEY) !== 'classic')) {
                 document.documentElement.classList.add('theme-future');
             }
         } catch (e) { /* ignore */ }
@@ -114,15 +114,24 @@
                                 <h3 data-i18n="bed_dims">Bed</h3>
                                 <div class="field full">
                                     <label data-i18n="bed_preset">Preset</label>
-                                    <select id="w-bedPreset" data-iframe="bedPreset"></select>
+                                    <select id="w-bedPreset" data-iframe="bedPreset">
+                                        <option value="single">Single (900×2000)</option>
+                                        <option value="onehalf">1.5 (1200×2000)</option>
+                                        <option value="double" selected>Double (1600×2000)</option>
+                                    </select>
                                 </div>
                                 <div class="field-grid cols-3">
-                                    <div class="field"><label data-i18n="mattress_w">Mattress width</label><input type="number" id="w-bedMattressW" data-iframe="bedMattressW" step="10"></div>
-                                    <div class="field"><label data-i18n="bed_length">Length</label><input type="number" id="w-bedLength" data-iframe="bedLength" step="10"></div>
-                                    <div class="field"><label data-i18n="frame_h">Frame height</label><input type="number" id="w-bedFrameH" data-iframe="bedFrameH" step="5"></div>
-                                    <div class="field"><label data-i18n="headboard_h">Headboard</label><input type="number" id="w-bedHeadboardH" data-iframe="bedHeadboardH" step="10"></div>
-                                    <div class="field"><label data-i18n="footboard_h">Footboard</label><input type="number" id="w-bedFootboardH" data-iframe="bedFootboardH" step="10"></div>
-                                    <div class="field"><label data-i18n="bed_base">Base</label><select id="w-bedBaseType" data-iframe="bedBaseType"></select></div>
+                                    <div class="field"><label data-i18n="mattress_w">Mattress width</label><input type="number" id="w-bedMattressW" data-iframe="bedMattressW" value="1600" min="700" step="10"></div>
+                                    <div class="field"><label data-i18n="bed_length">Length</label><input type="number" id="w-bedLength" data-iframe="bedLength" value="2000" min="1800" step="10"></div>
+                                    <div class="field"><label data-i18n="frame_h">Frame height</label><input type="number" id="w-bedFrameH" data-iframe="bedFrameH" value="420" min="250" step="5"></div>
+                                    <div class="field"><label data-i18n="headboard_h">Headboard</label><input type="number" id="w-bedHeadboardH" data-iframe="bedHeadboardH" value="900" min="400" step="10"></div>
+                                    <div class="field"><label data-i18n="footboard_h">Footboard</label><input type="number" id="w-bedFootboardH" data-iframe="bedFootboardH" value="420" min="200" step="10"></div>
+                                    <div class="field"><label data-i18n="bed_base">Base</label>
+                                        <select id="w-bedBaseType" data-iframe="bedBaseType">
+                                            <option value="slats" selected>Transverse strips (LDSP)</option>
+                                            <option value="sheet">Solid LDSP sheet</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -417,7 +426,15 @@
             <section class="furniture-3d-panel" id="furniture3dPanel" hidden aria-hidden="true" aria-label="3D preview">
                 <div class="furniture-3d-header">
                     <h2 data-i18n="preview_3d">3D</h2>
-                    <button type="button" class="furniture-3d-expand" id="btn3dExpand" aria-label="Expand 3D view" title="Expand">⛶</button>
+                    <div class="furniture-3d-header-actions">
+                        <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_dims">Dimensions</span>
+                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dDims" role="group" aria-label="3D dimensions" data-active="1">
+                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                            <button type="button" class="slide-toggle-btn" data-dims="off" aria-pressed="false" data-i18n="toggle_off">Off</button>
+                            <button type="button" class="slide-toggle-btn active" data-dims="on" aria-pressed="true" data-i18n="toggle_on">On</button>
+                        </div>
+                        <button type="button" class="furniture-3d-expand" id="btn3dExpand" aria-label="Expand 3D view" title="Expand">⛶</button>
+                    </div>
                 </div>
                 <div id="furniture-3d" role="img" aria-label="3D furniture model"></div>
             </section>

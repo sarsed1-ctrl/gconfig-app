@@ -1979,7 +1979,9 @@
     // LANGUAGE SYSTEM
     // ==========================================
     let currentLang = localStorage.getItem('gconfig-v2-lang') || localStorage.getItem('configurator_lang') || 'en';
-    const CONFIG_MODE_RAW = new URLSearchParams(window.location.search).get('mode') || 'closets';
+    const _urlParams = new URLSearchParams(window.location.search);
+    const _hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+    const CONFIG_MODE_RAW = _urlParams.get('mode') || _hashParams.get('mode') || 'closets';
     if (CONFIG_MODE_RAW === 'shelves') {
         const sp = new URLSearchParams(window.location.search);
         sp.delete('mode');

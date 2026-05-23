@@ -709,11 +709,13 @@
 
     function iframeSrc() {
 
+        const bust = `_=${Date.now()}`;
+
         return productMode === 'beds'
 
-            ? 'configurator.html?mode=beds'
+            ? `configurator.html#mode=beds&${bust}`
 
-            : 'configurator.html';
+            : `configurator.html?${bust}`;
 
     }
 
@@ -3243,11 +3245,11 @@
 
             const saved = localStorage.getItem(THEME_STORAGE_KEY);
 
-            if (saved === 'future') return 'future';
+            if (saved === 'classic') return 'classic';
 
         } catch (_) { /* ignore */ }
 
-        return 'classic';
+        return 'future';
 
     }
 

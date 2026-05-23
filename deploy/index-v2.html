@@ -13,8 +13,8 @@
         var KEY = 'gconfig-v2-theme';
         try {
             var q = new URLSearchParams(location.search);
-            var theme = q.get('theme') === 'future' ? 'future' : localStorage.getItem(KEY);
-            if (theme === 'future') {
+            var qTheme = (q.get('theme') || '').toLowerCase();
+            if (qTheme !== 'classic' && (qTheme === 'future' || localStorage.getItem(KEY) !== 'classic')) {
                 document.documentElement.classList.add('theme-future');
             }
         } catch (e) { /* ignore */ }

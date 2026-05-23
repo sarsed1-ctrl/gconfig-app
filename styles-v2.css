@@ -62,9 +62,9 @@ html, body {
 
     top: 0;
 
-    width: 1px;
+    width: 1280px;
 
-    height: 1px;
+    height: 800px;
 
     opacity: 0;
 
@@ -434,6 +434,56 @@ html, body {
     padding: 14px 16px 8px;
 
     flex-shrink: 0;
+
+    gap: 8px;
+
+}
+
+
+
+.furniture-3d-header-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+}
+
+
+
+.furniture-3d-dims-label {
+
+    font-size: 0.72rem;
+
+    color: var(--text-muted, #667);
+
+    white-space: nowrap;
+
+}
+
+
+
+.slide-toggle--compact .slide-toggle-btn {
+
+    min-width: 52px;
+
+    padding: 0 10px;
+
+    font-size: 0.72rem;
+
+}
+
+
+
+#toggle3dDims .slide-toggle-btn {
+
+    min-width: 2.6rem;
 
 }
 
@@ -992,6 +1042,8 @@ html, body {
     font-size: 0.9rem;
 
     background: var(--panel);
+
+    color: var(--text);
 
     transition: border-color var(--transition), box-shadow var(--transition);
 

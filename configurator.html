@@ -1979,7 +1979,9 @@
     // LANGUAGE SYSTEM
     // ==========================================
     let currentLang = localStorage.getItem('gconfig-v2-lang') || localStorage.getItem('configurator_lang') || 'en';
-    const CONFIG_MODE_RAW = new URLSearchParams(window.location.search).get('mode') || 'closets';
+    const _urlParams = new URLSearchParams(window.location.search);
+    const _hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+    const CONFIG_MODE_RAW = _urlParams.get('mode') || _hashParams.get('mode') || 'closets';
     if (CONFIG_MODE_RAW === 'shelves') {
         const sp = new URLSearchParams(window.location.search);
         sp.delete('mode');
@@ -1987,10 +1989,13 @@
         window.location.replace(window.location.pathname + (q ? '?' + q : '') + (window.location.hash || ''));
     }
     const CONFIG_MODE = CONFIG_MODE_RAW === 'shelves' ? 'closets' : CONFIG_MODE_RAW;
+    window.__gconfigMode = CONFIG_MODE;
 
     function updateNavActiveState() {
         const path = (window.location.pathname || '').toLowerCase();
-        const mode = new URLSearchParams(window.location.search).get('mode') || 'closets';
+        const _sp = new URLSearchParams(window.location.search);
+        const _hp = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+        const mode = _sp.get('mode') || _hp.get('mode') || 'closets';
         const isBedsPage = /beds\.html/i.test(path);
         const isConfigurator = /configurator\.html/i.test(path);
         const bedsMode = isConfigurator && mode === 'beds';
@@ -4324,6 +4329,14 @@
         }
     }
 
+    function notifyParentV1Ready() {
+        try {
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'gconfig-v1-ready', mode: CONFIG_MODE }, '*');
+            }
+        } catch (_) { /* ignore */ }
+    }
+
     function initBedsModeUI() {
         if (CONFIG_MODE !== 'beds') return;
         setEamfCarcassEdgeRowVisible(false);
@@ -4331,7 +4344,18 @@
         setEamfCarcassBackPanelOptionsVisible(false);
         const sidebar = document.querySelector('.sidebar');
         if (!sidebar) return;
-        if (document.getElementById('beds-controls')) return;
+        if (document.getElementById('beds-controls')) {
+            if (typeof window.__gconfigSyncBedToCoreFields === 'function') {
+                window.__gconfigSyncBedToCoreFields();
+            }
+            if (typeof window.__gconfigRedrawBedsConfigurator === 'function') {
+                window.__gconfigRedrawBedsConfigurator();
+            } else if (typeof scheduleUpdate === 'function') {
+                scheduleUpdate();
+            }
+            notifyParentV1Ready();
+            return;
+        }
 
         const blocks = sidebar.querySelectorAll('.block');
         blocks.forEach(block => {
@@ -4437,7 +4461,8 @@
 
         const redrawBedsConfigurator = () => {
             syncBedToCoreFields();
-            scheduleUpdate();
+            if (typeof updateConfigurator === 'function') updateConfigurator();
+            else scheduleUpdate();
         };
 
         ['bedMattressW', 'bedLength', 'bedFrameH', 'bedHeadboardH', 'bedFootboardH']
@@ -4462,6 +4487,11 @@
         refreshEamfMaterialSelectsOnThicknessChange();
 
         syncBedToCoreFields();
+        window.__gconfigSyncBedToCoreFields = syncBedToCoreFields;
+        window.__gconfigRedrawBedsConfigurator = redrawBedsConfigurator;
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+        else scheduleUpdate();
+        notifyParentV1Ready();
     }
 
     function initShelvesModeUI() {
@@ -5871,6 +5901,7 @@
             renderWarnings(bedWarnings);
 
             drawSchematic(mattressW, frameH, bedLength, outerW, headboardH, railT, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
+            window.__gconfigBedsSchematicReady = true;
 
             // Hide closet-only hinge/gas spec tables
             ['hingeSpecTableUpper','hingeSpecTable','upperGasSpecTable','gasSpecTable',
@@ -7881,10 +7912,13 @@
 
         if (CONFIG_MODE === 'beds') {
             drawBedSchematic(ctx, width, height, w1, h1, d1, w2, h2, lang);
+            window.__gconfigBedsSchematicReady = true;
             window.__gconfigSchematicHingeDots = [];
             window.__gconfigSchematicShelfSegments = [];
             return;
         }
+
+        window.__gconfigBedsSchematicReady = false;
 
         syncHingePositionsForCabinetHeight('lower');
         syncHingePositionsForCabinetHeight('upper');
@@ -8751,6 +8785,14 @@
     // On language switch, update placeholder and heading defaults (if no custom value)
     const _origSetLang = typeof setLang === 'function' ? setLang : null;
 
+    if (CONFIG_MODE === 'beds') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => initBedsModeUI());
+        } else {
+            initBedsModeUI();
+        }
+    }
+
     window.onload = async function() {
         await initEamfMaterialsUI();
         initBedsModeUI();
@@ -8916,6 +8958,7 @@
         }
         
         updateConfigurator();
+        notifyParentV1Ready();
     };
 
 </script>

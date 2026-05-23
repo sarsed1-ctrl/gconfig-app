@@ -511,7 +511,7 @@ class Furniture3D {
         group.add(pivotGroup);
 
         const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, mat, 0, -doorH / 2, 0);
-        const openAngle = -Math.PI;
+        const openAngle = -(135 * Math.PI) / 180;
         const closedAngle = 0;
         const startT = opts.startOpen !== false ? 1 : 0;
         pivotGroup.rotation.x = closedAngle + startT * (openAngle - closedAngle);

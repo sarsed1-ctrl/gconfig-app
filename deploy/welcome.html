@@ -325,9 +325,9 @@
         try {
             var q = new URLSearchParams(location.search);
             var qTheme = (q.get('theme') || '').toLowerCase();
-            if (qTheme === 'future') {
-                document.documentElement.classList.add('theme-future');
-            } else if (qTheme !== 'classic' && qTheme !== 'v1' && localStorage.getItem(KEY) === 'future') {
+            if (qTheme === 'classic' || qTheme === 'v1') {
+                /* classic — no theme-future */
+            } else if (qTheme === 'future' || localStorage.getItem(KEY) !== 'classic') {
                 document.documentElement.classList.add('theme-future');
             }
         } catch (e) { /* ignore */ }
@@ -691,11 +691,10 @@
                     applyTheme('future');
                 } else if (qTheme === 'classic' || qTheme === 'v1') {
                     applyTheme('classic');
-                } else if (localStorage.getItem(THEME_KEY) === 'future') {
-                    applyTheme('future');
+                } else if (localStorage.getItem(THEME_KEY) === 'classic') {
+                    applyTheme('classic');
                 } else {
-                    updateV2Links();
-                    updateTopToggles();
+                    applyTheme('future');
                 }
             } catch (e) {
                 updateV2Links();
