@@ -14,8 +14,9 @@
         try {
             var q = new URLSearchParams(location.search);
             var qTheme = (q.get('theme') || '').toLowerCase();
-            if (qTheme !== 'classic' && (qTheme === 'future' || localStorage.getItem(KEY) !== 'classic')) {
+            if (qTheme !== 'classic') {
                 document.documentElement.classList.add('theme-future');
+                try { localStorage.setItem(KEY, 'future'); } catch (e) { /* ignore */ }
             }
         } catch (e) { /* ignore */ }
     })();

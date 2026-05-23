@@ -325,10 +325,9 @@
         try {
             var q = new URLSearchParams(location.search);
             var qTheme = (q.get('theme') || '').toLowerCase();
-            if (qTheme === 'classic' || qTheme === 'v1') {
-                /* classic — no theme-future */
-            } else if (qTheme === 'future' || localStorage.getItem(KEY) !== 'classic') {
+            if (qTheme !== 'classic' && qTheme !== 'v1') {
                 document.documentElement.classList.add('theme-future');
+                try { localStorage.setItem(KEY, 'future'); } catch (e) { /* ignore */ }
             }
         } catch (e) { /* ignore */ }
     })();
@@ -687,11 +686,7 @@
             try {
                 var q = new URLSearchParams(location.search);
                 var qTheme = (q.get('theme') || '').toLowerCase();
-                if (qTheme === 'future') {
-                    applyTheme('future');
-                } else if (qTheme === 'classic' || qTheme === 'v1') {
-                    applyTheme('classic');
-                } else if (localStorage.getItem(THEME_KEY) === 'classic') {
+                if (qTheme === 'classic' || qTheme === 'v1') {
                     applyTheme('classic');
                 } else {
                     applyTheme('future');

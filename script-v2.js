@@ -3935,14 +3935,6 @@
 
     function restoreTheme() {
 
-        try {
-
-            const saved = localStorage.getItem(THEME_STORAGE_KEY);
-
-            if (saved === 'classic') return 'classic';
-
-        } catch (_) { /* ignore */ }
-
         return 'future';
 
     }
@@ -4090,13 +4082,13 @@
 
         const themeParam = params.get('theme');
 
-        if (themeParam === 'future' || themeParam === 'classic') {
+        if (themeParam === 'classic') {
 
-            applyTheme(themeParam);
+            applyTheme('classic');
 
         } else {
 
-            applyTheme(restoreTheme());
+            applyTheme('future');
 
         }
 
