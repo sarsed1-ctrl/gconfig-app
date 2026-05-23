@@ -782,7 +782,9 @@ class Furniture3D {
         const upperW = params.upperWidth || lowerW;
         const lowerD = params.depth || 450;
         const upperD = params.upperDepth || lowerD;
-        const ctT = params.countertop?.enabled ? (params.countertop.thickness || 38) : 0;
+        const ctT = params.countertop?.enabled && params.countertop.thickness > 0
+            ? params.countertop.thickness
+            : 0;
         const stackGap = 400;
         const upperBaseY = lowerH + ctT + stackGap;
 
@@ -934,11 +936,13 @@ class Furniture3D {
             h: p.upperHeight || 400,
             d: p.upperDepth || lower.d,
         };
-        const ctT = p.countertop?.enabled ? (p.countertop.thickness || 38) : 0;
+        const ctT = p.countertop?.enabled && p.countertop.thickness > 0
+            ? p.countertop.thickness
+            : 0;
         const upperBaseY = lower.h + ctT + gap;
 
         this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
-        if (p.countertop?.enabled) this.buildCountertop(p, lower, edgeMat);
+        if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
         this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
 
         const shelfDefs = Array.isArray(p.shelves) ? p.shelves : [];
@@ -1001,7 +1005,8 @@ class Furniture3D {
 
     buildCountertop(p, lower, edgeMat) {
         const ct = p.countertop || {};
-        const ctT = ct.thickness || 38;
+        const ctT = ct.thickness > 0 ? ct.thickness : 0;
+        if (!ctT) return;
         const front = ct.frontOverhang || 0;
         const side = ct.sideOverhang || 0;
         const ctW = lower.w + side * 2;
@@ -1071,6 +1076,7 @@ class Furniture3D {
         group.add(pivotGroup);
 
         const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, mat, 0, -doorH / 2, 0);
+        if (doorMesh) doorMesh.renderOrder = 2;
         const openAngle = GAS_LIFT_OPEN_RAD;
         const closedAngle = 0;
         const startT = opts.startOpen !== false ? 1 : 0;
@@ -1078,12 +1084,16 @@ class Furniture3D {
 
         const strutMat = getMaterial('gas-strut', 0x707880, { metalness: 0.55, roughness: 0.38 });
         const strutX = W / 2 - 48;
-        const rodR = 4;
+        const rodR = 3.5;
         const cabinetAttachY = cabinetTopY - Math.min(28, H * 0.08);
-        const cabinetAttachZ = D / 2 - 18;
+        const cabinetAttachZ = D / 2 - 22;
         const doorAttachFromTop = doorH * 0.22;
-        const attachLocalLeft = new THREE.Vector3(-strutX * MM, -doorAttachFromTop * MM, 0);
-        const attachLocalRight = new THREE.Vector3(strutX * MM, -doorAttachFromTop * MM, 0);
+        /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
+        const doorInnerZMm = -(facadeT / 2 + 4);
+        const doorAttachY = cabinetTopY - doorAttachFromTop;
+        const doorAttachZ = pivotZ + doorInnerZMm;
+        const attachLocalLeft = new THREE.Vector3(-strutX * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
+        const attachLocalRight = new THREE.Vector3(strutX * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
 
         const gasState = {
             group: pivotGroup,
@@ -1111,11 +1121,12 @@ class Furniture3D {
                     cabinetAttachY,
                     cabinetAttachZ,
                     x,
-                    cabinetTopY + doorAttachFromTop,
-                    pivotZ,
+                    doorAttachY,
+                    doorAttachZ,
                     rodR,
                     strutMat
                 );
+                rod.renderOrder = 0;
                 strutSpecs.push({ rod, x, rodR, cabinetAttachY, cabinetAttachZ, side });
             });
             gasState.strutSpecs = strutSpecs;
@@ -1123,10 +1134,10 @@ class Furniture3D {
             this.gasLiftDoors.push(gasState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'gasLift', state: gasState });
         } else {
-            const openAttachY = cabinetTopY + doorAttachFromTop;
             [-1, 1].forEach((side) => {
                 const x = side * strutX;
-                addRod(group, x, cabinetAttachY, cabinetAttachZ, x, openAttachY, pivotZ, rodR, strutMat);
+                const rod = addRod(group, x, cabinetAttachY, cabinetAttachZ, x, doorAttachY, doorAttachZ, rodR, strutMat);
+                rod.renderOrder = 0;
             });
         }
     }

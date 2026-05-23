@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="eamf-countertop-thickness.js"></script>
 
     <style>
         :root {
@@ -3172,6 +3173,9 @@
     }
 
     function getEamfCountertopThick(material) {
+        if (window.GConfigCountertopThick) {
+            return window.GConfigCountertopThick.getThicknessMm(material);
+        }
         if (!material) return null;
         if (isEamfCountertopHpl12(material)) return 12;
         if (isEamfCountertopLdsp20(material)) return 20;
@@ -3185,6 +3189,14 @@
         if (/^\d+$/.test(last)) return parseInt(last, 10);
         return null;
     }
+
+    window.__gconfigGetCountertopThicknessMm = function () {
+        const hasCT = !!document.getElementById('hasCountertop')?.checked;
+        if (!hasCT) return 0;
+        const ctMat = getSelectedEamfCountertopMaterial();
+        if (!ctMat) return 0;
+        return getEamfCountertopThick(ctMat) || 0;
+    };
 
     function getEamfCountertopGroupKey(ct) {
         if (isEamfCountertopHpl12(ct)) return 'h:12';

@@ -388,11 +388,6 @@
                 <span data-lang="en">Furniture Configurator</span>
             </h1>
             <div class="top-actions" id="topActions">
-                <div class="slide-toggle slide-toggle--version" id="versionToggle" role="group" aria-label="Version" data-active="0">
-                    <span class="slide-toggle-thumb" aria-hidden="true"></span>
-                    <button type="button" class="slide-toggle-btn active" data-theme="future" aria-pressed="true" title="GConfig v2 Neon">V2.0</button>
-                    <button type="button" class="slide-toggle-btn" data-theme="classic" aria-pressed="false" title="GConfig v1 Classic">V1.0</button>
-                </div>
                 <div class="slide-toggle slide-toggle--theme" id="themeToggle" role="group" aria-label="Theme" data-active="0">
                     <span class="slide-toggle-thumb" aria-hidden="true"></span>
                     <button type="button" class="slide-toggle-btn active" data-theme="future" aria-pressed="true" title="Neon theme">NEON</button>
@@ -650,7 +645,7 @@
         function updateTopToggles() {
             var isFuture = document.documentElement.classList.contains('theme-future');
             var activeIndex = isFuture ? '0' : '1';
-            ['versionToggle', 'themeToggle'].forEach(function (id) {
+            ['themeToggle'].forEach(function (id) {
                 var toggle = document.getElementById(id);
                 if (!toggle) return;
                 toggle.dataset.active = activeIndex;
@@ -695,7 +690,6 @@
                 updateV2Links();
                 updateTopToggles();
             }
-            bindSlideToggle('versionToggle');
             bindSlideToggle('themeToggle');
         })();
     </script>

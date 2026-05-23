@@ -415,7 +415,7 @@
 
             price_on_right: 'Сводка цены справа. Экспорт — кнопки под превью.',
 
-            open_v1_full: 'Полный конфигуратор v1.0 →',
+            open_v1_full: 'Открыть старый конфигуратор →',
 
             preview: 'Превью',
 
@@ -649,7 +649,7 @@
 
             price_on_right: 'Price summary on the right. Export buttons below preview.',
 
-            open_v1_full: 'Open full v1.0 configurator →',
+            open_v1_full: 'Open old configurator →',
 
             preview: 'Preview',
 
@@ -1003,6 +1003,74 @@
 
 
 
+    let eamfCatalogCache = null;
+
+    let eamfCatalogLoadPromise = null;
+
+
+
+    function loadEamfCatalog() {
+
+        if (eamfCatalogCache) return Promise.resolve(eamfCatalogCache);
+
+        if (eamfCatalogLoadPromise) return eamfCatalogLoadPromise;
+
+        eamfCatalogLoadPromise = fetch('assets/eamf-catalog.json')
+
+            .then((r) => (r.ok ? r.json() : null))
+
+            .then((data) => {
+
+                eamfCatalogCache = data || { countertops: [] };
+
+                return eamfCatalogCache;
+
+            })
+
+            .catch(() => {
+
+                eamfCatalogCache = { countertops: [] };
+
+                return eamfCatalogCache;
+
+            });
+
+        return eamfCatalogLoadPromise;
+
+    }
+
+
+
+    function getCountertopThicknessMm() {
+
+        if (!fieldCheck('hasCountertop')) return 0;
+
+        const win = iframeWin();
+
+        if (win && typeof win.__gconfigGetCountertopThicknessMm === 'function') {
+
+            const fromV1 = win.__gconfigGetCountertopThicknessMm();
+
+            if (Number.isFinite(fromV1) && fromV1 > 0) return fromV1;
+
+        }
+
+        const article = fieldStr('countertopMaterial');
+
+        if (window.GConfigCountertopThick && eamfCatalogCache) {
+
+            const t = window.GConfigCountertopThick.getThicknessMmByArticle(eamfCatalogCache, article);
+
+            if (Number.isFinite(t) && t > 0) return t;
+
+        }
+
+        return 0;
+
+    }
+
+
+
     function collectHingeZoneSpec(zone, cabinetHeightMm) {
 
         const prefix = zone === 'upper' ? 'upper' : 'lower';
@@ -1223,13 +1291,18 @@
 
             backWall: fieldCheck('useCarcassBackPanel') || !!fieldStr('eamfBackPanel'),
 
-            countertop: {
-                enabled: fieldCheck('w-hasCountertop'),
-                thickness: 38,
-                frontOverhang: fieldNum('w-ctFrontOverhang', 20),
-                sideOverhang: fieldNum('w-ctSideOverhang', 2),
-                material: fieldStr('w-countertopMaterial') || fieldStr('countertopMaterial'),
-            },
+            countertop: (() => {
+                const material = fieldStr('countertopMaterial');
+                const enabled = fieldCheck('hasCountertop');
+                const thickness = enabled ? getCountertopThicknessMm() : 0;
+                return {
+                    enabled: enabled && thickness > 0,
+                    thickness,
+                    frontOverhang: fieldNum('ctFrontOverhang', 20),
+                    sideOverhang: fieldNum('ctSideOverhang', 2),
+                    material,
+                };
+            })(),
 
             material,
 
@@ -2379,6 +2452,8 @@
 
                 }
 
+                if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
+
             }, 0);
 
         }
@@ -3213,18 +3288,6 @@
 
 
 
-    function updateV1WelcomeLink() {
-
-        const link = document.getElementById('v1WelcomeLink');
-
-        if (!link) return;
-
-        link.href = 'welcome.html?theme=classic';
-
-    }
-
-
-
     function updateV1Link() {
 
         const link = document.getElementById('openV1Link');
@@ -3234,6 +3297,10 @@
             link.href = productMode === 'beds' ? 'beds.html' : 'configurator.html';
 
         }
+
+        const wrap = document.getElementById('v1LinkWrap');
+
+        if (wrap) wrap.hidden = !isLastStep(currentStep);
 
     }
 
@@ -3253,8 +3320,6 @@
 
         document.getElementById('modeBeds').classList.toggle('active', mode === 'beds');
 
-        updateV1Link();
-
         const url = new URL(window.location.href);
 
         if (mode === 'beds') url.searchParams.set('type', 'beds');
@@ -3267,6 +3332,7 @@
             goToStep(1);
         } else {
             updateNavLabels();
+            updateV1Link();
         }
 
         applyBedWizardDefaults(true);
@@ -3393,6 +3459,8 @@
         updateConditionalUI();
 
         updateNavLabels();
+
+        updateV1Link();
 
         schedulePreviewSync();
 
@@ -4076,10 +4144,6 @@
 
         document.getElementById('modeBeds').classList.toggle('active', productMode === 'beds');
 
-        updateV1Link();
-
-        updateV1WelcomeLink();
-
         const themeParam = params.get('theme');
 
         if (themeParam === 'classic') {
@@ -4097,6 +4161,12 @@
         if (productMode === 'beds') applyBedWizardDefaults(true);
 
         bindUI();
+
+        loadEamfCatalog().then(() => {
+
+            if (productMode === 'closets') schedule3DRebuild();
+
+        });
 
         loadIframe();
 

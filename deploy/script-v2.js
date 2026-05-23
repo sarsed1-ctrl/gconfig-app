@@ -71,9 +71,43 @@
 
     let previewLoopInterval = null;
 
+    let bedsIframeReloadAttempts = 0;
+
     let previewSyncTimer = null;
 
     let model3dEnabled = false;
+
+    let model3dDimsEnabled = true;
+
+    function isMobile3D() {
+
+        return window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+
+    }
+
+    function normalizeBedCarcassT(value) {
+
+        const allowed = [16, 18, 19, 25, 28];
+
+        const n = parseInt(value, 10);
+
+        if (allowed.includes(n)) return n;
+
+        let best = allowed[0];
+
+        let bestDist = Infinity;
+
+        for (const a of allowed) {
+
+            const d = Math.abs(a - (Number.isFinite(n) ? n : best));
+
+            if (d < bestDist) { bestDist = d; best = a; }
+
+        }
+
+        return best;
+
+    }
 
 
 
@@ -138,6 +172,62 @@
         'lowerHingeBrand', 'lowerHingeType', 'lowerHingeCount',
 
         'bedPreset', 'bedBaseType'
+
+    ];
+
+
+
+    /** Fallback when iframe bed UI is not ready yet (sync with configurator.html defaults). */
+
+    const BED_WIZARD_DEFAULTS = {
+
+        bedPreset: 'double',
+
+        bedMattressW: 1600,
+
+        bedLength: 2000,
+
+        bedFrameH: 420,
+
+        bedHeadboardH: 900,
+
+        bedFootboardH: 420,
+
+        bedBaseType: 'slats',
+
+    };
+
+
+
+    const BED_IFRAME_FIELD_IDS = [
+
+        'bedPreset', 'bedMattressW', 'bedLength', 'bedFrameH',
+
+        'bedHeadboardH', 'bedFootboardH', 'bedBaseType',
+
+        'facadeThick', 'carcassThick',
+
+    ];
+
+
+
+    const BED_PRESET_OPTIONS = [
+
+        { value: 'single', en: 'Single (900×2000)', ru: 'Одинарная (900×2000)' },
+
+        { value: 'onehalf', en: '1.5 (1200×2000)', ru: '1,5 (1200×2000)' },
+
+        { value: 'double', en: 'Double (1600×2000)', ru: 'Двуспальная (1600×2000)' },
+
+    ];
+
+
+
+    const BED_BASE_OPTIONS = [
+
+        { value: 'slats', en: 'Transverse strips (LDSP)', ru: 'Поперечные планки (ЛДСП)' },
+
+        { value: 'sheet', en: 'Solid LDSP sheet', ru: 'Листовое ЛДСП' },
 
     ];
 
@@ -325,7 +415,7 @@
 
             price_on_right: 'Сводка цены справа. Экспорт — кнопки под превью.',
 
-            open_v1_full: 'Полный конфигуратор v1.0 →',
+            open_v1_full: 'Открыть старый конфигуратор →',
 
             preview: 'Превью',
 
@@ -335,7 +425,11 @@
 
             toggle_off: 'Выкл',
 
+            toggle_on: 'Вкл',
+
             toggle_3d: '3D',
+
+            toggle_3d_dims: 'Размеры',
 
             back: 'Назад',
 
@@ -555,11 +649,21 @@
 
             price_on_right: 'Price summary on the right. Export buttons below preview.',
 
-            open_v1_full: 'Open full v1.0 configurator →',
+            open_v1_full: 'Open old configurator →',
 
             preview: 'Preview',
 
             preview_3d: '3D',
+
+            toggle_3d_model: '3D model',
+
+            toggle_off: 'Off',
+
+            toggle_on: 'On',
+
+            toggle_3d: '3D',
+
+            toggle_3d_dims: 'Dimensions',
 
             back: 'Back',
 
@@ -835,6 +939,16 @@
 
     function flushPreviewNow() {
 
+        if (productMode === 'beds' && !ensureBedPreviewDrawn()) {
+
+            syncPriceMirror();
+
+            schedule3DRebuild();
+
+            return;
+
+        }
+
         syncCanvas();
 
         syncPriceMirror();
@@ -889,6 +1003,138 @@
 
 
 
+    let eamfCatalogCache = null;
+
+    let eamfCatalogLoadPromise = null;
+
+
+
+    function loadEamfCatalog() {
+
+        if (eamfCatalogCache) return Promise.resolve(eamfCatalogCache);
+
+        if (eamfCatalogLoadPromise) return eamfCatalogLoadPromise;
+
+        eamfCatalogLoadPromise = fetch('assets/eamf-catalog.json')
+
+            .then((r) => (r.ok ? r.json() : null))
+
+            .then((data) => {
+
+                eamfCatalogCache = data || { countertops: [] };
+
+                return eamfCatalogCache;
+
+            })
+
+            .catch(() => {
+
+                eamfCatalogCache = { countertops: [] };
+
+                return eamfCatalogCache;
+
+            });
+
+        return eamfCatalogLoadPromise;
+
+    }
+
+
+
+    function getCountertopThicknessMm() {
+
+        if (!fieldCheck('hasCountertop')) return 0;
+
+        const win = iframeWin();
+
+        if (win && typeof win.__gconfigGetCountertopThicknessMm === 'function') {
+
+            const fromV1 = win.__gconfigGetCountertopThicknessMm();
+
+            if (Number.isFinite(fromV1) && fromV1 > 0) return fromV1;
+
+        }
+
+        const article = fieldStr('countertopMaterial');
+
+        if (window.GConfigCountertopThick && eamfCatalogCache) {
+
+            const t = window.GConfigCountertopThick.getThicknessMmByArticle(eamfCatalogCache, article);
+
+            if (Number.isFinite(t) && t > 0) return t;
+
+        }
+
+        return 0;
+
+    }
+
+
+
+    function collectHingeZoneSpec(zone, cabinetHeightMm) {
+
+        const prefix = zone === 'upper' ? 'upper' : 'lower';
+
+        const doc = iframeDoc();
+
+        const readNum = (id, fallback) => {
+
+            const el = fieldByIframe(id) || doc?.getElementById(id);
+
+            const v = parseFloat(el?.value);
+
+            return Number.isFinite(v) ? v : fallback;
+
+        };
+
+        const count = Math.max(2, Math.min(5, readNum(`${prefix}HingeCount`, 2)));
+
+        const edgeDist = readNum(`${prefix}HingeEdgeDist`, 70);
+
+        const position = getIframeRadio(`${prefix}HingePosition`) || (zone === 'upper' ? 'both' : 'left');
+
+        const positions = [];
+
+        for (let i = 1; i <= 5; i += 1) {
+
+            const pos = readNum(`${prefix}HingePos${i}`, 0);
+
+            if (pos > 0) positions.push(pos);
+
+        }
+
+        const suggest = (n, h) => {
+
+            if (n <= 1) return [Math.max(100, Math.round(h / 2))];
+
+            const top = 100;
+
+            const bottom = Math.max(top + 50, h - 100);
+
+            if (n === 2) return [top, bottom];
+
+            const step = (bottom - top) / (n - 1);
+
+            return Array.from({ length: n }, (_, i) => Math.round(top + step * i));
+
+        };
+
+        return {
+
+            count,
+
+            edgeDist,
+
+            position,
+
+            positions: positions.length ? positions : suggest(count, cabinetHeightMm),
+
+        };
+
+    }
+
+
+
     function collect3DParams() {
 
         const carcassT = fieldNum('carcassThick', 16);
@@ -900,6 +1146,16 @@
         const edge = fieldStr('eamfCarcassEdge');
 
         const facadeMaterial = fieldStr('eamfFacadeMaterial') || material;
+
+        const shared = {
+
+            lang: currentLang,
+
+            quality: isMobile3D() ? 'mobile' : 'desktop',
+
+            dimensionsVisible: model3dDimsEnabled,
+
+        };
 
 
 
@@ -921,7 +1177,7 @@
 
                 facadeT,
 
-                carcassT,
+                carcassT: normalizeBedCarcassT(carcassT),
 
                 baseType: fieldStr('bedBaseType') || 'slats',
 
@@ -930,6 +1186,8 @@
                 edge,
 
                 facadeMaterial,
+
+                ...shared,
 
             };
 
@@ -1013,6 +1271,14 @@
 
             },
 
+            hinges: {
+
+                upper: collectHingeZoneSpec('upper', fieldNum('upper_h', 400)),
+
+                lower: collectHingeZoneSpec('lower', fieldNum('h1', 500)),
+
+            },
+
             drawers: {
 
                 enabled: getLowerHardwareMode() === 'drawer',
@@ -1025,19 +1291,26 @@
 
             backWall: fieldCheck('useCarcassBackPanel') || !!fieldStr('eamfBackPanel'),
 
-            countertop: {
-                enabled: fieldCheck('w-hasCountertop'),
-                thickness: 38,
-                frontOverhang: fieldNum('w-ctFrontOverhang', 20),
-                sideOverhang: fieldNum('w-ctSideOverhang', 2),
-                material: fieldStr('w-countertopMaterial') || fieldStr('countertopMaterial'),
-            },
+            countertop: (() => {
+                const material = fieldStr('countertopMaterial');
+                const enabled = fieldCheck('hasCountertop');
+                const thickness = enabled ? getCountertopThicknessMm() : 0;
+                return {
+                    enabled: enabled && thickness > 0,
+                    thickness,
+                    frontOverhang: fieldNum('ctFrontOverhang', 20),
+                    sideOverhang: fieldNum('ctSideOverhang', 2),
+                    material,
+                };
+            })(),
 
             material,
 
             edge,
 
             facadeMaterial,
+
+            ...shared,
 
         };
 
@@ -1055,13 +1328,15 @@
 
         if (threeRebuildTimer) clearTimeout(threeRebuildTimer);
 
+        const debounceMs = isMobile3D() ? 180 : 100;
+
         threeRebuildTimer = setTimeout(() => {
 
             threeRebuildTimer = null;
 
             window.GConfig3D.scheduleRebuild(collect3DParams());
 
-        }, 100);
+        }, debounceMs);
 
     }
 
@@ -1093,6 +1368,8 @@
 
             waitFor3DModule(() => init3DView());
 
+            updateSlideToggle('toggle3dDims', model3dDimsEnabled ? 1 : 0);
+
         } else {
 
             workspace?.classList.remove('has-3d');
@@ -1105,9 +1382,7 @@
 
             if (modal && !modal.hidden && host && panelEl) {
 
-                const canvas = host.querySelector('canvas');
-
-                if (canvas) panelEl.appendChild(canvas);
+                while (host.firstChild) panelEl.appendChild(host.firstChild);
 
                 modal.hidden = true;
 
@@ -1147,7 +1422,35 @@
 
         window.GConfig3D.init();
 
+        window.GConfig3D.setOptions({
+
+            quality: isMobile3D() ? 'mobile' : 'desktop',
+
+            dimensionsVisible: model3dDimsEnabled,
+
+            mobileExpanded: false,
+
+        });
+
         schedule3DRebuild();
+
+    }
+
+
+
+    function bind3DDimensionsToggle() {
+
+        bindSlideToggle('toggle3dDims', (btn) => {
+
+            const enabled = btn.getAttribute('data-dims') === 'on';
+
+            if (model3dDimsEnabled === enabled) return;
+
+            model3dDimsEnabled = enabled;
+
+            window.GConfig3D?.setDimensionsVisible?.(model3dDimsEnabled);
+
+        });
 
     }
 
@@ -1171,13 +1474,27 @@
 
 
 
+        const move3dTo = (target) => {
+
+            const source = target === host ? panel : host;
+
+            while (source.firstChild) {
+
+                target.appendChild(source.firstChild);
+
+            }
+
+        };
+
+
+
         const closeModal = () => {
 
             modal.hidden = true;
 
-            const canvas = host.querySelector('canvas');
+            move3dTo(panel);
 
-            if (canvas) panel.appendChild(canvas);
+            window.GConfig3D?.setMobileExpanded?.(false);
 
             if (window.GConfig3D?.resize) window.GConfig3D.resize();
 
@@ -1189,9 +1506,9 @@
 
             modal.hidden = false;
 
-            const canvas = panel.querySelector('canvas');
+            move3dTo(host);
 
-            if (canvas) host.appendChild(canvas);
+            window.GConfig3D?.setMobileExpanded?.(true);
 
             if (window.GConfig3D?.resize) window.GConfig3D.resize();
 
@@ -1637,9 +1954,393 @@
 
 
 
+    function updateBedWizardSelectLabels() {
+
+        const lang = currentLang === 'en' ? 'en' : 'ru';
+
+        const presetEl = fieldByIframe('bedPreset');
+
+        if (presetEl && presetEl.tagName === 'SELECT') {
+
+            const prev = presetEl.value || BED_WIZARD_DEFAULTS.bedPreset;
+
+            presetEl.innerHTML = '';
+
+            BED_PRESET_OPTIONS.forEach(({ value, en, ru }) => {
+
+                const opt = document.createElement('option');
+
+                opt.value = value;
+
+                opt.textContent = lang === 'en' ? en : ru;
+
+                presetEl.appendChild(opt);
+
+            });
+
+            presetEl.value = prev;
+
+        }
+
+        const baseEl = fieldByIframe('bedBaseType');
+
+        if (baseEl && baseEl.tagName === 'SELECT') {
+
+            const prev = baseEl.value || BED_WIZARD_DEFAULTS.bedBaseType;
+
+            baseEl.innerHTML = '';
+
+            BED_BASE_OPTIONS.forEach(({ value, en, ru }) => {
+
+                const opt = document.createElement('option');
+
+                opt.value = value;
+
+                opt.textContent = lang === 'en' ? en : ru;
+
+                baseEl.appendChild(opt);
+
+            });
+
+            baseEl.value = prev;
+
+        }
+
+    }
+
+
+
+    function ensureBedWizardSelectOptions() {
+
+        const lang = currentLang === 'en' ? 'en' : 'ru';
+
+        const presetEl = fieldByIframe('bedPreset');
+
+        if (presetEl && presetEl.tagName === 'SELECT' && !presetEl.options.length) {
+
+            BED_PRESET_OPTIONS.forEach(({ value, en, ru }) => {
+
+                const opt = document.createElement('option');
+
+                opt.value = value;
+
+                opt.textContent = lang === 'en' ? en : ru;
+
+                presetEl.appendChild(opt);
+
+            });
+
+            presetEl.value = BED_WIZARD_DEFAULTS.bedPreset;
+
+        }
+
+        const baseEl = fieldByIframe('bedBaseType');
+
+        if (baseEl && baseEl.tagName === 'SELECT' && !baseEl.options.length) {
+
+            BED_BASE_OPTIONS.forEach(({ value, en, ru }) => {
+
+                const opt = document.createElement('option');
+
+                opt.value = value;
+
+                opt.textContent = lang === 'en' ? en : ru;
+
+                baseEl.appendChild(opt);
+
+            });
+
+            baseEl.value = BED_WIZARD_DEFAULTS.bedBaseType;
+
+        }
+
+    }
+
+
+
+    function applyBedWizardDefaults(force = false) {
+
+        if (productMode !== 'beds') return;
+
+        ensureBedWizardSelectOptions();
+
+        Object.entries(BED_WIZARD_DEFAULTS).forEach(([id, defVal]) => {
+
+            const el = fieldByIframe(id);
+
+            if (!el) return;
+
+            if (force || el.value === '' || el.value == null) {
+
+                el.value = String(defVal);
+
+            }
+
+        });
+
+    }
+
+
+
+    function isIframeBedUiReady() {
+
+        const doc = iframeDoc();
+
+        return !!(doc && doc.getElementById('bedMattressW'));
+
+    }
+
+
+
+    /** Bed schematic canvas is 580px tall; closet schematic uses 500px. */
+
+    function isIframeBedSchematicReady() {
+
+        if (productMode !== 'beds') return true;
+
+        const win = iframeWin();
+
+        const doc = iframeDoc();
+
+        if (!win || !doc) return false;
+
+        if (win.__gconfigMode !== 'beds') return false;
+
+        if (win.__gconfigBedsSchematicReady) return true;
+
+        const src = doc.getElementById('schematicCanvas');
+
+        return !!(src && src.height >= 550 && src.width >= 600);
+
+    }
+
+
+
+    function ensureBedPreviewDrawn() {
+
+        if (productMode !== 'beds') return true;
+
+        if (isIframeBedSchematicReady()) return true;
+
+        if (!iframeReady) return false;
+
+        if (isIframeBedUiReady()) {
+
+            pushBedWizardToIframe();
+
+        } else {
+
+            redrawBedIframeSchematic();
+
+        }
+
+        return isIframeBedSchematicReady();
+
+    }
+
+
+
+    function pushBedWizardToIframe() {
+
+        if (productMode !== 'beds' || !iframeReady) return false;
+
+        if (!isIframeBedUiReady()) return false;
+
+        applyBedWizardDefaults();
+
+        syncPaused = true;
+
+        BED_IFRAME_FIELD_IDS.forEach((id) => {
+
+            const el = fieldByIframe(id);
+
+            if (!el) return;
+
+            const val = el.type === 'checkbox' ? el.checked : el.value;
+
+            setIframeValueQuiet(id, val);
+
+        });
+
+        syncPaused = false;
+
+
+
+        const win = iframeWin();
+
+        if (win && typeof win.__gconfigRedrawBedsConfigurator === 'function') {
+
+            win.__gconfigRedrawBedsConfigurator();
+
+        } else if (win && typeof win.__gconfigSyncBedToCoreFields === 'function') {
+
+            win.__gconfigSyncBedToCoreFields();
+
+            if (typeof win.scheduleUpdate === 'function') win.scheduleUpdate();
+
+            else if (typeof win.updateConfigurator === 'function') win.updateConfigurator();
+
+        }
+
+        return true;
+
+    }
+
+
+
+    function redrawBedIframeSchematic() {
+
+        const win = iframeWin();
+
+        if (!win) return;
+
+        if (typeof win.__gconfigRedrawBedsConfigurator === 'function') {
+
+            win.__gconfigRedrawBedsConfigurator();
+
+            return;
+
+        }
+
+        if (typeof win.updateConfigurator === 'function') win.updateConfigurator();
+
+        else if (typeof win.scheduleUpdate === 'function') win.scheduleUpdate();
+
+    }
+
+
+
+    function ensureIframeBedsDocument() {
+
+        if (productMode !== 'beds') return true;
+
+        const win = iframeWin();
+
+        if (!win) return false;
+
+        if (win.__gconfigMode === 'beds') return true;
+
+        if (bedsIframeReloadAttempts < 2) {
+
+            bedsIframeReloadAttempts += 1;
+
+            loadIframe();
+
+        }
+
+        return false;
+
+    }
+
+
+
+    function refreshBedPreviewFromIframe(attempt = 0) {
+
+        if (productMode !== 'beds') return;
+
+        if (!ensureIframeBedsDocument()) {
+
+            if (attempt < 40) {
+
+                setTimeout(() => refreshBedPreviewFromIframe(attempt + 1), 200);
+
+            }
+
+            return;
+
+        }
+
+        applyBedWizardDefaults(true);
+
+
+
+        if (!iframeReady) {
+
+            if (attempt < 40) {
+
+                setTimeout(() => refreshBedPreviewFromIframe(attempt + 1), 150);
+
+            }
+
+            return;
+
+        }
+
+
+
+        if (pushBedWizardToIframe() && isIframeBedSchematicReady()) {
+
+            pullFromIframe();
+
+            flushPreviewNow();
+
+            return;
+
+        }
+
+
+
+        if (attempt < 40) {
+
+            setTimeout(() => refreshBedPreviewFromIframe(attempt + 1), attempt < 10 ? 150 : 300);
+
+        }
+
+    }
+
+
+
+    function scheduleBedWizardSync() {
+
+        refreshBedPreviewFromIframe(0);
+
+    }
+
+
+
+    function onV1EngineReady(mode) {
+
+        if (mode === 'beds' && productMode === 'beds') {
+
+            applyBedWizardDefaults(true);
+
+            pushBedWizardToIframe();
+
+            redrawBedIframeSchematic();
+
+            pullFromIframe();
+
+            requestAnimationFrame(() => {
+
+                flushPreviewNow();
+
+                requestAnimationFrame(flushPreviewNow);
+
+            });
+
+            return;
+
+        }
+
+        if (productMode === 'closets' && mode !== 'beds') {
+
+            pullFromIframe();
+
+            triggerV1Update();
+
+            flushPreviewNow();
+
+        }
+
+    }
+
+
+
     function pullFromIframe() {
 
         syncPaused = true;
+
+        if (productMode === 'beds') ensureBedWizardSelectOptions();
 
         document.querySelectorAll('[data-iframe]').forEach((el) => {
 
@@ -1664,6 +2365,10 @@
             if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
 
         });
+
+
+
+        if (productMode === 'beds') applyBedWizardDefaults();
 
 
 
@@ -1746,6 +2451,8 @@
                     refreshEamfBackPanelSelect();
 
                 }
+
+                if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
 
             }, 0);
 
@@ -2473,6 +3180,22 @@
 
         if (!doc || !previewCanvas) return;
 
+        if (productMode === 'beds') {
+
+            const win = iframeWin();
+
+            if (win && win.__gconfigMode !== 'beds') return;
+
+            if (!isIframeBedSchematicReady()) {
+
+                ensureBedPreviewDrawn();
+
+                return;
+
+            }
+
+        }
+
         const src = doc.getElementById('schematicCanvas');
 
         if (!src) return;
@@ -2493,17 +3216,27 @@
 
             if (document.documentElement.classList.contains('theme-future')) {
 
-                const hingeDots = collectHingeDotsFromIframe();
+                if (productMode === 'beds') {
 
-                recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
-                applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
 
-                drawNeonParallelLiftOverlay(ctx);
+                } else {
 
-                drawNeonShelfSegmentsOverlay(ctx);
+                    const hingeDots = collectHingeDotsFromIframe();
 
-                drawSoftNeonHingeDots(ctx, hingeDots);
+                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+
+                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+
+                    drawNeonParallelLiftOverlay(ctx);
+
+                    drawNeonShelfSegmentsOverlay(ctx);
+
+                    drawSoftNeonHingeDots(ctx, hingeDots);
+
+                }
 
             }
 
@@ -2555,18 +3288,6 @@
 
 
 
-    function updateV1WelcomeLink() {
-
-        const link = document.getElementById('v1WelcomeLink');
-
-        if (!link) return;
-
-        link.href = 'welcome.html?theme=classic';
-
-    }
-
-
-
     function updateV1Link() {
 
         const link = document.getElementById('openV1Link');
@@ -2576,6 +3297,10 @@
             link.href = productMode === 'beds' ? 'beds.html' : 'configurator.html';
 
         }
+
+        const wrap = document.getElementById('v1LinkWrap');
+
+        if (wrap) wrap.hidden = !isLastStep(currentStep);
 
     }
 
@@ -2587,13 +3312,13 @@
 
         productMode = mode;
 
+        bedsIframeReloadAttempts = 0;
+
         appShell.classList.toggle('beds-mode', mode === 'beds');
 
         document.getElementById('modeClosets').classList.toggle('active', mode === 'closets');
 
         document.getElementById('modeBeds').classList.toggle('active', mode === 'beds');
-
-        updateV1Link();
 
         const url = new URL(window.location.href);
 
@@ -2607,7 +3332,10 @@
             goToStep(1);
         } else {
             updateNavLabels();
+            updateV1Link();
         }
+
+        applyBedWizardDefaults(true);
 
         loadIframe();
 
@@ -2732,6 +3460,8 @@
 
         updateNavLabels();
 
+        updateV1Link();
+
         schedulePreviewSync();
 
     }
@@ -2799,6 +3529,8 @@
 
         applyI18n();
 
+        if (productMode === 'beds') updateBedWizardSelectLabels();
+
         const win = iframeWin();
 
         if (win && typeof win.setLang === 'function') win.setLang(currentLang);
@@ -2829,15 +3561,39 @@
 
 
 
-        pullFromIframe();
+        if (productMode === 'beds') {
 
-        triggerV1Update();
+            applyBedWizardDefaults(true);
+
+            scheduleBedWizardSync();
+
+        } else {
+
+            pullFromIframe();
+
+            triggerV1Update();
+
+        }
 
 
 
         setTimeout(() => {
 
-            pullFromIframe();
+            if (productMode === 'beds') {
+
+                pushBedWizardToIframe();
+
+                if (!isIframeBedSchematicReady()) redrawBedIframeSchematic();
+
+                pullFromIframe();
+
+            } else {
+
+                pullFromIframe();
+
+                triggerV1Update();
+
+            }
 
             syncCanvas();
 
@@ -3185,7 +3941,13 @@
 
             if (!btn || btn.classList.contains('active')) return;
 
+            const buttons = [...toggle.querySelectorAll('.slide-toggle-btn')];
+
+            const activeIndex = buttons.indexOf(btn);
+
             onSelect(btn);
+
+            if (activeIndex >= 0) updateSlideToggle(id, activeIndex);
 
         });
 
@@ -3265,6 +4027,18 @@
 
 
 
+        window.addEventListener('message', (ev) => {
+
+            if (!iframe?.contentWindow || ev.source !== iframe.contentWindow) return;
+
+            if (ev.data?.type !== 'gconfig-v1-ready') return;
+
+            onV1EngineReady(ev.data.mode);
+
+        });
+
+
+
         bindSlideToggle('langToggle', (btn) => setLang(btn.getAttribute('data-lang')));
 
 
@@ -3301,6 +4075,28 @@
         bind3DModal();
 
         bind3DToggle();
+
+        bind3DDimensionsToggle();
+
+        let resize3dTimer = null;
+
+        window.addEventListener('orientationchange', () => {
+
+            if (!model3dEnabled) return;
+
+            clearTimeout(resize3dTimer);
+
+            resize3dTimer = setTimeout(() => {
+
+                window.GConfig3D?.setOptions?.({ quality: isMobile3D() ? 'mobile' : 'desktop' });
+
+                window.GConfig3D?.resize?.();
+
+                schedule3DRebuild();
+
+            }, 200);
+
+        });
 
 
 
@@ -3348,10 +4144,6 @@
 
         document.getElementById('modeBeds').classList.toggle('active', productMode === 'beds');
 
-        updateV1Link();
-
-        updateV1WelcomeLink();
-
         const themeParam = params.get('theme');
 
         if (themeParam === 'classic') {
@@ -3366,7 +4158,15 @@
 
         setLang(currentLang);
 
+        if (productMode === 'beds') applyBedWizardDefaults(true);
+
         bindUI();
+
+        loadEamfCatalog().then(() => {
+
+            if (productMode === 'closets') schedule3DRebuild();
+
+        });
 
         loadIframe();
 

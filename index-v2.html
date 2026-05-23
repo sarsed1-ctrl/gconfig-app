@@ -34,9 +34,8 @@
         <header class="top-bar">
             <div class="top-bar-nav">
                 <a href="welcome.html" class="version-toggle home-link" id="homeLink" data-i18n="to_home">Home</a>
-                <a href="welcome.html?theme=classic" class="version-toggle" id="v1WelcomeLink" data-i18n="to_v1">← v1.0</a>
             </div>
-            <div class="brand"><span class="brand-logo">GConfig</span><span class="brand-version">v2.0</span></div>
+            <div class="brand"><span class="brand-logo">GConfig</span></div>
             <div class="top-actions" id="topActions">
                 <div class="slide-toggle slide-toggle--theme" id="themeToggle" role="group" aria-label="Theme" data-active="0">
                     <span class="slide-toggle-thumb" aria-hidden="true"></span>
@@ -140,7 +139,7 @@
                         <div class="card closets-only">
                             <h3 data-i18n="countertop">Countertop</h3>
                             <label class="checkbox-field">
-                                <input type="checkbox" id="w-hasCountertop" data-iframe="hasCountertop">
+                                <input type="checkbox" id="w-hasCountertop" data-iframe="hasCountertop" checked>
                                 <span data-i18n="include_countertop">Include countertop</span>
                             </label>
                             <div class="field-grid countertop-fields" id="countertopFields">
@@ -150,7 +149,7 @@
                                 </div>
                                 <div class="field">
                                     <label data-i18n="ct_front_overhang">Front overhang (mm)</label>
-                                    <input type="number" id="w-ctFrontOverhang" data-iframe="ctFrontOverhang" min="0" step="1">
+                                    <input type="number" id="w-ctFrontOverhang" data-iframe="ctFrontOverhang" value="20" min="0" step="1">
                                 </div>
                                 <div class="field">
                                     <label data-i18n="ct_side_overhang">Side overhang (mm)</label>
@@ -372,7 +371,9 @@
                             </div>
                         </div>
                         <p class="step-desc" data-i18n="price_on_right">Price summary on the right. Export buttons below preview.</p>
-                        <p class="wizard-v1-link"><a href="configurator.html" id="openV1Link" data-i18n="open_v1_full">Open full v1.0 configurator →</a></p>
+                        <p class="wizard-v1-link" id="v1LinkWrap" hidden>
+                            <a href="configurator.html" id="openV1Link" data-i18n="open_v1_full">Open old configurator →</a>
+                        </p>
                     </section>
                 </div>
 
@@ -490,6 +491,7 @@
         }
     }
     </script>
+    <script src="eamf-countertop-thickness.js"></script>
     <script type="module" src="three-configurator.js"></script>
     <script src="script-v2.js"></script>
 </body>
