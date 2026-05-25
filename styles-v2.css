@@ -1100,6 +1100,18 @@ html, body {
 .drawer-fields.visible,
 .card.drawer-fields.visible { display: block; }
 
+.section-disabled {
+    opacity: 0.38;
+    pointer-events: none;
+    user-select: none;
+}
+
+.field-hint--drawer-warn {
+    color: #e8a020;
+    font-size: 0.82em;
+    margin: 4px 0 6px;
+}
+
 
 
 .back-fit-row {

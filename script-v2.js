@@ -1912,6 +1912,26 @@
 
         if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
 
+        // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
+        const isDrawer = lowerMode === 'drawer';
+        document.querySelectorAll('.lower-shelf-field').forEach((el) => {
+            el.classList.toggle('section-disabled', isDrawer);
+        });
+        document.getElementById('lowerShelvesDrawerHint')?.classList.toggle('hidden', !isDrawer);
+        if (isDrawer) {
+            const hEl = document.getElementById('w-vanityShelvesH');
+            const vEl = document.getElementById('w-vanityShelvesV');
+            if (hEl && hEl.value !== '0') {
+                hEl.value = '0';
+                hEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (vEl && vEl.value !== '0') {
+                vEl.value = '0';
+                vEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
 
 
         document.querySelectorAll('.hinge-upper-field').forEach((el) => {
