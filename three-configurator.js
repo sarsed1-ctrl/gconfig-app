@@ -1033,12 +1033,19 @@ class Furniture3D {
         const countH = Math.max(0, Math.min(5, sec.horizontal || 0));
         const countV = Math.max(0, Math.min(4, sec.vertical || 0));
 
+        const fallbackSpacingH = Math.floor((H - 2 * T) / (countH + 1));
+        const spacingH = (sec.spacingH > 0) ? sec.spacingH : fallbackSpacingH;
         for (let i = 1; i <= countH; i += 1) {
-            const y = baseY + T + (i * (H - 2 * T)) / (countH + 1);
+            const y = baseY + T + i * spacingH;
+            if (y + T > baseY + H - T) break;           // out-of-bounds guard
             addPanel(group, innerW, T, innerD, mat, 0, y, 0);
         }
+
+        const fallbackSpacingV = Math.floor(innerW / (countV + 1));
+        const spacingV = (sec.spacingV > 0) ? sec.spacingV : fallbackSpacingV;
         for (let i = 1; i <= countV; i += 1) {
-            const x = -innerW / 2 + (i * innerW) / (countV + 1);
+            const x = -innerW / 2 + i * spacingV;
+            if (Math.abs(x) > innerW / 2 - T) break;   // out-of-bounds guard
             addPanel(group, T, H - 2 * T, innerD, mat, x, baseY + H / 2, 0);
         }
     }
