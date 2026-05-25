@@ -493,6 +493,8 @@
 
             hint_drawer_preview: 'Каждый ящик — отдельная панель фасада в превью.',
 
+            hint_lower_shelves_drawer: 'Полки недоступны в режиме ящиков.',
+
             hint_edge_override: 'Подбирается при смене материала; можно изменить вручную.',
 
             hint_spacing_upper_h: 'Расстояние между горизонтальными полками верхнего шкафа.',
@@ -726,6 +728,8 @@
             hint_drawer_sink: 'Drawers disable sink in the lower cabinet (v1 rule).',
 
             hint_drawer_preview: 'Each drawer becomes a separate facade panel in the preview.',
+
+            hint_lower_shelves_drawer: 'Lower shelves unavailable in drawer mode.',
 
             hint_edge_override: 'Auto-selected when material changes; you can override.',
 
