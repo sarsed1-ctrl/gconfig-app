@@ -983,7 +983,7 @@ class Furniture3D {
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true });
+            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec });
         } else if (lowerMode === 'gas') {
             this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
         } else if (lowerMode === 'hinge') {
@@ -1218,24 +1218,43 @@ class Furniture3D {
         });
     }
 
-    addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, wallT, mat) {
-        const sideH = innerH - wallT;
-        const sideY = cy - wallT / 2;
-        addPanel(drawerGroup, innerW, wallT, innerD, mat, 0, cy - innerH / 2 + wallT / 2, 0);
-        addPanel(drawerGroup, wallT, sideH, innerD, mat, -innerW / 2 + wallT / 2, sideY, 0);
-        addPanel(drawerGroup, wallT, sideH, innerD, mat, innerW / 2 - wallT / 2, sideY, 0);
-        addPanel(drawerGroup, innerW - 2 * wallT, sideH, wallT, mat, 0, sideY, -innerD / 2 + wallT / 2);
+    addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, spec, innerMat) {
+        // spec: { sideThick, sideH, sideColor } from drawer system DB
+        const sideT   = spec?.sideThick || 16;
+        const sideH   = Math.min(spec?.sideH || (innerH - 16), innerH - 16);
+        const bottomT = 16;    // chipboard bottom always 16mm
+        const bottomY = cy - innerH / 2 + bottomT / 2;
+        const sideY   = bottomY + bottomT / 2 + sideH / 2;   // sides sit on top of bottom panel
+
+        const sideMat = spec?.sideColor != null
+            ? getMaterial('drawer-side', spec.sideColor, { roughness: 0.25, metalness: 0.55 })
+            : innerMat;
+
+        // Bottom (chipboard)
+        addPanel(drawerGroup, innerW, bottomT, innerD, innerMat, 0, bottomY, 0);
+        // Sides (real system material, real height)
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat, -innerW / 2 + sideT / 2, sideY, 0);
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat,  innerW / 2 - sideT / 2, sideY, 0);
+        // Back panel (chipboard)
+        addPanel(drawerGroup, innerW - 2 * sideT, sideH, sideT, innerMat, 0, sideY, -innerD / 2 + sideT / 2);
     }
 
     addDrawers(group, W, H, D, facadeT, mat, count, opts = {}) {
-        const n = Math.max(1, Math.min(5, count));
-        const drawerH = (H - FACADE_GAP * 2) / n;
-        const facadeZ = D / 2 + facadeT / 2 + 2;
-        const slideMm = 0.72 * (D - 24);
-        const innerW = W - 16;
-        const innerH = drawerH - 12;
-        const innerD = D - 24;
-        const wallT = 16;
+        const n    = Math.max(1, Math.min(5, count));
+        const spec = opts.drawerSpec || null;   // { sideH, sideThick, gap, sideColor, runners }
+
+        // Runner length: largest standard ≤ available depth
+        const RUNNERS = (spec?.runners) || [250, 300, 350, 400, 450, 500, 550, 600];
+        let runnerL = RUNNERS[0];
+        for (const l of RUNNERS) { if (l <= D - 24) runnerL = l; }
+
+        const gap      = spec?.gap ?? 16;       // total lateral clearance consumed by system
+        const drawerH  = (H - FACADE_GAP * 2) / n;
+        const facadeZ  = D / 2 + facadeT / 2 + 2;
+        const slideMm  = runnerL * 0.92;        // realistic slide-out distance
+        const innerW   = W - 32 - gap;          // 16mm carcass side each side + system clearance
+        const innerH   = drawerH - 12;
+        const innerD   = runnerL;
         const innerMat = getMaterial('drawer-inner', 'ldsp');
 
         for (let i = 0; i < n; i += 1) {
@@ -1244,7 +1263,7 @@ class Furniture3D {
             group.add(drawerGroup);
 
             const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
-            this.addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, wallT, innerMat);
+            this.addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, spec, innerMat);
 
             if (opts.interactive && facadeMesh) {
                 facadeMesh.userData.baseMaterial = mat;

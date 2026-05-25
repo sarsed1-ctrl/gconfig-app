@@ -157,11 +157,89 @@
 
 
 
+    // ── Drawer system database (manufacturer specs) ───────────────────────────
+    // sideH    — side panel / inner box height, mm (what you see on the label)
+    // sideThick — side panel thickness, mm
+    // gap      — total lateral clearance consumed by runners + brackets, mm
+    // sideColor — Three.js hex for the side panel material in 3D preview
+    // runners  — available runner lengths, mm (largest that fits depth is chosen)
+    const DRAWER_SYSTEMS = [
+        // GTV AxisPro — aluminium push-to-open, anthracite, 37mm bracket per side
+        { id: 'axispro_86',  brand: 'GTV',    name: 'AxisPro H86',         sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_115', brand: 'GTV',    name: 'AxisPro H115',        sideH: 115, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_150', brand: 'GTV',    name: 'AxisPro H150',        sideH: 150, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        // Hafele MatrixBox — epoxy steel, 7mm clearance per side
+        { id: 'matrixbox_86',  brand: 'Hafele', name: 'MatrixBox S30 H86',  sideH: 86,  sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_115', brand: 'Hafele', name: 'MatrixBox M40 H115', sideH: 115, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_150', brand: 'Hafele', name: 'MatrixBox L40 H150', sideH: 150, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_190', brand: 'Hafele', name: 'MatrixBox XL H190',  sideH: 190, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+    ];
+
+    /**
+     * Return systems whose side height fits inside one drawer slot.
+     * slotH = cabinetInterior / drawerCount
+     * Required clearance: 16mm bottom + 10mm top gap + 6mm facade gap = 32mm
+     */
+    function filterDrawerSystems(cabinetH, drawerCount, carcassT) {
+        const interior = cabinetH - 2 * (carcassT || 16);
+        const count = Math.max(1, drawerCount || 1);
+        const slotH = Math.floor(interior / count);
+        const maxSideH = slotH - 32;   // 16mm bottom panel + 10mm top clearance + 6mm facade gaps
+        return DRAWER_SYSTEMS.filter(s => s.sideH <= maxSideH);
+    }
+
+    /** Get the DRAWER_SYSTEMS entry for the currently selected system (or first available). */
+    function getSelectedDrawerSpec() {
+        const id = document.getElementById('w-lowerDrawerSystem')?.value;
+        return DRAWER_SYSTEMS.find(s => s.id === id) || DRAWER_SYSTEMS[0];
+    }
+
+    /**
+     * Rebuild the v2 drawer system <select> based on current cabinet H and drawer count.
+     * Also updates the hint and syncs the chosen value to the v1 iframe.
+     */
+    function rebuildDrawerSystemSelect() {
+        const sel = document.getElementById('w-lowerDrawerSystem');
+        if (!sel) return;
+        const cabinetH  = fieldNum('h1', 500);
+        const count     = fieldNum('lowerDrawerCount', 1);
+        const carcassT  = fieldNum('carcassThick', 16);
+        const prev      = sel.value;
+        const available = filterDrawerSystems(cabinetH, count, carcassT);
+        sel.innerHTML = available.length
+            ? available.map(s =>
+                `<option value="${s.id}">${s.brand} — ${s.name}</option>`
+              ).join('')
+            : `<option value="">— ${currentLang === 'ru' ? 'Нет подходящих систем' : 'No systems fit'} —</option>`;
+        // Restore previous selection if still available
+        if (available.find(s => s.id === prev)) sel.value = prev;
+        else if (available.length) sel.value = available[0].id;
+        // Push selected system to v1 iframe so cut list uses correct gap/SKU
+        _syncDrawerSystemToV1(sel.value);
+    }
+
+    /** Push the selected drawer system ID to v1 so its cut list uses correct values. */
+    function _syncDrawerSystemToV1(systemId) {
+        const iDoc = iframeDoc();
+        if (!iDoc) return;
+        const iSel = iDoc.getElementById('lowerDrawerSystem');
+        if (!iSel) return;
+        // Map our detailed ID to the base brand v1 understands (axispro / matrixbox)
+        const base = systemId.startsWith('axispro') ? 'axispro'
+                   : systemId.startsWith('matrixbox') ? 'matrixbox'
+                   : systemId;
+        if (iSel.value !== base) {
+            iSel.value = base;
+            iSel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const SELECT_CLONE_IDS = [
 
         'facadeThick', 'carcassThick', 'wallType', 'countertopMaterial',
 
-        'lowerDrawerSystem', 'lowerDrawerCount',
+        'lowerDrawerCount',
 
         'eamfBackPanel', 'eamfFacadeMaterial', 'eamfFacadeEdge',
 
@@ -1289,6 +1367,8 @@
 
                 count: fieldNum('lowerDrawerCount', 1),
 
+                spec: getSelectedDrawerSpec(),
+
             },
 
             lowerSplitDoor: fieldCheck('lowerSplitFacade'),
@@ -1790,13 +1870,12 @@
 
         if (getLowerHardwareMode() !== 'drawer') return;
 
-        ['lowerDrawerSystem', 'lowerDrawerCount'].forEach((id) => {
+        // lowerDrawerSystem is now managed by rebuildDrawerSystemSelect(), not cloned from v1
+        // lowerDrawerCount is still cloned from v1
+        const wEl = document.querySelector('[data-iframe="lowerDrawerCount"]');
+        if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions('lowerDrawerCount', wEl);
 
-            const wEl = document.querySelector(`[data-iframe="${id}"]`);
-
-            if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
-
-        });
+        rebuildDrawerSystemSelect();
 
     }
 
@@ -1915,6 +1994,9 @@
         if (drawerFields) drawerFields.classList.toggle('visible', lowerMode === 'drawer');
 
         if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
+
+        // Rebuild drawer system select whenever mode or dimensions change
+        if (lowerMode === 'drawer') rebuildDrawerSystemSelect();
 
         // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
         const isDrawer = lowerMode === 'drawer';
@@ -2427,6 +2509,20 @@
         if (id === 'lowerDrawerCount' || id === 'lowerDrawerSystem') {
 
             ensureLowerDrawerModeInIframe();
+
+        }
+
+        // lowerDrawerSystem uses detailed IDs (axispro_86 etc.) that v1 doesn't know —
+        // map to v1 base name, then trigger 3D rebuild with the selected spec and return.
+        if (id === 'lowerDrawerSystem') {
+
+            _syncDrawerSystemToV1(fromEl.value);
+
+            schedule3DRebuild();
+
+            updateConditionalUI();
+
+            return;
 
         }
 
