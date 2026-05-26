@@ -328,7 +328,10 @@ function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
     const screwMat = getMaterial('gas-bracket-screw', 0x2f363b, { metalness: 0.92, roughness: 0.18 });
 
     const parts = [];
-    const base = addPanel(group, plateThk, plateH, plateD, bodyMat, xPlate, attachY, attachZ);
+    // 90° on side wall: long edge along depth (Z), short edge along height (Y).
+    const plateY = plateD;
+    const plateZ = plateH;
+    const base = addPanel(group, plateThk, plateY, plateZ, bodyMat, xPlate, attachY, attachZ);
     if (base) {
         base.renderOrder = 1;
         parts.push(base);
@@ -337,14 +340,14 @@ function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
     const faceThk = 1.8;
     const faceInset = 12;
     const faceX = side < 0 ? xPlate + plateThk / 2 + faceThk / 2 + 0.12 : xPlate - plateThk / 2 - faceThk / 2 - 0.12;
-    const face = addPanel(group, faceThk, plateH - faceInset, plateD - faceInset, faceMat, faceX, attachY, attachZ);
+    const face = addPanel(group, faceThk, plateY - faceInset, plateZ - faceInset, faceMat, faceX, attachY, attachZ);
     if (face) {
         face.renderOrder = 2;
         parts.push(face);
     }
 
-    const screwY = plateH * 0.26;
-    const screwZ = plateD * 0.24;
+    const screwY = plateY * 0.26;
+    const screwZ = plateZ * 0.24;
     const screwW = 11;
     const screwH = 11;
     const screwD = 2.8;
