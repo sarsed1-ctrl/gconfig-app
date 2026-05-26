@@ -1230,13 +1230,12 @@ class Furniture3D {
         });
     }
 
-    addDrawerBox(drawerGroup, innerW, slotH, innerD, cy, spec, innerMat) {
+    addDrawerBox(drawerGroup, innerW, slotH, innerD, cy, spec, innerMat, boxCenterZ = 0) {
         // spec: { sideThick, sideH, sideColor } from drawer system DB
         // slotH — full height of the slot this drawer occupies (cabinet interior / count)
+        // boxCenterZ — Z-center of the box so the front face sits just behind the facade
         const sideT   = spec?.sideThick || 16;
         // Use the REAL catalog side height, not the slot height.
-        // getBestDrawerSpec guarantees sideH fits (sideH <= slotH - 32),
-        // but we guard anyway to avoid geometry overflow.
         const sideH   = Math.min(spec?.sideH || Math.max(50, slotH - 32), slotH - 20);
         const bottomT = 16;         // chipboard bottom panel, always 16mm
         const runnerGap = 4;        // small clearance at slot bottom for runner bracket
@@ -1250,13 +1249,16 @@ class Furniture3D {
             ? getMaterial('drawer-side', spec.sideColor, { roughness: 0.25, metalness: 0.55 })
             : innerMat;
 
+        // Back panel Z: relative to box center
+        const backZ = boxCenterZ - innerD / 2 + sideT / 2;
+
         // Bottom (chipboard)
-        addPanel(drawerGroup, innerW, bottomT, innerD, innerMat, 0, bottomY, 0);
+        addPanel(drawerGroup, innerW, bottomT, innerD, innerMat, 0, bottomY, boxCenterZ);
         // Sides — aluminum rails at their real catalog height
-        addPanel(drawerGroup, sideT, sideH, innerD, sideMat, -innerW / 2 + sideT / 2, sideY, 0);
-        addPanel(drawerGroup, sideT, sideH, innerD, sideMat,  innerW / 2 - sideT / 2, sideY, 0);
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat, -innerW / 2 + sideT / 2, sideY, boxCenterZ);
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat,  innerW / 2 - sideT / 2, sideY, boxCenterZ);
         // Back panel (chipboard, same height as sides)
-        addPanel(drawerGroup, innerW - 2 * sideT, sideH, sideT, innerMat, 0, sideY, -innerD / 2 + sideT / 2);
+        addPanel(drawerGroup, innerW - 2 * sideT, sideH, sideT, innerMat, 0, sideY, backZ);
     }
 
     addDrawers(group, W, H, D, facadeT, mat, count, opts = {}) {
@@ -1279,13 +1281,18 @@ class Furniture3D {
         const innerD   = runnerL;
         const innerMat = getMaterial('drawer-inner', 'ldsp');
 
+        // Position the box so its front face sits ~3 mm behind the carcass opening (D/2).
+        // Without this offset the box would be centred at z=0 leaving a ~25mm gap.
+        const boxFrontZ  = D / 2 - 3;          // front face of the drawer box
+        const boxCenterZ = boxFrontZ - innerD / 2;
+
         for (let i = 0; i < n; i += 1) {
             const cy = drawerH * i + drawerH / 2 + FACADE_GAP;
             const drawerGroup = new THREE.Group();
             group.add(drawerGroup);
 
             const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
-            this.addDrawerBox(drawerGroup, innerW, drawerH, innerD, cy, spec, innerMat);
+            this.addDrawerBox(drawerGroup, innerW, drawerH, innerD, cy, spec, innerMat, boxCenterZ);
 
             // Per-drawer push-to-open flag: user index 0 = top = 3D index (n-1)
             const userIdx  = n - 1 - i;
