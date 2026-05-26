@@ -6513,63 +6513,6 @@
                 : 'Inset hinges (zero overlay) — HAFELE, GTV';
         }
 
-        // === UPPER CABINET: facade dimension calculation ===
-        const upperDoorType = document.querySelector('input[name="upperDoorType"]:checked')?.value || 'overlay';
-        const upperOverlayGap = parseFloat(document.getElementById('upperOverlayGap').value) || 2;
-        const upperInsetGap = parseFloat(document.getElementById('upperInsetGap').value) || 2;
-        const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
-        const upperSplitFacade = !!document.getElementById('upperSplitFacade')?.checked;
-        
-        const upperFacadeDimsEl = document.getElementById('upperFacadeDims');
-        const upperHintEl = document.getElementById('upperHingeHint');
-        
-        if (w2 > 0 && h2 > 0) {
-            const upperOpeningW = Math.max(0, w2 - 2 * carcassT);
-            const upperOpeningH = Math.max(0, h2 - 2 * carcassT);
-            const upperBaseFacadeW = upperDoorType === 'overlay'
-                ? Math.max(0, w2 - 2 * upperOverlayGap)
-                : Math.max(0, upperOpeningW - 2 * upperInsetGap);
-            const upperBaseFacadeH = upperDoorType === 'overlay'
-                ? Math.max(0, h2 - 2 * upperOverlayGap)
-                : Math.max(0, upperOpeningH - 2 * upperInsetGap);
-            
-            let upperDoors = [{ name: 'Upper Closet Facade', width: upperBaseFacadeW, height: upperBaseFacadeH, side: 'left' }];
-            if (upperHardwareMode === 'hinge' && upperSplitFacade) {
-                const leftInput = document.getElementById('upperLeftDoorW');
-                const rightInput = document.getElementById('upperRightDoorW');
-                const autoHalf = Math.max(50, Math.round((upperBaseFacadeW - 3) / 2));
-                let leftW = parseInt(leftInput?.value) || autoHalf;
-                let rightW = parseInt(rightInput?.value) || autoHalf;
-                if (!leftInput?.dataset.userEdited && !rightInput?.dataset.userEdited) {
-                    leftW = autoHalf;
-                    rightW = Math.max(50, upperBaseFacadeW - leftW - 3);
-                    if (leftInput) leftInput.value = String(leftW);
-                    if (rightInput) rightInput.value = String(rightW);
-                }
-                if (leftW + rightW > upperBaseFacadeW) {
-                    rightW = Math.max(50, upperBaseFacadeW - leftW);
-                    if (rightInput) rightInput.value = String(rightW);
-                }
-                upperDoors = [
-                    { name: 'Upper Closet Left Facade', width: leftW, height: upperBaseFacadeH, side: 'left' },
-                    { name: 'Upper Closet Right Facade', width: rightW, height: upperBaseFacadeH, side: 'right' }
-                ];
-            }
-            
-            if (upperFacadeDimsEl) {
-                const label = upperDoors.map(d => `${d.name}: ${Math.round(d.width)}×${Math.round(d.height)} mm`).join(' | ');
-                upperFacadeDimsEl.textContent = label;
-            }
-            if (upperHintEl) {
-                upperHintEl.textContent = upperDoorType === 'overlay'
-                    ? 'Overlay hinges — HAFELE, GTV'
-                    : 'Inset hinges — HAFELE, GTV';
-            }
-        } else {
-            if (upperFacadeDimsEl) upperFacadeDimsEl.textContent = '—';
-            if (upperHintEl) upperHintEl.textContent = '—';
-        }
-
         // Countertop
         if (hasCT && ctMat && ctT) {
             const ctW = w1 + (ctSideOverhang * 2);
