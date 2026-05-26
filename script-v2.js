@@ -164,15 +164,20 @@
     // sideColor — Three.js hex for the side panel material in 3D preview
     // runners  — available runner lengths, mm (largest that fits depth is chosen)
     const DRAWER_SYSTEMS = [
-        // GTV AxisPro — aluminium, ALWAYS push-to-open, anthracite, 37mm bracket per side
-        { id: 'axispro_86',  brand: 'GTV',    name: 'AxisPro H86',         pushToOpen: true, sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_115', brand: 'GTV',    name: 'AxisPro H115',        pushToOpen: true, sideH: 115, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_150', brand: 'GTV',    name: 'AxisPro H150',        pushToOpen: true, sideH: 150, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        // Hafele MatrixBox — epoxy steel, 7mm clearance per side; available in regular + push-to-open
-        { id: 'matrixbox_86',  brand: 'Hafele', name: 'MatrixBox S30 H86',  sideH: 86,  sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_115', brand: 'Hafele', name: 'MatrixBox M40 H115', sideH: 115, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_150', brand: 'Hafele', name: 'MatrixBox L40 H150', sideH: 150, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_190', brand: 'Hafele', name: 'MatrixBox XL H190',  sideH: 190, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        // GTV AxisPro — aluminium, anthracite, 37mm bracket per side.
+        // Available in BOTH soft-close and push-to-open.
+        // Real heights (gtv.com.pl): 69, 86, 120, 168, 200 mm.
+        { id: 'axispro_69',  brand: 'GTV', name: 'AxisPro H69',  sideH: 69,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_86',  brand: 'GTV', name: 'AxisPro H86',  sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_120', brand: 'GTV', name: 'AxisPro H120', sideH: 120, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_168', brand: 'GTV', name: 'AxisPro H168', sideH: 168, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_200', brand: 'GTV', name: 'AxisPro H200', sideH: 200, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        // Hafele MatrixBox S — epoxy steel, 7mm clearance per side; soft-close and push-to-open.
+        // Real heights (hafele.com): 84, 120, 167, 199 mm.
+        { id: 'matrixbox_84',  brand: 'Hafele', name: 'MatrixBox S H84',  sideH: 84,  sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_120', brand: 'Hafele', name: 'MatrixBox M H120', sideH: 120, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_167', brand: 'Hafele', name: 'MatrixBox L H167', sideH: 167, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        { id: 'matrixbox_199', brand: 'Hafele', name: 'MatrixBox XL H199', sideH: 199, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
     ];
 
     /**
@@ -200,11 +205,9 @@
      * AxisPro forces all to 'pto'. Unset slots default to 'regular'.
      */
     function getDrawerTypes(count) {
-        const brand = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
-        const def   = brand === 'axispro' ? 'pto' : 'regular';
         const result = [];
         for (let i = 0; i < count; i++) {
-            result.push(drawerTypesArr[i] !== undefined ? drawerTypesArr[i] : def);
+            result.push(drawerTypesArr[i] !== undefined ? drawerTypesArr[i] : 'regular');
         }
         return result;
     }
@@ -216,9 +219,7 @@
     function renderDrawerTypeRows(count) {
         const container = document.getElementById('drawerTypeRows');
         if (!container) return;
-        const brand     = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
-        const isPtoOnly = brand === 'axispro';
-        const types     = getDrawerTypes(count);
+        const types = getDrawerTypes(count);
         container.innerHTML = '';
         for (let i = 0; i < count; i++) {
             const row = document.createElement('div');
@@ -227,7 +228,7 @@
             lbl.className = 'drawer-type-label';
             lbl.textContent = `${t('drawer_label')} ${i + 1}`;
             const chips = document.createElement('div');
-            chips.className = 'hw-chips' + (isPtoOnly ? ' section-disabled' : '');
+            chips.className = 'hw-chips';
             ['regular', 'pto'].forEach(val => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -235,7 +236,6 @@
                 btn.dataset.value = val;
                 btn.textContent = t(val === 'regular' ? 'drawer_regular' : 'drawer_pto');
                 btn.addEventListener('click', () => {
-                    if (isPtoOnly) return;
                     chips.querySelectorAll('.hw-chip').forEach(c => c.classList.remove('active'));
                     btn.classList.add('active');
                     drawerTypesArr[i] = val;
