@@ -323,25 +323,81 @@ function gasLiftCabinetAttachZ(D) {
     return D / 2 - GAS_MOUNT_PLATE_DEPTH_MM / 2 - GAS_MOUNT_FRONT_CLEAR_MM;
 }
 
-/** Door-end joint on inner facade face (pivot-local mm, Z toward cabinet interior). */
-function gasLiftDoorAttachLocalMm(facadeT, doorH, rodR) {
+const _gasCab = new THREE.Vector3();
+const _gasHint = new THREE.Vector3();
+const _gasDir = new THREE.Vector3();
+const _gasNormal = new THREE.Vector3();
+const _gasHit = new THREE.Vector3();
+const _gasRay = new THREE.Raycaster();
+const _gasPivotLocal = new THREE.Vector3();
+
+/** Door-end joint hint (pivot-local mm). */
+function gasLiftDoorAttachLocalMm(facadeT, doorH) {
     const doorBracketThk = 3.5;
     return {
         fromTop: doorH * 0.22,
-        zInner: -(facadeT / 2 + doorBracketThk + rodR + 2),
+        zInner: -(facadeT / 2 + doorBracketThk / 2),
         bracketThk: doorBracketThk,
     };
 }
 
-/** Small bracket on door inner face — rod meets here, not inside the panel. */
+/**
+ * Clip strut end to the door inner surface along cabinet→door ray (avoids passing through facade).
+ * @returns {{ x: number, y: number, z: number, hit: boolean }}
+ */
+function resolveGasLiftDoorRodEndMm(lift, cabX, cabY, cabZ, hintMm, rodR) {
+    if (!lift?.doorMesh) {
+        return { x: hintMm.x, y: hintMm.y, z: hintMm.z, hit: false };
+    }
+    lift.doorMesh.updateMatrixWorld(true);
+    _gasCab.set(cabX * MM, cabY * MM, cabZ * MM);
+    _gasHint.set(hintMm.x * MM, hintMm.y * MM, hintMm.z * MM);
+    _gasDir.subVectors(_gasHint, _gasCab);
+    const dist = _gasDir.length();
+    if (dist < 1e-6) {
+        return { x: hintMm.x, y: hintMm.y, z: hintMm.z, hit: false };
+    }
+    _gasDir.multiplyScalar(1 / dist);
+    _gasRay.set(_gasCab, _gasDir);
+    _gasRay.far = dist + 0.004;
+    const hits = _gasRay.intersectObject(lift.doorMesh, false);
+    if (!hits.length) {
+        return { x: hintMm.x, y: hintMm.y, z: hintMm.z, hit: false };
+    }
+    const hit = hits[0];
+    const hitWorld = hit.point.clone();
+    const hitNorm = hit.face.normal.clone().transformDirection(lift.doorMesh.matrixWorld).normalize();
+    const standoff = (rodR + 5) * MM;
+    _gasHit.copy(hitWorld);
+    if (hitNorm.dot(_gasDir) < 0) _gasHit.addScaledVector(hitNorm, -standoff);
+    else _gasHit.addScaledVector(hitNorm, standoff);
+    return {
+        x: _gasHit.x / MM,
+        y: _gasHit.y / MM,
+        z: _gasHit.z / MM,
+        hit: true,
+        hitPoint: hitWorld,
+        hitNormal: hitNorm,
+    };
+}
+
+/** Small bracket on door inner face — repositioned each frame from ray hit. */
 function addGasLiftDoorBracket(pivotGroup, xRod, yPivot, zInner, attach) {
     const mat = getMaterial('gas-door-bracket', 0x5c656c, { metalness: 0.72, roughness: 0.36 });
     const w = 44;
     const h = 30;
-    const zCenter = zInner - attach.bracketThk / 2;
-    const mesh = addPanel(pivotGroup, w, h, attach.bracketThk, mat, xRod, yPivot, zCenter);
-    if (mesh) mesh.renderOrder = 3;
+    const mesh = addPanel(pivotGroup, w, h, attach.bracketThk, mat, xRod, yPivot, zInner);
+    if (mesh) mesh.renderOrder = 4;
     return mesh;
+}
+
+function syncGasLiftDoorBracket(pivotGroup, bracket, hitPointWorld, hitNormalWorld, bracketThkMm) {
+    if (!bracket || !hitPointWorld || !hitNormalWorld) return;
+    const half = (bracketThkMm * MM) / 2;
+    _gasPivotLocal.copy(hitPointWorld).addScaledVector(hitNormalWorld, -half);
+    const inv = pivotGroup.matrixWorld.clone().invert();
+    _gasPivotLocal.applyMatrix4(inv);
+    bracket.position.copy(_gasPivotLocal);
 }
 
 /** Plate center + rod joint on cavity face of bracket (mm, cabinet space). */
@@ -739,21 +795,34 @@ class Furniture3D {
                 if (!showStruts) {
                     rod.visible = false;
                     if (mountPlates) mountPlates.forEach((p) => { p.visible = false; });
+                    const brHide = side < 0 ? lift.doorBracketLeft : lift.doorBracketRight;
+                    if (brHide) brHide.visible = false;
                     return;
                 }
                 if (mountPlates) mountPlates.forEach((p) => { p.visible = true; });
                 const attachLocal = side < 0 ? lift.attachLocalLeft : lift.attachLocalRight;
+                const bracket = side < 0 ? lift.doorBracketLeft : lift.doorBracketRight;
+                if (bracket) bracket.visible = true;
                 attachScratch.copy(attachLocal).applyMatrix4(lift.group.matrixWorld);
+                const hintMm = {
+                    x: attachScratch.x / MM,
+                    y: attachScratch.y / MM,
+                    z: attachScratch.z / MM,
+                };
+                const end = resolveGasLiftDoorRodEndMm(lift, x, cabinetAttachY, cabinetAttachZ, hintMm, rodR);
+                if (end.hit && end.hitPoint && end.hitNormal) {
+                    syncGasLiftDoorBracket(lift.group, bracket, end.hitPoint, end.hitNormal, lift.doorBracketThk);
+                }
                 setRodEndpoints(
                     rod,
                     x,
                     cabinetAttachY,
                     cabinetAttachZ,
-                    attachScratch.x / MM,
-                    attachScratch.y / MM,
-                    attachScratch.z / MM,
+                    end.x,
+                    end.y,
+                    end.z,
                     rodR,
-                    rodR + 1.5
+                    rodR + 2
                 );
             });
         }
@@ -1241,21 +1310,22 @@ class Furniture3D {
         // never crosses the carcass top when the door swings fully open.
         const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
         const cabinetAttachZ = gasLiftCabinetAttachZ(D);
-        const doorAttach = gasLiftDoorAttachLocalMm(facadeT, doorH, rodR);
+        const doorAttach = gasLiftDoorAttachLocalMm(facadeT, doorH);
         const doorAttachFromTop = doorAttach.fromTop;
         const doorInnerZMm = doorAttach.zInner;
         const doorPivotY = -doorAttachFromTop;
-        const doorAttachY = cabinetTopY - doorAttachFromTop;
-        const doorAttachZ = pivotZ + doorInnerZMm;
         const attachLocalLeft = new THREE.Vector3(mountLeft.xRod * MM, doorPivotY * MM, doorInnerZMm * MM);
         const attachLocalRight = new THREE.Vector3(mountRight.xRod * MM, doorPivotY * MM, doorInnerZMm * MM);
 
-        addGasLiftDoorBracket(pivotGroup, mountLeft.xRod, doorPivotY, doorInnerZMm, doorAttach);
-        addGasLiftDoorBracket(pivotGroup, mountRight.xRod, doorPivotY, doorInnerZMm, doorAttach);
+        const doorBracketLeft = addGasLiftDoorBracket(pivotGroup, mountLeft.xRod, doorPivotY, doorInnerZMm, doorAttach);
+        const doorBracketRight = addGasLiftDoorBracket(pivotGroup, mountRight.xRod, doorPivotY, doorInnerZMm, doorAttach);
 
         const gasState = {
             group: pivotGroup,
             doorMesh,
+            doorBracketThk: doorAttach.bracketThk,
+            doorBracketLeft,
+            doorBracketRight,
             rotationAxis: 'x',
             openAngle,
             closedAngle,
@@ -1280,12 +1350,15 @@ class Furniture3D {
                     cabinetAttachY,
                     cabinetAttachZ,
                     x,
-                    doorAttachY,
-                    doorAttachZ,
+                    cabinetTopY - doorAttachFromTop,
+                    pivotZ + doorInnerZMm,
                     rodR,
                     strutMat
                 );
-                rod.renderOrder = 0;
+                rod.renderOrder = 1;
+                if (rod.material) {
+                    rod.material.depthWrite = true;
+                }
                 const mountPlates = addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
                 strutSpecs.push({ rod, mountPlates, x, rodR, cabinetAttachY, cabinetAttachZ, side });
             });
@@ -1298,8 +1371,18 @@ class Furniture3D {
             [-1, 1].forEach((side) => {
                 const mount = side < 0 ? mountLeft : mountRight;
                 const x = mount.xRod;
-                const rod = addRod(group, x, cabinetAttachY, cabinetAttachZ, x, doorAttachY, doorAttachZ, rodR, strutMat);
-                rod.renderOrder = 0;
+                const rod = addRod(
+                    group,
+                    x,
+                    cabinetAttachY,
+                    cabinetAttachZ,
+                    x,
+                    cabinetTopY - doorAttachFromTop,
+                    pivotZ + doorInnerZMm,
+                    rodR,
+                    strutMat
+                );
+                rod.renderOrder = 1;
                 addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
             });
         }
