@@ -6436,30 +6436,51 @@
         let runnerLength = 250;
         for (const nl of axisproNLSizes) { if (nl <= d1) runnerLength = nl; }
 
-        let drawerGap = 0, drawerSKU = "", drawerName = "";
+        // Auto-select drawer side height (same logic as script-v2.js getBestDrawerSpec)
+        const AXISPRO_HEIGHTS   = [69, 84, 116, 167, 199];
+        const MATRIXBOX_HEIGHTS = [80, 120, 150];
+        const drawerSlotH = Math.floor((h1 - 2 * carcassT) / drawerCount);
+        const maxDrawerSideH = drawerSlotH - 32;
+        function pickDrawerHeight(heights) {
+            let best = heights[0];
+            for (const hh of heights) { if (hh <= maxDrawerSideH) best = hh; }
+            return best;
+        }
+        const drawerHeightArr = drawerSystem === 'matrixbox' ? MATRIXBOX_HEIGHTS : AXISPRO_HEIGHTS;
+        const selectedH = pickDrawerHeight(drawerHeightArr);
+
+        let drawerGap = 0, drawerSKU = "", drawerName = "", drawerBrand = "", drawerTypeStr = "";
 
         if (drawerSystem === 'matrixbox') {
-            // Hafele MatrixBox: box width = LW - 14mm (7mm per side)
-            drawerGap = 14;
-            drawerName = "HAFELE MatrixBox Single + UM S30";
-            drawerSKU  = "514.40.xxx / 514.41.xxx";
-            // Runner length: LT >= NL + 13; NL = runnerLength
+            // Hafele MatrixBox Single: 2mm steel side, 7mm clearance per side
+            drawerGap  = 14;
+            drawerBrand = 'Hafele';
+            drawerName = `MatrixBox Single H${selectedH}`;
+            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+            // Hafele article series: 514.40.xxx (H80), 514.41.xxx (H120), 514.42.xxx (H150)
+            const mbSeries = { 80: '514.40', 120: '514.41', 150: '514.42' };
+            drawerSKU = `${mbSeries[selectedH] || '514.40'}.${runnerLength}`;
         } else if (drawerSystem === 'axispro') {
-            // GTV AxisPro: 37mm bracket footprint per side
-            drawerGap = 37 * 2;
-            drawerName = "GTV AxisPro";
-            // SKU format: PB-AXISPRO-KPL{NL}A (low H=86) anthracite
-            drawerSKU  = `PB-AXISPRO-KPL${runnerLength}A`;
+            // GTV AxisPro: 14mm aluminium side, 37mm bracket footprint per side
+            drawerGap  = 74;
+            drawerBrand = 'GTV';
+            drawerName = `AxisPro H${selectedH}`;
+            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+            // AM furnitura article: PB-AXISPRO-KPL{NL}A
+            drawerSKU = `PB-AXISPRO-KPL${runnerLength}A`;
         }
 
         const drawerInnerW = innerW1 - drawerGap;
         // Drawer bottom: width = drawerInnerW; depth = NL - 24 (AxisPro) or NL - 14 (MatrixBox)
         const drawerBottomDepth = (drawerSystem === 'axispro') ? runnerLength - 24 : runnerLength - 14;
-        parts.push({ name: T.part_drawer_bottom, qty: 2, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
+        parts.push({ name: T.part_drawer_bottom, qty: drawerCount, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
 
         hardware.push({
-            name: `${T.hw_runners}${runnerLength}${T.hw_runners_suffix} — ${drawerName}`,
-            qty: 2, sku: drawerSKU,
+            item: `${drawerBrand} ${drawerName}`,
+            brandModel: drawerBrand,
+            type: drawerTypeStr,
+            article: drawerSKU,
+            qty: drawerCount * 2,
             note: `${T.hw_gap_note}${drawerGap / 2}${T.hw_gap_note2}`
         });
 
@@ -8496,7 +8517,19 @@
         };
         const upperRowsDebug = getRows('upperPartsTableBody', 4);
         const lowerRowsDebug = getRows('lowerPartsTableBody', 4);
-        const hardwareRowsDebug = getRows('hardwareTableBody', 3);
+        // Hardware table: [name] [brandModel] [type] [sku] [qty] — combine into 3 PDF columns
+        const hardwareRowsDebug = (() => {
+            const tbody = document.getElementById('hardwareTableBody');
+            if (!tbody) return [];
+            return Array.from(tbody.querySelectorAll('tr')).map(tr => {
+                const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+                if (tds.length >= 5) {
+                    const namePart = [tds[0], tds[1], tds[2]].filter(Boolean).join(' · ');
+                    return [namePart, tds[3], tds[4]];
+                }
+                return tds.slice(0, 3);
+            });
+        })();
 
         if (upperEnabled) {
             addTableSection(T.upper_cabinet_section, [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material], upperRowsDebug);
@@ -8504,7 +8537,7 @@
         if (lowerEnabled) {
             addTableSection(T.lower_cabinet_section, [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material], lowerRowsDebug);
         }
-        addTableSection(T.hardware_title, [T.col_hw_name, T.col_qty, T.col_note], hardwareRowsDebug);
+        addTableSection(T.hardware_title, [T.col_hw_name, T.col_sku, T.col_qty], hardwareRowsDebug);
         pdf.save('gconfig-export.pdf');
     }
 
@@ -8605,20 +8638,18 @@
         const hwRowsForPdf = (() => {
             const tbody = document.getElementById('hardwareTableBody');
             if (!tbody) return [];
-            const out = [];
-            tbody.querySelectorAll('tr').forEach(tr => {
+            return Array.from(tbody.querySelectorAll('tr')).map(tr => {
                 const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
                 if (tds.length >= 5) {
-                    out.push([tds[0], tds[4], [tds[1], tds[2], tds[3]].filter(Boolean).join(' · ')]);
-                } else if (tds.length >= 3) {
-                    out.push(tds.slice(0, 3));
+                    const namePart = [tds[0], tds[1], tds[2]].filter(Boolean).join(' · ');
+                    return [namePart, tds[3], tds[4]];
                 }
+                return tds.slice(0, 3);
             });
-            return out;
         })();
         if (hwRowsForPdf.length) {
             addTableSection(T.hardware_title,
-                [T.col_hw_name, T.col_qty, T.col_note],
+                [T.col_hw_name, T.col_sku, T.col_qty],
                 hwRowsForPdf);
         }
 
