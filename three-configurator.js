@@ -776,9 +776,7 @@ class Furniture3D {
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
         const pad = 80;
 
-        const pLayout = params.layout || 'both';
-        const hasLower = pLayout !== 'upper';
-        const hasUpper = pLayout !== 'lower';
+        const hasUpper = (params.layout || 'both') === 'both';
 
         const lowerH = params.height || 500;
         const upperH = params.upperHeight || 400;
@@ -790,18 +788,16 @@ class Furniture3D {
             ? params.countertop.thickness
             : 0;
         const stackGap = 400;
-        const upperBaseY = hasLower ? lowerH + ctT + stackGap : 0;
+        const upperBaseY = lowerH + ctT + stackGap;
 
-        const refW = hasLower && hasUpper ? Math.max(lowerW, upperW) : (hasLower ? lowerW : upperW);
-        const refD = hasLower && hasUpper ? Math.max(lowerD, upperD) : (hasLower ? lowerD : upperD);
-        const wMm = Math.round(refW);
-        const dMm = Math.round(refD);
+        const wMm = Math.round(hasUpper ? Math.max(lowerW, upperW) : lowerW);
+        const dMm = Math.round(hasUpper ? Math.max(lowerD, upperD) : lowerD);
         const upperHm = Math.round(upperH);
         const lowerHm = Math.round(lowerH);
         const totalH = hasUpper ? upperBaseY + upperH : lowerH;
 
-        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -refD / 2 };
-        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: refD / 2 };
+        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lowerD / 2 };
+        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: lowerD / 2 };
 
         const summaryH = hasUpper ? upperHm : lowerHm;
         const summary = `${wMm} × ${summaryH} × ${dMm} ${unit}`;
@@ -939,9 +935,7 @@ class Furniture3D {
         const backMat = getMaterial('back', 0xd8dde0);
         const gap = 400;
 
-        const layout = p.layout || 'both';
-        const hasLower = layout !== 'upper';
-        const hasUpper = layout !== 'lower';
+        const hasUpper = (p.layout || 'both') === 'both';
 
         const lower = { w: p.width || 800, h: p.height || 500, d: p.depth || 450 };
         const upper = {
@@ -952,13 +946,10 @@ class Furniture3D {
         const ctT = p.countertop?.enabled && p.countertop.thickness > 0
             ? p.countertop.thickness
             : 0;
-        // If lower-only: upper doesn't exist; if upper-only: upper starts at floor
-        const upperBaseY = hasLower ? lower.h + ctT + gap : 0;
+        const upperBaseY = lower.h + ctT + gap;
 
-        if (hasLower) {
-            this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
-            if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
-        }
+        this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
+        if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
         if (hasUpper) {
             this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
         }
@@ -966,7 +957,6 @@ class Furniture3D {
         const shelfDefs = Array.isArray(p.shelves) ? p.shelves : [];
         shelfDefs.forEach((sec) => {
             if (sec.zone === 'upper' && !hasUpper) return;
-            if (sec.zone === 'lower' && !hasLower) return;
             const baseY = sec.zone === 'upper' ? upperBaseY : 0;
             const sw = sec.w || lower.w;
             const sh = sec.h || lower.h;
@@ -1004,25 +994,23 @@ class Furniture3D {
             }
         }
 
-        if (hasLower) {
-            if (lowerMode === 'drawer' || p.drawers?.enabled) {
-                this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
-            } else if (lowerMode === 'gas') {
-                this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
-            } else if (lowerMode === 'hinge') {
-                if (p.lowerSplitDoor) {
-                    this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
-                        interactive: true,
-                        ...lowerHingeOpts,
-                    });
-                } else {
-                    const lowerPos = p.hinges?.lower?.position || 'left';
-                    this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
-                        interactive: true,
-                        hingeSide: lowerPos === 'right' ? 'right' : 'left',
-                        ...lowerHingeOpts,
-                    });
-                }
+        if (lowerMode === 'drawer' || p.drawers?.enabled) {
+            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
+        } else if (lowerMode === 'gas') {
+            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
+        } else if (lowerMode === 'hinge') {
+            if (p.lowerSplitDoor) {
+                this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
+                    interactive: true,
+                    ...lowerHingeOpts,
+                });
+            } else {
+                const lowerPos = p.hinges?.lower?.position || 'left';
+                this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
+                    interactive: true,
+                    hingeSide: lowerPos === 'right' ? 'right' : 'left',
+                    ...lowerHingeOpts,
+                });
             }
         }
     }

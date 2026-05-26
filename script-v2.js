@@ -654,11 +654,9 @@
 
             cabinet_layout: 'Конфигурация',
 
-            layout_both: 'Оба шкафа',
+            layout_both: 'Два шкафа',
 
-            layout_lower: 'Только нижний',
-
-            layout_upper: 'Только верхний'
+            layout_single: 'Один шкаф'
 
         },
 
@@ -910,9 +908,7 @@
 
             layout_both: 'Both cabinets',
 
-            layout_lower: 'Lower only',
-
-            layout_upper: 'Upper only'
+            layout_single: 'One cabinet'
 
         }
 
@@ -2069,16 +2065,13 @@
      */
     function syncCabinetLayoutToV1(layout) {
         if (!iframeReady) return;
-        if (layout === 'lower') {
+        if (layout === 'single') {
+            // Zero out the upper section so v1 doesn't count it
             setIframeValueQuiet('upper_w', 0);
             setIframeValueQuiet('upper_h', 0);
             setIframeValueQuiet('upper_d', 0);
-        } else if (layout === 'upper') {
-            setIframeValueQuiet('w1', 0);
-            setIframeValueQuiet('h1', 0);
-            setIframeValueQuiet('d1', 0);
         } else {
-            // Restore both from v2 fields
+            // Restore both sections from v2 field values
             ['w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d'].forEach(id => {
                 const el = document.querySelector(`[data-iframe="${id}"]`);
                 if (el) setIframeValueQuiet(id, el.value);
@@ -2113,14 +2106,12 @@
 
 
 
-        // ── Cabinet layout (lower-only / upper-only / both) ──────────────────
+        // ── Cabinet layout (single / both) ───────────────────────────────────
         const layout = getCabinetLayout();
-        document.getElementById('lowerCabinetCard')?.classList.toggle('hidden', layout === 'upper');
-        document.getElementById('upperCabinetCard')?.classList.toggle('hidden', layout === 'lower');
-        document.getElementById('upperHwGroup')?.classList.toggle('hidden', layout === 'lower');
-        document.getElementById('lowerHwGroup')?.classList.toggle('hidden', layout === 'upper');
-        document.querySelector('#countertopFields')?.closest('.card')?.classList.toggle('hidden', layout === 'upper');
-        document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', layout === 'lower'));
+        const isSingle = layout === 'single';
+        document.getElementById('upperCabinetCard')?.classList.toggle('hidden', isSingle);
+        document.getElementById('upperHwGroup')?.classList.toggle('hidden', isSingle);
+        document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', isSingle));
         // ─────────────────────────────────────────────────────────────────────
 
 
@@ -2164,13 +2155,13 @@
 
         document.querySelectorAll('.hinge-upper-field').forEach((el) => {
 
-            el.classList.toggle('hidden', upperMode === 'gas' || layout === 'lower');
+            el.classList.toggle('hidden', upperMode === 'gas' || isSingle);
 
         });
 
         document.querySelectorAll('.hinge-lower-field').forEach((el) => {
 
-            el.classList.toggle('hidden', lowerMode !== 'hinge' || layout === 'upper');
+            el.classList.toggle('hidden', lowerMode !== 'hinge');
 
         });
 
