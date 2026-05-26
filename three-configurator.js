@@ -983,7 +983,7 @@ class Furniture3D {
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec });
+            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
         } else if (lowerMode === 'gas') {
             this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
         } else if (lowerMode === 'hinge') {
@@ -1242,6 +1242,9 @@ class Furniture3D {
     addDrawers(group, W, H, D, facadeT, mat, count, opts = {}) {
         const n    = Math.max(1, Math.min(5, count));
         const spec = opts.drawerSpec || null;   // { sideH, sideThick, gap, sideColor, runners }
+        // Per-drawer types array (index 0 = top drawer in user view).
+        // 3D renders i=0 at bottom, so user index for 3D slot i is (n-1-i).
+        const drawerTypes = opts.drawerTypes || [];
 
         // Runner length: largest standard ≤ available depth
         const RUNNERS = (spec?.runners) || [250, 300, 350, 400, 450, 500, 550, 600];
@@ -1265,8 +1268,14 @@ class Furniture3D {
             const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
             this.addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, spec, innerMat);
 
+            // Per-drawer push-to-open flag: user index 0 = top = 3D index (n-1)
+            const userIdx  = n - 1 - i;
+            const isPto    = drawerTypes.length > 0
+                ? drawerTypes[userIdx] === 'pto'
+                : (spec?.pushToOpen ?? false);
+
             // Regular drawers get a horizontal bar handle; push-to-open drawers don't
-            if (!spec?.pushToOpen) {
+            if (!isPto) {
                 const handleW = Math.min(160, (W - FACADE_GAP * 2) * 0.55);
                 const handleH = 13;
                 const handleD = 10;

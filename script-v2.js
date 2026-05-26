@@ -192,21 +192,70 @@
             .sort((a, b) => b.sideH - a.sideH)[0] || null;
     }
 
-    /** Returns 'pto' or 'regular'. AxisPro is always push-to-open regardless of chip selection. */
-    function getSelectedDrawerType() {
+    /** Per-drawer open types: index 0 = top drawer (as user sees). 'regular' | 'pto'. */
+    let drawerTypesArr = [];
+
+    /**
+     * Returns an array of length `count` with per-drawer types.
+     * AxisPro forces all to 'pto'. Unset slots default to 'regular'.
+     */
+    function getDrawerTypes(count) {
         const brand = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
-        if (brand === 'axispro') return 'pto';
-        return getHardwareModeFromChips('drawerTypeChips', 'regular');
+        const def   = brand === 'axispro' ? 'pto' : 'regular';
+        const result = [];
+        for (let i = 0; i < count; i++) {
+            result.push(drawerTypesArr[i] !== undefined ? drawerTypesArr[i] : def);
+        }
+        return result;
     }
 
-    /** Get the auto-selected spec + pushToOpen flag for the current settings. */
+    /**
+     * Renders per-drawer type rows into #drawerTypeRows.
+     * Each row: "Drawer N  [Regular] [Push-to-open]"
+     */
+    function renderDrawerTypeRows(count) {
+        const container = document.getElementById('drawerTypeRows');
+        if (!container) return;
+        const brand     = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+        const isPtoOnly = brand === 'axispro';
+        const types     = getDrawerTypes(count);
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const row = document.createElement('div');
+            row.className = 'drawer-type-row';
+            const lbl = document.createElement('span');
+            lbl.className = 'drawer-type-label';
+            lbl.textContent = `${t('drawer_label')} ${i + 1}`;
+            const chips = document.createElement('div');
+            chips.className = 'hw-chips' + (isPtoOnly ? ' section-disabled' : '');
+            ['regular', 'pto'].forEach(val => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'hw-chip' + (types[i] === val ? ' active' : '');
+                btn.dataset.value = val;
+                btn.textContent = t(val === 'regular' ? 'drawer_regular' : 'drawer_pto');
+                btn.addEventListener('click', () => {
+                    if (isPtoOnly) return;
+                    chips.querySelectorAll('.hw-chip').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawerTypesArr[i] = val;
+                    schedule3DRebuild();
+                });
+                chips.appendChild(btn);
+            });
+            row.appendChild(lbl);
+            row.appendChild(chips);
+            container.appendChild(row);
+        }
+    }
+
+    /** Get the auto-selected spec (physical dimensions only — no pushToOpen). */
     function getSelectedDrawerSpec() {
         const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
         const cabinetH = fieldNum('h1', 500);
         const count    = fieldNum('lowerDrawerCount', 1);
         const carcassT = fieldNum('carcassThick', 16);
-        const base = getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
-        return { ...base, pushToOpen: getSelectedDrawerType() === 'pto' };
+        return getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
     }
 
     /** Update the auto-height info label shown next to the brand selector. */
@@ -237,6 +286,8 @@
      */
     function rebuildDrawerSystemSelect() {
         updateDrawerAutoLabel();
+        const count = parseInt(document.getElementById('w-lowerDrawerCount')?.value) || 1;
+        renderDrawerTypeRows(count);
         schedule3DRebuild();
     }
     // ─────────────────────────────────────────────────────────────────────────
@@ -454,6 +505,8 @@
             drawer_system: 'Система ящиков',
 
             drawer_brand: 'Бренд',
+
+            drawer_label: 'Ящик',
 
             drawer_type: 'Тип открывания',
 
@@ -698,6 +751,8 @@
             drawer_system: 'Drawer system',
 
             drawer_brand: 'Brand',
+
+            drawer_label: 'Drawer',
 
             drawer_type: 'Opening type',
 
@@ -1391,6 +1446,8 @@
 
                 spec: getSelectedDrawerSpec(),
 
+                types: getDrawerTypes(fieldNum('lowerDrawerCount', 1)),
+
             },
 
             lowerSplitDoor: fieldCheck('lowerSplitFacade'),
@@ -2017,24 +2074,8 @@
 
         if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
 
-        // Rebuild drawer system select whenever mode or dimensions change
-        if (lowerMode === 'drawer') {
-            rebuildDrawerSystemSelect();
-
-            // AxisPro is always push-to-open — lock/unlock the type chips accordingly
-            const brand      = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
-            const isPtoOnly  = brand === 'axispro';
-            const typeChips  = document.getElementById('drawerTypeChips');
-            if (typeChips) {
-                typeChips.classList.toggle('section-disabled', isPtoOnly);
-                if (isPtoOnly) {
-                    // force PTO chip active
-                    typeChips.querySelectorAll('.hw-chip').forEach((c) => {
-                        c.classList.toggle('active', c.dataset.value === 'pto');
-                    });
-                }
-            }
-        }
+        // Rebuild drawer system select + per-drawer type rows whenever mode or dimensions change
+        if (lowerMode === 'drawer') rebuildDrawerSystemSelect();
 
         // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
         const isDrawer = lowerMode === 'drawer';

@@ -1122,6 +1122,35 @@ html, body {
 .drawer-auto-label[data-state="ok"]   { color: #16a34a; }
 .drawer-auto-label[data-state="warn"] { color: #dc2626; }
 
+.drawer-type-rows {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.drawer-type-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drawer-type-label {
+    font-size: 0.82em;
+    min-width: 62px;
+    color: var(--text-secondary, #888);
+    flex-shrink: 0;
+}
+
+.drawer-type-rows .hw-chips {
+    gap: 4px;
+}
+
+.drawer-type-rows .hw-chip {
+    padding: 3px 10px;
+    font-size: 0.78em;
+}
+
 
 
 .back-fit-row {
