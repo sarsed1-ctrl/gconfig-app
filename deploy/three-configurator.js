@@ -280,14 +280,21 @@ function addEdgeBand(group, w, h, d, mat, x, y, z, face = 'front') {
     }
 }
 
-function setRodEndpoints(rod, ax, ay, az, bx, by, bz, radiusMm) {
+function setRodEndpoints(rod, ax, ay, az, bx, by, bz, radiusMm, endTrimMm = radiusMm) {
     const a = new THREE.Vector3(ax * MM, ay * MM, az * MM);
     const b = new THREE.Vector3(bx * MM, by * MM, bz * MM);
     const dir = new THREE.Vector3().subVectors(b, a);
-    const len = dir.length();
+    let len = dir.length();
     if (len < 1e-9) {
         rod.visible = false;
         return;
+    }
+    const trim = Math.max(0, endTrimMm) * MM;
+    if (trim > 0 && len > trim * 2.2) {
+        dir.multiplyScalar(1 / len);
+        a.addScaledVector(dir, trim);
+        b.addScaledVector(dir, -trim);
+        len -= trim * 2;
     }
     rod.visible = true;
     rod.scale.set(radiusMm * 2 * MM, len, radiusMm * 2 * MM);
@@ -314,6 +321,27 @@ const GAS_MOUNT_FRONT_CLEAR_MM = 72;
 /** Center Z for bracket on side wall (mm, cabinet space). */
 function gasLiftCabinetAttachZ(D) {
     return D / 2 - GAS_MOUNT_PLATE_DEPTH_MM / 2 - GAS_MOUNT_FRONT_CLEAR_MM;
+}
+
+/** Door-end joint on inner facade face (pivot-local mm, Z toward cabinet interior). */
+function gasLiftDoorAttachLocalMm(facadeT, doorH, rodR) {
+    const doorBracketThk = 3.5;
+    return {
+        fromTop: doorH * 0.22,
+        zInner: -(facadeT / 2 + doorBracketThk + rodR + 2),
+        bracketThk: doorBracketThk,
+    };
+}
+
+/** Small bracket on door inner face — rod meets here, not inside the panel. */
+function addGasLiftDoorBracket(pivotGroup, xRod, yPivot, zInner, attach) {
+    const mat = getMaterial('gas-door-bracket', 0x5c656c, { metalness: 0.72, roughness: 0.36 });
+    const w = 44;
+    const h = 30;
+    const zCenter = zInner - attach.bracketThk / 2;
+    const mesh = addPanel(pivotGroup, w, h, attach.bracketThk, mat, xRod, yPivot, zCenter);
+    if (mesh) mesh.renderOrder = 3;
+    return mesh;
 }
 
 /** Plate center + rod joint on cavity face of bracket (mm, cabinet space). */
@@ -724,7 +752,8 @@ class Furniture3D {
                     attachScratch.x / MM,
                     attachScratch.y / MM,
                     attachScratch.z / MM,
-                    rodR
+                    rodR,
+                    rodR + 1.5
                 );
             });
         }
@@ -1212,13 +1241,17 @@ class Furniture3D {
         // never crosses the carcass top when the door swings fully open.
         const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
         const cabinetAttachZ = gasLiftCabinetAttachZ(D);
-        const doorAttachFromTop = doorH * 0.22;
-        /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
-        const doorInnerZMm = -(facadeT / 2 + 1);
+        const doorAttach = gasLiftDoorAttachLocalMm(facadeT, doorH, rodR);
+        const doorAttachFromTop = doorAttach.fromTop;
+        const doorInnerZMm = doorAttach.zInner;
+        const doorPivotY = -doorAttachFromTop;
         const doorAttachY = cabinetTopY - doorAttachFromTop;
         const doorAttachZ = pivotZ + doorInnerZMm;
-        const attachLocalLeft = new THREE.Vector3(mountLeft.xRod * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
-        const attachLocalRight = new THREE.Vector3(mountRight.xRod * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
+        const attachLocalLeft = new THREE.Vector3(mountLeft.xRod * MM, doorPivotY * MM, doorInnerZMm * MM);
+        const attachLocalRight = new THREE.Vector3(mountRight.xRod * MM, doorPivotY * MM, doorInnerZMm * MM);
+
+        addGasLiftDoorBracket(pivotGroup, mountLeft.xRod, doorPivotY, doorInnerZMm, doorAttach);
+        addGasLiftDoorBracket(pivotGroup, mountRight.xRod, doorPivotY, doorInnerZMm, doorAttach);
 
         const gasState = {
             group: pivotGroup,
@@ -1260,6 +1293,7 @@ class Furniture3D {
             doorMesh.userData.baseMaterial = mat;
             this.gasLiftDoors.push(gasState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'gasLift', state: gasState });
+            this.updateGasLiftDoors(0);
         } else {
             [-1, 1].forEach((side) => {
                 const mount = side < 0 ? mountLeft : mountRight;
