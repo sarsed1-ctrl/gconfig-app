@@ -9,7 +9,9 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 const MM = 0.001;
 const REBUILD_MS_DESKTOP = 120;
 const REBUILD_MS_MOBILE = 180;
-const FACADE_GAP = 3;
+const FACADE_GAP = 2;
+/** Sub-mm overlap so carcass panels meet without visible cracks. */
+const CARCASS_JOINT_OVERLAP_MM = 0.45;
 /** Gas-lift flip-up door open angle (degrees from closed). */
 const GAS_LIFT_OPEN_DEG = 135;
 const GAS_LIFT_OPEN_RAD = -(GAS_LIFT_OPEN_DEG * Math.PI) / 180;
@@ -300,31 +302,42 @@ function addRod(group, ax, ay, az, bx, by, bz, radiusMm, mat) {
     return rod;
 }
 
+/** Gas-lift side bracket (приёмка) — 2× catalog size for visibility in preview. */
+const GAS_MOUNT_PLATE_THK_MM = 5.6;
+const GAS_MOUNT_PLATE_H_MM = 108;
+const GAS_MOUNT_PLATE_D_MM = 68;
+
+/** Plate center + rod joint on cavity face of bracket (mm, cabinet space). */
+function gasLiftMountAnchor(W, carcassT, side) {
+    const plateThk = GAS_MOUNT_PLATE_THK_MM;
+    const xInner = side < 0 ? -W / 2 + carcassT : W / 2 - carcassT;
+    const xPlate = side < 0 ? xInner + plateThk / 2 : xInner - plateThk / 2;
+    const xRod = side < 0 ? xPlate + plateThk / 2 : xPlate - plateThk / 2;
+    return { xPlate, xRod, plateThk, plateH: GAS_MOUNT_PLATE_H_MM, plateD: GAS_MOUNT_PLATE_D_MM };
+}
+
 /**
  * Rectangular gas-lift mounting plate on the cabinet side wall (приёмка).
- * Sits on the inner face of the side panel at the strut lower anchor.
+ * Sits flush on the inner face of the side panel at the strut lower anchor.
  */
 function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
-    const plateThk = 2.8;
-    const plateH = 54;
-    const plateD = 34;
-    const xInner = side < 0 ? -W / 2 + carcassT : W / 2 - carcassT;
-    const x = side < 0 ? xInner + plateThk / 2 + 0.6 : xInner - plateThk / 2 - 0.6;
+    const { xPlate, plateThk, plateH, plateD } = gasLiftMountAnchor(W, carcassT, side);
 
     const bodyMat = getMaterial('gas-bracket', 0x6a737a, { metalness: 0.78, roughness: 0.34 });
     const faceMat = getMaterial('gas-bracket-face', 0x9aa3ab, { metalness: 0.88, roughness: 0.22 });
     const screwMat = getMaterial('gas-bracket-screw', 0x2f363b, { metalness: 0.92, roughness: 0.18 });
 
     const parts = [];
-    const base = addPanel(group, plateThk, plateH, plateD, bodyMat, x, attachY, attachZ);
+    const base = addPanel(group, plateThk, plateH, plateD, bodyMat, xPlate, attachY, attachZ);
     if (base) {
         base.renderOrder = 1;
         parts.push(base);
     }
 
-    const faceThk = 0.9;
-    const faceX = side < 0 ? x + plateThk / 2 + faceThk / 2 + 0.15 : x - plateThk / 2 - faceThk / 2 - 0.15;
-    const face = addPanel(group, faceThk, plateH - 6, plateD - 6, faceMat, faceX, attachY, attachZ);
+    const faceThk = 1.8;
+    const faceInset = 12;
+    const faceX = side < 0 ? xPlate + plateThk / 2 + faceThk / 2 + 0.12 : xPlate - plateThk / 2 - faceThk / 2 - 0.12;
+    const face = addPanel(group, faceThk, plateH - faceInset, plateD - faceInset, faceMat, faceX, attachY, attachZ);
     if (face) {
         face.renderOrder = 2;
         parts.push(face);
@@ -332,10 +345,10 @@ function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
 
     const screwY = plateH * 0.26;
     const screwZ = plateD * 0.24;
-    const screwW = 5.5;
-    const screwH = 5.5;
-    const screwD = 1.4;
-    const screwX = side < 0 ? faceX + faceThk / 2 + screwD / 2 + 0.1 : faceX - faceThk / 2 - screwD / 2 - 0.1;
+    const screwW = 11;
+    const screwH = 11;
+    const screwD = 2.8;
+    const screwX = side < 0 ? faceX + faceThk / 2 + screwD / 2 + 0.08 : faceX - faceThk / 2 - screwD / 2 - 0.08;
     [-1, 1].forEach((sy) => {
         [-1, 1].forEach((sz) => {
             const screw = addPanel(
@@ -682,11 +695,13 @@ class Furniture3D {
             if (!lift.strutSpecs?.length) continue;
             lift.group.updateMatrixWorld(true);
             const showStruts = eased > 0.08;
-            lift.strutSpecs.forEach(({ rod, x, rodR, cabinetAttachY, cabinetAttachZ, side }) => {
+            lift.strutSpecs.forEach(({ rod, mountPlates, x, rodR, cabinetAttachY, cabinetAttachZ, side }) => {
                 if (!showStruts) {
                     rod.visible = false;
+                    if (mountPlates) mountPlates.forEach((p) => { p.visible = false; });
                     return;
                 }
+                if (mountPlates) mountPlates.forEach((p) => { p.visible = true; });
                 const attachLocal = side < 0 ? lift.attachLocalLeft : lift.attachLocalRight;
                 attachScratch.copy(attachLocal).applyMatrix4(lift.group.matrixWorld);
                 setRodEndpoints(
@@ -1104,13 +1119,14 @@ class Furniture3D {
 
     buildCarcassSection(group, W, H, D, T, baseY, mat, edgeMat, backWall, backMat) {
         const y0 = baseY + H / 2;
-        addPanel(group, T, H, D, mat, -W / 2 + T / 2, y0, 0);
-        addPanel(group, T, H, D, mat, W / 2 - T / 2, y0, 0);
-        addPanel(group, W, T, D, mat, 0, baseY + T / 2, 0);
-        addPanel(group, W, T, D, mat, 0, baseY + H - T / 2, 0);
-        addPanel(group, W, H, T, edgeMat, 0, y0, -D / 2 + T / 2);
-        addEdgeBand(group, W, H, T, edgeMat, 0, y0, -D / 2 + T / 2, 'front');
-        if (backWall) addPanel(group, W - 2 * T, H - 2 * T, 4, backMat, 0, y0, -D / 2 + T + 2);
+        const j = CARCASS_JOINT_OVERLAP_MM;
+        addPanel(group, T, H + j, D + j, mat, -W / 2 + T / 2, y0, 0);
+        addPanel(group, T, H + j, D + j, mat, W / 2 - T / 2, y0, 0);
+        addPanel(group, W + j, T, D + j, mat, 0, baseY + T / 2, 0);
+        addPanel(group, W + j, T, D + j, mat, 0, baseY + H - T / 2, 0);
+        addPanel(group, W + j, H + j, T, edgeMat, 0, y0, -D / 2 + T / 2);
+        addEdgeBand(group, W + j, H + j, T, edgeMat, 0, y0, -D / 2 + T / 2, 'front');
+        if (backWall) addPanel(group, W - 2 * T, H - 2 * T, 4, backMat, 0, y0, -D / 2 + T + 1);
     }
 
     addShelves(group, sec, W, H, D, T, baseY, mat) {
@@ -1139,7 +1155,7 @@ class Furniture3D {
     addDoor(group, W, H, facadeT, D, centerY, mat, isLift, opts = {}) {
         const doorW = W - FACADE_GAP * 2;
         const doorH = H - FACADE_GAP * 2;
-        const z = D / 2 + facadeT / 2 + 2;
+        const z = D / 2 + facadeT / 2 + 1;
 
         if (!isLift) {
             if (opts.interactive) {
@@ -1163,7 +1179,7 @@ class Furniture3D {
         }
 
         const cabinetTopY = centerY + H / 2;
-        const pivotZ = D / 2 + facadeT / 2 + 2;
+        const pivotZ = D / 2 + facadeT / 2 + 1;
         const pivotGroup = new THREE.Group();
         pivotGroup.position.set(0, cabinetTopY * MM, pivotZ * MM);
         group.add(pivotGroup);
@@ -1176,20 +1192,22 @@ class Furniture3D {
         pivotGroup.rotation.x = closedAngle + startT * (openAngle - closedAngle);
 
         const strutMat = getMaterial('gas-strut', 0x707880, { metalness: 0.55, roughness: 0.38 });
-        const strutX = W / 2 - 48;
         const rodR = 3.5;
+        const carcassT = Math.max(12, opts.carcassT || 16);
+        const mountLeft = gasLiftMountAnchor(W, carcassT, -1);
+        const mountRight = gasLiftMountAnchor(W, carcassT, 1);
         // Cabinet attachment: at least 70 mm below the top panel so the strut
         // never crosses the carcass top when the door swings fully open.
         const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
         // Push strut anchor ~70 mm back from the front opening to keep it inside
-        const cabinetAttachZ = D / 2 - 70;
+        const cabinetAttachZ = D / 2 - 37;
         const doorAttachFromTop = doorH * 0.22;
         /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
-        const doorInnerZMm = -(facadeT / 2 + 4);
+        const doorInnerZMm = -(facadeT / 2 + 1);
         const doorAttachY = cabinetTopY - doorAttachFromTop;
         const doorAttachZ = pivotZ + doorInnerZMm;
-        const attachLocalLeft = new THREE.Vector3(-strutX * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
-        const attachLocalRight = new THREE.Vector3(strutX * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
+        const attachLocalLeft = new THREE.Vector3(mountLeft.xRod * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
+        const attachLocalRight = new THREE.Vector3(mountRight.xRod * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
 
         const gasState = {
             group: pivotGroup,
@@ -1207,12 +1225,11 @@ class Furniture3D {
             strutSpecs: [],
         };
 
-        const carcassT = Math.max(12, opts.carcassT || 16);
-
         if (opts.interactive && doorMesh) {
             const strutSpecs = [];
             [-1, 1].forEach((side) => {
-                const x = side * strutX;
+                const mount = side < 0 ? mountLeft : mountRight;
+                const x = mount.xRod;
                 const rod = addRod(
                     group,
                     x,
@@ -1234,9 +1251,11 @@ class Furniture3D {
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'gasLift', state: gasState });
         } else {
             [-1, 1].forEach((side) => {
-                const x = side * strutX;
+                const mount = side < 0 ? mountLeft : mountRight;
+                const x = mount.xRod;
                 const rod = addRod(group, x, cabinetAttachY, cabinetAttachZ, x, doorAttachY, doorAttachZ, rodR, strutMat);
                 rod.renderOrder = 0;
+                addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
             });
         }
     }
