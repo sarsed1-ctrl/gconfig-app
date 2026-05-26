@@ -1100,6 +1100,57 @@ html, body {
 .drawer-fields.visible,
 .card.drawer-fields.visible { display: block; }
 
+.section-disabled {
+    opacity: 0.38;
+    pointer-events: none;
+    user-select: none;
+}
+
+.field-hint--drawer-warn {
+    color: #e8a020;
+    font-size: 0.82em;
+    margin: 4px 0 6px;
+}
+
+.drawer-auto-label {
+    display: block;
+    font-size: 0.82em;
+    margin-top: 4px;
+    min-height: 1.2em;
+    transition: color 0.2s;
+}
+.drawer-auto-label[data-state="ok"]   { color: #16a34a; }
+.drawer-auto-label[data-state="warn"] { color: #dc2626; }
+
+.drawer-type-rows {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.drawer-type-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drawer-type-label {
+    font-size: 0.82em;
+    min-width: 62px;
+    color: var(--text-secondary, #888);
+    flex-shrink: 0;
+}
+
+.drawer-type-rows .hw-chips {
+    gap: 4px;
+}
+
+.drawer-type-rows .hw-chip {
+    padding: 3px 10px;
+    font-size: 0.78em;
+}
+
 
 
 .back-fit-row {

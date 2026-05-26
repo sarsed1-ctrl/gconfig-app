@@ -300,6 +300,64 @@ function addRod(group, ax, ay, az, bx, by, bz, radiusMm, mat) {
     return rod;
 }
 
+/**
+ * Rectangular gas-lift mounting plate on the cabinet side wall (приёмка).
+ * Sits on the inner face of the side panel at the strut lower anchor.
+ */
+function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
+    const plateThk = 2.8;
+    const plateH = 54;
+    const plateD = 34;
+    const xInner = side < 0 ? -W / 2 + carcassT : W / 2 - carcassT;
+    const x = side < 0 ? xInner + plateThk / 2 + 0.6 : xInner - plateThk / 2 - 0.6;
+
+    const bodyMat = getMaterial('gas-bracket', 0x6a737a, { metalness: 0.78, roughness: 0.34 });
+    const faceMat = getMaterial('gas-bracket-face', 0x9aa3ab, { metalness: 0.88, roughness: 0.22 });
+    const screwMat = getMaterial('gas-bracket-screw', 0x2f363b, { metalness: 0.92, roughness: 0.18 });
+
+    const parts = [];
+    const base = addPanel(group, plateThk, plateH, plateD, bodyMat, x, attachY, attachZ);
+    if (base) {
+        base.renderOrder = 1;
+        parts.push(base);
+    }
+
+    const faceThk = 0.9;
+    const faceX = side < 0 ? x + plateThk / 2 + faceThk / 2 + 0.15 : x - plateThk / 2 - faceThk / 2 - 0.15;
+    const face = addPanel(group, faceThk, plateH - 6, plateD - 6, faceMat, faceX, attachY, attachZ);
+    if (face) {
+        face.renderOrder = 2;
+        parts.push(face);
+    }
+
+    const screwY = plateH * 0.26;
+    const screwZ = plateD * 0.24;
+    const screwW = 5.5;
+    const screwH = 5.5;
+    const screwD = 1.4;
+    const screwX = side < 0 ? faceX + faceThk / 2 + screwD / 2 + 0.1 : faceX - faceThk / 2 - screwD / 2 - 0.1;
+    [-1, 1].forEach((sy) => {
+        [-1, 1].forEach((sz) => {
+            const screw = addPanel(
+                group,
+                screwD,
+                screwH,
+                screwW,
+                screwMat,
+                screwX,
+                attachY + sy * screwY,
+                attachZ + sz * screwZ
+            );
+            if (screw) {
+                screw.renderOrder = 3;
+                parts.push(screw);
+            }
+        });
+    });
+
+    return parts;
+}
+
 function disposeObject(obj) {
     if (!obj) return;
     obj.traverse((child) => {
@@ -624,11 +682,13 @@ class Furniture3D {
             if (!lift.strutSpecs?.length) continue;
             lift.group.updateMatrixWorld(true);
             const showStruts = eased > 0.08;
-            lift.strutSpecs.forEach(({ rod, x, rodR, cabinetAttachY, cabinetAttachZ, side }) => {
+            lift.strutSpecs.forEach(({ rod, mountPlates, x, rodR, cabinetAttachY, cabinetAttachZ, side }) => {
                 if (!showStruts) {
                     rod.visible = false;
+                    if (mountPlates) mountPlates.forEach((p) => { p.visible = false; });
                     return;
                 }
+                if (mountPlates) mountPlates.forEach((p) => { p.visible = true; });
                 const attachLocal = side < 0 ? lift.attachLocalLeft : lift.attachLocalRight;
                 attachScratch.copy(attachLocal).applyMatrix4(lift.group.matrixWorld);
                 setRodEndpoints(
@@ -999,7 +1059,7 @@ class Furniture3D {
 
         if (hasUpper) {
             if (upperMode === 'gas') {
-                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true });
+                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
             } else if (upperMode === 'hinge') {
                 const upperPos = p.hinges?.upper?.position || 'both';
                 this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
@@ -1013,7 +1073,7 @@ class Furniture3D {
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
             this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
         } else if (lowerMode === 'gas') {
-            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
+            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
         } else if (lowerMode === 'hinge') {
             if (p.lowerSplitDoor) {
                 this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
@@ -1149,6 +1209,8 @@ class Furniture3D {
             strutSpecs: [],
         };
 
+        const carcassT = Math.max(12, opts.carcassT || 16);
+
         if (opts.interactive && doorMesh) {
             const strutSpecs = [];
             [-1, 1].forEach((side) => {
@@ -1165,7 +1227,8 @@ class Furniture3D {
                     strutMat
                 );
                 rod.renderOrder = 0;
-                strutSpecs.push({ rod, x, rodR, cabinetAttachY, cabinetAttachZ, side });
+                const mountPlates = addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
+                strutSpecs.push({ rod, mountPlates, x, rodR, cabinetAttachY, cabinetAttachZ, side });
             });
             gasState.strutSpecs = strutSpecs;
             doorMesh.userData.baseMaterial = mat;
@@ -1176,6 +1239,7 @@ class Furniture3D {
                 const x = side * strutX;
                 const rod = addRod(group, x, cabinetAttachY, cabinetAttachZ, x, doorAttachY, doorAttachZ, rodR, strutMat);
                 rod.renderOrder = 0;
+                addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
             });
         }
     }

@@ -27,6 +27,8 @@ const BED_MDF_CARCASS_THICKNESS_MM = [16, 18, 19, 25, 28];
 const materialPool = new Map();
 /** Shared unit box — meshes use scale for dimensions (geometry reuse). */
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
+/** Shared unit cylinder (axis = Y, r=0.5, h=1, 8 segments) — scaled for round hardware. */
+const unitCylinder = new THREE.CylinderGeometry(0.5, 0.5, 1, 8, 1);
 const dimLineMatCache = new Map();
 
 function detectMobile() {
@@ -247,6 +249,20 @@ function addPanel(group, w, h, d, mat, x, y, z) {
     return mesh;
 }
 
+/**
+ * Place a scaled cylinder mesh.  Default axis = Y; pass rotX=Math.PI/2 to align along Z.
+ * All positions/sizes in mm.
+ */
+function addCylinder(group, r, h, mat, x, y, z, rotX = 0) {
+    if (r <= 0 || h <= 0) return null;
+    const mesh = new THREE.Mesh(unitCylinder, mat);
+    mesh.scale.set(r * 2 * MM, h * MM, r * 2 * MM);
+    mesh.position.set(x * MM, y * MM, z * MM);
+    if (rotX) mesh.rotation.x = rotX;
+    group.add(mesh);
+    return mesh;
+}
+
 /** Thin edge-band hint on one visible face (procedural, no CSG). */
 function addEdgeBand(group, w, h, d, mat, x, y, z, face = 'front') {
     const band = 1.5;
@@ -284,10 +300,68 @@ function addRod(group, ax, ay, az, bx, by, bz, radiusMm, mat) {
     return rod;
 }
 
+/**
+ * Rectangular gas-lift mounting plate on the cabinet side wall (приёмка).
+ * Sits on the inner face of the side panel at the strut lower anchor.
+ */
+function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
+    const plateThk = 2.8;
+    const plateH = 54;
+    const plateD = 34;
+    const xInner = side < 0 ? -W / 2 + carcassT : W / 2 - carcassT;
+    const x = side < 0 ? xInner + plateThk / 2 + 0.6 : xInner - plateThk / 2 - 0.6;
+
+    const bodyMat = getMaterial('gas-bracket', 0x6a737a, { metalness: 0.78, roughness: 0.34 });
+    const faceMat = getMaterial('gas-bracket-face', 0x9aa3ab, { metalness: 0.88, roughness: 0.22 });
+    const screwMat = getMaterial('gas-bracket-screw', 0x2f363b, { metalness: 0.92, roughness: 0.18 });
+
+    const parts = [];
+    const base = addPanel(group, plateThk, plateH, plateD, bodyMat, x, attachY, attachZ);
+    if (base) {
+        base.renderOrder = 1;
+        parts.push(base);
+    }
+
+    const faceThk = 0.9;
+    const faceX = side < 0 ? x + plateThk / 2 + faceThk / 2 + 0.15 : x - plateThk / 2 - faceThk / 2 - 0.15;
+    const face = addPanel(group, faceThk, plateH - 6, plateD - 6, faceMat, faceX, attachY, attachZ);
+    if (face) {
+        face.renderOrder = 2;
+        parts.push(face);
+    }
+
+    const screwY = plateH * 0.26;
+    const screwZ = plateD * 0.24;
+    const screwW = 5.5;
+    const screwH = 5.5;
+    const screwD = 1.4;
+    const screwX = side < 0 ? faceX + faceThk / 2 + screwD / 2 + 0.1 : faceX - faceThk / 2 - screwD / 2 - 0.1;
+    [-1, 1].forEach((sy) => {
+        [-1, 1].forEach((sz) => {
+            const screw = addPanel(
+                group,
+                screwD,
+                screwH,
+                screwW,
+                screwMat,
+                screwX,
+                attachY + sy * screwY,
+                attachZ + sz * screwZ
+            );
+            if (screw) {
+                screw.renderOrder = 3;
+                parts.push(screw);
+            }
+        });
+    });
+
+    return parts;
+}
+
 function disposeObject(obj) {
     if (!obj) return;
     obj.traverse((child) => {
-        if (child.geometry && child.geometry !== unitBox) child.geometry.dispose();
+        if (child.geometry && child.geometry !== unitBox && child.geometry !== unitCylinder) child.geometry.dispose();
         if (child.material && child.material !== unitBox && child.userData?.isDimLine) {
             /* line materials cached */
         }
@@ -776,6 +850,8 @@ class Furniture3D {
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
         const pad = 80;
 
+        const hasUpper = (params.layout || 'both') === 'both';
+
         const lowerH = params.height || 500;
         const upperH = params.upperHeight || 400;
         const lowerW = params.width || 800;
@@ -788,21 +864,20 @@ class Furniture3D {
         const stackGap = 400;
         const upperBaseY = lowerH + ctT + stackGap;
 
-        const wMm = Math.round(Math.max(lowerW, upperW));
-        const dMm = Math.round(Math.max(lowerD, upperD));
+        const wMm = Math.round(hasUpper ? Math.max(lowerW, upperW) : lowerW);
+        const dMm = Math.round(hasUpper ? Math.max(lowerD, upperD) : lowerD);
         const upperHm = Math.round(upperH);
         const lowerHm = Math.round(lowerH);
-        const stackH = Math.round(upperBaseY + upperH);
+        const totalH = hasUpper ? upperBaseY + upperH : lowerH;
 
         const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lowerD / 2 };
-        const max = bounds?.max ?? { x: wMm / 2, y: stackH, z: lowerD / 2 };
+        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: lowerD / 2 };
 
-        const summary = lang === 'en'
-            ? `${wMm} × ${upperHm} × ${dMm} ${unit}`
-            : `${wMm} × ${upperHm} × ${dMm} ${unit}`;
+        const summaryH = hasUpper ? upperHm : lowerHm;
+        const summary = `${wMm} × ${summaryH} × ${dMm} ${unit}`;
 
         const summaryLabel = createDimLabel(summary, 'gconfig-dim-summary');
-        summaryLabel.position.set(0, (upperBaseY + upperH) * MM + 0.12, 0);
+        summaryLabel.position.set(0, totalH * MM + 0.12, 0);
         this.dimGroup.add(summaryLabel);
 
         const yBase = min.y - pad * 0.35;
@@ -819,27 +894,31 @@ class Furniture3D {
         lenLabel.position.set(((min.x + max.x) / 2) * MM, yBase * MM - 0.03, zFront * MM);
         this.dimGroup.add(lenLabel);
 
-        const upperY0 = upperBaseY;
-        const upperY1 = upperBaseY + upperH;
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, upperY0, zDim], [xRight, upperY1, zDim]],
-            color
-        );
-        const upperLabel = createDimLabel(`${upperHm} ${unit}`, 'gconfig-dim-upper');
-        upperLabel.position.set(xRight * MM + 0.03, ((upperY0 + upperY1) / 2) * MM, zDim * MM);
-        this.dimGroup.add(upperLabel);
+        if (hasUpper) {
+            const upperY0 = upperBaseY;
+            const upperY1 = upperBaseY + upperH;
+            addDimensionLine(
+                this.dimGroup,
+                [[xRight, upperY0, zDim], [xRight, upperY1, zDim]],
+                color
+            );
+            const upperLabel = createDimLabel(`${upperHm} ${unit}`, 'gconfig-dim-upper');
+            upperLabel.position.set(xRight * MM + 0.03, ((upperY0 + upperY1) / 2) * MM, zDim * MM);
+            this.dimGroup.add(upperLabel);
+        }
 
-        const lowerY0 = 0;
-        const lowerY1 = lowerH;
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, lowerY0, zDim], [xRight, lowerY1, zDim]],
-            color
-        );
-        const lowerLabel = createDimLabel(`${lowerHm} ${unit}`, 'gconfig-dim-lower');
-        lowerLabel.position.set(xRight * MM + 0.03, ((lowerY0 + lowerY1) / 2) * MM, zDim * MM);
-        this.dimGroup.add(lowerLabel);
+        if (hasLower) {
+            const lowerY0 = 0;
+            const lowerY1 = lowerH;
+            addDimensionLine(
+                this.dimGroup,
+                [[xRight, lowerY0, zDim], [xRight, lowerY1, zDim]],
+                color
+            );
+            const lowerLabel = createDimLabel(`${lowerHm} ${unit}`, 'gconfig-dim-lower');
+            lowerLabel.position.set(xRight * MM + 0.03, ((lowerY0 + lowerY1) / 2) * MM, zDim * MM);
+            this.dimGroup.add(lowerLabel);
+        }
 
         addDimensionLine(
             this.dimGroup,
@@ -930,6 +1009,8 @@ class Furniture3D {
         const backMat = getMaterial('back', 0xd8dde0);
         const gap = 400;
 
+        const hasUpper = (p.layout || 'both') === 'both';
+
         const lower = { w: p.width || 800, h: p.height || 500, d: p.depth || 450 };
         const upper = {
             w: p.upperWidth || lower.w,
@@ -943,10 +1024,13 @@ class Furniture3D {
 
         this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
         if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
-        this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
+        if (hasUpper) {
+            this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
+        }
 
         const shelfDefs = Array.isArray(p.shelves) ? p.shelves : [];
         shelfDefs.forEach((sec) => {
+            if (sec.zone === 'upper' && !hasUpper) return;
             const baseY = sec.zone === 'upper' ? upperBaseY : 0;
             const sw = sec.w || lower.w;
             const sh = sec.h || lower.h;
@@ -971,21 +1055,23 @@ class Furniture3D {
             cabinetHeightMm: lower.h,
         };
 
-        if (upperMode === 'gas') {
-            this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true });
-        } else if (upperMode === 'hinge') {
-            const upperPos = p.hinges?.upper?.position || 'both';
-            this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
-                interactive: true,
-                hingeSide: upperPos === 'right' ? 'right' : 'left',
-                ...upperHingeOpts,
-            });
+        if (hasUpper) {
+            if (upperMode === 'gas') {
+                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
+            } else if (upperMode === 'hinge') {
+                const upperPos = p.hinges?.upper?.position || 'both';
+                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
+                    interactive: true,
+                    hingeSide: upperPos === 'right' ? 'right' : 'left',
+                    ...upperHingeOpts,
+                });
+            }
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true });
+            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
         } else if (lowerMode === 'gas') {
-            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
+            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
         } else if (lowerMode === 'hinge') {
             if (p.lowerSplitDoor) {
                 this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
@@ -1033,12 +1119,19 @@ class Furniture3D {
         const countH = Math.max(0, Math.min(5, sec.horizontal || 0));
         const countV = Math.max(0, Math.min(4, sec.vertical || 0));
 
+        const fallbackSpacingH = Math.floor((H - 2 * T) / (countH + 1));
+        const spacingH = (sec.spacingH > 0) ? sec.spacingH : fallbackSpacingH;
         for (let i = 1; i <= countH; i += 1) {
-            const y = baseY + T + (i * (H - 2 * T)) / (countH + 1);
+            const y = baseY + T + i * spacingH;
+            if (y + T > baseY + H - T) break;           // out-of-bounds guard
             addPanel(group, innerW, T, innerD, mat, 0, y, 0);
         }
+
+        const fallbackSpacingV = Math.floor(innerW / (countV + 1));
+        const spacingV = (sec.spacingV > 0) ? sec.spacingV : fallbackSpacingV;
         for (let i = 1; i <= countV; i += 1) {
-            const x = -innerW / 2 + (i * innerW) / (countV + 1);
+            const x = -innerW / 2 + i * spacingV;
+            if (Math.abs(x) > innerW / 2 - T) break;   // out-of-bounds guard
             addPanel(group, T, H - 2 * T, innerD, mat, x, baseY + H / 2, 0);
         }
     }
@@ -1076,6 +1169,7 @@ class Furniture3D {
         group.add(pivotGroup);
 
         const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, mat, 0, -doorH / 2, 0);
+        if (doorMesh) doorMesh.renderOrder = 2;
         const openAngle = GAS_LIFT_OPEN_RAD;
         const closedAngle = 0;
         const startT = opts.startOpen !== false ? 1 : 0;
@@ -1084,8 +1178,11 @@ class Furniture3D {
         const strutMat = getMaterial('gas-strut', 0x707880, { metalness: 0.55, roughness: 0.38 });
         const strutX = W / 2 - 48;
         const rodR = 3.5;
-        const cabinetAttachY = cabinetTopY - Math.min(28, H * 0.08);
-        const cabinetAttachZ = D / 2 - 22;
+        // Cabinet attachment: at least 70 mm below the top panel so the strut
+        // never crosses the carcass top when the door swings fully open.
+        const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
+        // Push strut anchor ~70 mm back from the front opening to keep it inside
+        const cabinetAttachZ = D / 2 - 70;
         const doorAttachFromTop = doorH * 0.22;
         /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
         const doorInnerZMm = -(facadeT / 2 + 4);
@@ -1110,6 +1207,8 @@ class Furniture3D {
             strutSpecs: [],
         };
 
+        const carcassT = Math.max(12, opts.carcassT || 16);
+
         if (opts.interactive && doorMesh) {
             const strutSpecs = [];
             [-1, 1].forEach((side) => {
@@ -1120,22 +1219,24 @@ class Furniture3D {
                     cabinetAttachY,
                     cabinetAttachZ,
                     x,
-                    cabinetTopY + doorAttachFromTop,
-                    pivotZ,
+                    doorAttachY,
+                    doorAttachZ,
                     rodR,
                     strutMat
                 );
-                strutSpecs.push({ rod, x, rodR, cabinetAttachY, cabinetAttachZ, side });
+                rod.renderOrder = 0;
+                const mountPlates = addGasLiftMountPlate(group, W, carcassT, side, cabinetAttachY, cabinetAttachZ);
+                strutSpecs.push({ rod, mountPlates, x, rodR, cabinetAttachY, cabinetAttachZ, side });
             });
             gasState.strutSpecs = strutSpecs;
             doorMesh.userData.baseMaterial = mat;
             this.gasLiftDoors.push(gasState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'gasLift', state: gasState });
         } else {
-            const openAttachY = cabinetTopY + doorAttachFromTop;
             [-1, 1].forEach((side) => {
                 const x = side * strutX;
-                addRod(group, x, cabinetAttachY, cabinetAttachZ, x, openAttachY, pivotZ, rodR, strutMat);
+                const rod = addRod(group, x, cabinetAttachY, cabinetAttachZ, x, doorAttachY, doorAttachZ, rodR, strutMat);
+                rod.renderOrder = 0;
             });
         }
     }
@@ -1175,6 +1276,37 @@ class Furniture3D {
             this.hingeDoors.push(hingeState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
+
+        // ── Hinge hardware geometry ──────────────────────────────────────────
+        // Cup (Ø35 mm cylinder) + arm bar per hinge position.
+        // All geometry lives in pivotGroup so it rotates with the door on click.
+        const hingeSpec = opts.hingeSpec;
+        if (hingeSpec && doorMesh) {
+            const hingeMat = getMaterial('hinge-metal', 0x8a8e94, { roughness: 0.22, metalness: 0.78 });
+            // Which X-direction from pivot toward door interior?
+            const cupDir = (doorCenterX - hingeX) >= 0 ? 1 : -1;
+            // Cap edge-distance so cup never wanders past ¼ of door width
+            const edgeDist = Math.min(hingeSpec.edgeDist ?? 70, doorW * 0.25, 55);
+            // Door back face Z in pivotGroup local coordinates (mm, 0 = door centre)
+            const backZ = -facadeT / 2;
+
+            hingeSpec.positions.forEach((posFromTop) => {
+                if (posFromTop <= 0 || posFromTop >= doorH) return;
+                // Vertical position relative to door centre (Y in pivotGroup)
+                const hy = doorH / 2 - posFromTop;
+
+                // Cup: Ø35 mm × 12 mm deep cylinder, axis along Z, on door back face
+                // rotX = π/2 rotates the Y-axis cylinder to align with Z
+                addCylinder(pivotGroup, 17.5, 12, hingeMat,
+                    cupDir * edgeDist, hy, backZ - 6,   // centre 6 mm into the door
+                    Math.PI / 2);
+
+                // Arm: flat bar connecting cup to pivot axis
+                addPanel(pivotGroup, edgeDist, 10, 5, hingeMat,
+                    cupDir * edgeDist / 2, hy, backZ - 2.5);
+            });
+        }
+        // ─────────────────────────────────────────────────────────────────────
     }
 
     addSplitDoors(group, W, H, facadeT, D, centerY, mat, opts = {}) {
@@ -1209,25 +1341,61 @@ class Furniture3D {
         });
     }
 
-    addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, wallT, mat) {
-        const sideH = innerH - wallT;
-        const sideY = cy - wallT / 2;
-        addPanel(drawerGroup, innerW, wallT, innerD, mat, 0, cy - innerH / 2 + wallT / 2, 0);
-        addPanel(drawerGroup, wallT, sideH, innerD, mat, -innerW / 2 + wallT / 2, sideY, 0);
-        addPanel(drawerGroup, wallT, sideH, innerD, mat, innerW / 2 - wallT / 2, sideY, 0);
-        addPanel(drawerGroup, innerW - 2 * wallT, sideH, wallT, mat, 0, sideY, -innerD / 2 + wallT / 2);
+    addDrawerBox(drawerGroup, innerW, slotH, innerD, cy, spec, innerMat, boxCenterZ = 0) {
+        // spec: { sideThick, sideH, sideColor } from drawer system DB
+        // slotH — full height of the slot this drawer occupies (cabinet interior / count)
+        // boxCenterZ — Z-center of the box so the front face sits just behind the facade
+        const sideT   = spec?.sideThick || 16;
+        // Use the REAL catalog side height, not the slot height.
+        const sideH   = Math.min(spec?.sideH || Math.max(50, slotH - 32), slotH - 20);
+        const bottomT = 16;         // chipboard bottom panel, always 16mm
+        const runnerGap = 4;        // small clearance at slot bottom for runner bracket
+
+        // Bottom panel: flush with slot bottom + runner clearance
+        const bottomY = cy - slotH / 2 + runnerGap + bottomT / 2;
+        // Sides sit directly on top of the bottom panel
+        const sideY   = bottomY + bottomT / 2 + sideH / 2;
+
+        const sideMat = spec?.sideColor != null
+            ? getMaterial('drawer-side', spec.sideColor, { roughness: 0.25, metalness: 0.55 })
+            : innerMat;
+
+        // Back panel Z: relative to box center
+        const backZ = boxCenterZ - innerD / 2 + sideT / 2;
+
+        // Bottom (chipboard)
+        addPanel(drawerGroup, innerW, bottomT, innerD, innerMat, 0, bottomY, boxCenterZ);
+        // Sides — aluminum rails at their real catalog height
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat, -innerW / 2 + sideT / 2, sideY, boxCenterZ);
+        addPanel(drawerGroup, sideT, sideH, innerD, sideMat,  innerW / 2 - sideT / 2, sideY, boxCenterZ);
+        // Back panel (chipboard, same height as sides)
+        addPanel(drawerGroup, innerW - 2 * sideT, sideH, sideT, innerMat, 0, sideY, backZ);
     }
 
     addDrawers(group, W, H, D, facadeT, mat, count, opts = {}) {
-        const n = Math.max(1, Math.min(5, count));
-        const drawerH = (H - FACADE_GAP * 2) / n;
-        const facadeZ = D / 2 + facadeT / 2 + 2;
-        const slideMm = 0.72 * (D - 24);
-        const innerW = W - 16;
-        const innerH = drawerH - 12;
-        const innerD = D - 24;
-        const wallT = 16;
+        const n    = Math.max(1, Math.min(5, count));
+        const spec = opts.drawerSpec || null;   // { sideH, sideThick, gap, sideColor, runners }
+        // Per-drawer types array (index 0 = top drawer in user view).
+        // 3D renders i=0 at bottom, so user index for 3D slot i is (n-1-i).
+        const drawerTypes = opts.drawerTypes || [];
+
+        // Runner length: largest standard ≤ available depth
+        const RUNNERS = (spec?.runners) || [250, 300, 350, 400, 450, 500, 550, 600];
+        let runnerL = RUNNERS[0];
+        for (const l of RUNNERS) { if (l <= D - 24) runnerL = l; }
+
+        const gap      = spec?.gap ?? 16;       // total lateral clearance consumed by system
+        const drawerH  = (H - FACADE_GAP * 2) / n;  // full slot height per drawer
+        const facadeZ  = D / 2 + facadeT / 2 + 2;
+        const slideMm  = runnerL * 0.92;        // realistic slide-out distance
+        const innerW   = W - 32 - gap;          // 16mm carcass side each side + system clearance
+        const innerD   = runnerL;
         const innerMat = getMaterial('drawer-inner', 'ldsp');
+
+        // Position the box so its front face sits ~3 mm behind the carcass opening (D/2).
+        // Without this offset the box would be centred at z=0 leaving a ~25mm gap.
+        const boxFrontZ  = D / 2 - 3;          // front face of the drawer box
+        const boxCenterZ = boxFrontZ - innerD / 2;
 
         for (let i = 0; i < n; i += 1) {
             const cy = drawerH * i + drawerH / 2 + FACADE_GAP;
@@ -1235,7 +1403,22 @@ class Furniture3D {
             group.add(drawerGroup);
 
             const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
-            this.addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, wallT, innerMat);
+            this.addDrawerBox(drawerGroup, innerW, drawerH, innerD, cy, spec, innerMat, boxCenterZ);
+
+            // Per-drawer push-to-open flag: user index 0 = top = 3D index (n-1)
+            const userIdx  = n - 1 - i;
+            const isPto    = drawerTypes.length > 0
+                ? drawerTypes[userIdx] === 'pto'
+                : (spec?.pushToOpen ?? false);
+
+            // Regular drawers get a horizontal bar handle; push-to-open drawers don't
+            if (!isPto) {
+                const handleW = Math.min(160, (W - FACADE_GAP * 2) * 0.55);
+                const handleH = 13;
+                const handleD = 10;
+                const handleMat = getMaterial('drawer-handle', 0xb8bcc2, { roughness: 0.18, metalness: 0.88 });
+                addPanel(drawerGroup, handleW, handleH, handleD, handleMat, 0, cy, facadeZ + facadeT / 2 + handleD / 2);
+            }
 
             if (opts.interactive && facadeMesh) {
                 facadeMesh.userData.baseMaterial = mat;
