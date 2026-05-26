@@ -309,12 +309,12 @@ const GAS_MOUNT_PLATE_D_MM = 68;
 /** After 90° rotation the long edge runs along cabinet depth (Z). */
 const GAS_MOUNT_PLATE_DEPTH_MM = GAS_MOUNT_PLATE_H_MM;
 /** Clearance from front opening to the front face of the bracket (toward door). */
-const GAS_MOUNT_FRONT_CLEAR_MM = 36;
+const GAS_MOUNT_FRONT_CLEAR_MM = 10;
 
 /** Center Z for bracket on side wall (mm, cabinet space). */
 function gasLiftCabinetAttachZ(D) {
     const frontZ = D / 2;
-    const clear = Math.min(GAS_MOUNT_FRONT_CLEAR_MM, Math.max(24, D * 0.1));
+    const clear = Math.min(GAS_MOUNT_FRONT_CLEAR_MM, Math.max(10, D * 0.05));
     return frontZ - GAS_MOUNT_PLATE_DEPTH_MM / 2 - clear;
 }
 
