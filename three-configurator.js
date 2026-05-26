@@ -1310,37 +1310,6 @@ class Furniture3D {
             this.hingeDoors.push(hingeState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
-
-        // ── Hinge hardware geometry ──────────────────────────────────────────
-        // Cup (Ø35 mm cylinder) + arm bar per hinge position.
-        // All geometry lives in pivotGroup so it rotates with the door on click.
-        const hingeSpec = opts.hingeSpec;
-        if (hingeSpec && doorMesh) {
-            const hingeMat = getMaterial('hinge-metal', 0x8a8e94, { roughness: 0.22, metalness: 0.78 });
-            // Which X-direction from pivot toward door interior?
-            const cupDir = (doorCenterX - hingeX) >= 0 ? 1 : -1;
-            // Cap edge-distance so cup never wanders past ¼ of door width
-            const edgeDist = Math.min(hingeSpec.edgeDist ?? 70, doorW * 0.25, 55);
-            // Door back face Z in pivotGroup local coordinates (mm, 0 = door centre)
-            const backZ = -facadeT / 2;
-
-            hingeSpec.positions.forEach((posFromTop) => {
-                if (posFromTop <= 0 || posFromTop >= doorH) return;
-                // Vertical position relative to door centre (Y in pivotGroup)
-                const hy = doorH / 2 - posFromTop;
-
-                // Cup: Ø35 mm × 12 mm deep cylinder, axis along Z, on door back face
-                // rotX = π/2 rotates the Y-axis cylinder to align with Z
-                addCylinder(pivotGroup, 17.5, 12, hingeMat,
-                    cupDir * edgeDist, hy, backZ - 6,   // centre 6 mm into the door
-                    Math.PI / 2);
-
-                // Arm: flat bar connecting cup to pivot axis
-                addPanel(pivotGroup, edgeDist, 10, 5, hingeMat,
-                    cupDir * edgeDist / 2, hy, backZ - 2.5);
-            });
-        }
-        // ─────────────────────────────────────────────────────────────────────
     }
 
     addSplitDoors(group, W, H, facadeT, D, centerY, mat, opts = {}) {
