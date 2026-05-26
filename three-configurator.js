@@ -1104,8 +1104,11 @@ class Furniture3D {
         const strutMat = getMaterial('gas-strut', 0x707880, { metalness: 0.55, roughness: 0.38 });
         const strutX = W / 2 - 48;
         const rodR = 3.5;
-        const cabinetAttachY = cabinetTopY - Math.min(28, H * 0.08);
-        const cabinetAttachZ = D / 2 - 22;
+        // Cabinet attachment: at least 70 mm below the top panel so the strut
+        // never crosses the carcass top when the door swings fully open.
+        const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
+        // Push strut anchor ~70 mm back from the front opening to keep it inside
+        const cabinetAttachZ = D / 2 - 70;
         const doorAttachFromTop = doorH * 0.22;
         /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
         const doorInnerZMm = -(facadeT / 2 + 4);
