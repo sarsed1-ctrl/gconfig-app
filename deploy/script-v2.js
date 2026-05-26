@@ -370,6 +370,8 @@
 
 
 
+    const THICKNESS_IFRAME_IDS = new Set(['facadeThick', 'carcassThick']);
+
     const EAMF_IFRAME_HANDLERS = {
 
         eamfFacadeMaterial: 'onEamfFacadeMaterialChange',
@@ -2027,6 +2029,15 @@
 
 
 
+    /** Rebuild v1 EAMF material lists for current facade/carcass thickness (v2 sync is quiet). */
+    function refreshIframeEamfByThickness() {
+        if (!iframeReady) return;
+        const win = iframeWin();
+        if (win && typeof win.refreshEamfMaterialSelectsOnThicknessChange === 'function') {
+            win.refreshEamfMaterialSelectsOnThicknessChange();
+        }
+    }
+
     /** Re-clone iframe selects into the wizard after v1 catalog/UI is ready. */
 
     function refreshWizardSelectsFromIframe() {
@@ -2769,6 +2780,8 @@
                 syncCabinetLayoutToV1(getCabinetLayout(), { skipTrigger: true });
             }
 
+            refreshIframeEamfByThickness();
+
             if (includeEamf) {
                 Object.entries(EAMF_IFRAME_HANDLERS).forEach(([id, handlerName]) => {
                     const wEl = document.querySelector(`[data-iframe="${id}"]`);
@@ -2796,9 +2809,9 @@
     }
 
     function afterV1CatalogReady() {
+        syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
         refreshWizardSelectsFromIframe();
         refreshEamfEdgeSelects();
-        syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
         const win = iframeWin();
         if (win && typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
     }
@@ -2851,7 +2864,13 @@
 
         }
 
-
+        if (THICKNESS_IFRAME_IDS.has(id)) {
+            refreshIframeEamfByThickness();
+            if (currentStep === 4) {
+                refreshWizardSelectsFromIframe();
+                refreshEamfEdgeSelects();
+            }
+        }
 
         if (handlerName) {
 
@@ -3946,10 +3965,12 @@
 
         exportActions.classList.toggle('visible', iframeReady);
 
-        if (currentStep === 4) refreshWizardSelectsFromIframe();
-
         if (iframeReady) {
             syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
+        }
+        if (currentStep === 4) {
+            refreshWizardSelectsFromIframe();
+            refreshEamfEdgeSelects();
         }
 
         if (currentStep === 3) {
