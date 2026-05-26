@@ -336,26 +336,16 @@ function gasLiftMountAnchor(W, carcassT, side) {
 function addGasLiftMountPlate(group, W, carcassT, side, attachY, attachZ) {
     const { xPlate, plateThk, plateH, plateD } = gasLiftMountAnchor(W, carcassT, side);
 
-    const bodyMat = getMaterial('gas-bracket', 0x6a737a, { metalness: 0.78, roughness: 0.34 });
-    const faceMat = getMaterial('gas-bracket-face', 0x9aa3ab, { metalness: 0.88, roughness: 0.22 });
+    const mat = getMaterial('gas-bracket', 0x6a737a, { metalness: 0.78, roughness: 0.34 });
 
     const parts = [];
-    // 90° on side wall: long edge along depth (Z), short edge along height (Y).
+    // 90° on side wall: long edge along depth (Z), short edge along height (Y). Single flat plate — no screws/dots.
     const plateY = plateD;
     const plateZ = plateH;
-    const base = addPanel(group, plateThk, plateY, plateZ, bodyMat, xPlate, attachY, attachZ);
+    const base = addPanel(group, plateThk, plateY, plateZ, mat, xPlate, attachY, attachZ);
     if (base) {
         base.renderOrder = 1;
         parts.push(base);
-    }
-
-    const faceThk = 1.8;
-    const faceInset = 12;
-    const faceX = side < 0 ? xPlate + plateThk / 2 + faceThk / 2 + 0.12 : xPlate - plateThk / 2 - faceThk / 2 - 0.12;
-    const face = addPanel(group, faceThk, plateY - faceInset, plateZ - faceInset, faceMat, faceX, attachY, attachZ);
-    if (face) {
-        face.renderOrder = 2;
-        parts.push(face);
     }
 
     return parts;
