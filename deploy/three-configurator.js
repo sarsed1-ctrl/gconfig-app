@@ -310,6 +310,8 @@ const GAS_MOUNT_PLATE_D_MM = 68;
 const GAS_MOUNT_PLATE_DEPTH_MM = GAS_MOUNT_PLATE_H_MM;
 /** Clearance from front opening to the front face of the bracket (toward door). */
 const GAS_MOUNT_FRONT_CLEAR_MM = 10;
+/** Extra offset below default mount height (mm, positive = lower). */
+const GAS_MOUNT_LOWER_OFFSET_MM = 10;
 
 /** Center Z for bracket on side wall (mm, cabinet space). */
 function gasLiftCabinetAttachZ(D) {
@@ -1212,9 +1214,9 @@ class Furniture3D {
         const mountRight = gasLiftMountAnchor(W, carcassT, 1);
         // Cabinet attachment: at least 70 mm below the top panel so the strut
         // never crosses the carcass top when the door swings fully open.
-        const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
+        const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20) - GAS_MOUNT_LOWER_OFFSET_MM;
         const cabinetAttachZ = gasLiftCabinetAttachZ(D);
-        const doorAttachFromTop = doorH * 0.22;
+        const doorAttachFromTop = doorH * 0.22 + GAS_MOUNT_LOWER_OFFSET_MM;
         const doorInnerZMm = -(facadeT / 2 + 1);
         const doorAttachY = cabinetTopY - doorAttachFromTop;
         const doorAttachZ = pivotZ + doorInnerZMm;
