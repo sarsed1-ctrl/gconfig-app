@@ -92,6 +92,14 @@
 
                         <div class="closets-only">
                             <div class="card">
+                                <h3 data-i18n="cabinet_layout">Configuration</h3>
+                                <div class="hw-chips" id="cabinetLayoutChips" data-radio="cabinetLayout">
+                                    <button type="button" class="hw-chip active" data-value="both"  data-i18n="layout_both">Both</button>
+                                    <button type="button" class="hw-chip"        data-value="lower" data-i18n="layout_lower">Lower only</button>
+                                    <button type="button" class="hw-chip"        data-value="upper" data-i18n="layout_upper">Upper only</button>
+                                </div>
+                            </div>
+                            <div class="card" id="lowerCabinetCard">
                                 <h3 data-i18n="lower_section">Lower cabinet</h3>
                                 <div class="field-grid cols-3">
                                     <div class="field"><label data-i18n="width">Width (W)</label><input type="number" id="w-lower-w" data-iframe="w1" min="300" step="1"></div>
@@ -99,7 +107,7 @@
                                     <div class="field"><label data-i18n="depth">Depth (D)</label><input type="number" id="w-lower-d" data-iframe="d1" min="200" step="1"></div>
                                 </div>
                             </div>
-                            <div class="card">
+                            <div class="card" id="upperCabinetCard">
                                 <h3 data-i18n="upper_section">Upper cabinet</h3>
                                 <div class="field-grid cols-3">
                                     <div class="field"><label data-i18n="width">Width (W2)</label><input type="number" id="w-upper-w" data-iframe="upper_w" min="300" step="1"></div>
@@ -186,11 +194,11 @@
                             <div class="card">
                                 <h3 data-i18n="shelves">Shelves</h3>
                                 <div class="field-grid">
-                                    <div class="field">
+                                    <div class="field upper-shelf-field">
                                         <label data-i18n="upper_shelves_h">Upper — horiz.</label>
                                         <input type="number" id="w-upperShelvesH" data-iframe="upperShelvesH" min="0" max="5">
                                     </div>
-                                    <div class="field">
+                                    <div class="field upper-shelf-field">
                                         <label data-i18n="upper_shelves_v">Upper — vert.</label>
                                         <input type="number" id="w-upperShelvesV" data-iframe="upperShelvesV" min="0" max="4">
                                     </div>
@@ -203,7 +211,7 @@
                                         <input type="number" id="w-vanityShelvesV" data-iframe="vanityShelvesV" min="0" max="4">
                                     </div>
                                 </div>
-                                <div class="shelf-spacing-block hidden" id="upperHSpacingBlock">
+                                <div class="shelf-spacing-block hidden upper-shelf-field" id="upperHSpacingBlock">
                                     <label data-i18n="shelf_spacing_h">Vertical spacing (upper)</label>
                                     <div class="range-row">
                                         <input type="range" id="w-upperSpacingH" data-iframe="upperSpacingH" min="30" max="300" step="5">
@@ -211,7 +219,7 @@
                                     </div>
                                     <span class="field-hint" data-i18n="hint_spacing_upper_h">Distance between horizontal shelves in the upper cabinet.</span>
                                 </div>
-                                <div class="shelf-spacing-block hidden" id="upperVSpacingBlock">
+                                <div class="shelf-spacing-block hidden upper-shelf-field" id="upperVSpacingBlock">
                                     <label data-i18n="shelf_spacing_v">Horizontal spacing (upper)</label>
                                     <div class="range-row">
                                         <input type="range" id="w-upperSpacingV" data-iframe="upperSpacingV" min="50" max="600" step="5">
@@ -241,14 +249,14 @@
                             </div>
                             <div class="card">
                                 <h3 data-i18n="hardware_mode">Door hardware</h3>
-                                <div class="hw-group">
+                                <div class="hw-group" id="upperHwGroup">
                                     <label data-i18n="upper_hw">Upper cabinet</label>
                                     <div class="hw-chips" id="upperHwChips" data-radio="upperHardwareMode">
                                         <button type="button" class="hw-chip" data-value="gas" data-i18n="gas">Gas lifts</button>
                                         <button type="button" class="hw-chip" data-value="hinge" data-i18n="hinge">Hinges</button>
                                     </div>
                                 </div>
-                                <div class="hw-group">
+                                <div class="hw-group" id="lowerHwGroup">
                                     <label data-i18n="lower_hw">Lower cabinet</label>
                                     <div class="hw-chips" id="lowerHwChips" data-radio="lowerHardwareMode">
                                         <button type="button" class="hw-chip" data-value="hinge" data-i18n="hinge">Hinges</button>

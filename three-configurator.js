@@ -776,6 +776,10 @@ class Furniture3D {
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
         const pad = 80;
 
+        const pLayout = params.layout || 'both';
+        const hasLower = pLayout !== 'upper';
+        const hasUpper = pLayout !== 'lower';
+
         const lowerH = params.height || 500;
         const upperH = params.upperHeight || 400;
         const lowerW = params.width || 800;
@@ -786,23 +790,24 @@ class Furniture3D {
             ? params.countertop.thickness
             : 0;
         const stackGap = 400;
-        const upperBaseY = lowerH + ctT + stackGap;
+        const upperBaseY = hasLower ? lowerH + ctT + stackGap : 0;
 
-        const wMm = Math.round(Math.max(lowerW, upperW));
-        const dMm = Math.round(Math.max(lowerD, upperD));
+        const refW = hasLower && hasUpper ? Math.max(lowerW, upperW) : (hasLower ? lowerW : upperW);
+        const refD = hasLower && hasUpper ? Math.max(lowerD, upperD) : (hasLower ? lowerD : upperD);
+        const wMm = Math.round(refW);
+        const dMm = Math.round(refD);
         const upperHm = Math.round(upperH);
         const lowerHm = Math.round(lowerH);
-        const stackH = Math.round(upperBaseY + upperH);
+        const totalH = hasUpper ? upperBaseY + upperH : lowerH;
 
-        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lowerD / 2 };
-        const max = bounds?.max ?? { x: wMm / 2, y: stackH, z: lowerD / 2 };
+        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -refD / 2 };
+        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: refD / 2 };
 
-        const summary = lang === 'en'
-            ? `${wMm} × ${upperHm} × ${dMm} ${unit}`
-            : `${wMm} × ${upperHm} × ${dMm} ${unit}`;
+        const summaryH = hasUpper ? upperHm : lowerHm;
+        const summary = `${wMm} × ${summaryH} × ${dMm} ${unit}`;
 
         const summaryLabel = createDimLabel(summary, 'gconfig-dim-summary');
-        summaryLabel.position.set(0, (upperBaseY + upperH) * MM + 0.12, 0);
+        summaryLabel.position.set(0, totalH * MM + 0.12, 0);
         this.dimGroup.add(summaryLabel);
 
         const yBase = min.y - pad * 0.35;
@@ -819,27 +824,31 @@ class Furniture3D {
         lenLabel.position.set(((min.x + max.x) / 2) * MM, yBase * MM - 0.03, zFront * MM);
         this.dimGroup.add(lenLabel);
 
-        const upperY0 = upperBaseY;
-        const upperY1 = upperBaseY + upperH;
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, upperY0, zDim], [xRight, upperY1, zDim]],
-            color
-        );
-        const upperLabel = createDimLabel(`${upperHm} ${unit}`, 'gconfig-dim-upper');
-        upperLabel.position.set(xRight * MM + 0.03, ((upperY0 + upperY1) / 2) * MM, zDim * MM);
-        this.dimGroup.add(upperLabel);
+        if (hasUpper) {
+            const upperY0 = upperBaseY;
+            const upperY1 = upperBaseY + upperH;
+            addDimensionLine(
+                this.dimGroup,
+                [[xRight, upperY0, zDim], [xRight, upperY1, zDim]],
+                color
+            );
+            const upperLabel = createDimLabel(`${upperHm} ${unit}`, 'gconfig-dim-upper');
+            upperLabel.position.set(xRight * MM + 0.03, ((upperY0 + upperY1) / 2) * MM, zDim * MM);
+            this.dimGroup.add(upperLabel);
+        }
 
-        const lowerY0 = 0;
-        const lowerY1 = lowerH;
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, lowerY0, zDim], [xRight, lowerY1, zDim]],
-            color
-        );
-        const lowerLabel = createDimLabel(`${lowerHm} ${unit}`, 'gconfig-dim-lower');
-        lowerLabel.position.set(xRight * MM + 0.03, ((lowerY0 + lowerY1) / 2) * MM, zDim * MM);
-        this.dimGroup.add(lowerLabel);
+        if (hasLower) {
+            const lowerY0 = 0;
+            const lowerY1 = lowerH;
+            addDimensionLine(
+                this.dimGroup,
+                [[xRight, lowerY0, zDim], [xRight, lowerY1, zDim]],
+                color
+            );
+            const lowerLabel = createDimLabel(`${lowerHm} ${unit}`, 'gconfig-dim-lower');
+            lowerLabel.position.set(xRight * MM + 0.03, ((lowerY0 + lowerY1) / 2) * MM, zDim * MM);
+            this.dimGroup.add(lowerLabel);
+        }
 
         addDimensionLine(
             this.dimGroup,
@@ -930,6 +939,10 @@ class Furniture3D {
         const backMat = getMaterial('back', 0xd8dde0);
         const gap = 400;
 
+        const layout = p.layout || 'both';
+        const hasLower = layout !== 'upper';
+        const hasUpper = layout !== 'lower';
+
         const lower = { w: p.width || 800, h: p.height || 500, d: p.depth || 450 };
         const upper = {
             w: p.upperWidth || lower.w,
@@ -939,14 +952,21 @@ class Furniture3D {
         const ctT = p.countertop?.enabled && p.countertop.thickness > 0
             ? p.countertop.thickness
             : 0;
-        const upperBaseY = lower.h + ctT + gap;
+        // If lower-only: upper doesn't exist; if upper-only: upper starts at floor
+        const upperBaseY = hasLower ? lower.h + ctT + gap : 0;
 
-        this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
-        if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
-        this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
+        if (hasLower) {
+            this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
+            if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
+        }
+        if (hasUpper) {
+            this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
+        }
 
         const shelfDefs = Array.isArray(p.shelves) ? p.shelves : [];
         shelfDefs.forEach((sec) => {
+            if (sec.zone === 'upper' && !hasUpper) return;
+            if (sec.zone === 'lower' && !hasLower) return;
             const baseY = sec.zone === 'upper' ? upperBaseY : 0;
             const sw = sec.w || lower.w;
             const sh = sec.h || lower.h;
@@ -971,34 +991,38 @@ class Furniture3D {
             cabinetHeightMm: lower.h,
         };
 
-        if (upperMode === 'gas') {
-            this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true });
-        } else if (upperMode === 'hinge') {
-            const upperPos = p.hinges?.upper?.position || 'both';
-            this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
-                interactive: true,
-                hingeSide: upperPos === 'right' ? 'right' : 'left',
-                ...upperHingeOpts,
-            });
+        if (hasUpper) {
+            if (upperMode === 'gas') {
+                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true });
+            } else if (upperMode === 'hinge') {
+                const upperPos = p.hinges?.upper?.position || 'both';
+                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
+                    interactive: true,
+                    hingeSide: upperPos === 'right' ? 'right' : 'left',
+                    ...upperHingeOpts,
+                });
+            }
         }
 
-        if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
-        } else if (lowerMode === 'gas') {
-            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
-        } else if (lowerMode === 'hinge') {
-            if (p.lowerSplitDoor) {
-                this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
-                    interactive: true,
-                    ...lowerHingeOpts,
-                });
-            } else {
-                const lowerPos = p.hinges?.lower?.position || 'left';
-                this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
-                    interactive: true,
-                    hingeSide: lowerPos === 'right' ? 'right' : 'left',
-                    ...lowerHingeOpts,
-                });
+        if (hasLower) {
+            if (lowerMode === 'drawer' || p.drawers?.enabled) {
+                this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
+            } else if (lowerMode === 'gas') {
+                this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true });
+            } else if (lowerMode === 'hinge') {
+                if (p.lowerSplitDoor) {
+                    this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
+                        interactive: true,
+                        ...lowerHingeOpts,
+                    });
+                } else {
+                    const lowerPos = p.hinges?.lower?.position || 'left';
+                    this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
+                        interactive: true,
+                        hingeSide: lowerPos === 'right' ? 'right' : 'left',
+                        ...lowerHingeOpts,
+                    });
+                }
             }
         }
     }

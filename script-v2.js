@@ -650,7 +650,15 @@
 
             hint_spacing_lower_h: 'Расстояние между горизонтальными полками нижнего шкафа.',
 
-            hint_spacing_lower_v: 'Расстояние между вертикальными перегородками нижнего шкафа.'
+            hint_spacing_lower_v: 'Расстояние между вертикальными перегородками нижнего шкафа.',
+
+            cabinet_layout: 'Конфигурация',
+
+            layout_both: 'Оба шкафа',
+
+            layout_lower: 'Только нижний',
+
+            layout_upper: 'Только верхний'
 
         },
 
@@ -896,7 +904,15 @@
 
             hint_spacing_lower_h: 'Distance between horizontal shelves in the lower cabinet.',
 
-            hint_spacing_lower_v: 'Distance between vertical shelf dividers in the lower cabinet.'
+            hint_spacing_lower_v: 'Distance between vertical shelf dividers in the lower cabinet.',
+
+            cabinet_layout: 'Configuration',
+
+            layout_both: 'Both cabinets',
+
+            layout_lower: 'Lower only',
+
+            layout_upper: 'Upper only'
 
         }
 
@@ -1405,6 +1421,8 @@
         return {
 
             mode: 'closets',
+
+            layout: getCabinetLayout(),
 
             width: fieldNum('w1', 800),
 
@@ -2040,6 +2058,37 @@
 
     }
 
+    /** Returns 'both' | 'lower' | 'upper' */
+    function getCabinetLayout() {
+        return getHardwareModeFromChips('cabinetLayoutChips', 'both');
+    }
+
+    /**
+     * Sync cabinet layout to v1 iframe by zeroing out the hidden section's
+     * dimension fields.  When restoring to 'both', re-push current v2 values.
+     */
+    function syncCabinetLayoutToV1(layout) {
+        if (!iframeReady) return;
+        if (layout === 'lower') {
+            setIframeValueQuiet('upper_w', 0);
+            setIframeValueQuiet('upper_h', 0);
+            setIframeValueQuiet('upper_d', 0);
+        } else if (layout === 'upper') {
+            setIframeValueQuiet('w1', 0);
+            setIframeValueQuiet('h1', 0);
+            setIframeValueQuiet('d1', 0);
+        } else {
+            // Restore both from v2 fields
+            ['w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d'].forEach(id => {
+                const el = document.querySelector(`[data-iframe="${id}"]`);
+                if (el) setIframeValueQuiet(id, el.value);
+            });
+        }
+        triggerV1Update();
+        schedulePreviewSync();
+        schedule3DRebuild();
+    }
+
 
 
     function getUpperHardwareMode() {
@@ -2061,6 +2110,18 @@
         const countertopFields = document.getElementById('countertopFields');
 
         if (countertopFields) countertopFields.classList.toggle('hidden', !hasCountertop);
+
+
+
+        // ── Cabinet layout (lower-only / upper-only / both) ──────────────────
+        const layout = getCabinetLayout();
+        document.getElementById('lowerCabinetCard')?.classList.toggle('hidden', layout === 'upper');
+        document.getElementById('upperCabinetCard')?.classList.toggle('hidden', layout === 'lower');
+        document.getElementById('upperHwGroup')?.classList.toggle('hidden', layout === 'lower');
+        document.getElementById('lowerHwGroup')?.classList.toggle('hidden', layout === 'upper');
+        document.querySelector('#countertopFields')?.closest('.card')?.classList.toggle('hidden', layout === 'upper');
+        document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', layout === 'lower'));
+        // ─────────────────────────────────────────────────────────────────────
 
 
 
@@ -2103,13 +2164,13 @@
 
         document.querySelectorAll('.hinge-upper-field').forEach((el) => {
 
-            el.classList.toggle('hidden', upperMode === 'gas');
+            el.classList.toggle('hidden', upperMode === 'gas' || layout === 'lower');
 
         });
 
         document.querySelectorAll('.hinge-lower-field').forEach((el) => {
 
-            el.classList.toggle('hidden', lowerMode !== 'hinge');
+            el.classList.toggle('hidden', lowerMode !== 'hinge' || layout === 'upper');
 
         });
 
@@ -2684,6 +2745,12 @@
     function pushRadioToIframe(name, value) {
 
         if (!iframeReady) return;
+
+        if (name === 'cabinetLayout') {
+            syncCabinetLayoutToV1(value);
+            updateConditionalUI();
+            return;
+        }
 
         if (name === 'lowerHardwareMode' && value === 'drawer') {
 
