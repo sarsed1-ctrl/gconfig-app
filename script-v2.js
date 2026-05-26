@@ -164,11 +164,11 @@
     // sideColor — Three.js hex for the side panel material in 3D preview
     // runners  — available runner lengths, mm (largest that fits depth is chosen)
     const DRAWER_SYSTEMS = [
-        // GTV AxisPro — aluminium push-to-open, anthracite, 37mm bracket per side
-        { id: 'axispro_86',  brand: 'GTV',    name: 'AxisPro H86',         sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_115', brand: 'GTV',    name: 'AxisPro H115',        sideH: 115, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_150', brand: 'GTV',    name: 'AxisPro H150',        sideH: 150, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        // Hafele MatrixBox — epoxy steel, 7mm clearance per side
+        // GTV AxisPro — aluminium, ALWAYS push-to-open, anthracite, 37mm bracket per side
+        { id: 'axispro_86',  brand: 'GTV',    name: 'AxisPro H86',         pushToOpen: true, sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_115', brand: 'GTV',    name: 'AxisPro H115',        pushToOpen: true, sideH: 115, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        { id: 'axispro_150', brand: 'GTV',    name: 'AxisPro H150',        pushToOpen: true, sideH: 150, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
+        // Hafele MatrixBox — epoxy steel, 7mm clearance per side; available in regular + push-to-open
         { id: 'matrixbox_86',  brand: 'Hafele', name: 'MatrixBox S30 H86',  sideH: 86,  sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
         { id: 'matrixbox_115', brand: 'Hafele', name: 'MatrixBox M40 H115', sideH: 115, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
         { id: 'matrixbox_150', brand: 'Hafele', name: 'MatrixBox L40 H150', sideH: 150, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
@@ -192,13 +192,21 @@
             .sort((a, b) => b.sideH - a.sideH)[0] || null;
     }
 
-    /** Get the auto-selected spec for the currently chosen brand + cabinet dimensions. */
+    /** Returns 'pto' or 'regular'. AxisPro is always push-to-open regardless of chip selection. */
+    function getSelectedDrawerType() {
+        const brand = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+        if (brand === 'axispro') return 'pto';
+        return getHardwareModeFromChips('drawerTypeChips', 'regular');
+    }
+
+    /** Get the auto-selected spec + pushToOpen flag for the current settings. */
     function getSelectedDrawerSpec() {
         const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
         const cabinetH = fieldNum('h1', 500);
         const count    = fieldNum('lowerDrawerCount', 1);
         const carcassT = fieldNum('carcassThick', 16);
-        return getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
+        const base = getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
+        return { ...base, pushToOpen: getSelectedDrawerType() === 'pto' };
     }
 
     /** Update the auto-height info label shown next to the brand selector. */
@@ -447,6 +455,12 @@
 
             drawer_brand: 'Бренд',
 
+            drawer_type: 'Тип открывания',
+
+            drawer_regular: 'Обычный',
+
+            drawer_pto: 'Push-to-open',
+
             drawer_count: 'Количество ящиков',
 
             back_panel: 'Задняя панель',
@@ -684,6 +698,12 @@
             drawer_system: 'Drawer system',
 
             drawer_brand: 'Brand',
+
+            drawer_type: 'Opening type',
+
+            drawer_regular: 'Regular',
+
+            drawer_pto: 'Push-to-open',
 
             drawer_count: 'Drawer count',
 
@@ -1998,7 +2018,23 @@
         if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
 
         // Rebuild drawer system select whenever mode or dimensions change
-        if (lowerMode === 'drawer') rebuildDrawerSystemSelect();
+        if (lowerMode === 'drawer') {
+            rebuildDrawerSystemSelect();
+
+            // AxisPro is always push-to-open — lock/unlock the type chips accordingly
+            const brand      = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+            const isPtoOnly  = brand === 'axispro';
+            const typeChips  = document.getElementById('drawerTypeChips');
+            if (typeChips) {
+                typeChips.classList.toggle('section-disabled', isPtoOnly);
+                if (isPtoOnly) {
+                    // force PTO chip active
+                    typeChips.querySelectorAll('.hw-chip').forEach((c) => {
+                        c.classList.toggle('active', c.dataset.value === 'pto');
+                    });
+                }
+            }
+        }
 
         // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
         const isDrawer = lowerMode === 'drawer';

@@ -1265,6 +1265,15 @@ class Furniture3D {
             const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
             this.addDrawerBox(drawerGroup, innerW, innerH, innerD, cy, spec, innerMat);
 
+            // Regular drawers get a horizontal bar handle; push-to-open drawers don't
+            if (!spec?.pushToOpen) {
+                const handleW = Math.min(160, (W - FACADE_GAP * 2) * 0.55);
+                const handleH = 13;
+                const handleD = 10;
+                const handleMat = getMaterial('drawer-handle', 0xb8bcc2, { roughness: 0.18, metalness: 0.88 });
+                addPanel(drawerGroup, handleW, handleH, handleD, handleMat, 0, cy, facadeZ + facadeT / 2 + handleD / 2);
+            }
+
             if (opts.interactive && facadeMesh) {
                 facadeMesh.userData.baseMaterial = mat;
                 this.hoverableMeshes.push({ mesh: facadeMesh, kind: 'drawer', drawerIndex: i });
