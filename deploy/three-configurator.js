@@ -306,6 +306,15 @@ function addRod(group, ax, ay, az, bx, by, bz, radiusMm, mat) {
 const GAS_MOUNT_PLATE_THK_MM = 5.6;
 const GAS_MOUNT_PLATE_H_MM = 108;
 const GAS_MOUNT_PLATE_D_MM = 68;
+/** After 90° rotation the long edge runs along cabinet depth (Z). */
+const GAS_MOUNT_PLATE_DEPTH_MM = GAS_MOUNT_PLATE_H_MM;
+/** Clearance from front opening to the front face of the bracket. */
+const GAS_MOUNT_FRONT_CLEAR_MM = 72;
+
+/** Center Z for bracket on side wall (mm, cabinet space). */
+function gasLiftCabinetAttachZ(D) {
+    return D / 2 - GAS_MOUNT_PLATE_DEPTH_MM / 2 - GAS_MOUNT_FRONT_CLEAR_MM;
+}
 
 /** Plate center + rod joint on cavity face of bracket (mm, cabinet space). */
 function gasLiftMountAnchor(W, carcassT, side) {
@@ -1202,8 +1211,7 @@ class Furniture3D {
         // Cabinet attachment: at least 70 mm below the top panel so the strut
         // never crosses the carcass top when the door swings fully open.
         const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20);
-        // Push strut anchor ~70 mm back from the front opening to keep it inside
-        const cabinetAttachZ = D / 2 - 37;
+        const cabinetAttachZ = gasLiftCabinetAttachZ(D);
         const doorAttachFromTop = doorH * 0.22;
         /** Inner face of door (toward cabinet) — keeps struts behind the facade, not through it. */
         const doorInnerZMm = -(facadeT / 2 + 1);
