@@ -176,62 +176,60 @@
     ];
 
     /**
-     * Return systems whose side height fits inside one drawer slot.
-     * slotH = cabinetInterior / drawerCount
-     * Required clearance: 16mm bottom + 10mm top gap + 6mm facade gap = 32mm
+     * Pick the tallest DRAWER_SYSTEMS entry for the given brand that fits
+     * inside a single drawer slot.
+     *   slotH = (cabinetInterior) / drawerCount
+     *   Required clearance: 16mm chipboard bottom + 10mm top gap + 6mm facade gaps = 32mm
+     * Returns null when nothing fits.
      */
-    function filterDrawerSystems(cabinetH, drawerCount, carcassT) {
-        const interior = cabinetH - 2 * (carcassT || 16);
-        const count = Math.max(1, drawerCount || 1);
-        const slotH = Math.floor(interior / count);
-        const maxSideH = slotH - 32;   // 16mm bottom panel + 10mm top clearance + 6mm facade gaps
-        return DRAWER_SYSTEMS.filter(s => s.sideH <= maxSideH);
+    function getBestDrawerSpec(brand, cabinetH, drawerCount, carcassT) {
+        const interior = (cabinetH || 500) - 2 * (carcassT || 16);
+        const count    = Math.max(1, drawerCount || 1);
+        const slotH    = Math.floor(interior / count);
+        const maxSideH = slotH - 32;
+        return DRAWER_SYSTEMS
+            .filter(s => s.id.startsWith(brand) && s.sideH <= maxSideH)
+            .sort((a, b) => b.sideH - a.sideH)[0] || null;
     }
 
-    /** Get the DRAWER_SYSTEMS entry for the currently selected system (or first available). */
+    /** Get the auto-selected spec for the currently chosen brand + cabinet dimensions. */
     function getSelectedDrawerSpec() {
-        const id = document.getElementById('w-lowerDrawerSystem')?.value;
-        return DRAWER_SYSTEMS.find(s => s.id === id) || DRAWER_SYSTEMS[0];
+        const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+        const cabinetH = fieldNum('h1', 500);
+        const count    = fieldNum('lowerDrawerCount', 1);
+        const carcassT = fieldNum('carcassThick', 16);
+        return getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
+    }
+
+    /** Update the auto-height info label shown next to the brand selector. */
+    function updateDrawerAutoLabel() {
+        const label = document.getElementById('drawerAutoHeightLabel');
+        if (!label) return;
+        const spec = (() => {
+            const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+            const cabinetH = fieldNum('h1', 500);
+            const count    = fieldNum('lowerDrawerCount', 1);
+            const carcassT = fieldNum('carcassThick', 16);
+            return getBestDrawerSpec(brand, cabinetH, count, carcassT);
+        })();
+        if (!spec) {
+            label.textContent = currentLang === 'ru'
+                ? '⚠ Ящики не помещаются в шкаф'
+                : '⚠ Drawers do not fit cabinet';
+            label.dataset.state = 'warn';
+        } else {
+            label.textContent = `↳ ${spec.name}`;
+            label.dataset.state = 'ok';
+        }
     }
 
     /**
-     * Rebuild the v2 drawer system <select> based on current cabinet H and drawer count.
-     * Also updates the hint and syncs the chosen value to the v1 iframe.
+     * Called whenever drawer mode is active and dimensions/count change.
+     * The <select> only holds brand (axispro/matrixbox) — height is auto.
      */
     function rebuildDrawerSystemSelect() {
-        const sel = document.getElementById('w-lowerDrawerSystem');
-        if (!sel) return;
-        const cabinetH  = fieldNum('h1', 500);
-        const count     = fieldNum('lowerDrawerCount', 1);
-        const carcassT  = fieldNum('carcassThick', 16);
-        const prev      = sel.value;
-        const available = filterDrawerSystems(cabinetH, count, carcassT);
-        sel.innerHTML = available.length
-            ? available.map(s =>
-                `<option value="${s.id}">${s.brand} — ${s.name}</option>`
-              ).join('')
-            : `<option value="">— ${currentLang === 'ru' ? 'Нет подходящих систем' : 'No systems fit'} —</option>`;
-        // Restore previous selection if still available
-        if (available.find(s => s.id === prev)) sel.value = prev;
-        else if (available.length) sel.value = available[0].id;
-        // Push selected system to v1 iframe so cut list uses correct gap/SKU
-        _syncDrawerSystemToV1(sel.value);
-    }
-
-    /** Push the selected drawer system ID to v1 so its cut list uses correct values. */
-    function _syncDrawerSystemToV1(systemId) {
-        const iDoc = iframeDoc();
-        if (!iDoc) return;
-        const iSel = iDoc.getElementById('lowerDrawerSystem');
-        if (!iSel) return;
-        // Map our detailed ID to the base brand v1 understands (axispro / matrixbox)
-        const base = systemId.startsWith('axispro') ? 'axispro'
-                   : systemId.startsWith('matrixbox') ? 'matrixbox'
-                   : systemId;
-        if (iSel.value !== base) {
-            iSel.value = base;
-            iSel.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        updateDrawerAutoLabel();
+        schedule3DRebuild();
     }
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -446,6 +444,8 @@
             lower_split_door: 'Разделить дверь на две створки',
 
             drawer_system: 'Система ящиков',
+
+            drawer_brand: 'Бренд',
 
             drawer_count: 'Количество ящиков',
 
@@ -682,6 +682,8 @@
             lower_split_door: 'Split door into two leaves',
 
             drawer_system: 'Drawer system',
+
+            drawer_brand: 'Brand',
 
             drawer_count: 'Drawer count',
 
@@ -2510,19 +2512,7 @@
 
             ensureLowerDrawerModeInIframe();
 
-        }
-
-        // lowerDrawerSystem uses detailed IDs (axispro_86 etc.) that v1 doesn't know —
-        // map to v1 base name, then trigger 3D rebuild with the selected spec and return.
-        if (id === 'lowerDrawerSystem') {
-
-            _syncDrawerSystemToV1(fromEl.value);
-
-            schedule3DRebuild();
-
-            updateConditionalUI();
-
-            return;
+            rebuildDrawerSystemSelect(); // refresh auto-height label + 3D
 
         }
 

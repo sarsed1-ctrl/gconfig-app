@@ -1112,6 +1112,16 @@ html, body {
     margin: 4px 0 6px;
 }
 
+.drawer-auto-label {
+    display: block;
+    font-size: 0.82em;
+    margin-top: 4px;
+    min-height: 1.2em;
+    transition: color 0.2s;
+}
+.drawer-auto-label[data-state="ok"]   { color: #16a34a; }
+.drawer-auto-label[data-state="warn"] { color: #dc2626; }
+
 
 
 .back-fit-row {
