@@ -1719,6 +1719,8 @@
 
     let _deferredTriggerTimer = null;
 
+    let _deferredTriggerAttempts = 0;
+
     function deferredTriggerV1Update() {
 
         if (_deferredTriggerTimer) clearTimeout(_deferredTriggerTimer);
@@ -1729,11 +1731,29 @@
 
             if (syncPaused) {
 
-                deferredTriggerV1Update();
+                _deferredTriggerAttempts += 1;
+
+                if (_deferredTriggerAttempts < 40) {
+
+                    deferredTriggerV1Update();
+
+                } else {
+
+                    console.warn('deferredTriggerV1Update: syncPaused stuck; forcing update');
+
+                    _deferredTriggerAttempts = 0;
+
+                    triggerV1Update();
+
+                    schedulePreviewSync();
+
+                }
 
                 return;
 
             }
+
+            _deferredTriggerAttempts = 0;
 
             triggerV1Update();
 
@@ -1911,9 +1931,9 @@
 
         });
 
-        if (opts.preferSourceValue && src.value) {
+        if (opts.preferSourceValue) {
 
-            toSelect.value = src.value;
+            toSelect.value = src.value || '';
 
         } else if (prev && Array.from(toSelect.options).some((o) => o.value === prev)) {
 
@@ -1942,6 +1962,34 @@
             }
 
         });
+
+    }
+
+
+
+    /** Re-clone iframe selects into the wizard after v1 catalog/UI is ready. */
+
+    function refreshWizardSelectsFromIframe() {
+
+        if (!iframeReady) return;
+
+        SELECT_CLONE_IDS.forEach((id) => {
+
+            const wEl = document.querySelector(`[data-iframe="${id}"]`);
+
+            if (wEl && wEl.tagName === 'SELECT') {
+
+                const preferSource = EAMF_EDGE_SELECT_IDS.includes(id) || id === 'eamfBackPanel';
+
+                cloneSelectOptions(id, wEl, preferSource ? { preferSourceValue: true } : undefined);
+
+            }
+
+        });
+
+        refreshEamfEdgeSelects();
+
+        refreshEamfBackPanelSelect();
 
     }
 
@@ -2565,6 +2613,8 @@
 
             pullFromIframe();
 
+            refreshWizardSelectsFromIframe();
+
             triggerV1Update();
 
             flushPreviewNow();
@@ -2683,6 +2733,14 @@
 
             if (win && typeof win[handlerName] === 'function') win[handlerName]();
 
+            refreshEamfEdgeSelects();
+
+            if (id === 'eamfCarcassMaterial' || id === 'eamfFacadeMaterial' || id === 'eamfBackPanel') {
+
+                refreshEamfBackPanelSelect();
+
+            }
+
             setTimeout(() => {
 
                 refreshEamfEdgeSelects();
@@ -2692,6 +2750,8 @@
                     refreshEamfBackPanelSelect();
 
                 }
+
+                syncPriceMirror();
 
                 if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
 
@@ -3175,6 +3235,8 @@
 
         const { fdX, fdY, fdW, fdH, wY } = data;
 
+        if (![fdX, fdY, fdW, fdH, wY].every((n) => Number.isFinite(n))) return;
+
 
 
         ctx.save();
@@ -3463,25 +3525,33 @@
 
             if (document.documentElement.classList.contains('theme-future')) {
 
-                if (productMode === 'beds') {
+                try {
 
-                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                    if (productMode === 'beds') {
 
-                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
-                } else {
+                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
 
-                    const hingeDots = collectHingeDotsFromIframe();
+                    } else {
 
-                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                        const hingeDots = collectHingeDotsFromIframe();
 
-                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
-                    drawNeonParallelLiftOverlay(ctx);
+                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
 
-                    drawNeonShelfSegmentsOverlay(ctx);
+                        drawNeonParallelLiftOverlay(ctx);
 
-                    drawSoftNeonHingeDots(ctx, hingeDots);
+                        drawNeonShelfSegmentsOverlay(ctx);
+
+                        drawSoftNeonHingeDots(ctx, hingeDots);
+
+                    }
+
+                } catch (neonErr) {
+
+                    console.warn('Neon preview styling skipped:', neonErr);
 
                 }
 
@@ -3689,7 +3759,7 @@
 
         exportActions.classList.toggle('visible', iframeReady);
 
-        if (currentStep === 4) refreshEamfEdgeSelects();
+        if (currentStep === 4) refreshWizardSelectsFromIframe();
 
         if (currentStep === 3) {
 
@@ -3842,6 +3912,8 @@
 
             }
 
+            refreshWizardSelectsFromIframe();
+
             syncCanvas();
 
             syncPriceMirror();
@@ -3849,10 +3921,6 @@
             schedule3DRebuild();
 
             startPreviewLoop();
-
-            refreshEamfEdgeSelects();
-
-            refreshEamfBackPanelSelect();
 
         }, 800);
 

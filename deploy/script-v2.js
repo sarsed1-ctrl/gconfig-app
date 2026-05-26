@@ -157,11 +157,148 @@
 
 
 
+    // ── Drawer system database (manufacturer specs) ───────────────────────────
+    // sideH    — side panel / inner box height, mm (what you see on the label)
+    // sideThick — side panel thickness, mm
+    // gap      — total lateral clearance consumed by runners + brackets, mm
+    // sideColor — Three.js hex for the side panel material in 3D preview
+    // runners  — available runner lengths, mm (largest that fits depth is chosen)
+    const DRAWER_SYSTEMS = [
+        // GTV AxisPro — aluminium extrusion, 14mm wide side, anthracite/white.
+        // Both soft-close and push-to-open available.
+        // Heights from AM furnitura catalog: 84, 116, 167, 199mm (+69mm in 500mm only).
+        // gap=74: 37mm per side (14mm profile + 23mm runner bracket into carcass wall).
+        { id: 'axispro_69',  brand: 'GTV', name: 'AxisPro H69',  sideH: 69,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [500] },
+        { id: 'axispro_84',  brand: 'GTV', name: 'AxisPro H84',  sideH: 84,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_116', brand: 'GTV', name: 'AxisPro H116', sideH: 116, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_167', brand: 'GTV', name: 'AxisPro H167', sideH: 167, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_199', brand: 'GTV', name: 'AxisPro H199', sideH: 199, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        // Hafele Matrix Box Single — Einwandzarge (single-wall steel), 2mm side profile.
+        // Both soft-close and push-to-open available.
+        // Heights from Hafele catalog: 80, 120, 150mm.
+        // gap=14: 7mm per side (formula B = Korpusinnenbreite − 14mm from Hafele PDF).
+        { id: 'matrixbox_80',  brand: 'Hafele', name: 'MatrixBox H80',  sideH: 80,  sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
+        { id: 'matrixbox_120', brand: 'Hafele', name: 'MatrixBox H120', sideH: 120, sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
+        { id: 'matrixbox_150', brand: 'Hafele', name: 'MatrixBox H150', sideH: 150, sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
+    ];
+
+    /**
+     * Pick the tallest DRAWER_SYSTEMS entry for the given brand that fits
+     * inside a single drawer slot.
+     *   slotH = (cabinetInterior) / drawerCount
+     *   Required clearance: 16mm chipboard bottom + 10mm top gap + 6mm facade gaps = 32mm
+     * Returns null when nothing fits.
+     */
+    function getBestDrawerSpec(brand, cabinetH, drawerCount, carcassT) {
+        const interior = (cabinetH || 500) - 2 * (carcassT || 16);
+        const count    = Math.max(1, drawerCount || 1);
+        const slotH    = Math.floor(interior / count);
+        const maxSideH = slotH - 32;
+        return DRAWER_SYSTEMS
+            .filter(s => s.id.startsWith(brand) && s.sideH <= maxSideH)
+            .sort((a, b) => b.sideH - a.sideH)[0] || null;
+    }
+
+    /** Per-drawer open types: index 0 = top drawer (as user sees). 'regular' | 'pto'. */
+    let drawerTypesArr = [];
+
+    /**
+     * Returns an array of length `count` with per-drawer types.
+     * AxisPro forces all to 'pto'. Unset slots default to 'regular'.
+     */
+    function getDrawerTypes(count) {
+        const result = [];
+        for (let i = 0; i < count; i++) {
+            result.push(drawerTypesArr[i] !== undefined ? drawerTypesArr[i] : 'regular');
+        }
+        return result;
+    }
+
+    /**
+     * Renders per-drawer type rows into #drawerTypeRows.
+     * Each row: "Drawer N  [Regular] [Push-to-open]"
+     */
+    function renderDrawerTypeRows(count) {
+        const container = document.getElementById('drawerTypeRows');
+        if (!container) return;
+        const types = getDrawerTypes(count);
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const row = document.createElement('div');
+            row.className = 'drawer-type-row';
+            const lbl = document.createElement('span');
+            lbl.className = 'drawer-type-label';
+            lbl.textContent = `${t('drawer_label')} ${i + 1}`;
+            const chips = document.createElement('div');
+            chips.className = 'hw-chips';
+            ['regular', 'pto'].forEach(val => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'hw-chip' + (types[i] === val ? ' active' : '');
+                btn.dataset.value = val;
+                btn.textContent = t(val === 'regular' ? 'drawer_regular' : 'drawer_pto');
+                btn.addEventListener('click', () => {
+                    chips.querySelectorAll('.hw-chip').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawerTypesArr[i] = val;
+                    schedule3DRebuild();
+                });
+                chips.appendChild(btn);
+            });
+            row.appendChild(lbl);
+            row.appendChild(chips);
+            container.appendChild(row);
+        }
+    }
+
+    /** Get the auto-selected spec (physical dimensions only — no pushToOpen). */
+    function getSelectedDrawerSpec() {
+        const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+        const cabinetH = fieldNum('h1', 500);
+        const count    = fieldNum('lowerDrawerCount', 1);
+        const carcassT = fieldNum('carcassThick', 16);
+        return getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
+    }
+
+    /** Update the auto-height info label shown next to the brand selector. */
+    function updateDrawerAutoLabel() {
+        const label = document.getElementById('drawerAutoHeightLabel');
+        if (!label) return;
+        const spec = (() => {
+            const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
+            const cabinetH = fieldNum('h1', 500);
+            const count    = fieldNum('lowerDrawerCount', 1);
+            const carcassT = fieldNum('carcassThick', 16);
+            return getBestDrawerSpec(brand, cabinetH, count, carcassT);
+        })();
+        if (!spec) {
+            label.textContent = currentLang === 'ru'
+                ? '⚠ Ящики не помещаются в шкаф'
+                : '⚠ Drawers do not fit cabinet';
+            label.dataset.state = 'warn';
+        } else {
+            label.textContent = `↳ ${spec.name}`;
+            label.dataset.state = 'ok';
+        }
+    }
+
+    /**
+     * Called whenever drawer mode is active and dimensions/count change.
+     * The <select> only holds brand (axispro/matrixbox) — height is auto.
+     */
+    function rebuildDrawerSystemSelect() {
+        updateDrawerAutoLabel();
+        const count = parseInt(document.getElementById('w-lowerDrawerCount')?.value) || 1;
+        renderDrawerTypeRows(count);
+        schedule3DRebuild();
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const SELECT_CLONE_IDS = [
 
         'facadeThick', 'carcassThick', 'wallType', 'countertopMaterial',
 
-        'lowerDrawerSystem', 'lowerDrawerCount',
+        'lowerDrawerCount',
 
         'eamfBackPanel', 'eamfFacadeMaterial', 'eamfFacadeEdge',
 
@@ -369,6 +506,16 @@
 
             drawer_system: 'Система ящиков',
 
+            drawer_brand: 'Бренд',
+
+            drawer_label: 'Ящик',
+
+            drawer_type: 'Тип открывания',
+
+            drawer_regular: 'Обычный',
+
+            drawer_pto: 'Push-to-open',
+
             drawer_count: 'Количество ящиков',
 
             back_panel: 'Задняя панель',
@@ -493,6 +640,8 @@
 
             hint_drawer_preview: 'Каждый ящик — отдельная панель фасада в превью.',
 
+            hint_lower_shelves_drawer: 'Полки недоступны в режиме ящиков.',
+
             hint_edge_override: 'Подбирается при смене материала; можно изменить вручную.',
 
             hint_spacing_upper_h: 'Расстояние между горизонтальными полками верхнего шкафа.',
@@ -501,7 +650,13 @@
 
             hint_spacing_lower_h: 'Расстояние между горизонтальными полками нижнего шкафа.',
 
-            hint_spacing_lower_v: 'Расстояние между вертикальными перегородками нижнего шкафа.'
+            hint_spacing_lower_v: 'Расстояние между вертикальными перегородками нижнего шкафа.',
+
+            cabinet_layout: 'Конфигурация',
+
+            layout_both: 'Два шкафа',
+
+            layout_single: 'Один шкаф'
 
         },
 
@@ -602,6 +757,16 @@
             lower_split_door: 'Split door into two leaves',
 
             drawer_system: 'Drawer system',
+
+            drawer_brand: 'Brand',
+
+            drawer_label: 'Drawer',
+
+            drawer_type: 'Opening type',
+
+            drawer_regular: 'Regular',
+
+            drawer_pto: 'Push-to-open',
 
             drawer_count: 'Drawer count',
 
@@ -727,6 +892,8 @@
 
             hint_drawer_preview: 'Each drawer becomes a separate facade panel in the preview.',
 
+            hint_lower_shelves_drawer: 'Lower shelves unavailable in drawer mode.',
+
             hint_edge_override: 'Auto-selected when material changes; you can override.',
 
             hint_spacing_upper_h: 'Distance between horizontal shelves in the upper cabinet.',
@@ -735,7 +902,13 @@
 
             hint_spacing_lower_h: 'Distance between horizontal shelves in the lower cabinet.',
 
-            hint_spacing_lower_v: 'Distance between vertical shelf dividers in the lower cabinet.'
+            hint_spacing_lower_v: 'Distance between vertical shelf dividers in the lower cabinet.',
+
+            cabinet_layout: 'Configuration',
+
+            layout_both: 'Both cabinets',
+
+            layout_single: 'One cabinet'
 
         }
 
@@ -1245,6 +1418,8 @@
 
             mode: 'closets',
 
+            layout: getCabinetLayout(),
+
             width: fieldNum('w1', 800),
 
             height: fieldNum('h1', 500),
@@ -1284,6 +1459,10 @@
                 enabled: getLowerHardwareMode() === 'drawer',
 
                 count: fieldNum('lowerDrawerCount', 1),
+
+                spec: getSelectedDrawerSpec(),
+
+                types: getDrawerTypes(fieldNum('lowerDrawerCount', 1)),
 
             },
 
@@ -1540,6 +1719,8 @@
 
     let _deferredTriggerTimer = null;
 
+    let _deferredTriggerAttempts = 0;
+
     function deferredTriggerV1Update() {
 
         if (_deferredTriggerTimer) clearTimeout(_deferredTriggerTimer);
@@ -1550,11 +1731,29 @@
 
             if (syncPaused) {
 
-                deferredTriggerV1Update();
+                _deferredTriggerAttempts += 1;
+
+                if (_deferredTriggerAttempts < 40) {
+
+                    deferredTriggerV1Update();
+
+                } else {
+
+                    console.warn('deferredTriggerV1Update: syncPaused stuck; forcing update');
+
+                    _deferredTriggerAttempts = 0;
+
+                    triggerV1Update();
+
+                    schedulePreviewSync();
+
+                }
 
                 return;
 
             }
+
+            _deferredTriggerAttempts = 0;
 
             triggerV1Update();
 
@@ -1732,9 +1931,9 @@
 
         });
 
-        if (opts.preferSourceValue && src.value) {
+        if (opts.preferSourceValue) {
 
-            toSelect.value = src.value;
+            toSelect.value = src.value || '';
 
         } else if (prev && Array.from(toSelect.options).some((o) => o.value === prev)) {
 
@@ -1768,6 +1967,34 @@
 
 
 
+    /** Re-clone iframe selects into the wizard after v1 catalog/UI is ready. */
+
+    function refreshWizardSelectsFromIframe() {
+
+        if (!iframeReady) return;
+
+        SELECT_CLONE_IDS.forEach((id) => {
+
+            const wEl = document.querySelector(`[data-iframe="${id}"]`);
+
+            if (wEl && wEl.tagName === 'SELECT') {
+
+                const preferSource = EAMF_EDGE_SELECT_IDS.includes(id) || id === 'eamfBackPanel';
+
+                cloneSelectOptions(id, wEl, preferSource ? { preferSourceValue: true } : undefined);
+
+            }
+
+        });
+
+        refreshEamfEdgeSelects();
+
+        refreshEamfBackPanelSelect();
+
+    }
+
+
+
     function refreshEamfBackPanelSelect() {
 
         const wEl = document.querySelector('[data-iframe="eamfBackPanel"]');
@@ -1786,13 +2013,12 @@
 
         if (getLowerHardwareMode() !== 'drawer') return;
 
-        ['lowerDrawerSystem', 'lowerDrawerCount'].forEach((id) => {
+        // lowerDrawerSystem is now managed by rebuildDrawerSystemSelect(), not cloned from v1
+        // lowerDrawerCount is still cloned from v1
+        const wEl = document.querySelector('[data-iframe="lowerDrawerCount"]');
+        if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions('lowerDrawerCount', wEl);
 
-            const wEl = document.querySelector(`[data-iframe="${id}"]`);
-
-            if (wEl && wEl.tagName === 'SELECT') cloneSelectOptions(id, wEl);
-
-        });
+        rebuildDrawerSystemSelect();
 
     }
 
@@ -1876,6 +2102,34 @@
 
     }
 
+    /** Returns 'both' | 'lower' | 'upper' */
+    function getCabinetLayout() {
+        return getHardwareModeFromChips('cabinetLayoutChips', 'both');
+    }
+
+    /**
+     * Sync cabinet layout to v1 iframe by zeroing out the hidden section's
+     * dimension fields.  When restoring to 'both', re-push current v2 values.
+     */
+    function syncCabinetLayoutToV1(layout) {
+        if (!iframeReady) return;
+        if (layout === 'single') {
+            // Zero out the upper section so v1 doesn't count it
+            setIframeValueQuiet('upper_w', 0);
+            setIframeValueQuiet('upper_h', 0);
+            setIframeValueQuiet('upper_d', 0);
+        } else {
+            // Restore both sections from v2 field values
+            ['w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d'].forEach(id => {
+                const el = document.querySelector(`[data-iframe="${id}"]`);
+                if (el) setIframeValueQuiet(id, el.value);
+            });
+        }
+        triggerV1Update();
+        schedulePreviewSync();
+        schedule3DRebuild();
+    }
+
 
 
     function getUpperHardwareMode() {
@@ -1900,6 +2154,16 @@
 
 
 
+        // ── Cabinet layout (single / both) ───────────────────────────────────
+        const layout = getCabinetLayout();
+        const isSingle = layout === 'single';
+        document.getElementById('upperCabinetCard')?.classList.toggle('hidden', isSingle);
+        document.getElementById('upperHwGroup')?.classList.toggle('hidden', isSingle);
+        document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', isSingle));
+        // ─────────────────────────────────────────────────────────────────────
+
+
+
         const lowerMode = getLowerHardwareMode();
 
         const upperMode = getUpperHardwareMode();
@@ -1912,11 +2176,34 @@
 
         if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
 
+        // Rebuild drawer system select + per-drawer type rows whenever mode or dimensions change
+        if (lowerMode === 'drawer') rebuildDrawerSystemSelect();
+
+        // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
+        const isDrawer = lowerMode === 'drawer';
+        document.querySelectorAll('.lower-shelf-field').forEach((el) => {
+            el.classList.toggle('section-disabled', isDrawer);
+        });
+        document.getElementById('lowerShelvesDrawerHint')?.classList.toggle('hidden', !isDrawer);
+        if (isDrawer) {
+            const hEl = document.getElementById('w-vanityShelvesH');
+            const vEl = document.getElementById('w-vanityShelvesV');
+            if (hEl && hEl.value !== '0') {
+                hEl.value = '0';
+                hEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (vEl && vEl.value !== '0') {
+                vEl.value = '0';
+                vEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
 
 
         document.querySelectorAll('.hinge-upper-field').forEach((el) => {
 
-            el.classList.toggle('hidden', upperMode === 'gas');
+            el.classList.toggle('hidden', upperMode === 'gas' || isSingle);
 
         });
 
@@ -2326,6 +2613,8 @@
 
             pullFromIframe();
 
+            refreshWizardSelectsFromIframe();
+
             triggerV1Update();
 
             flushPreviewNow();
@@ -2404,6 +2693,8 @@
 
             ensureLowerDrawerModeInIframe();
 
+            rebuildDrawerSystemSelect(); // refresh auto-height label + 3D
+
         }
 
 
@@ -2442,6 +2733,14 @@
 
             if (win && typeof win[handlerName] === 'function') win[handlerName]();
 
+            refreshEamfEdgeSelects();
+
+            if (id === 'eamfCarcassMaterial' || id === 'eamfFacadeMaterial' || id === 'eamfBackPanel') {
+
+                refreshEamfBackPanelSelect();
+
+            }
+
             setTimeout(() => {
 
                 refreshEamfEdgeSelects();
@@ -2451,6 +2750,8 @@
                     refreshEamfBackPanelSelect();
 
                 }
+
+                syncPriceMirror();
 
                 if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
 
@@ -2495,6 +2796,12 @@
     function pushRadioToIframe(name, value) {
 
         if (!iframeReady) return;
+
+        if (name === 'cabinetLayout') {
+            syncCabinetLayoutToV1(value);
+            updateConditionalUI();
+            return;
+        }
 
         if (name === 'lowerHardwareMode' && value === 'drawer') {
 
@@ -2928,6 +3235,8 @@
 
         const { fdX, fdY, fdW, fdH, wY } = data;
 
+        if (![fdX, fdY, fdW, fdH, wY].every((n) => Number.isFinite(n))) return;
+
 
 
         ctx.save();
@@ -3216,25 +3525,33 @@
 
             if (document.documentElement.classList.contains('theme-future')) {
 
-                if (productMode === 'beds') {
+                try {
 
-                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                    if (productMode === 'beds') {
 
-                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
-                } else {
+                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
 
-                    const hingeDots = collectHingeDotsFromIframe();
+                    } else {
 
-                    recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                        const hingeDots = collectHingeDotsFromIframe();
 
-                    applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
 
-                    drawNeonParallelLiftOverlay(ctx);
+                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
 
-                    drawNeonShelfSegmentsOverlay(ctx);
+                        drawNeonParallelLiftOverlay(ctx);
 
-                    drawSoftNeonHingeDots(ctx, hingeDots);
+                        drawNeonShelfSegmentsOverlay(ctx);
+
+                        drawSoftNeonHingeDots(ctx, hingeDots);
+
+                    }
+
+                } catch (neonErr) {
+
+                    console.warn('Neon preview styling skipped:', neonErr);
 
                 }
 
@@ -3442,7 +3759,7 @@
 
         exportActions.classList.toggle('visible', iframeReady);
 
-        if (currentStep === 4) refreshEamfEdgeSelects();
+        if (currentStep === 4) refreshWizardSelectsFromIframe();
 
         if (currentStep === 3) {
 
@@ -3595,6 +3912,8 @@
 
             }
 
+            refreshWizardSelectsFromIframe();
+
             syncCanvas();
 
             syncPriceMirror();
@@ -3602,10 +3921,6 @@
             schedule3DRebuild();
 
             startPreviewLoop();
-
-            refreshEamfEdgeSelects();
-
-            refreshEamfBackPanelSelect();
 
         }, 800);
 

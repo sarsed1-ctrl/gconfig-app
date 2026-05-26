@@ -27,6 +27,8 @@ const BED_MDF_CARCASS_THICKNESS_MM = [16, 18, 19, 25, 28];
 const materialPool = new Map();
 /** Shared unit box — meshes use scale for dimensions (geometry reuse). */
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
+/** Shared unit cylinder (axis = Y, r=0.5, h=1, 8 segments) — scaled for round hardware. */
+const unitCylinder = new THREE.CylinderGeometry(0.5, 0.5, 1, 8, 1);
 const dimLineMatCache = new Map();
 
 function detectMobile() {
@@ -247,6 +249,20 @@ function addPanel(group, w, h, d, mat, x, y, z) {
     return mesh;
 }
 
+/**
+ * Place a scaled cylinder mesh.  Default axis = Y; pass rotX=Math.PI/2 to align along Z.
+ * All positions/sizes in mm.
+ */
+function addCylinder(group, r, h, mat, x, y, z, rotX = 0) {
+    if (r <= 0 || h <= 0) return null;
+    const mesh = new THREE.Mesh(unitCylinder, mat);
+    mesh.scale.set(r * 2 * MM, h * MM, r * 2 * MM);
+    mesh.position.set(x * MM, y * MM, z * MM);
+    if (rotX) mesh.rotation.x = rotX;
+    group.add(mesh);
+    return mesh;
+}
+
 /** Thin edge-band hint on one visible face (procedural, no CSG). */
 function addEdgeBand(group, w, h, d, mat, x, y, z, face = 'front') {
     const band = 1.5;
@@ -287,7 +303,7 @@ function addRod(group, ax, ay, az, bx, by, bz, radiusMm, mat) {
 function disposeObject(obj) {
     if (!obj) return;
     obj.traverse((child) => {
-        if (child.geometry && child.geometry !== unitBox) child.geometry.dispose();
+        if (child.geometry && child.geometry !== unitBox && child.geometry !== unitCylinder) child.geometry.dispose();
         if (child.material && child.material !== unitBox && child.userData?.isDimLine) {
             /* line materials cached */
         }
@@ -1199,6 +1215,37 @@ class Furniture3D {
             this.hingeDoors.push(hingeState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
+
+        // ── Hinge hardware geometry ──────────────────────────────────────────
+        // Cup (Ø35 mm cylinder) + arm bar per hinge position.
+        // All geometry lives in pivotGroup so it rotates with the door on click.
+        const hingeSpec = opts.hingeSpec;
+        if (hingeSpec && doorMesh) {
+            const hingeMat = getMaterial('hinge-metal', 0x8a8e94, { roughness: 0.22, metalness: 0.78 });
+            // Which X-direction from pivot toward door interior?
+            const cupDir = (doorCenterX - hingeX) >= 0 ? 1 : -1;
+            // Cap edge-distance so cup never wanders past ¼ of door width
+            const edgeDist = Math.min(hingeSpec.edgeDist ?? 70, doorW * 0.25, 55);
+            // Door back face Z in pivotGroup local coordinates (mm, 0 = door centre)
+            const backZ = -facadeT / 2;
+
+            hingeSpec.positions.forEach((posFromTop) => {
+                if (posFromTop <= 0 || posFromTop >= doorH) return;
+                // Vertical position relative to door centre (Y in pivotGroup)
+                const hy = doorH / 2 - posFromTop;
+
+                // Cup: Ø35 mm × 12 mm deep cylinder, axis along Z, on door back face
+                // rotX = π/2 rotates the Y-axis cylinder to align with Z
+                addCylinder(pivotGroup, 17.5, 12, hingeMat,
+                    cupDir * edgeDist, hy, backZ - 6,   // centre 6 mm into the door
+                    Math.PI / 2);
+
+                // Arm: flat bar connecting cup to pivot axis
+                addPanel(pivotGroup, edgeDist, 10, 5, hingeMat,
+                    cupDir * edgeDist / 2, hy, backZ - 2.5);
+            });
+        }
+        // ─────────────────────────────────────────────────────────────────────
     }
 
     addSplitDoors(group, W, H, facadeT, D, centerY, mat, opts = {}) {

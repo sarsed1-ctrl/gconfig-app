@@ -3860,6 +3860,7 @@
         eamfMaterialsReady = true;
         if (typeof updateConfigurator === 'function') updateConfigurator();
         scheduleAmflexPriceRefresh();
+        notifyParentV1Ready();
     }
 
     function refreshEamfMaterialSelectLabels() {
@@ -6436,30 +6437,51 @@
         let runnerLength = 250;
         for (const nl of axisproNLSizes) { if (nl <= d1) runnerLength = nl; }
 
-        let drawerGap = 0, drawerSKU = "", drawerName = "";
+        // Auto-select drawer side height (same logic as script-v2.js getBestDrawerSpec)
+        const AXISPRO_HEIGHTS   = [69, 84, 116, 167, 199];
+        const MATRIXBOX_HEIGHTS = [80, 120, 150];
+        const drawerSlotH = Math.floor((h1 - 2 * carcassT) / drawerCount);
+        const maxDrawerSideH = drawerSlotH - 32;
+        function pickDrawerHeight(heights) {
+            let best = heights[0];
+            for (const hh of heights) { if (hh <= maxDrawerSideH) best = hh; }
+            return best;
+        }
+        const drawerHeightArr = drawerSystem === 'matrixbox' ? MATRIXBOX_HEIGHTS : AXISPRO_HEIGHTS;
+        const selectedH = pickDrawerHeight(drawerHeightArr);
+
+        let drawerGap = 0, drawerSKU = "", drawerName = "", drawerBrand = "", drawerTypeStr = "";
 
         if (drawerSystem === 'matrixbox') {
-            // Hafele MatrixBox: box width = LW - 14mm (7mm per side)
-            drawerGap = 14;
-            drawerName = "HAFELE MatrixBox Single + UM S30";
-            drawerSKU  = "514.40.xxx / 514.41.xxx";
-            // Runner length: LT >= NL + 13; NL = runnerLength
+            // Hafele MatrixBox Single: 2mm steel side, 7mm clearance per side
+            drawerGap  = 14;
+            drawerBrand = 'Hafele';
+            drawerName = `MatrixBox Single H${selectedH}`;
+            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+            // Hafele article series: 514.40.xxx (H80), 514.41.xxx (H120), 514.42.xxx (H150)
+            const mbSeries = { 80: '514.40', 120: '514.41', 150: '514.42' };
+            drawerSKU = `${mbSeries[selectedH] || '514.40'}.${runnerLength}`;
         } else if (drawerSystem === 'axispro') {
-            // GTV AxisPro: 37mm bracket footprint per side
-            drawerGap = 37 * 2;
-            drawerName = "GTV AxisPro";
-            // SKU format: PB-AXISPRO-KPL{NL}A (low H=86) anthracite
-            drawerSKU  = `PB-AXISPRO-KPL${runnerLength}A`;
+            // GTV AxisPro: 14mm aluminium side, 37mm bracket footprint per side
+            drawerGap  = 74;
+            drawerBrand = 'GTV';
+            drawerName = `AxisPro H${selectedH}`;
+            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+            // AM furnitura article: PB-AXISPRO-KPL{NL}A
+            drawerSKU = `PB-AXISPRO-KPL${runnerLength}A`;
         }
 
         const drawerInnerW = innerW1 - drawerGap;
         // Drawer bottom: width = drawerInnerW; depth = NL - 24 (AxisPro) or NL - 14 (MatrixBox)
         const drawerBottomDepth = (drawerSystem === 'axispro') ? runnerLength - 24 : runnerLength - 14;
-        parts.push({ name: T.part_drawer_bottom, qty: 2, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
+        parts.push({ name: T.part_drawer_bottom, qty: drawerCount, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
 
         hardware.push({
-            name: `${T.hw_runners}${runnerLength}${T.hw_runners_suffix} — ${drawerName}`,
-            qty: 2, sku: drawerSKU,
+            item: `${drawerBrand} ${drawerName}`,
+            brandModel: drawerBrand,
+            type: drawerTypeStr,
+            article: drawerSKU,
+            qty: drawerCount * 2,
             note: `${T.hw_gap_note}${drawerGap / 2}${T.hw_gap_note2}`
         });
 
@@ -7951,13 +7973,18 @@
         // We represent it as a dashed rectangle extending downward from
         // the bottom edge of the upper cabinet, with the correct
         // facade W and H dimensions (not depth).
-        const doorProjectionH = upFH || h2;   // door height in mm (real facade height)
-        const doorProjectionW = upFW || w2;   // door width  in mm (real facade width)
+        const hasUpper = w2 > 0 && h2 > 0;
+        const doorProjectionH = hasUpper ? (upFH || h2) : 0;
+        const doorProjectionW = hasUpper ? (upFW || w2) : 0;
 
         // Total vertical span: door above upper cabinet + upper cabinet + gap + vanity
         const wallGapMm = 400; // visual gap between units
-        const totalH = doorProjectionH + h2 + wallGapMm + h1 + (hasCT ? ctT : 0) + 80;
-        const totalW = Math.max(w1 + sOver * 2, w2, doorProjectionW) + 200;
+        const totalH = hasUpper
+            ? doorProjectionH + h2 + wallGapMm + h1 + (hasCT ? ctT : 0) + 80
+            : h1 + (hasCT ? ctT : 0) + 80;
+        const totalW = hasUpper
+            ? Math.max(w1 + sOver * 2, w2, doorProjectionW) + 200
+            : (w1 + sOver * 2) + 200;
 
         const scale   = Math.min((height - 50) / totalH, (width - 80) / totalW);
         const centerX = width / 2;
@@ -7990,15 +8017,17 @@
         }
 
         // ---- 3. UPPER CABINET ----
-        const wW = w2 * scale, wH = h2 * scale;
+        const wW = hasUpper ? w2 * scale : 0, wH = hasUpper ? h2 * scale : 0;
         const wX = centerX - wW / 2;
         const wY = vY - ctScaleH - (wallGapMm * scale) - wH;
-        ctx.fillStyle = '#f5f5f5';
-        ctx.fillRect(wX, wY, wW, wH);
-        ctx.strokeRect(wX, wY, wW, wH);
+        if (hasUpper) {
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(wX, wY, wW, wH);
+            ctx.strokeRect(wX, wY, wW, wH);
+        }
 
         // ---- Door planner overlay/inset visualization + hinge circles ----
-        if (doorPlanner && Array.isArray(doorPlanner.hingePositions)) {
+        if (hasUpper && doorPlanner && Array.isArray(doorPlanner.hingePositions)) {
             const openingX = wX + (carcassT * scale);
             const openingY = wY + (carcassT * scale);
             const openingW = Math.max(10, wW - (2 * carcassT * scale));
@@ -8055,9 +8084,9 @@
         }
         
         // ---- DRAW UPPER CABINET HINGES (blue dots) ----
-        // Draw only if Hinges mode (not Gas springs)
+        // Draw only if Hinges mode (not Gas springs) and upper cabinet exists
         const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
-        if (upperHardwareMode === 'hinge') {
+        if (hasUpper && upperHardwareMode === 'hinge') {
             const openingX = wX + (carcassT * scale);
             const openingY = wY + (carcassT * scale);
             const openingW = Math.max(10, wW - (2 * carcassT * scale));
@@ -8312,11 +8341,13 @@
         const vInnerB = startY - carcassT * scale;
         drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vSpH, _vShV, _vSpV, _vShelfT);
 
-        const uInnerL = wX + carcassT * scale;
-        const uInnerR = wX + wW - carcassT * scale;
-        const uInnerT = wY + carcassT * scale;
-        const uInnerB = wY + wH - carcassT * scale;
-        drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+        if (hasUpper) {
+            const uInnerL = wX + carcassT * scale;
+            const uInnerR = wX + wW - carcassT * scale;
+            const uInnerT = wY + carcassT * scale;
+            const uInnerB = wY + wH - carcassT * scale;
+            drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+        }
 
         ctx.restore();
 
@@ -8333,12 +8364,14 @@
         ctx.restore();
 
         // Height arrow for upper cabinet
-        drawArrow(ctx, wX - 18, wY, wX - 18, wY + wH);
-        ctx.save();
-        ctx.translate(wX - 30, wY + wH / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText(`${h2} ${unit}`, -20, 0);
-        ctx.restore();
+        if (hasUpper) {
+            drawArrow(ctx, wX - 18, wY, wX - 18, wY + wH);
+            ctx.save();
+            ctx.translate(wX - 30, wY + wH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`${h2} ${unit}`, -20, 0);
+            ctx.restore();
+        }
 
         // ---- Dimension annotations on right side ----
         ctx.fillStyle = '#888';
@@ -8349,7 +8382,7 @@
         ctx.fillText(`${w1}\u00d7${h1} ${unit}`, rightEdge, vY + vH / 2 + 4);
 
         // Upper: W × H
-        ctx.fillText(`${w2}\u00d7${h2} ${unit}`, rightEdge, wY + wH / 2 + 4);
+        if (hasUpper) ctx.fillText(`${w2}\u00d7${h2} ${unit}`, rightEdge, wY + wH / 2 + 4);
 
         // Depth labels (right of each unit, smaller)
         ctx.fillStyle = '#aaa';
@@ -8485,7 +8518,19 @@
         };
         const upperRowsDebug = getRows('upperPartsTableBody', 4);
         const lowerRowsDebug = getRows('lowerPartsTableBody', 4);
-        const hardwareRowsDebug = getRows('hardwareTableBody', 3);
+        // Hardware table: [name] [brandModel] [type] [sku] [qty] — combine into 3 PDF columns
+        const hardwareRowsDebug = (() => {
+            const tbody = document.getElementById('hardwareTableBody');
+            if (!tbody) return [];
+            return Array.from(tbody.querySelectorAll('tr')).map(tr => {
+                const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+                if (tds.length >= 5) {
+                    const namePart = [tds[0], tds[1], tds[2]].filter(Boolean).join(' · ');
+                    return [namePart, tds[3], tds[4]];
+                }
+                return tds.slice(0, 3);
+            });
+        })();
 
         if (upperEnabled) {
             addTableSection(T.upper_cabinet_section, [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material], upperRowsDebug);
@@ -8493,7 +8538,7 @@
         if (lowerEnabled) {
             addTableSection(T.lower_cabinet_section, [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material], lowerRowsDebug);
         }
-        addTableSection(T.hardware_title, [T.col_hw_name, T.col_qty, T.col_note], hardwareRowsDebug);
+        addTableSection(T.hardware_title, [T.col_hw_name, T.col_sku, T.col_qty], hardwareRowsDebug);
         pdf.save('gconfig-export.pdf');
     }
 
@@ -8594,20 +8639,18 @@
         const hwRowsForPdf = (() => {
             const tbody = document.getElementById('hardwareTableBody');
             if (!tbody) return [];
-            const out = [];
-            tbody.querySelectorAll('tr').forEach(tr => {
+            return Array.from(tbody.querySelectorAll('tr')).map(tr => {
                 const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
                 if (tds.length >= 5) {
-                    out.push([tds[0], tds[4], [tds[1], tds[2], tds[3]].filter(Boolean).join(' · ')]);
-                } else if (tds.length >= 3) {
-                    out.push(tds.slice(0, 3));
+                    const namePart = [tds[0], tds[1], tds[2]].filter(Boolean).join(' · ');
+                    return [namePart, tds[3], tds[4]];
                 }
+                return tds.slice(0, 3);
             });
-            return out;
         })();
         if (hwRowsForPdf.length) {
             addTableSection(T.hardware_title,
-                [T.col_hw_name, T.col_qty, T.col_note],
+                [T.col_hw_name, T.col_sku, T.col_qty],
                 hwRowsForPdf);
         }
 

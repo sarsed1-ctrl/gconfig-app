@@ -3860,6 +3860,7 @@
         eamfMaterialsReady = true;
         if (typeof updateConfigurator === 'function') updateConfigurator();
         scheduleAmflexPriceRefresh();
+        notifyParentV1Ready();
     }
 
     function refreshEamfMaterialSelectLabels() {
