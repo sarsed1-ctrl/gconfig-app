@@ -1079,11 +1079,15 @@ class Furniture3D {
             hingeSpec: p.hinges?.upper,
             cabinetTopY: upperBaseY + upper.h,
             cabinetHeightMm: upper.h,
+            carcassT: T,
+            carcassW: upper.w,
         };
         const lowerHingeOpts = {
             hingeSpec: p.hinges?.lower,
             cabinetTopY: lower.h,
             cabinetHeightMm: lower.h,
+            carcassT: T,
+            carcassW: lower.w,
         };
 
         if (hasUpper) {
@@ -1187,6 +1191,8 @@ class Furniture3D {
                     cabinetTopY: opts.cabinetTopY,
                     cabinetHeightMm: opts.cabinetHeightMm,
                     facadeZ: z,
+                    carcassT: opts.carcassT,
+                    carcassW: opts.carcassW,
                 });
             } else {
                 addPanel(group, doorW, doorH, facadeT, mat, 0, centerY, z);
@@ -1275,6 +1281,53 @@ class Furniture3D {
         }
     }
 
+/**
+ * Procedural concealed (Euro) hinge: cup in door, articulated arm, mounting plate on carcass.
+ * Door parts rotate with pivotGroup; carcass plate stays on root group.
+ */
+function addConcealedHinge(pivotGroup, rootGroup, params) {
+    const {
+        hy, cupDir, edgeDist, facadeT, centerY, facadeZ, carcassW, carcassT,
+    } = params;
+    const backZ = -facadeT / 2;
+    const cupX = cupDir * edgeDist;
+    const cupDepth = 13;
+    const matBody = getMaterial('hinge-body', 0x8a9096, { metalness: 0.86, roughness: 0.24 });
+    const matCup = getMaterial('hinge-cup', 0x4e5459, { metalness: 0.52, roughness: 0.42 });
+    const matPlate = getMaterial('hinge-plate', 0xa3a8ad, { metalness: 0.9, roughness: 0.18 });
+    const matScrew = getMaterial('hinge-screw', 0x353a3e, { metalness: 0.92, roughness: 0.12 });
+
+    const mark = (mesh) => {
+        if (mesh) mesh.renderOrder = 4;
+    };
+
+    mark(addCylinder(pivotGroup, 17.5, cupDepth, matCup, cupX, hy, backZ - cupDepth / 2, Math.PI / 2));
+    mark(addCylinder(pivotGroup, 18, 1.6, matBody, cupX, hy, backZ - 0.9, Math.PI / 2));
+
+    mark(addCylinder(pivotGroup, 5.5, 16, matBody, cupDir * 2.5, hy, backZ - 2, 0));
+
+    const armLen = Math.max(14, edgeDist - 22);
+    mark(addPanel(pivotGroup, armLen, 11, 6.5, matBody, cupDir * (edgeDist - armLen / 2), hy, backZ - 2));
+    mark(addPanel(pivotGroup, 20, 9, 5, matBody, cupDir * 12, hy, backZ + 1.2));
+    mark(addPanel(pivotGroup, 12, 8, 4.5, matBody, cupDir * (edgeDist - 7), hy, backZ + 0.8));
+
+    if (!rootGroup || !carcassW || !carcassT) return;
+    const plateThk = 2.5;
+    const plateH = 46;
+    const plateD = 18;
+    const yRoot = centerY + hy;
+    const zRoot = facadeZ + backZ - 1;
+    const xRoot = cupDir > 0
+        ? -carcassW / 2 + carcassT + plateThk / 2
+        : carcassW / 2 - carcassT - plateThk / 2;
+    mark(addPanel(rootGroup, plateThk, plateH, plateD, matPlate, xRoot, yRoot, zRoot));
+    const screwX = xRoot + cupDir * (plateThk / 2 + 1);
+    mark(addCylinder(rootGroup, 2.2, 2.4, matScrew, screwX, yRoot + 14, zRoot, Math.PI / 2));
+    mark(addCylinder(rootGroup, 2.2, 2.4, matScrew, screwX, yRoot - 14, zRoot, Math.PI / 2));
+    mark(addCylinder(rootGroup, 2.2, 2.4, matScrew, screwX, yRoot, zRoot + 10, Math.PI / 2));
+    mark(addCylinder(rootGroup, 2.2, 2.4, matScrew, screwX, yRoot, zRoot - 10, Math.PI / 2));
+}
+
     addHingedDoor(group, doorW, doorH, facadeT, D, centerY, mat, opts = {}) {
         const z = D / 2 + facadeT / 2 + 2;
         const hingeX = opts.hingeX ?? -doorW / 2;
@@ -1311,36 +1364,28 @@ class Furniture3D {
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
 
-        // ── Hinge hardware geometry ──────────────────────────────────────────
-        // Cup (Ø35 mm cylinder) + arm bar per hinge position.
-        // All geometry lives in pivotGroup so it rotates with the door on click.
         const hingeSpec = opts.hingeSpec;
         if (hingeSpec && doorMesh) {
-            const hingeMat = getMaterial('hinge-metal', 0x8a8e94, { roughness: 0.22, metalness: 0.78 });
-            // Which X-direction from pivot toward door interior?
             const cupDir = (doorCenterX - hingeX) >= 0 ? 1 : -1;
-            // Cap edge-distance so cup never wanders past ¼ of door width
-            const edgeDist = Math.min(hingeSpec.edgeDist ?? 70, doorW * 0.25, 55);
-            // Door back face Z in pivotGroup local coordinates (mm, 0 = door centre)
-            const backZ = -facadeT / 2;
-
+            const edgeDist = Math.min(hingeSpec.edgeDist ?? 70, doorW * 0.28, 58);
+            const facadeZ = opts.facadeZ ?? z;
+            const carcassW = opts.carcassW ?? doorW + FACADE_GAP * 2;
+            const carcassT = opts.carcassT ?? 16;
             hingeSpec.positions.forEach((posFromTop) => {
                 if (posFromTop <= 0 || posFromTop >= doorH) return;
-                // Vertical position relative to door centre (Y in pivotGroup)
                 const hy = doorH / 2 - posFromTop;
-
-                // Cup: Ø35 mm × 12 mm deep cylinder, axis along Z, on door back face
-                // rotX = π/2 rotates the Y-axis cylinder to align with Z
-                addCylinder(pivotGroup, 17.5, 12, hingeMat,
-                    cupDir * edgeDist, hy, backZ - 6,   // centre 6 mm into the door
-                    Math.PI / 2);
-
-                // Arm: flat bar connecting cup to pivot axis
-                addPanel(pivotGroup, edgeDist, 10, 5, hingeMat,
-                    cupDir * edgeDist / 2, hy, backZ - 2.5);
+                addConcealedHinge(pivotGroup, group, {
+                    hy,
+                    cupDir,
+                    edgeDist,
+                    facadeT,
+                    centerY,
+                    facadeZ,
+                    carcassW,
+                    carcassT,
+                });
             });
         }
-        // ─────────────────────────────────────────────────────────────────────
     }
 
     addSplitDoors(group, W, H, facadeT, D, centerY, mat, opts = {}) {
@@ -1360,6 +1405,8 @@ class Furniture3D {
             cabinetTopY: opts.cabinetTopY,
             cabinetHeightMm: opts.cabinetHeightMm,
             facadeZ: D / 2 + facadeT / 2 + 2,
+            carcassT: opts.carcassT,
+            carcassW: W,
         };
         this.addHingedDoor(group, leafW, doorHm, facadeT, D, centerY, mat, {
             hingeX: leftCenterX - leafW / 2,
