@@ -7951,13 +7951,18 @@
         // We represent it as a dashed rectangle extending downward from
         // the bottom edge of the upper cabinet, with the correct
         // facade W and H dimensions (not depth).
-        const doorProjectionH = upFH || h2;   // door height in mm (real facade height)
-        const doorProjectionW = upFW || w2;   // door width  in mm (real facade width)
+        const hasUpper = w2 > 0 && h2 > 0;
+        const doorProjectionH = hasUpper ? (upFH || h2) : 0;
+        const doorProjectionW = hasUpper ? (upFW || w2) : 0;
 
         // Total vertical span: door above upper cabinet + upper cabinet + gap + vanity
         const wallGapMm = 400; // visual gap between units
-        const totalH = doorProjectionH + h2 + wallGapMm + h1 + (hasCT ? ctT : 0) + 80;
-        const totalW = Math.max(w1 + sOver * 2, w2, doorProjectionW) + 200;
+        const totalH = hasUpper
+            ? doorProjectionH + h2 + wallGapMm + h1 + (hasCT ? ctT : 0) + 80
+            : h1 + (hasCT ? ctT : 0) + 80;
+        const totalW = hasUpper
+            ? Math.max(w1 + sOver * 2, w2, doorProjectionW) + 200
+            : (w1 + sOver * 2) + 200;
 
         const scale   = Math.min((height - 50) / totalH, (width - 80) / totalW);
         const centerX = width / 2;
@@ -7990,15 +7995,17 @@
         }
 
         // ---- 3. UPPER CABINET ----
-        const wW = w2 * scale, wH = h2 * scale;
+        const wW = hasUpper ? w2 * scale : 0, wH = hasUpper ? h2 * scale : 0;
         const wX = centerX - wW / 2;
         const wY = vY - ctScaleH - (wallGapMm * scale) - wH;
-        ctx.fillStyle = '#f5f5f5';
-        ctx.fillRect(wX, wY, wW, wH);
-        ctx.strokeRect(wX, wY, wW, wH);
+        if (hasUpper) {
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(wX, wY, wW, wH);
+            ctx.strokeRect(wX, wY, wW, wH);
+        }
 
         // ---- Door planner overlay/inset visualization + hinge circles ----
-        if (doorPlanner && Array.isArray(doorPlanner.hingePositions)) {
+        if (hasUpper && doorPlanner && Array.isArray(doorPlanner.hingePositions)) {
             const openingX = wX + (carcassT * scale);
             const openingY = wY + (carcassT * scale);
             const openingW = Math.max(10, wW - (2 * carcassT * scale));
@@ -8055,9 +8062,9 @@
         }
         
         // ---- DRAW UPPER CABINET HINGES (blue dots) ----
-        // Draw only if Hinges mode (not Gas springs)
+        // Draw only if Hinges mode (not Gas springs) and upper cabinet exists
         const upperHardwareMode = document.querySelector('input[name="upperHardwareMode"]:checked')?.value || 'gas';
-        if (upperHardwareMode === 'hinge') {
+        if (hasUpper && upperHardwareMode === 'hinge') {
             const openingX = wX + (carcassT * scale);
             const openingY = wY + (carcassT * scale);
             const openingW = Math.max(10, wW - (2 * carcassT * scale));
@@ -8312,11 +8319,13 @@
         const vInnerB = startY - carcassT * scale;
         drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vSpH, _vShV, _vSpV, _vShelfT);
 
-        const uInnerL = wX + carcassT * scale;
-        const uInnerR = wX + wW - carcassT * scale;
-        const uInnerT = wY + carcassT * scale;
-        const uInnerB = wY + wH - carcassT * scale;
-        drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+        if (hasUpper) {
+            const uInnerL = wX + carcassT * scale;
+            const uInnerR = wX + wW - carcassT * scale;
+            const uInnerT = wY + carcassT * scale;
+            const uInnerB = wY + wH - carcassT * scale;
+            drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+        }
 
         ctx.restore();
 
@@ -8333,12 +8342,14 @@
         ctx.restore();
 
         // Height arrow for upper cabinet
-        drawArrow(ctx, wX - 18, wY, wX - 18, wY + wH);
-        ctx.save();
-        ctx.translate(wX - 30, wY + wH / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText(`${h2} ${unit}`, -20, 0);
-        ctx.restore();
+        if (hasUpper) {
+            drawArrow(ctx, wX - 18, wY, wX - 18, wY + wH);
+            ctx.save();
+            ctx.translate(wX - 30, wY + wH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`${h2} ${unit}`, -20, 0);
+            ctx.restore();
+        }
 
         // ---- Dimension annotations on right side ----
         ctx.fillStyle = '#888';
@@ -8349,7 +8360,7 @@
         ctx.fillText(`${w1}\u00d7${h1} ${unit}`, rightEdge, vY + vH / 2 + 4);
 
         // Upper: W × H
-        ctx.fillText(`${w2}\u00d7${h2} ${unit}`, rightEdge, wY + wH / 2 + 4);
+        if (hasUpper) ctx.fillText(`${w2}\u00d7${h2} ${unit}`, rightEdge, wY + wH / 2 + 4);
 
         // Depth labels (right of each unit, smaller)
         ctx.fillStyle = '#aaa';
