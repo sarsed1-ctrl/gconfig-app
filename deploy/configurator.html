@@ -8957,6 +8957,9 @@
         }
         
         updateConfigurator();
+        requestAnimationFrame(() => {
+            if (typeof updateConfigurator === 'function') updateConfigurator();
+        });
         notifyParentV1Ready();
     };
 
