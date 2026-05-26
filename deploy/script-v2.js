@@ -1839,6 +1839,22 @@
 
 
 
+    function setIframeRadioQuiet(name, value) {
+
+        const doc = iframeDoc();
+
+        if (!doc) return;
+
+        const el = doc.querySelector(`input[name="${name}"][value="${value}"]`);
+
+        if (!el) return;
+
+        el.checked = true;
+
+    }
+
+
+
     function getIframeValue(id) {
 
         const doc = iframeDoc();
@@ -2111,7 +2127,8 @@
      * Sync cabinet layout to v1 iframe by zeroing out the hidden section's
      * dimension fields.  When restoring to 'both', re-push current v2 values.
      */
-    function syncCabinetLayoutToV1(layout) {
+    function syncCabinetLayoutToV1(layout, options) {
+        options = options || {};
         if (!iframeReady) return;
         if (layout === 'single') {
             // Zero out the upper section so v1 doesn't count it
@@ -2119,12 +2136,14 @@
             setIframeValueQuiet('upper_h', 0);
             setIframeValueQuiet('upper_d', 0);
         } else {
-            // Restore both sections from v2 field values
+            // Restore both sections from v2 field values (skip empty — avoids wiping iframe defaults)
             ['w1', 'h1', 'd1', 'upper_w', 'upper_h', 'upper_d'].forEach(id => {
                 const el = document.querySelector(`[data-iframe="${id}"]`);
-                if (el) setIframeValueQuiet(id, el.value);
+                if (!el || el.value === '' || el.value == null) return;
+                setIframeValueQuiet(id, el.value);
             });
         }
+        if (options.skipTrigger) return;
         triggerV1Update();
         schedulePreviewSync();
         schedule3DRebuild();
@@ -2611,13 +2630,7 @@
 
         if (productMode === 'closets' && mode !== 'beds') {
 
-            pullFromIframe();
-
-            refreshWizardSelectsFromIframe();
-
-            triggerV1Update();
-
-            flushPreviewNow();
+            pushAllWizardToIframe();
 
         }
 
@@ -2675,6 +2688,48 @@
 
         updateConditionalUI();
 
+    }
+
+
+
+    /** Push all wizard fields into the v1 iframe and redraw preview/price. */
+    function pushAllWizardToIframe() {
+        if (!iframeReady) return false;
+        const win = iframeWin();
+        if (!win) return false;
+
+        syncPaused = true;
+
+        document.querySelectorAll('[data-iframe]').forEach((el) => {
+            const id = el.getAttribute('data-iframe');
+            if (!id) return;
+            if (el.type === 'number' && (el.value === '' || el.value == null)) return;
+            if (el.type === 'checkbox') setIframeValueQuiet(id, el.checked);
+            else setIframeValueQuiet(id, el.value);
+        });
+
+        setIframeRadioQuiet('lowerHardwareMode', getLowerHardwareMode());
+        setIframeRadioQuiet('upperHardwareMode', getUpperHardwareMode());
+        const backFit = document.getElementById('backFitChips')?.querySelector('.hw-chip.active')?.getAttribute('data-value');
+        if (backFit) setIframeRadioQuiet('backPanelFitType', backFit);
+
+        if (productMode === 'closets') {
+            syncCabinetLayoutToV1(getCabinetLayout(), { skipTrigger: true });
+        }
+
+        Object.entries(EAMF_IFRAME_HANDLERS).forEach(([id, handlerName]) => {
+            const wEl = document.querySelector(`[data-iframe="${id}"]`);
+            if (!wEl || wEl.tagName !== 'SELECT' || !wEl.value) return;
+            if (typeof win[handlerName] === 'function') win[handlerName]();
+        });
+
+        syncPaused = false;
+
+        triggerV1Update();
+        refreshWizardSelectsFromIframe();
+        if (typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
+        flushPreviewNow();
+        return true;
     }
 
 
@@ -2741,6 +2796,8 @@
 
             }
 
+            const winAfter = iframeWin();
+
             setTimeout(() => {
 
                 refreshEamfEdgeSelects();
@@ -2753,9 +2810,19 @@
 
                 syncPriceMirror();
 
+                if (typeof winAfter?.scheduleAmflexPriceRefresh === 'function') winAfter.scheduleAmflexPriceRefresh();
+
                 if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
 
             }, 0);
+
+            setTimeout(() => {
+
+                refreshEamfEdgeSelects();
+
+                syncPriceMirror();
+
+            }, 200);
 
         }
 
@@ -3761,6 +3828,8 @@
 
         if (currentStep === 4) refreshWizardSelectsFromIframe();
 
+        if (iframeReady) pushAllWizardToIframe();
+
         if (currentStep === 3) {
 
             refreshDrawerSelects();
@@ -3908,7 +3977,7 @@
 
                 pullFromIframe();
 
-                triggerV1Update();
+                pushAllWizardToIframe();
 
             }
 
