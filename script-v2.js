@@ -164,20 +164,22 @@
     // sideColor — Three.js hex for the side panel material in 3D preview
     // runners  — available runner lengths, mm (largest that fits depth is chosen)
     const DRAWER_SYSTEMS = [
-        // GTV AxisPro — aluminium, anthracite, 37mm bracket per side.
-        // Available in BOTH soft-close and push-to-open.
-        // Real heights (gtv.com.pl): 69, 86, 120, 168, 200 mm.
-        { id: 'axispro_69',  brand: 'GTV', name: 'AxisPro H69',  sideH: 69,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_86',  brand: 'GTV', name: 'AxisPro H86',  sideH: 86,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_120', brand: 'GTV', name: 'AxisPro H120', sideH: 120, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_168', brand: 'GTV', name: 'AxisPro H168', sideH: 168, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        { id: 'axispro_200', brand: 'GTV', name: 'AxisPro H200', sideH: 200, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [250,300,350,400,450,500,550,600] },
-        // Hafele MatrixBox S — epoxy steel, 7mm clearance per side; soft-close and push-to-open.
-        // Real heights (hafele.com): 84, 120, 167, 199 mm.
-        { id: 'matrixbox_84',  brand: 'Hafele', name: 'MatrixBox S H84',  sideH: 84,  sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_120', brand: 'Hafele', name: 'MatrixBox M H120', sideH: 120, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_167', brand: 'Hafele', name: 'MatrixBox L H167', sideH: 167, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
-        { id: 'matrixbox_199', brand: 'Hafele', name: 'MatrixBox XL H199', sideH: 199, sideThick: 13, gap: 14, sideColor: 0x9ca3af, runners: [270,350,400,450,500,550] },
+        // GTV AxisPro — aluminium extrusion, 14mm wide side, anthracite/white.
+        // Both soft-close and push-to-open available.
+        // Heights from AM furnitura catalog: 84, 116, 167, 199mm (+69mm in 500mm only).
+        // gap=74: 37mm per side (14mm profile + 23mm runner bracket into carcass wall).
+        { id: 'axispro_69',  brand: 'GTV', name: 'AxisPro H69',  sideH: 69,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [500] },
+        { id: 'axispro_84',  brand: 'GTV', name: 'AxisPro H84',  sideH: 84,  sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_116', brand: 'GTV', name: 'AxisPro H116', sideH: 116, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_167', brand: 'GTV', name: 'AxisPro H167', sideH: 167, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        { id: 'axispro_199', brand: 'GTV', name: 'AxisPro H199', sideH: 199, sideThick: 14, gap: 74, sideColor: 0x4b5563, runners: [300,350,400,450,500,550] },
+        // Hafele Matrix Box Single — Einwandzarge (single-wall steel), 2mm side profile.
+        // Both soft-close and push-to-open available.
+        // Heights from Hafele catalog: 80, 120, 150mm.
+        // gap=14: 7mm per side (formula B = Korpusinnenbreite − 14mm from Hafele PDF).
+        { id: 'matrixbox_80',  brand: 'Hafele', name: 'MatrixBox H80',  sideH: 80,  sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
+        { id: 'matrixbox_120', brand: 'Hafele', name: 'MatrixBox H120', sideH: 120, sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
+        { id: 'matrixbox_150', brand: 'Hafele', name: 'MatrixBox H150', sideH: 150, sideThick: 2, gap: 14, sideColor: 0x9ca3af, runners: [300,350,400,450,500,550] },
     ];
 
     /**
