@@ -4350,6 +4350,17 @@
         } catch (_) { /* ignore */ }
     }
 
+    /** PNG snapshot for v2 preview when drawImage from iframe canvas fails. */
+    window.__gconfigGetSchematicSnapshot = function () {
+        const c = document.getElementById('schematicCanvas');
+        if (!c || !c.width || !c.height) return null;
+        try {
+            return { width: c.width, height: c.height, dataUrl: c.toDataURL('image/png') };
+        } catch (_) {
+            return null;
+        }
+    };
+
     function initBedsModeUI() {
         if (CONFIG_MODE !== 'beds') return;
         setEamfCarcassEdgeRowVisible(false);
@@ -6422,71 +6433,60 @@
             parts.push({ name: T.part_back, qty: 1, l: h1 - 4, w: w1 - 4, t: 3, mat: 'HDF' });
         }
 
-        // ==========================================
-        // DRAWER SYSTEM (AxisPro & MatrixBox only, HORIZON removed per TZ)
-        // AxisPro (GTV): drawer side panel = 14mm wide; gap each side = 37mm from wall for runner mount.
-        //   Drawer box width B = NL - 7mm each side; inner box width = innerW - 37*2 (runner brackets).
-        //   Per datasheet: side panel = 14mm; gap each side= 37mm -> drawerGap = 74mm totaltal.
-        // MatrixBox (Hafele): drawer box width = LW - 14mm (LW = inner cabinet width).
-        //   Runner side clearance = 7mm per side minimum; standard X = 11mm.
-        //   drawerGap = 14mm total (just the side clearances).
-        //   Runner length NL chosen so NL <= drawer depth D1.
-        // ==========================================
-        // Runner length: choose the largest standard NL that fits within cabinet depth
-        const axisproNLSizes = [250, 300, 350, 400, 450, 500, 550, 600];
-        let runnerLength = 250;
-        for (const nl of axisproNLSizes) { if (nl <= d1) runnerLength = nl; }
-
-        // Auto-select drawer side height (same logic as script-v2.js getBestDrawerSpec)
-        const AXISPRO_HEIGHTS   = [69, 84, 116, 167, 199];
-        const MATRIXBOX_HEIGHTS = [80, 120, 150];
-        const drawerSlotH = Math.floor((h1 - 2 * carcassT) / drawerCount);
-        const maxDrawerSideH = drawerSlotH - 32;
-        function pickDrawerHeight(heights) {
-            let best = heights[0];
-            for (const hh of heights) { if (hh <= maxDrawerSideH) best = hh; }
-            return best;
-        }
-        const drawerHeightArr = drawerSystem === 'matrixbox' ? MATRIXBOX_HEIGHTS : AXISPRO_HEIGHTS;
-        const selectedH = pickDrawerHeight(drawerHeightArr);
-
-        let drawerGap = 0, drawerSKU = "", drawerName = "", drawerBrand = "", drawerTypeStr = "";
-
-        if (drawerSystem === 'matrixbox') {
-            // Hafele MatrixBox Single: 2mm steel side, 7mm clearance per side
-            drawerGap  = 14;
-            drawerBrand = 'Hafele';
-            drawerName = `MatrixBox Single H${selectedH}`;
-            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
-            // Hafele article series: 514.40.xxx (H80), 514.41.xxx (H120), 514.42.xxx (H150)
-            const mbSeries = { 80: '514.40', 120: '514.41', 150: '514.42' };
-            drawerSKU = `${mbSeries[selectedH] || '514.40'}.${runnerLength}`;
-        } else if (drawerSystem === 'axispro') {
-            // GTV AxisPro: 14mm aluminium side, 37mm bracket footprint per side
-            drawerGap  = 74;
-            drawerBrand = 'GTV';
-            drawerName = `AxisPro H${selectedH}`;
-            drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
-            // AM furnitura article: PB-AXISPRO-KPL{NL}A
-            drawerSKU = `PB-AXISPRO-KPL${runnerLength}A`;
-        }
-
-        const drawerInnerW = innerW1 - drawerGap;
-        // Drawer bottom: width = drawerInnerW; depth = NL - 24 (AxisPro) or NL - 14 (MatrixBox)
-        const drawerBottomDepth = (drawerSystem === 'axispro') ? runnerLength - 24 : runnerLength - 14;
-        parts.push({ name: T.part_drawer_bottom, qty: drawerCount, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
-
-        hardware.push({
-            item: `${drawerBrand} ${drawerName}`,
-            brandModel: drawerBrand,
-            type: drawerTypeStr,
-            article: drawerSKU,
-            qty: drawerCount * 2,
-            note: `${T.hw_gap_note}${drawerGap / 2}${T.hw_gap_note2}`
-        });
-
         // Lower cabinet facade geometry (shared with schematic preview)
         const facadeCalc = calcLowerFacadePanels(w1, h1, carcassT);
+        const drawerCount = facadeCalc.drawerCount || 1;
+
+        // ==========================================
+        // DRAWER SYSTEM (AxisPro & MatrixBox only, when lower hardware = drawer)
+        // ==========================================
+        if (lowerHardwareMode === 'drawer') {
+            const axisproNLSizes = [250, 300, 350, 400, 450, 500, 550, 600];
+            let runnerLength = 250;
+            for (const nl of axisproNLSizes) { if (nl <= d1) runnerLength = nl; }
+
+            const AXISPRO_HEIGHTS   = [69, 84, 116, 167, 199];
+            const MATRIXBOX_HEIGHTS = [80, 120, 150];
+            const drawerSlotH = Math.floor((h1 - 2 * carcassT) / drawerCount);
+            const maxDrawerSideH = drawerSlotH - 32;
+            function pickDrawerHeight(heights) {
+                let best = heights[0];
+                for (const hh of heights) { if (hh <= maxDrawerSideH) best = hh; }
+                return best;
+            }
+            const drawerHeightArr = drawerSystem === 'matrixbox' ? MATRIXBOX_HEIGHTS : AXISPRO_HEIGHTS;
+            const selectedH = pickDrawerHeight(drawerHeightArr);
+
+            let drawerGap = 0, drawerSKU = "", drawerName = "", drawerBrand = "", drawerTypeStr = "";
+
+            if (drawerSystem === 'matrixbox') {
+                drawerGap  = 14;
+                drawerBrand = 'Hafele';
+                drawerName = `MatrixBox Single H${selectedH}`;
+                drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+                const mbSeries = { 80: '514.40', 120: '514.41', 150: '514.42' };
+                drawerSKU = `${mbSeries[selectedH] || '514.40'}.${runnerLength}`;
+            } else if (drawerSystem === 'axispro') {
+                drawerGap  = 74;
+                drawerBrand = 'GTV';
+                drawerName = `AxisPro H${selectedH}`;
+                drawerTypeStr = `H${selectedH} × NL${runnerLength} мм`;
+                drawerSKU = `PB-AXISPRO-KPL${runnerLength}A`;
+            }
+
+            const drawerInnerW = innerW1 - drawerGap;
+            const drawerBottomDepth = (drawerSystem === 'axispro') ? runnerLength - 24 : runnerLength - 14;
+            parts.push({ name: T.part_drawer_bottom, qty: drawerCount, l: drawerInnerW, w: drawerBottomDepth, t: 16, mat: matCarcass });
+
+            hardware.push({
+                item: `${drawerBrand} ${drawerName}`,
+                brandModel: drawerBrand,
+                type: drawerTypeStr,
+                article: drawerSKU,
+                qty: drawerCount * 2,
+                note: `${T.hw_gap_note}${drawerGap / 2}${T.hw_gap_note2}`
+            });
+        }
         const baseFacadeW = facadeCalc.baseFacadeW;
         const baseFacadeH = facadeCalc.baseFacadeH;
         const lowerDoors = lowerFacadePanelsToDoors(facadeCalc, T);
@@ -6511,6 +6511,7 @@
             lowerHintEl.textContent = lowerDoorType === 'overlay'
                 ? 'Overlay hinges — HAFELE, GTV'
                 : 'Inset hinges (zero overlay) — HAFELE, GTV';
+        }
 
         // === UPPER CABINET: facade dimension calculation ===
         const upperDoorType = document.querySelector('input[name="upperDoorType"]:checked')?.value || 'overlay';
@@ -6567,7 +6568,6 @@
         } else {
             if (upperFacadeDimsEl) upperFacadeDimsEl.textContent = '—';
             if (upperHintEl) upperHintEl.textContent = '—';
-        }
         }
 
         // Countertop

@@ -1,4 +1,4 @@
-const CACHE = 'gconfig-v25';
+const CACHE = 'gconfig-v26';
 
 const PRECACHE = [
     './',

@@ -386,6 +386,10 @@
 
     };
 
+    const EAMF_FIELD_IDS = new Set(Object.keys(EAMF_IFRAME_HANDLERS));
+
+    let iframeBootWatchdog = null;
+
 
 
     const EAMF_EDGE_SELECT_IDS = ['eamfFacadeEdge', 'eamfCarcassEdge'];
@@ -998,11 +1002,51 @@
 
 
 
+    function dismissLoadingOverlay() {
+
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
+
+        if (iframeBootWatchdog) {
+
+            clearTimeout(iframeBootWatchdog);
+
+            iframeBootWatchdog = null;
+
+        }
+
+    }
+
+
+
     function loadIframe() {
 
         iframeReady = false;
 
         loadingOverlay.classList.remove('hidden');
+
+        if (iframeBootWatchdog) clearTimeout(iframeBootWatchdog);
+
+        iframeBootWatchdog = setTimeout(() => {
+
+            iframeBootWatchdog = null;
+
+            if (!loadingOverlay.classList.contains('hidden')) {
+
+                console.warn('GConfig: iframe boot timeout — showing UI anyway');
+
+                iframeReady = true;
+
+                dismissLoadingOverlay();
+
+                showV2Toast(currentLang === 'ru'
+
+                    ? 'Движок загружается дольше обычного. Проверьте сеть и обновите страницу.'
+
+                    : 'Engine is slow to load. Check your network and refresh.', true);
+
+            }
+
+        }, 15000);
 
         iframe.src = iframeSrc();
 
@@ -2630,7 +2674,7 @@
 
         if (productMode === 'closets' && mode !== 'beds') {
 
-            pushAllWizardToIframe();
+            afterV1CatalogReady();
 
         }
 
@@ -2692,44 +2736,71 @@
 
 
 
-    /** Push all wizard fields into the v1 iframe and redraw preview/price. */
-    function pushAllWizardToIframe() {
+  /**
+   * Push wizard fields into the v1 iframe.
+   * @param {{ includeEamf?: boolean }} options — run EAMF handlers (materials/edges/price) on step 4+
+   */
+    function syncWizardFieldsToIframe(options) {
+        options = options || {};
         if (!iframeReady) return false;
         const win = iframeWin();
         if (!win) return false;
 
-        syncPaused = true;
+        const includeEamf = options.includeEamf === true;
 
-        document.querySelectorAll('[data-iframe]').forEach((el) => {
-            const id = el.getAttribute('data-iframe');
-            if (!id) return;
-            if (el.type === 'number' && (el.value === '' || el.value == null)) return;
-            if (el.type === 'checkbox') setIframeValueQuiet(id, el.checked);
-            else setIframeValueQuiet(id, el.value);
-        });
+        try {
+            syncPaused = true;
 
-        setIframeRadioQuiet('lowerHardwareMode', getLowerHardwareMode());
-        setIframeRadioQuiet('upperHardwareMode', getUpperHardwareMode());
-        const backFit = document.getElementById('backFitChips')?.querySelector('.hw-chip.active')?.getAttribute('data-value');
-        if (backFit) setIframeRadioQuiet('backPanelFitType', backFit);
+            document.querySelectorAll('[data-iframe]').forEach((el) => {
+                const id = el.getAttribute('data-iframe');
+                if (!id) return;
+                if (!includeEamf && EAMF_FIELD_IDS.has(id)) return;
+                if (el.type === 'number' && (el.value === '' || el.value == null)) return;
+                if (el.type === 'checkbox') setIframeValueQuiet(id, el.checked);
+                else setIframeValueQuiet(id, el.value);
+            });
 
-        if (productMode === 'closets') {
-            syncCabinetLayoutToV1(getCabinetLayout(), { skipTrigger: true });
+            setIframeRadioQuiet('lowerHardwareMode', getLowerHardwareMode());
+            setIframeRadioQuiet('upperHardwareMode', getUpperHardwareMode());
+            const backFit = document.getElementById('backFitChips')?.querySelector('.hw-chip.active')?.getAttribute('data-value');
+            if (backFit) setIframeRadioQuiet('backPanelFitType', backFit);
+
+            if (productMode === 'closets') {
+                syncCabinetLayoutToV1(getCabinetLayout(), { skipTrigger: true });
+            }
+
+            if (includeEamf) {
+                Object.entries(EAMF_IFRAME_HANDLERS).forEach(([id, handlerName]) => {
+                    const wEl = document.querySelector(`[data-iframe="${id}"]`);
+                    if (!wEl || wEl.tagName !== 'SELECT' || !wEl.value) return;
+                    if (typeof win[handlerName] === 'function') win[handlerName]();
+                });
+            }
+        } catch (err) {
+            console.error('syncWizardFieldsToIframe failed:', err);
+        } finally {
+            syncPaused = false;
         }
 
-        Object.entries(EAMF_IFRAME_HANDLERS).forEach(([id, handlerName]) => {
-            const wEl = document.querySelector(`[data-iframe="${id}"]`);
-            if (!wEl || wEl.tagName !== 'SELECT' || !wEl.value) return;
-            if (typeof win[handlerName] === 'function') win[handlerName]();
-        });
-
-        syncPaused = false;
-
         triggerV1Update();
-        refreshWizardSelectsFromIframe();
-        if (typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
+        if (includeEamf) {
+            refreshWizardSelectsFromIframe();
+            if (typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
+        }
         flushPreviewNow();
         return true;
+    }
+
+    function pushAllWizardToIframe() {
+        return syncWizardFieldsToIframe({ includeEamf: true });
+    }
+
+    function afterV1CatalogReady() {
+        refreshWizardSelectsFromIframe();
+        refreshEamfEdgeSelects();
+        syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
+        const win = iframeWin();
+        if (win && typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
     }
 
 
@@ -3550,15 +3621,58 @@
 
 
 
+    function schematicSnapshotHasInk(dataUrl) {
+        if (!dataUrl || dataUrl.length < 200) return false;
+        return dataUrl.indexOf('AAAA') === -1;
+    }
+
+    function drawSchematicSnapshotToPreview(dataUrl, ctx) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    if (previewCanvas.width !== img.width) previewCanvas.width = img.width;
+                    if (previewCanvas.height !== img.height) previewCanvas.height = img.height;
+                    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    resolve(true);
+                } catch (_) {
+                    resolve(false);
+                }
+            };
+            img.onerror = () => resolve(false);
+            img.src = dataUrl;
+        });
+    }
+
+    function applyNeonPreviewStyling(ctx) {
+        if (!document.documentElement.classList.contains('theme-future')) return;
+        try {
+            if (productMode === 'beds') {
+                recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+            } else {
+                const hingeDots = collectHingeDotsFromIframe();
+                recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                drawNeonParallelLiftOverlay(ctx);
+                drawNeonShelfSegmentsOverlay(ctx);
+                drawSoftNeonHingeDots(ctx, hingeDots);
+            }
+        } catch (neonErr) {
+            console.warn('Neon preview styling skipped:', neonErr);
+        }
+    }
+
     function syncCanvas() {
 
         const doc = iframeDoc();
 
         if (!doc || !previewCanvas) return;
 
-        if (productMode === 'beds') {
+        const win = iframeWin();
 
-            const win = iframeWin();
+        if (productMode === 'beds') {
 
             if (win && win.__gconfigMode !== 'beds') return;
 
@@ -3586,45 +3700,51 @@
 
         ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 
+        let drew = false;
+
         try {
 
             ctx.drawImage(src, 0, 0);
 
-            if (document.documentElement.classList.contains('theme-future')) {
+            drew = true;
 
-                try {
+        } catch (drawErr) {
 
-                    if (productMode === 'beds') {
+            console.warn('Preview drawImage failed, trying snapshot:', drawErr);
 
-                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+        }
 
-                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+        if (!drew && win && typeof win.__gconfigGetSchematicSnapshot === 'function') {
 
-                    } else {
+            try {
 
-                        const hingeDots = collectHingeDotsFromIframe();
+                const snap = win.__gconfigGetSchematicSnapshot();
 
-                        recolorSchematicForNeon(ctx, previewCanvas.width, previewCanvas.height);
+                if (snap && snap.dataUrl && schematicSnapshotHasInk(snap.dataUrl)) {
 
-                        applyNeonSchematicSoftening(ctx, previewCanvas.width, previewCanvas.height);
+                    drawSchematicSnapshotToPreview(snap.dataUrl, ctx).then(() => {
 
-                        drawNeonParallelLiftOverlay(ctx);
+                        applyNeonPreviewStyling(ctx);
 
-                        drawNeonShelfSegmentsOverlay(ctx);
+                    });
 
-                        drawSoftNeonHingeDots(ctx, hingeDots);
-
-                    }
-
-                } catch (neonErr) {
-
-                    console.warn('Neon preview styling skipped:', neonErr);
+                    return;
 
                 }
 
-            }
+            } catch (_) { /* ignore */ }
 
-        } catch (_) { /* tainted or not ready */ }
+        }
+
+        if (!drew) {
+
+            triggerV1Update();
+
+            return;
+
+        }
+
+        applyNeonPreviewStyling(ctx);
 
     }
 
@@ -3828,7 +3948,9 @@
 
         if (currentStep === 4) refreshWizardSelectsFromIframe();
 
-        if (iframeReady) pushAllWizardToIframe();
+        if (iframeReady) {
+            syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
+        }
 
         if (currentStep === 3) {
 
@@ -3927,25 +4049,35 @@
 
     function onIframeLoad() {
 
-        const win = iframeWin();
+        let win = null;
 
-        if (!win) return;
+        try {
 
+            win = iframeWin();
 
+        } catch (_) { /* ignore */ }
 
         iframeReady = true;
 
-        loadingOverlay.classList.add('hidden');
+        dismissLoadingOverlay();
 
         appShell.classList.toggle('beds-mode', productMode === 'beds');
 
         exportActions.classList.add('visible');
 
+        if (!win) {
 
+            showV2Toast(currentLang === 'ru'
+
+                ? 'Не удалось открыть движок конфигуратора (iframe).'
+
+                : 'Could not access configurator engine (iframe).', true);
+
+            return;
+
+        }
 
         if (typeof win.setLang === 'function') win.setLang(currentLang);
-
-
 
         if (productMode === 'beds') {
 
@@ -3957,11 +4089,9 @@
 
             pullFromIframe();
 
-            triggerV1Update();
+            syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
 
         }
-
-
 
         setTimeout(() => {
 
@@ -3977,7 +4107,7 @@
 
                 pullFromIframe();
 
-                pushAllWizardToIframe();
+                syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });
 
             }
 
@@ -3991,7 +4121,7 @@
 
             startPreviewLoop();
 
-        }, 800);
+        }, 400);
 
     }
 
