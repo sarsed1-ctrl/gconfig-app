@@ -1,22 +1,27 @@
-const CACHE = 'gconfig-v26';
+const CACHE = 'gconfig-v27';
 
+/** Static assets only — HTML is always fetched fresh (see fetch handler). */
 const PRECACHE = [
-    './',
-    './index.html',
-    './index-v1.html',
-    './index-v2.html',
-    './welcome.html',
-    './app.html',
-    './configurator.html',
-    './beds.html',
     './manifest.json',
     './style.css',
     './styles-v2.css',
     './styles-v2-future.css',
     './styles-welcome-future.css',
     './script-v2.js',
-    './alien-logo.png'
+    './eamf-countertop-thickness.js',
+    './alien-logo.png',
+    './alien-logo-padded.png'
 ];
+
+function isHtmlRequest(request) {
+    if (request.mode === 'navigate') return true;
+    try {
+        const path = new URL(request.url).pathname;
+        return path.endsWith('.html') || path.endsWith('/') || path.includes('index');
+    } catch (_) {
+        return false;
+    }
+}
 
 self.addEventListener('install', (e) => {
     e.waitUntil(
@@ -30,19 +35,24 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys()
-            .then((keys) => Promise.all(
-                keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
-            ))
+            .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
             .then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
+
+    if (isHtmlRequest(e.request)) {
+        e.respondWith(
+            fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
+        );
+        return;
+    }
+
     e.respondWith(
         fetch(e.request)
             .then((res) => {
-                // Only cache valid 200 responses (not opaque/error)
                 if (res && res.status === 200 && res.type !== 'opaque') {
                     const clone = res.clone();
                     caches.open(CACHE).then((c) => c.put(e.request, clone));
