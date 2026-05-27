@@ -1035,24 +1035,8 @@ class Furniture3D {
         const xL = -wMm / 2;
         const zB = -dMm / 2;
 
-        const addSummary = (text, yTopMm) => {
-            const summaryLabel = createDimLabel(text, 'gconfig-dim-summary');
-            summaryLabel.position.set(0, yTopMm * MM + 0.12, 0);
-            this.dimGroup.add(summaryLabel);
-        };
-
-        if (hasUpper && hasLower) {
-            const lowerSummary = `${Math.round(lower.w)} × ${lowerHm} × ${Math.round(lower.d)} ${unit}`;
-            const upperSummary = `${Math.round(upper.w)} × ${upperHm} × ${Math.round(upper.d)} ${unit}`;
-            addSummary(lowerSummary, lower.h);
-            addSummary(upperSummary, upperBaseY + upper.h);
-        } else if (hasUpper) {
-            const upperSummary = `${Math.round(upper.w)} × ${upperHm} × ${Math.round(upper.d)} ${unit}`;
-            addSummary(upperSummary, upperBaseY + upper.h);
-        } else {
-            const lowerSummary = `${Math.round(lower.w)} × ${lowerHm} × ${Math.round(lower.d)} ${unit}`;
-            addSummary(lowerSummary, lower.h);
-        }
+        // Split layout already has explicit edge dimensions; summary boxes are
+        // intentionally omitted to avoid duplicated size data.
 
         const splitDepth = hasUpper && hasLower && !sameDepth;
         const splitWidth = hasUpper && hasLower && !sameWidth;
