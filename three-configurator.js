@@ -1034,6 +1034,7 @@ class Furniture3D {
         const y0 = 0;
         const xL = -wMm / 2;
         const zB = -dMm / 2;
+        const wallPlaneZ = zB;
 
         // Split layout already has explicit edge dimensions; summary boxes are
         // intentionally omitted to avoid duplicated size data.
@@ -1072,14 +1073,14 @@ class Furniture3D {
                 const lz = lower.d / 2;
                 addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', lx, lz);
                 if (splitWidth) addWidthDim(0, -lx, lx, lower.w, 'gconfig-dim-lower-w', lz);
-                if (splitDepth) addDepthDim(0, -lz, lz, lower.d, 'gconfig-dim-lower-d', lx);
+                if (splitDepth) addDepthDim(0, wallPlaneZ, wallPlaneZ + lower.d, lower.d, 'gconfig-dim-lower-d', lx);
             }
             if (hasUpper) {
                 const ux = upper.w / 2;
                 const uz = upper.d / 2;
                 addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', ux, uz);
                 if (splitWidth) addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
-                if (splitDepth) addDepthDim(upperBaseY, -uz, uz, upper.d, 'gconfig-dim-upper-d', ux);
+                if (splitDepth) addDepthDim(upperBaseY, wallPlaneZ, wallPlaneZ + upper.d, upper.d, 'gconfig-dim-upper-d', ux);
             }
             if (!splitWidth && (hasUpper || hasLower)) {
                 addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
