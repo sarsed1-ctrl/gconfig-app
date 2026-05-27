@@ -845,7 +845,9 @@ class Furniture3D {
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
         const pad = 80;
 
-        const hasUpper = (params.layout || 'both') === 'both';
+        const layout = params.layout || 'both';
+        const hasUpper = layout === 'both';
+        const hasLower = hasUpper || layout === 'single' || layout === 'lower';
 
         const lowerH = params.height || 500;
         const upperH = params.upperHeight || 400;
