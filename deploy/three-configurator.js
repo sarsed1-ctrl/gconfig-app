@@ -16,6 +16,12 @@ const CARCASS_JOINT_OVERLAP_MM = 0.45;
 const GAS_LIFT_OPEN_DEG = 135;
 const GAS_LIFT_OPEN_RAD = -(GAS_LIFT_OPEN_DEG * Math.PI) / 180;
 const LEDGER_W_MM = 40;
+/** Extra gap between mattress side and inner rail face (mm), added to rail thickness. */
+const BED_MATTRESS_SIDE_CLEAR_MM = 6;
+/** Inset ledgers/deck from inner rail face (mm). */
+const BED_LEDGER_INSET_MM = 2;
+/** Bump to invalidate cached bed materials after mesh fixes. */
+const BED_MESH_MAT_REV = 10;
 /** Vertical gap between lower and upper cabinet (mm), sync with script-v2 layout. */
 const CLOSET_STACK_GAP_MM = 400;
 
@@ -232,6 +238,52 @@ function getBedVerticalGeometryMm({
     };
 }
 
+/** Bed layout metrics — keep buildBed + dimensions in sync with configurator.html. */
+function getBedStackMetrics(params) {
+    const mattressW = params.width || 1600;
+    const bedLen = params.length || 2000;
+    const frameH = params.height || 420;
+    const headboardH = params.headboardH || 900;
+    const footboardH = params.footboardH != null ? params.footboardH : frameH;
+    const panelT = Math.max(12, params.facadeT || 16);
+    const railT = normalizeBedMdfCarcassThicknessMm(params.carcassT || 16);
+    const ledgerT = railT;
+    const baseType = params.baseType === 'sheet' ? 'sheet' : 'slats';
+    const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
+    const stripLayout = getBedDeckStripLayout({
+        bedLength: bedLen,
+        mattressW,
+        ledgerW: LEDGER_W_MM,
+        centerSupportCount,
+        centerSupportT: ledgerT,
+        stripThicknessMm: ledgerT,
+    });
+    const bedVert = getBedVerticalGeometryMm({
+        frameH,
+        baseType,
+        stripLayout,
+        ledgerT,
+        mattressNominalT: BED_MATTRESS_THICKNESS_NOMINAL_MM,
+    });
+    const outerW = mattressW + 2 * panelT;
+    const outerL = bedLen + 2 * panelT;
+    const totalH = Math.max(headboardH, footboardH, bedVert.mattressTopFromFloor);
+    return {
+        mattressW,
+        bedLen,
+        frameH,
+        headboardH,
+        footboardH,
+        railT,
+        outerW,
+        outerL,
+        totalH,
+        wMm: Math.round(outerW),
+        lMm: Math.round(outerL),
+        hMm: Math.round(totalH),
+    };
+}
+
 function hashColor(key, fallback = 0xc8b496) {
     if (!key) return new THREE.Color(fallback);
     let h = 0;
@@ -241,14 +293,17 @@ function hashColor(key, fallback = 0xc8b496) {
 }
 
 function getMaterial(name, hexOrKey, opts = {}) {
-    const id = `${name}:${hexOrKey}:${opts.edge ? 1 : 0}:${opts.emissive ? 1 : 0}:${opts.transparent ? 1 : 0}`;
+    const bedRev = name.startsWith('bed') || name === 'mattress' ? BED_MESH_MAT_REV : 0;
+    const id = `${name}:${hexOrKey}:${opts.edge ? 1 : 0}:${opts.emissive ? 1 : 0}:${opts.transparent ? 1 : 0}:${bedRev}`;
     if (materialPool.has(id)) return materialPool.get(id);
     const color = typeof hexOrKey === 'number' ? new THREE.Color(hexOrKey) : hashColor(String(hexOrKey));
     if (opts.edge) color.offsetHSL(0.02, 0.08, -0.06);
     if (name === 'facade' || name === 'bed-facade') color.offsetHSL(0, -0.04, 0.1);
+    if (name === 'bed-rail') color.offsetHSL(0, 0.02, -0.1);
     if (name === 'facade-door') color.offsetHSL(0, -0.06, 0.14);
     if (name === 'countertop') color.offsetHSL(0, -0.06, -0.1);
     if (name === 'mattress') color.offsetHSL(0, -0.02, 0.06);
+    const isMattress = name === 'mattress';
     const mat = new THREE.MeshStandardMaterial({
         color,
         roughness: opts.roughness ?? 0.72,
@@ -256,6 +311,9 @@ function getMaterial(name, hexOrKey, opts = {}) {
         emissive: opts.emissive ? color.clone().multiplyScalar(0.08) : 0x000000,
         transparent: !!opts.transparent,
         opacity: opts.opacity ?? 1,
+        // Mattress draws on top at rail contact lines without z-fighting on side faces.
+        depthWrite: !isMattress,
+        polygonOffset: false,
     });
     materialPool.set(id, mat);
     return mat;
@@ -294,6 +352,12 @@ function addPanel(group, w, h, d, mat, x, y, z) {
     mesh.scale.set(w * MM, h * MM, d * MM);
     mesh.position.set(x * MM, y * MM, z * MM);
     group.add(mesh);
+    return mesh;
+}
+
+function tagBedMesh(mesh, renderOrder = 0) {
+    if (!mesh) return null;
+    mesh.renderOrder = renderOrder;
     return mesh;
 }
 
@@ -831,8 +895,74 @@ class Furniture3D {
             this.buildClosetDimensions(params, bounds);
             return;
         }
+        if (params.mode === 'beds') {
+            this.buildBedDimensions(params, bounds);
+            return;
+        }
         if (!bounds) return;
         this.buildGenericDimensions(params, bounds);
+    }
+
+    buildBedDimensions(params, bounds) {
+        const lang = params.lang === 'en' ? 'en' : 'ru';
+        const unit = lang === 'en' ? 'mm' : 'мм';
+        const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
+        const pad = 80;
+        const stack = getBedStackMetrics(params);
+        const min = bounds?.min ?? { x: -stack.outerL / 2, y: 0, z: -stack.outerW / 2 };
+        const max = bounds?.max ?? { x: stack.outerL / 2, y: stack.totalH, z: stack.outerW / 2 };
+
+        const summary = lang === 'en'
+            ? `${stack.wMm} × ${stack.hMm} × ${stack.lMm} ${unit}`
+            : `${stack.wMm} × ${stack.hMm} × ${stack.lMm} ${unit}`;
+
+        const summaryLabel = createDimLabel(summary, 'gconfig-dim-summary');
+        summaryLabel.position.set(0, max.y * MM + 0.12, 0);
+        this.dimGroup.add(summaryLabel);
+
+        const yBase = min.y - pad * 0.35;
+        const zFront = max.z + pad * 0.55;
+        const xRight = max.x + pad * 0.45;
+        const zDim = (min.z + max.z) / 2;
+
+        addDimensionLine(
+            this.dimGroup,
+            [[min.x, yBase, zFront], [max.x, yBase, zFront]],
+            color
+        );
+        const lenLabel = createDimLabel(`${stack.lMm} ${unit}`, 'gconfig-dim-bed-length');
+        lenLabel.position.set(((min.x + max.x) / 2) * MM, yBase * MM - 0.03, zFront * MM);
+        this.dimGroup.add(lenLabel);
+
+        addDimensionLine(
+            this.dimGroup,
+            [[xRight, min.y, zDim], [xRight, max.y, zDim]],
+            color
+        );
+        const hLabel = createDimLabel(`${stack.hMm} ${unit}`, 'gconfig-dim-bed-height');
+        hLabel.position.set(xRight * MM + 0.03, ((min.y + max.y) / 2) * MM, zDim * MM);
+        this.dimGroup.add(hLabel);
+
+        addDimensionLine(
+            this.dimGroup,
+            [[xRight, yBase, min.z], [xRight, yBase, max.z]],
+            color
+        );
+        const wLabel = createDimLabel(`${stack.wMm} ${unit}`, 'gconfig-dim-bed-width');
+        wLabel.position.set(xRight * MM + 0.03, yBase * MM - 0.03, zDim * MM);
+        this.dimGroup.add(wLabel);
+
+        if (stack.headboardH > stack.frameH + 0.5) {
+            const headX = min.x + pad * 0.12;
+            addDimensionLine(
+                this.dimGroup,
+                [[headX, stack.frameH, zDim], [headX, stack.headboardH, zDim]],
+                color
+            );
+            const hbLabel = createDimLabel(`${Math.round(stack.headboardH)} ${unit}`, 'gconfig-dim-bed-headboard');
+            hbLabel.position.set(headX * MM - 0.03, ((stack.frameH + stack.headboardH) / 2) * MM, zDim * MM);
+            this.dimGroup.add(hbLabel);
+        }
     }
 
     buildGenericDimensions(params, bounds) {
@@ -1036,7 +1166,16 @@ class Furniture3D {
         const maxDim = Math.max(size.x, size.y, size.z, 0.5);
         const dist = maxDim / (2 * Math.tan((this.camera.fov * Math.PI) / 360)) + maxDim * 0.65;
         this.controls.target.copy(center);
-        this.camera.position.set(center.x + dist * 0.55, center.y + dist * 0.35, center.z + dist * 0.75);
+        if (params?.mode === 'beds') {
+            // Show side-rail thickness (facadeT along Z): more side-on than closet default.
+            this.camera.position.set(
+                center.x + dist * 0.28,
+                center.y + dist * 0.42,
+                center.z + dist * 1.05
+            );
+        } else {
+            this.camera.position.set(center.x + dist * 0.55, center.y + dist * 0.35, center.z + dist * 0.75);
+        }
         this.controls.update();
     }
 
@@ -1444,17 +1583,24 @@ class Furniture3D {
         const frameH = p.height || 420;
         const headboardH = p.headboardH || 900;
         const footboardH = p.footboardH || frameH;
-        const railT = Math.max(12, p.facadeT || 16);
-        const ledgerT = normalizeBedMdfCarcassThicknessMm(p.carcassT || 16);
+        const panelT = Math.max(12, p.facadeT || 16);
+        const railT = normalizeBedMdfCarcassThicknessMm(p.carcassT || 16);
+        const ledgerT = railT;
         const baseType = p.baseType === 'sheet' ? 'sheet' : 'slats';
 
         const carcassMat = getMaterial('bed-carcass', p.material || 'bed');
-        const facadeMat = getMaterial('bed-facade', p.facadeMaterial || p.material || 'bed-facade');
-        const edgeMat = getMaterial('bed-edge', p.edge || p.material || 'edge', { edge: true });
+        const panelMat = getMaterial('bed-facade', p.facadeMaterial || p.material || 'bed-facade');
+        const railMat = getMaterial('bed-rail', p.material || 'bed-carcass');
         const mattressMat = getMaterial('mattress', 'mattress', { roughness: 0.92 });
 
+        // Top view: | rail (carcassT) | mattressW | rail (carcassT) |
         const outerW = mattressW + 2 * railT;
-        const outerL = bedLen + 2 * railT;
+        const outerL = bedLen + 2 * panelT;
+        const railLen = bedLen;
+        const railInnerLeftZ = -mattressW / 2;
+        const railInnerRightZ = mattressW / 2;
+        const railOuterLeftZ = -outerW / 2;
+        const railOuterRightZ = outerW / 2;
         const { centerSupportCount } = getBedCenterSupportConfig(mattressW);
 
         const stripLayout = getBedDeckStripLayout({
@@ -1474,55 +1620,93 @@ class Furniture3D {
             mattressNominalT: BED_MATTRESS_THICKNESS_NOMINAL_MM,
         });
 
-        // Headboard / footboard on floor (Y=0), full outer width.
-        addPanel(this.root, railT, headboardH, outerW, facadeMat, -outerL / 2 + railT / 2, headboardH / 2, 0);
-        addPanel(this.root, railT, footboardH, outerW, facadeMat, outerL / 2 - railT / 2, footboardH / 2, 0);
-        addEdgeBand(this.root, railT, headboardH, outerW, edgeMat, -outerL / 2 + railT / 2, headboardH / 2, 0, 'top');
-        addEdgeBand(this.root, railT, footboardH, outerW, edgeMat, outerL / 2 - railT / 2, footboardH / 2, 0, 'top');
+        // Headboard / footboard: facade thickness along length, full outer width.
+        const headFootW = mattressW + 2 * panelT;
+        tagBedMesh(
+            addPanel(this.root, panelT, headboardH, headFootW, panelMat, -outerL / 2 + panelT / 2, headboardH / 2, 0),
+            0
+        );
+        tagBedMesh(
+            addPanel(this.root, panelT, footboardH, headFootW, panelMat, outerL / 2 - panelT / 2, footboardH / 2, 0),
+            0
+        );
 
-        // Side rails between head/foot panels, sitting on floor.
+        // Side rails (царги): carcass board OUTSIDE mattress zone (not on mattress edge).
+        // Center Z = ±(mattressW/2 + railT/2) → inner face at ±mattressW/2, outer at ±outerW/2.
         const railCenterY = frameH / 2;
-        addPanel(this.root, bedLen, frameH, railT, facadeMat, 0, railCenterY, -mattressW / 2 + railT / 2);
-        addPanel(this.root, bedLen, frameH, railT, facadeMat, 0, railCenterY, mattressW / 2 - railT / 2);
-        addEdgeBand(this.root, bedLen, frameH, railT, edgeMat, 0, railCenterY, -mattressW / 2 + railT / 2, 'top');
-        addEdgeBand(this.root, bedLen, frameH, railT, edgeMat, 0, railCenterY, mattressW / 2 - railT / 2, 'top');
+        const railLeftZ = -(mattressW / 2 + railT / 2);
+        const railRightZ = mattressW / 2 + railT / 2;
+        // Keep exact butt-joint with head/foot panels (no X overhang).
+        const railRenderLen = railLen;
+        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, railMat, 0, railCenterY, railLeftZ), 1);
+        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, railMat, 0, railCenterY, railRightZ), 1);
 
-        // Inner ledgers (cleats) — top face at supportPlaneFromFloor.
+        // Inner ledgers inset from rail inner face (toward mattress center).
         const ledgerCenterY = bedVert.supportPlaneFromFloor - ledgerT / 2;
-        const ledgerLeftZ = -mattressW / 2 + railT + LEDGER_W_MM / 2;
-        const ledgerRightZ = mattressW / 2 - railT - LEDGER_W_MM / 2;
-        addPanel(this.root, bedLen, ledgerT, LEDGER_W_MM, carcassMat, 0, ledgerCenterY, ledgerLeftZ);
-        addPanel(this.root, bedLen, ledgerT, LEDGER_W_MM, carcassMat, 0, ledgerCenterY, ledgerRightZ);
+        const ledgerLeftZ = railInnerLeftZ + BED_LEDGER_INSET_MM + LEDGER_W_MM / 2;
+        const ledgerRightZ = railInnerRightZ - BED_LEDGER_INSET_MM - LEDGER_W_MM / 2;
+        tagBedMesh(
+            addPanel(this.root, railLen, ledgerT, LEDGER_W_MM, carcassMat, 0, ledgerCenterY, ledgerLeftZ),
+            2
+        );
+        tagBedMesh(
+            addPanel(this.root, railLen, ledgerT, LEDGER_W_MM, carcassMat, 0, ledgerCenterY, ledgerRightZ),
+            2
+        );
 
         // Center longitudinal supports.
         if (centerSupportCount > 0) {
             const supportH = bedVert.centerSupportHeightMm;
-            const ledgerSeatLeftZ = -mattressW / 2 + railT + LEDGER_W_MM;
-            const ledgerSeatRightZ = mattressW / 2 - railT - LEDGER_W_MM;
+            const ledgerSeatLeftZ = ledgerLeftZ + LEDGER_W_MM / 2;
+            const ledgerSeatRightZ = ledgerRightZ - LEDGER_W_MM / 2;
             const supportZoneW = ledgerSeatRightZ - ledgerSeatLeftZ;
             for (let i = 0; i < centerSupportCount; i += 1) {
                 const z = ledgerSeatLeftZ + ((i + 1) * supportZoneW) / (centerSupportCount + 1);
-                addPanel(this.root, bedLen, supportH, ledgerT, carcassMat, 0, supportH / 2, z);
+                tagBedMesh(
+                    addPanel(this.root, railLen, supportH, ledgerT, carcassMat, 0, supportH / 2, z),
+                    2
+                );
             }
         }
 
         const deckCenterY = bedVert.supportPlaneFromFloor + bedVert.deckT / 2;
-
+        const deckSpanZ = Math.max(200, stripLayout.stripSupportSpanW - 2 * BED_LEDGER_INSET_MM);
+        const deckRunL = Math.min(stripLayout.innerBedLength, railLen - 4);
         if (baseType === 'sheet') {
-            const sheetL = stripLayout.innerBedLength;
-            const sheetW = Math.max(300, stripLayout.stripSupportSpanW);
-            addPanel(this.root, sheetL, bedVert.deckT, sheetW, carcassMat, 0, deckCenterY, 0);
+            tagBedMesh(
+                addPanel(this.root, deckRunL, bedVert.deckT, deckSpanZ, carcassMat, 0, deckCenterY, 0),
+                2
+            );
         } else {
-            const { stripWidthW, stripLengthL, stripAlongCount, stripActualGap, innerBedLength } = stripLayout;
-            const stripRunStartX = -innerBedLength / 2 + stripWidthW / 2;
+            const { stripWidthW, stripAlongCount, stripActualGap } = stripLayout;
+            const stripRunStartX = -deckRunL / 2 + stripWidthW / 2;
             for (let i = 0; i < stripAlongCount; i += 1) {
                 const x = stripRunStartX + i * (stripWidthW + stripActualGap);
-                addPanel(this.root, stripWidthW, bedVert.deckT, stripLengthL, carcassMat, x, deckCenterY, 0);
+                tagBedMesh(
+                    addPanel(this.root, stripWidthW, bedVert.deckT, deckSpanZ, carcassMat, x, deckCenterY, 0),
+                    2
+                );
             }
         }
 
-        const mattressCenterY = bedVert.deckTopFromFloor + bedVert.mattressNominalT / 2;
-        addPanel(this.root, bedLen, bedVert.mattressNominalT, mattressW, mattressMat, 0, mattressCenterY, 0);
+        // Mattress stays inside rail inner faces (mattressW), never in the rail strip.
+        const mattressDrawW = Math.max(200, mattressW - 2 * BED_MATTRESS_SIDE_CLEAR_MM);
+        const mattressDrawL = Math.max(200, railLen - 2 * BED_MATTRESS_SIDE_CLEAR_MM);
+        const mattressLiftMm = 1;
+        const mattressCenterY = bedVert.deckTopFromFloor + mattressLiftMm + bedVert.mattressNominalT / 2;
+        const mattressMesh = addPanel(
+            this.root,
+            mattressDrawL,
+            bedVert.mattressNominalT,
+            mattressDrawW,
+            mattressMat,
+            0,
+            mattressCenterY,
+            0
+        );
+        if (mattressMesh) {
+            mattressMesh.renderOrder = 20;
+        }
     }
 
     setThemeBackground() {

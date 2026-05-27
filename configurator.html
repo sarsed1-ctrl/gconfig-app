@@ -2238,6 +2238,36 @@
         return BED_MDF_CARCASS_ARTICLE_BY_MM[t] || BED_MDF_CARCASS_ARTICLE_BY_MM[16];
     }
 
+    function readBedFootboardH(fallbackMm = 420) {
+        const el = document.getElementById('bedFootboardH');
+        if (el && el.value !== '' && el.value != null) {
+            const v = parseInt(el.value, 10);
+            if (Number.isFinite(v)) return v;
+        }
+        return fallbackMm;
+    }
+
+    const BED_PRESET_DIMENSIONS = {
+        single: { w: 900, l: 2000 },
+        onehalf: { w: 1200, l: 2000 },
+        double: { w: 1600, l: 2000 }
+    };
+
+    /** Apply mattress W × bed L for a preset key; syncs legacy w1/d1 when beds UI is active. */
+    function applyBedPresetDimensions(presetKey) {
+        const preset = BED_PRESET_DIMENSIONS[presetKey];
+        if (!preset) return false;
+        const bw = document.getElementById('bedMattressW');
+        const bl = document.getElementById('bedLength');
+        if (bw) bw.value = String(preset.w);
+        if (bl) bl.value = String(preset.l);
+        if (typeof window.__gconfigSyncBedToCoreFields === 'function') {
+            window.__gconfigSyncBedToCoreFields();
+        }
+        return true;
+    }
+    window.applyBedPresetDimensions = applyBedPresetDimensions;
+
     function isBedMdfCarcassArticle(article) {
         if (!article) return false;
         return BED_MDF_CARCASS_THICKNESS_MM.some(function(mm) {
@@ -4134,6 +4164,9 @@
         const T = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
         if (btn) btn.disabled = true;
         try {
+            if (CONFIG_MODE === 'beds' && !lastBedCutMapRows.length && typeof updateConfigurator === 'function') {
+                updateConfigurator();
+            }
             const project = getProjectName();
             const blob = await buildTellimusXlsxBlob({ project: project });
             if (!blob) {
@@ -4446,12 +4479,6 @@
             }
         }
 
-        const presetMap = {
-            single: { w: 900, l: 2000 },
-            onehalf: { w: 1200, l: 2000 },
-            double: { w: 1600, l: 2000 }
-        };
-
         const syncBedToCoreFields = () => {
             const mattressW = parseInt(document.getElementById('bedMattressW')?.value || '1600', 10);
             const bedLength = parseInt(document.getElementById('bedLength')?.value || '2000', 10);
@@ -4475,13 +4502,7 @@
         };
 
         document.getElementById('bedPreset')?.addEventListener('change', (e) => {
-            const preset = presetMap[e.target.value];
-            if (!preset) return;
-            const bw = document.getElementById('bedMattressW');
-            const bl = document.getElementById('bedLength');
-            if (bw) bw.value = String(preset.w);
-            if (bl) bl.value = String(preset.l);
-            syncBedToCoreFields();
+            if (!applyBedPresetDimensions(e.target.value)) return;
             scheduleUpdate();
         });
 
@@ -5653,7 +5674,7 @@
             const bedLength   = parseInt(document.getElementById('bedLength')?.value || d1 || '2000', 10);
             const frameH      = parseInt(document.getElementById('bedFrameH')?.value || h1 || '420', 10);
             const headboardH  = parseInt(document.getElementById('bedHeadboardH')?.value || h2 || '900', 10);
-            const footboardH  = parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10);
+            const footboardH  = readBedFootboardH(420);
             // Headboard, footboard, side rails — same thickness as "Facade thickness" (LDSP frame).
             const railT       = facadeT;
             const panelT      = facadeT;
@@ -5926,7 +5947,7 @@
             }
             renderWarnings(bedWarnings);
 
-            drawSchematic(mattressW, frameH, bedLength, outerW, headboardH, railT, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
+            drawSchematic(mattressW, frameH, bedLength, 0, headboardH, 0, false, 0, 0, 0, mattressW, frameH, panelT, null, currentLang);
             window.__gconfigBedsSchematicReady = true;
 
             // Hide closet-only hinge/gas spec tables
@@ -7502,7 +7523,7 @@
         const frameH     = Math.max(200, h1 || 420);
         const bedLength  = Math.max(1200, d1 || 2000);
         const headboardH = Math.max(300, h2 || 900);
-        const footboardH = Math.max(200, parseInt(document.getElementById('bedFootboardH')?.value || h1 || '420', 10));
+        const footboardH = Math.max(200, readBedFootboardH(420));
         const panelT     = Math.max(16, parseInt(document.getElementById('facadeThick')?.value || '16', 10));
         const railT      = panelT;
         const carcassTBed = normalizeBedMdfCarcassThicknessMm(document.getElementById('carcassThick')?.value || '16');
@@ -8400,6 +8421,84 @@
             && typeof window.jspdf.jsPDF.API !== 'undefined'
             && typeof window.jspdf.jsPDF.API.autoTable === 'function';
 
+        if (CONFIG_MODE === 'beds') {
+            if (!hasJsPdf || !hasAutoTable) {
+                alert('Failed to load PDF export library');
+                return;
+            }
+            if (!lastBedCutMapRows.length && typeof updateConfigurator === 'function') updateConfigurator();
+            const getRows = (tbodyId, cols) => {
+                const rows = [];
+                const tbody = document.getElementById(tbodyId);
+                if (!tbody) return rows;
+                tbody.querySelectorAll('tr').forEach(tr => {
+                    const cells = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+                    rows.push(cells.slice(0, cols));
+                });
+                return rows;
+            };
+            const partRows = getRows('upperPartsTableBody', 4);
+            if (!partRows.length) {
+                alert(currentLang === 'ru' ? 'Нет данных кровати для экспорта PDF' : 'No bed data to export as PDF');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+            const forceTranslitPdf = true;
+            const toPdfText = (s) => forceTranslitPdf ? translitRuToLat(s) : s;
+            try {
+                await loadPdfUnicodeFont(pdf);
+            } catch (e) {
+                alert('Failed to load PDF font');
+                return;
+            }
+            const pageMargin = 14;
+            const contentWidth = 210 - pageMargin * 2;
+            const dateText = new Date().toLocaleDateString('ru-RU');
+            let cursorY = 16;
+            pdf.setFontSize(14);
+            pdf.setTextColor(26, 107, 47);
+            pdf.text(toPdfText('GConfig — Bed'), pageMargin, cursorY);
+            cursorY += 7;
+            pdf.setFontSize(10);
+            pdf.setTextColor(60, 60, 60);
+            pdf.text(toPdfText(`Date: ${dateText}`), pageMargin, cursorY);
+            cursorY += 8;
+            const projectName = document.getElementById('project-name-input')?.value?.trim();
+            if (projectName) {
+                pdf.text(toPdfText(`Project: ${projectName}`), pageMargin, cursorY);
+                cursorY += 8;
+            }
+            const addTableSection = (title, head, body) => {
+                pdf.setFontSize(12);
+                pdf.setTextColor(26, 107, 47);
+                pdf.text(toPdfText(title), pageMargin, cursorY);
+                cursorY += 3;
+                pdf.autoTable({
+                    startY: cursorY,
+                    head: [head.map(toPdfText)],
+                    body: body.map(row => row.map(toPdfText)),
+                    margin: { left: pageMargin, right: pageMargin },
+                    tableWidth: contentWidth,
+                    styles: { font: 'NotoSans', fontSize: 9, cellPadding: 2.5, textColor: [40, 40, 40] },
+                    headStyles: { font: 'NotoSans', fillColor: [26, 107, 47], textColor: [255, 255, 255], fontStyle: 'normal' },
+                    theme: 'grid'
+                });
+                cursorY = pdf.lastAutoTable.finalY + 8;
+            };
+            const partsTitle = getBedUILabel(currentLang, 'parts');
+            const detailsTitle = getBedUILabel(currentLang, 'details');
+            const detHead = currentLang === 'ru'
+                ? ['Параметр', 'Значение', 'Кол-во', 'Примечание']
+                : ['Item', 'Value', 'Qty', 'Notes'];
+            addTableSection(partsTitle,
+                [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material],
+                partRows);
+            addTableSection(detailsTitle, detHead, getRows('lowerPartsTableBody', 4));
+            pdf.save('gconfig-bed-export.pdf');
+            return;
+        }
+
         if (!lowerEnabled && !upperEnabled) {
             alert('Enable at least one cabinet to export PDF');
             return;
@@ -8568,6 +8667,20 @@
             if (weightRows.length) {
                 addTableSection(currentLang === 'ru' ? 'Вес' : 'Weight Summary', ['Component', 'Weight'], weightRows);
             }
+            return pdf.output('blob');
+        }
+
+        if (CONFIG_MODE === 'beds') {
+            if (!lastBedCutMapRows.length && typeof updateConfigurator === 'function') updateConfigurator();
+            const partsTitle = getBedUILabel(currentLang, 'parts');
+            const detailsTitle = getBedUILabel(currentLang, 'details');
+            const detHead = currentLang === 'ru'
+                ? ['Параметр', 'Значение', 'Кол-во', 'Примечание']
+                : ['Item', 'Value', 'Qty', 'Notes'];
+            addTableSection(partsTitle,
+                [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material],
+                getRows('upperPartsTableBody', 4));
+            addTableSection(detailsTitle, detHead, getRows('lowerPartsTableBody', 4));
             return pdf.output('blob');
         }
 

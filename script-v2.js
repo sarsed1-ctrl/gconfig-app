@@ -316,6 +316,18 @@
 
     /** Fallback when iframe bed UI is not ready yet (sync with configurator.html defaults). */
 
+    const BED_PRESET_DIMENSIONS = {
+
+        single: { w: 900, l: 2000 },
+
+        onehalf: { w: 1200, l: 2000 },
+
+        double: { w: 1600, l: 2000 },
+
+    };
+
+
+
     const BED_WIZARD_DEFAULTS = {
 
         bedPreset: 'double',
@@ -2371,6 +2383,26 @@
 
 
 
+    function applyBedPresetInWizard(presetKey) {
+
+        const preset = BED_PRESET_DIMENSIONS[presetKey];
+
+        if (!preset) return false;
+
+        const mw = fieldByIframe('bedMattressW');
+
+        const bl = fieldByIframe('bedLength');
+
+        if (mw) mw.value = String(preset.w);
+
+        if (bl) bl.value = String(preset.l);
+
+        return true;
+
+    }
+
+
+
     function ensureBedWizardSelectOptions() {
 
         const lang = currentLang === 'en' ? 'en' : 'ru';
@@ -2525,7 +2557,11 @@
 
         syncPaused = false;
 
-
+        refreshIframeEamfByThickness();
+        if (currentStep === 4) {
+            refreshWizardSelectsFromIframe();
+            refreshEamfEdgeSelects();
+        }
 
         const win = iframeWin();
 
@@ -2670,6 +2706,20 @@
             redrawBedIframeSchematic();
 
             pullFromIframe();
+
+            refreshIframeEamfByThickness();
+
+            if (currentStep === 4) {
+
+                refreshWizardSelectsFromIframe();
+
+                refreshEamfEdgeSelects();
+
+                const win = iframeWin();
+
+                if (win && typeof win.scheduleAmflexPriceRefresh === 'function') win.scheduleAmflexPriceRefresh();
+
+            }
 
             requestAnimationFrame(() => {
 
@@ -2825,6 +2875,12 @@
         const id = fromEl.getAttribute('data-iframe');
 
         if (!id) return;
+
+        if (id === 'bedPreset' && productMode === 'beds') {
+
+            applyBedPresetInWizard(fromEl.value);
+
+        }
 
 
 
@@ -4124,6 +4180,8 @@
 
                 pullFromIframe();
 
+                refreshIframeEamfByThickness();
+
             } else {
 
                 pullFromIframe();
@@ -4324,7 +4382,9 @@
 
         try {
 
-            triggerV1Update();
+            if (productMode === 'beds') pushBedWizardToIframe();
+
+            else triggerV1Update();
 
             await win.doSendProject();
 
@@ -4370,9 +4430,9 @@
 
         if (!win) return;
 
-        triggerV1Update();
+        const delayMs = productMode === 'beds' ? 200 : 100;
 
-        setTimeout(() => {
+        const runExport = () => {
 
             if (typeof win[fnName] !== 'function') return;
 
@@ -4384,7 +4444,21 @@
 
             });
 
-        }, 100);
+        };
+
+        if (productMode === 'beds') {
+
+            if (!pushBedWizardToIframe()) triggerV1Update();
+
+            setTimeout(runExport, delayMs);
+
+            return;
+
+        }
+
+        triggerV1Update();
+
+        setTimeout(runExport, delayMs);
 
     }
 
