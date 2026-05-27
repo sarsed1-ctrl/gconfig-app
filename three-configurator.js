@@ -1067,18 +1067,14 @@ class Furniture3D {
             addDepthDim(y0, zB, zF, dMm, 'gconfig-dim-depth');
         } else {
             if (hasLower) {
-                const lx = lower.w / 2;
-                const lz = lower.d / 2;
-                addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', lx, lz);
-                if (splitWidth) addWidthDim(lower.h / 2, -lx, lx, lower.w, 'gconfig-dim-lower-w', lz);
-                if (splitDepth) addDepthDim(lower.h / 2, -lz, lz, lower.d, 'gconfig-dim-lower-d', lx);
+                addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', xR, zF);
+                if (splitWidth) addWidthDim(lower.h / 2, xR - lower.w, xR, lower.w, 'gconfig-dim-lower-w', zF);
+                if (splitDepth) addDepthDim(lower.h / 2, zF - lower.d, zF, lower.d, 'gconfig-dim-lower-d', xR);
             }
             if (hasUpper) {
-                const ux = upper.w / 2;
-                const uz = upper.d / 2;
-                addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', ux, uz);
-                if (splitWidth) addWidthDim(upperBaseY + upper.h / 2, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
-                if (splitDepth) addDepthDim(upperBaseY + upper.h / 2, -uz, uz, upper.d, 'gconfig-dim-upper-d', ux);
+                addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', xR, zF);
+                if (splitWidth) addWidthDim(upperBaseY + upper.h / 2, xR - upper.w, xR, upper.w, 'gconfig-dim-upper-w', zF);
+                if (splitDepth) addDepthDim(upperBaseY + upper.h / 2, zF - upper.d, zF, upper.d, 'gconfig-dim-upper-d', xR);
             }
             if (!splitWidth && (hasUpper || hasLower)) {
                 addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
