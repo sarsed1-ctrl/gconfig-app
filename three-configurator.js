@@ -491,6 +491,10 @@ function createDimLabel(text, className = 'gconfig-dim-label') {
     el.style.background = isNeonTheme() ? 'rgba(8,12,20,0.82)' : 'rgba(255,255,255,0.88)';
     el.style.color = dimAccentColor();
     el.style.border = `1px solid ${isNeonTheme() ? 'rgba(34,255,136,0.35)' : 'rgba(45,106,79,0.25)'}`;
+    if (isNeonTheme()) {
+        el.style.textShadow = '0 0 6px rgba(34,255,136,0.6)';
+        el.style.boxShadow = '0 0 10px rgba(34,255,136,0.28)';
+    }
     el.style.whiteSpace = 'nowrap';
     return new CSS2DObject(el);
 }
@@ -1056,7 +1060,7 @@ class Furniture3D {
         const addDepthDim = (yAt, zNear, zFar, labelMm, className, xEdge = xR) => {
             addDimensionLine(this.dimGroup, [[xEdge, yAt, zNear], [xEdge, yAt, zFar]], color);
             const label = createDimLabel(`${Math.round(labelMm)} ${unit}`, className);
-            label.position.set(xEdge * MM + labelPad, yAt * MM - labelPad, ((zNear + zFar) / 2) * MM);
+            label.position.set(xEdge * MM + labelPad, yAt * MM + labelPad, ((zNear + zFar) / 2) * MM);
             this.dimGroup.add(label);
         };
 
