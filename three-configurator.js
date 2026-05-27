@@ -474,7 +474,14 @@ function disposeObject(obj) {
 function getDimLineMaterial(colorHex) {
     const key = String(colorHex);
     if (dimLineMatCache.has(key)) return dimLineMatCache.get(key);
-    const mat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.92 });
+    const mat = new THREE.LineBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: isNeonTheme() ? 0.98 : 0.92,
+        blending: isNeonTheme() ? THREE.AdditiveBlending : THREE.NormalBlending,
+        depthTest: !isNeonTheme(),
+        depthWrite: false,
+    });
     mat.userData.isDimLine = true;
     dimLineMatCache.set(key, mat);
     return mat;
