@@ -16,6 +16,52 @@ const CARCASS_JOINT_OVERLAP_MM = 0.45;
 const GAS_LIFT_OPEN_DEG = 135;
 const GAS_LIFT_OPEN_RAD = -(GAS_LIFT_OPEN_DEG * Math.PI) / 180;
 const LEDGER_W_MM = 40;
+/** Vertical gap between lower and upper cabinet (mm), sync with script-v2 layout. */
+const CLOSET_STACK_GAP_MM = 400;
+
+/** Closet layout flags — keep build + dimensions in sync (v2: both | single). */
+function getClosetLayoutFlags(layout) {
+    const L = layout || 'both';
+    const hasUpper = L === 'both';
+    const hasLower = hasUpper || L === 'single';
+    return { layout: L, hasUpper, hasLower };
+}
+
+function getClosetStackMetrics(params) {
+    const { hasUpper, hasLower } = getClosetLayoutFlags(params.layout);
+    const lower = {
+        w: params.width || 800,
+        h: params.height || 500,
+        d: params.depth || 450,
+    };
+    const upper = {
+        w: params.upperWidth || lower.w,
+        h: params.upperHeight || 400,
+        d: params.upperDepth || lower.d,
+    };
+    const ctT = params.countertop?.enabled && params.countertop.thickness > 0
+        ? params.countertop.thickness
+        : 0;
+    const upperBaseY = lower.h + ctT + CLOSET_STACK_GAP_MM;
+    const totalH = hasUpper ? upperBaseY + upper.h : lower.h;
+    const wMm = Math.round(hasUpper ? Math.max(lower.w, upper.w) : lower.w);
+    const dMm = Math.round(hasUpper ? Math.max(lower.d, upper.d) : lower.d);
+    const sameDepth = Math.abs(lower.d - upper.d) < 0.5;
+    const sameWidth = Math.abs(lower.w - upper.w) < 0.5;
+    return {
+        hasUpper,
+        hasLower,
+        lower,
+        upper,
+        ctT,
+        upperBaseY,
+        totalH,
+        wMm,
+        dMm,
+        sameDepth,
+        sameWidth,
+    };
+}
 
 /** Sync with configurator.html v1 bed math. */
 const BED_MAX_MATTRESS_PROTRUSION_ABOVE_RAIL_MM = 60;
@@ -845,86 +891,83 @@ class Furniture3D {
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
         const pad = 80;
 
-        const layout = params.layout || 'both';
-        const hasUpper = layout === 'both';
-        const hasLower = hasUpper || layout === 'single' || layout === 'lower';
+        const stack = getClosetStackMetrics(params);
+        const { hasUpper, hasLower, lower, upper, upperBaseY, totalH, wMm, dMm, sameDepth, sameWidth } = stack;
+        const lowerHm = Math.round(lower.h);
+        const upperHm = Math.round(upper.h);
 
-        const lowerH = params.height || 500;
-        const upperH = params.upperHeight || 400;
-        const lowerW = params.width || 800;
-        const upperW = params.upperWidth || lowerW;
-        const lowerD = params.depth || 450;
-        const upperD = params.upperDepth || lowerD;
-        const ctT = params.countertop?.enabled && params.countertop.thickness > 0
-            ? params.countertop.thickness
-            : 0;
-        const stackGap = 400;
-        const upperBaseY = lowerH + ctT + stackGap;
+        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lower.d / 2 };
+        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: Math.max(lower.d, upper.d) / 2 };
 
-        const wMm = Math.round(hasUpper ? Math.max(lowerW, upperW) : lowerW);
-        const dMm = Math.round(hasUpper ? Math.max(lowerD, upperD) : lowerD);
-        const upperHm = Math.round(upperH);
-        const lowerHm = Math.round(lowerH);
-        const totalH = hasUpper ? upperBaseY + upperH : lowerH;
-
-        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lowerD / 2 };
-        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: lowerD / 2 };
-
-        const summaryH = hasUpper ? upperHm : lowerHm;
-        const summary = `${wMm} × ${summaryH} × ${dMm} ${unit}`;
+        let summary;
+        if (hasUpper && hasLower) {
+            summary = `${wMm} × ${Math.round(totalH)} × ${dMm} ${unit}`;
+        } else if (hasUpper) {
+            summary = `${wMm} × ${upperHm} × ${dMm} ${unit}`;
+        } else {
+            summary = `${wMm} × ${lowerHm} × ${dMm} ${unit}`;
+        }
 
         const summaryLabel = createDimLabel(summary, 'gconfig-dim-summary');
         summaryLabel.position.set(0, totalH * MM + 0.12, 0);
         this.dimGroup.add(summaryLabel);
 
         const yBase = min.y - pad * 0.35;
-        const zFront = max.z + pad * 0.55;
         const xRight = max.x + pad * 0.45;
         const zDim = (min.z + max.z) / 2;
+        const splitDepth = hasUpper && hasLower && !sameDepth;
+        const splitWidth = hasUpper && hasLower && !sameWidth;
 
-        addDimensionLine(
-            this.dimGroup,
-            [[min.x, yBase, zFront], [max.x, yBase, zFront]],
-            color
-        );
-        const lenLabel = createDimLabel(`${dMm} ${unit}`);
-        lenLabel.position.set(((min.x + max.x) / 2) * MM, yBase * MM - 0.03, zFront * MM);
-        this.dimGroup.add(lenLabel);
+        const addHeightDim = (y0, y1, labelMm, className) => {
+            addDimensionLine(this.dimGroup, [[xRight, y0, zDim], [xRight, y1, zDim]], color);
+            const label = createDimLabel(`${labelMm} ${unit}`, className);
+            label.position.set(xRight * MM + 0.03, ((y0 + y1) / 2) * MM, zDim * MM);
+            this.dimGroup.add(label);
+        };
+
+        const addDepthDim = (yMid, depthMm, className) => {
+            const z0 = -depthMm / 2;
+            const z1 = depthMm / 2;
+            addDimensionLine(this.dimGroup, [[xRight, yMid, z0], [xRight, yMid, z1]], color);
+            const label = createDimLabel(`${Math.round(depthMm)} ${unit}`, className);
+            label.position.set(xRight * MM + 0.03, yMid * MM, 0);
+            this.dimGroup.add(label);
+        };
+
+        const addWidthDim = (yMid, widthMm, zFront, className) => {
+            const x0 = -widthMm / 2;
+            const x1 = widthMm / 2;
+            addDimensionLine(this.dimGroup, [[x0, yMid, zFront], [x1, yMid, zFront]], color);
+            const label = createDimLabel(`${Math.round(widthMm)} ${unit}`, className);
+            label.position.set(0, yMid * MM - 0.03, zFront * MM);
+            this.dimGroup.add(label);
+        };
 
         if (hasUpper) {
-            const upperY0 = upperBaseY;
-            const upperY1 = upperBaseY + upperH;
-            addDimensionLine(
-                this.dimGroup,
-                [[xRight, upperY0, zDim], [xRight, upperY1, zDim]],
-                color
-            );
-            const upperLabel = createDimLabel(`${upperHm} ${unit}`, 'gconfig-dim-upper');
-            upperLabel.position.set(xRight * MM + 0.03, ((upperY0 + upperY1) / 2) * MM, zDim * MM);
-            this.dimGroup.add(upperLabel);
+            addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper');
         }
-
         if (hasLower) {
-            const lowerY0 = 0;
-            const lowerY1 = lowerH;
-            addDimensionLine(
-                this.dimGroup,
-                [[xRight, lowerY0, zDim], [xRight, lowerY1, zDim]],
-                color
-            );
-            const lowerLabel = createDimLabel(`${lowerHm} ${unit}`, 'gconfig-dim-lower');
-            lowerLabel.position.set(xRight * MM + 0.03, ((lowerY0 + lowerY1) / 2) * MM, zDim * MM);
-            this.dimGroup.add(lowerLabel);
+            addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower');
         }
 
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, yBase, min.z], [xRight, yBase, max.z]],
-            color
-        );
-        const wLabel = createDimLabel(`${wMm} ${unit}`);
-        wLabel.position.set(xRight * MM + 0.03, yBase * MM - 0.03, ((min.z + max.z) / 2) * MM);
-        this.dimGroup.add(wLabel);
+        if (splitWidth) {
+            if (hasLower) {
+                addWidthDim(lower.h / 2, lower.w, lower.d / 2 + pad * 0.55, 'gconfig-dim-lower-w');
+            }
+            if (hasUpper) {
+                addWidthDim(upperBaseY + upper.h / 2, upper.w, upper.d / 2 + pad * 0.55, 'gconfig-dim-upper-w');
+            }
+        } else {
+            const zFront = max.z + pad * 0.55;
+            addWidthDim(yBase, wMm, zFront, 'gconfig-dim-width');
+        }
+
+        if (splitDepth) {
+            if (hasLower) addDepthDim(lower.h / 2, lower.d, 'gconfig-dim-lower-d');
+            if (hasUpper) addDepthDim(upperBaseY + upper.h / 2, upper.d, 'gconfig-dim-upper-d');
+        } else {
+            addDepthDim(yBase, dMm, 'gconfig-dim-depth');
+        }
     }
 
     getModelBoundsMm() {
@@ -1004,20 +1047,9 @@ class Furniture3D {
         const edgeMat = getMaterial('edge', p.edge || p.material || 'edge', { edge: true });
         const doorMat = getMaterial('facade-door', p.facadeMaterial || p.material || 'facade-door');
         const backMat = getMaterial('back', 0xd8dde0);
-        const gap = 400;
 
-        const hasUpper = (p.layout || 'both') === 'both';
-
-        const lower = { w: p.width || 800, h: p.height || 500, d: p.depth || 450 };
-        const upper = {
-            w: p.upperWidth || lower.w,
-            h: p.upperHeight || 400,
-            d: p.upperDepth || lower.d,
-        };
-        const ctT = p.countertop?.enabled && p.countertop.thickness > 0
-            ? p.countertop.thickness
-            : 0;
-        const upperBaseY = lower.h + ctT + gap;
+        const stack = getClosetStackMetrics(p);
+        const { hasUpper, lower, upper, ctT, upperBaseY } = stack;
 
         this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
         if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
