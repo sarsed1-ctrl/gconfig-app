@@ -422,12 +422,14 @@ const GAS_MOUNT_PLATE_DEPTH_MM = GAS_MOUNT_PLATE_H_MM;
 const GAS_MOUNT_FRONT_CLEAR_MM = 10;
 /** Extra offset below default mount height (mm, positive = lower). */
 const GAS_MOUNT_LOWER_OFFSET_MM = 10;
+/** Pull strut anchors inward so they stay inside opened facade silhouette. */
+const GAS_STRUT_INSET_FROM_FACADE_MM = 14;
 
 /** Center Z for bracket on side wall (mm, cabinet space). */
 function gasLiftCabinetAttachZ(D) {
     const frontZ = D / 2;
     const clear = Math.min(GAS_MOUNT_FRONT_CLEAR_MM, Math.max(10, D * 0.05));
-    return frontZ - GAS_MOUNT_PLATE_DEPTH_MM / 2 - clear;
+    return frontZ - GAS_MOUNT_PLATE_DEPTH_MM / 2 - clear - GAS_STRUT_INSET_FROM_FACADE_MM;
 }
 
 /** Plate center + rod joint on cavity face of bracket (mm, cabinet space). */
@@ -1360,7 +1362,7 @@ class Furniture3D {
         const cabinetAttachY = cabinetTopY - Math.max(70, H * 0.20) - GAS_MOUNT_LOWER_OFFSET_MM;
         const cabinetAttachZ = gasLiftCabinetAttachZ(D);
         const doorAttachFromTop = doorH * 0.22 + GAS_MOUNT_LOWER_OFFSET_MM;
-        const doorInnerZMm = -(facadeT / 2 + 1);
+        const doorInnerZMm = -(facadeT / 2 + 1 + GAS_STRUT_INSET_FROM_FACADE_MM);
         const doorAttachY = cabinetTopY - doorAttachFromTop;
         const doorAttachZ = pivotZ + doorInnerZMm;
         const attachLocalLeft = new THREE.Vector3(mountLeft.xRod * MM, -doorAttachFromTop * MM, doorInnerZMm * MM);
