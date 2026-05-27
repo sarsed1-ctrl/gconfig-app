@@ -21,7 +21,7 @@ const BED_MATTRESS_SIDE_CLEAR_MM = 6;
 /** Inset ledgers/deck from inner rail face (mm). */
 const BED_LEDGER_INSET_MM = 2;
 /** Bump to invalidate cached bed materials after mesh fixes. */
-const BED_MESH_MAT_REV = 10;
+const BED_MESH_MAT_REV = 11;
 /** Vertical gap between lower and upper cabinet (mm), sync with script-v2 layout. */
 const CLOSET_STACK_GAP_MM = 400;
 
@@ -1590,7 +1590,6 @@ class Furniture3D {
 
         const carcassMat = getMaterial('bed-carcass', p.material || 'bed');
         const panelMat = getMaterial('bed-facade', p.facadeMaterial || p.material || 'bed-facade');
-        const railMat = getMaterial('bed-rail', p.material || 'bed-carcass');
         const mattressMat = getMaterial('mattress', 'mattress', { roughness: 0.92 });
 
         // Top view: | rail (carcassT) | mattressW | rail (carcassT) |
@@ -1638,8 +1637,8 @@ class Furniture3D {
         const railRightZ = mattressW / 2 + railT / 2;
         // Keep exact butt-joint with head/foot panels (no X overhang).
         const railRenderLen = railLen;
-        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, railMat, 0, railCenterY, railLeftZ), 1);
-        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, railMat, 0, railCenterY, railRightZ), 1);
+        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, panelMat, 0, railCenterY, railLeftZ), 1);
+        tagBedMesh(addPanel(this.root, railRenderLen, frameH, railT, panelMat, 0, railCenterY, railRightZ), 1);
 
         // Inner ledgers inset from rail inner face (toward mattress center).
         const ledgerCenterY = bedVert.supportPlaneFromFloor - ledgerT / 2;
