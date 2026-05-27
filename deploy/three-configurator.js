@@ -1070,24 +1070,24 @@ class Furniture3D {
         } else {
             if (hasLower) {
                 const lx = lower.w / 2;
-                const lz = lower.d / 2;
-                addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', lx, lz);
-                if (splitWidth) addWidthDim(0, -lx, lx, lower.w, 'gconfig-dim-lower-w', lz);
+                const lFront = wallPlaneZ + lower.d;
+                addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', lx, lFront);
+                if (splitWidth) addWidthDim(0, -lx, lx, lower.w, 'gconfig-dim-lower-w', lFront);
                 if (splitDepth) addDepthDim(0, wallPlaneZ, wallPlaneZ + lower.d, lower.d, 'gconfig-dim-lower-d', lx);
             }
             if (hasUpper) {
                 const ux = upper.w / 2;
-                const uz = upper.d / 2;
-                addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', ux, uz);
-                if (splitWidth) addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
+                const uFront = wallPlaneZ + upper.d;
+                addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', ux, uFront);
+                if (splitWidth) addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uFront);
                 if (splitDepth) addDepthDim(upperBaseY, wallPlaneZ, wallPlaneZ + upper.d, upper.d, 'gconfig-dim-upper-d', ux);
             }
             if (!splitWidth && (hasUpper || hasLower)) {
                 addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
                 if (hasUpper && hasLower) {
                     const ux = upper.w / 2;
-                    const uz = upper.d / 2;
-                    addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
+                    const uFront = wallPlaneZ + upper.d;
+                    addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uFront);
                 }
             }
             if (!splitDepth && (hasUpper || hasLower)) {
@@ -1184,12 +1184,21 @@ class Furniture3D {
         const backMat = getMaterial('back', 0xd8dde0);
 
         const stack = getClosetStackMetrics(p);
-        const { hasUpper, lower, upper, ctT, upperBaseY } = stack;
+        const { hasUpper, lower, upper, ctT, upperBaseY, dMm } = stack;
+        const lowerZ = (lower.d - dMm) / 2;
+        const upperZ = (upper.d - dMm) / 2;
+        const lowerGroup = new THREE.Group();
+        lowerGroup.position.z = lowerZ * MM;
+        this.root.add(lowerGroup);
+        this.buildCarcassSection(lowerGroup, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
+        if (ctT > 0) this.buildCountertop(p, lower, edgeMat, lowerGroup);
 
-        this.buildCarcassSection(this.root, lower.w, lower.h, lower.d, T, 0, carcassMat, edgeMat, p.backWall, backMat);
-        if (ctT > 0) this.buildCountertop(p, lower, edgeMat);
+        let upperGroup = null;
         if (hasUpper) {
-            this.buildCarcassSection(this.root, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
+            upperGroup = new THREE.Group();
+            upperGroup.position.z = upperZ * MM;
+            this.root.add(upperGroup);
+            this.buildCarcassSection(upperGroup, upper.w, upper.h, upper.d, T, upperBaseY, carcassMat, edgeMat, p.backWall, backMat);
         }
 
         const shelfDefs = Array.isArray(p.shelves) ? p.shelves : [];
@@ -1199,7 +1208,8 @@ class Furniture3D {
             const sw = sec.w || lower.w;
             const sh = sec.h || lower.h;
             const sd = sec.d || lower.d;
-            this.addShelves(this.root, sec, sw, sh, sd, T, baseY, carcassMat);
+            const targetGroup = sec.zone === 'upper' ? (upperGroup || lowerGroup) : lowerGroup;
+            this.addShelves(targetGroup, sec, sw, sh, sd, T, baseY, carcassMat);
         });
 
         const doors = p.doors || {};
@@ -1221,10 +1231,10 @@ class Furniture3D {
 
         if (hasUpper) {
             if (upperMode === 'gas') {
-                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
+                this.addDoor(upperGroup, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
             } else if (upperMode === 'hinge') {
                 const upperPos = p.hinges?.upper?.position || 'both';
-                this.addDoor(this.root, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
+                this.addDoor(upperGroup, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
                     interactive: true,
                     hingeSide: upperPos === 'right' ? 'right' : 'left',
                     ...upperHingeOpts,
@@ -1233,18 +1243,18 @@ class Furniture3D {
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(this.root, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
+            this.addDrawers(lowerGroup, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
         } else if (lowerMode === 'gas') {
-            this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
+            this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
         } else if (lowerMode === 'hinge') {
             if (p.lowerSplitDoor) {
-                this.addSplitDoors(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
+                this.addSplitDoors(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
                     interactive: true,
                     ...lowerHingeOpts,
                 });
             } else {
                 const lowerPos = p.hinges?.lower?.position || 'left';
-                this.addDoor(this.root, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
+                this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
                     interactive: true,
                     hingeSide: lowerPos === 'right' ? 'right' : 'left',
                     ...lowerHingeOpts,
@@ -1253,7 +1263,7 @@ class Furniture3D {
         }
     }
 
-    buildCountertop(p, lower, edgeMat) {
+    buildCountertop(p, lower, edgeMat, targetGroup = this.root) {
         const ct = p.countertop || {};
         const ctT = ct.thickness > 0 ? ct.thickness : 0;
         if (!ctT) return;
@@ -1262,8 +1272,8 @@ class Furniture3D {
         const ctW = lower.w + side * 2;
         const ctD = lower.d + front;
         const ctMat = getMaterial('countertop', ct.material || 'countertop');
-        addPanel(this.root, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2);
-        addEdgeBand(this.root, ctW, ctT, ctD, edgeMat, 0, lower.h + ctT / 2, front / 2, 'front');
+        addPanel(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2);
+        addEdgeBand(targetGroup, ctW, ctT, ctD, edgeMat, 0, lower.h + ctT / 2, front / 2, 'front');
     }
 
     buildCarcassSection(group, W, H, D, T, baseY, mat, edgeMat, backWall, backMat) {
