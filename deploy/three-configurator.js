@@ -1099,6 +1099,11 @@ class Furniture3D {
             }
             if (!splitWidth && (hasUpper || hasLower)) {
                 addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
+                if (hasUpper && hasLower) {
+                    const ux = upper.w / 2;
+                    const uz = upper.d / 2;
+                    addWidthDim(upperBaseY, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
+                }
             }
             if (!splitDepth && (hasUpper || hasLower)) {
                 addDepthDim(y0, zB, zF, dMm, 'gconfig-dim-depth');
