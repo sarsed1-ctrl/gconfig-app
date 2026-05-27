@@ -1,4 +1,4 @@
-const CACHE = 'gconfig-v46';
+const CACHE = 'gconfig-v47';
 
 /** Static assets only — HTML is always fetched fresh (see fetch handler). */
 const PRECACHE = [

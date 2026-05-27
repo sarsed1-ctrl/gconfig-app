@@ -1024,18 +1024,24 @@ class Furniture3D {
         const xL = -wMm / 2;
         const zB = -dMm / 2;
 
-        let summary;
-        if (hasUpper && hasLower) {
-            summary = `${wMm} × ${Math.round(totalH)} × ${dMm} ${unit}`;
-        } else if (hasUpper) {
-            summary = `${wMm} × ${upperHm} × ${dMm} ${unit}`;
-        } else {
-            summary = `${wMm} × ${lowerHm} × ${dMm} ${unit}`;
-        }
+        const addSummary = (text, yTopMm) => {
+            const summaryLabel = createDimLabel(text, 'gconfig-dim-summary');
+            summaryLabel.position.set(0, yTopMm * MM + 0.12, 0);
+            this.dimGroup.add(summaryLabel);
+        };
 
-        const summaryLabel = createDimLabel(summary, 'gconfig-dim-summary');
-        summaryLabel.position.set(0, totalH * MM + 0.12, 0);
-        this.dimGroup.add(summaryLabel);
+        if (hasUpper && hasLower) {
+            const lowerSummary = `${Math.round(lower.w)} × ${lowerHm} × ${Math.round(lower.d)} ${unit}`;
+            const upperSummary = `${Math.round(upper.w)} × ${upperHm} × ${Math.round(upper.d)} ${unit}`;
+            addSummary(lowerSummary, lower.h);
+            addSummary(upperSummary, upperBaseY + upper.h);
+        } else if (hasUpper) {
+            const upperSummary = `${Math.round(upper.w)} × ${upperHm} × ${Math.round(upper.d)} ${unit}`;
+            addSummary(upperSummary, upperBaseY + upper.h);
+        } else {
+            const lowerSummary = `${Math.round(lower.w)} × ${lowerHm} × ${Math.round(lower.d)} ${unit}`;
+            addSummary(lowerSummary, lower.h);
+        }
 
         const splitDepth = hasUpper && hasLower && !sameDepth;
         const splitWidth = hasUpper && hasLower && !sameWidth;
