@@ -1016,13 +1016,13 @@ class Furniture3D {
         const lowerHm = Math.round(lower.h);
         const upperHm = Math.round(upper.h);
 
-        const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lower.d / 2 };
-        const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: Math.max(lower.d, upper.d) / 2 };
-        const xR = max.x;
-        const zF = max.z;
-        const y0 = min.y;
-        const xL = min.x;
-        const zB = min.z;
+        // Use carcass stack extents for dimension anchoring, so open facades
+        // do not shift lines away from the cabinet edges.
+        const xR = wMm / 2;
+        const zF = dMm / 2;
+        const y0 = 0;
+        const xL = -wMm / 2;
+        const zB = -dMm / 2;
 
         let summary;
         if (hasUpper && hasLower) {
