@@ -907,10 +907,15 @@ class Furniture3D {
         const lang = params.lang === 'en' ? 'en' : 'ru';
         const unit = lang === 'en' ? 'mm' : 'мм';
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
-        const pad = 80;
+        const labelPad = 0.03;
         const stack = getBedStackMetrics(params);
         const min = bounds?.min ?? { x: -stack.outerL / 2, y: 0, z: -stack.outerW / 2 };
         const max = bounds?.max ?? { x: stack.outerL / 2, y: stack.totalH, z: stack.outerW / 2 };
+        const xR = max.x;
+        const zF = max.z;
+        const y0 = min.y;
+        const xL = min.x;
+        const zB = min.z;
 
         const summary = lang === 'en'
             ? `${stack.wMm} × ${stack.hMm} × ${stack.lMm} ${unit}`
@@ -920,47 +925,32 @@ class Furniture3D {
         summaryLabel.position.set(0, max.y * MM + 0.12, 0);
         this.dimGroup.add(summaryLabel);
 
-        const yBase = min.y - pad * 0.35;
-        const zFront = max.z + pad * 0.55;
-        const xRight = max.x + pad * 0.45;
-        const zDim = (min.z + max.z) / 2;
-
-        addDimensionLine(
-            this.dimGroup,
-            [[min.x, yBase, zFront], [max.x, yBase, zFront]],
-            color
-        );
+        // Length — front bottom edge.
+        addDimensionLine(this.dimGroup, [[xL, y0, zF], [xR, y0, zF]], color);
         const lenLabel = createDimLabel(`${stack.lMm} ${unit}`, 'gconfig-dim-bed-length');
-        lenLabel.position.set(((min.x + max.x) / 2) * MM, yBase * MM - 0.03, zFront * MM);
+        lenLabel.position.set(((xL + xR) / 2) * MM, y0 * MM - labelPad, zF * MM + labelPad);
         this.dimGroup.add(lenLabel);
 
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, min.y, zDim], [xRight, max.y, zDim]],
-            color
-        );
+        // Height — right front vertical edge.
+        addDimensionLine(this.dimGroup, [[xR, y0, zF], [xR, max.y, zF]], color);
         const hLabel = createDimLabel(`${stack.hMm} ${unit}`, 'gconfig-dim-bed-height');
-        hLabel.position.set(xRight * MM + 0.03, ((min.y + max.y) / 2) * MM, zDim * MM);
+        hLabel.position.set(xR * MM + labelPad, ((y0 + max.y) / 2) * MM, zF * MM + labelPad);
         this.dimGroup.add(hLabel);
 
-        addDimensionLine(
-            this.dimGroup,
-            [[xRight, yBase, min.z], [xRight, yBase, max.z]],
-            color
-        );
+        // Width — right bottom edge (depth in plan).
+        addDimensionLine(this.dimGroup, [[xR, y0, zB], [xR, y0, zF]], color);
         const wLabel = createDimLabel(`${stack.wMm} ${unit}`, 'gconfig-dim-bed-width');
-        wLabel.position.set(xRight * MM + 0.03, yBase * MM - 0.03, zDim * MM);
+        wLabel.position.set(xR * MM + labelPad, y0 * MM - labelPad, ((zB + zF) / 2) * MM);
         this.dimGroup.add(wLabel);
 
         if (stack.headboardH > stack.frameH + 0.5) {
-            const headX = min.x + pad * 0.12;
             addDimensionLine(
                 this.dimGroup,
-                [[headX, stack.frameH, zDim], [headX, stack.headboardH, zDim]],
+                [[xL, stack.frameH, zF], [xL, stack.headboardH, zF]],
                 color
             );
             const hbLabel = createDimLabel(`${Math.round(stack.headboardH)} ${unit}`, 'gconfig-dim-bed-headboard');
-            hbLabel.position.set(headX * MM - 0.03, ((stack.frameH + stack.headboardH) / 2) * MM, zDim * MM);
+            hbLabel.position.set(xL * MM - labelPad, ((stack.frameH + stack.headboardH) / 2) * MM, zF * MM + labelPad);
             this.dimGroup.add(hbLabel);
         }
     }
@@ -1019,7 +1009,7 @@ class Furniture3D {
         const lang = params.lang === 'en' ? 'en' : 'ru';
         const unit = lang === 'en' ? 'mm' : 'мм';
         const color = isNeonTheme() ? 0x22ff88 : 0x2d6a4f;
-        const pad = 80;
+        const labelPad = 0.03;
 
         const stack = getClosetStackMetrics(params);
         const { hasUpper, hasLower, lower, upper, upperBaseY, totalH, wMm, dMm, sameDepth, sameWidth } = stack;
@@ -1028,6 +1018,11 @@ class Furniture3D {
 
         const min = bounds?.min ?? { x: -wMm / 2, y: 0, z: -lower.d / 2 };
         const max = bounds?.max ?? { x: wMm / 2, y: totalH, z: Math.max(lower.d, upper.d) / 2 };
+        const xR = max.x;
+        const zF = max.z;
+        const y0 = min.y;
+        const xL = min.x;
+        const zB = min.z;
 
         let summary;
         if (hasUpper && hasLower) {
@@ -1042,61 +1037,55 @@ class Furniture3D {
         summaryLabel.position.set(0, totalH * MM + 0.12, 0);
         this.dimGroup.add(summaryLabel);
 
-        const yBase = min.y - pad * 0.35;
-        const xRight = max.x + pad * 0.45;
-        const zDim = (min.z + max.z) / 2;
         const splitDepth = hasUpper && hasLower && !sameDepth;
         const splitWidth = hasUpper && hasLower && !sameWidth;
 
-        const addHeightDim = (y0, y1, labelMm, className) => {
-            addDimensionLine(this.dimGroup, [[xRight, y0, zDim], [xRight, y1, zDim]], color);
+        const addHeightDim = (yStart, yEnd, labelMm, className, xEdge = xR, zEdge = zF) => {
+            addDimensionLine(this.dimGroup, [[xEdge, yStart, zEdge], [xEdge, yEnd, zEdge]], color);
             const label = createDimLabel(`${labelMm} ${unit}`, className);
-            label.position.set(xRight * MM + 0.03, ((y0 + y1) / 2) * MM, zDim * MM);
+            label.position.set(xEdge * MM + labelPad, ((yStart + yEnd) / 2) * MM, zEdge * MM + labelPad);
             this.dimGroup.add(label);
         };
 
-        const addDepthDim = (yMid, depthMm, className) => {
-            const z0 = -depthMm / 2;
-            const z1 = depthMm / 2;
-            addDimensionLine(this.dimGroup, [[xRight, yMid, z0], [xRight, yMid, z1]], color);
-            const label = createDimLabel(`${Math.round(depthMm)} ${unit}`, className);
-            label.position.set(xRight * MM + 0.03, yMid * MM, 0);
+        const addDepthDim = (yAt, zNear, zFar, labelMm, className, xEdge = xR) => {
+            addDimensionLine(this.dimGroup, [[xEdge, yAt, zNear], [xEdge, yAt, zFar]], color);
+            const label = createDimLabel(`${Math.round(labelMm)} ${unit}`, className);
+            label.position.set(xEdge * MM + labelPad, yAt * MM - labelPad, ((zNear + zFar) / 2) * MM);
             this.dimGroup.add(label);
         };
 
-        const addWidthDim = (yMid, widthMm, zFront, className) => {
-            const x0 = -widthMm / 2;
-            const x1 = widthMm / 2;
-            addDimensionLine(this.dimGroup, [[x0, yMid, zFront], [x1, yMid, zFront]], color);
-            const label = createDimLabel(`${Math.round(widthMm)} ${unit}`, className);
-            label.position.set(0, yMid * MM - 0.03, zFront * MM);
+        const addWidthDim = (yAt, xNear, xFar, labelMm, className, zEdge = zF) => {
+            addDimensionLine(this.dimGroup, [[xNear, yAt, zEdge], [xFar, yAt, zEdge]], color);
+            const label = createDimLabel(`${Math.round(labelMm)} ${unit}`, className);
+            label.position.set(((xNear + xFar) / 2) * MM, yAt * MM - labelPad, zEdge * MM + labelPad);
             this.dimGroup.add(label);
         };
 
-        if (hasUpper) {
-            addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper');
-        }
-        if (hasLower) {
-            addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower');
-        }
-
-        if (splitWidth) {
+        if (hasUpper && hasLower && sameWidth && sameDepth) {
+            addHeightDim(0, totalH, Math.round(totalH), 'gconfig-dim-total-h');
+            addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
+            addDepthDim(y0, zB, zF, dMm, 'gconfig-dim-depth');
+        } else {
             if (hasLower) {
-                addWidthDim(lower.h / 2, lower.w, lower.d / 2 + pad * 0.55, 'gconfig-dim-lower-w');
+                const lx = lower.w / 2;
+                const lz = lower.d / 2;
+                addHeightDim(0, lower.h, lowerHm, 'gconfig-dim-lower', lx, lz);
+                if (splitWidth) addWidthDim(lower.h / 2, -lx, lx, lower.w, 'gconfig-dim-lower-w', lz);
+                if (splitDepth) addDepthDim(lower.h / 2, -lz, lz, lower.d, 'gconfig-dim-lower-d', lx);
             }
             if (hasUpper) {
-                addWidthDim(upperBaseY + upper.h / 2, upper.w, upper.d / 2 + pad * 0.55, 'gconfig-dim-upper-w');
+                const ux = upper.w / 2;
+                const uz = upper.d / 2;
+                addHeightDim(upperBaseY, upperBaseY + upper.h, upperHm, 'gconfig-dim-upper', ux, uz);
+                if (splitWidth) addWidthDim(upperBaseY + upper.h / 2, -ux, ux, upper.w, 'gconfig-dim-upper-w', uz);
+                if (splitDepth) addDepthDim(upperBaseY + upper.h / 2, -uz, uz, upper.d, 'gconfig-dim-upper-d', ux);
             }
-        } else {
-            const zFront = max.z + pad * 0.55;
-            addWidthDim(yBase, wMm, zFront, 'gconfig-dim-width');
-        }
-
-        if (splitDepth) {
-            if (hasLower) addDepthDim(lower.h / 2, lower.d, 'gconfig-dim-lower-d');
-            if (hasUpper) addDepthDim(upperBaseY + upper.h / 2, upper.d, 'gconfig-dim-upper-d');
-        } else {
-            addDepthDim(yBase, dMm, 'gconfig-dim-depth');
+            if (!splitWidth && (hasUpper || hasLower)) {
+                addWidthDim(y0, xL, xR, wMm, 'gconfig-dim-width');
+            }
+            if (!splitDepth && (hasUpper || hasLower)) {
+                addDepthDim(y0, zB, zF, dMm, 'gconfig-dim-depth');
+            }
         }
     }
 
