@@ -337,19 +337,6 @@
       ]
     },
     {
-      "code": "73.F633.10",
-      "article": "73.F633.10",
-      "decor": "F633",
-      "thick": 10,
-      "thickness": 10,
-      "postform": false,
-      "feelWood": false,
-      "label": "73.F633.10",
-      "edgeCodes": [
-        "74.F230.1.5.43"
-      ]
-    },
-    {
       "code": "73.F765.10",
       "article": "73.F765.10",
       "decor": "F765",
@@ -2331,19 +2318,6 @@
       "label": "73.F584.16",
       "edgeCodes": [
         "74.F229.1.5.43"
-      ]
-    },
-    {
-      "code": "73.F633.16",
-      "article": "73.F633.16",
-      "decor": "F633",
-      "thick": 16,
-      "thickness": 16,
-      "postform": false,
-      "feelWood": false,
-      "label": "73.F633.16",
-      "edgeCodes": [
-        "74.F234.1.5.43"
       ]
     },
     {
