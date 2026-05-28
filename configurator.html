@@ -4282,16 +4282,10 @@
             return;
         }
 
-        if (amflexPriceState.error && !q) {
-            wrap.classList.add('is-error');
-            tbody.innerHTML = '';
-            meta.textContent = T.price_error + ': ' + amflexPriceState.error;
-            return;
-        }
-
         if (!q) {
+            wrap.classList.remove('is-error');
             tbody.innerHTML = '';
-            meta.textContent = T.price_loading;
+            meta.textContent = getAmflexPriceUnavailableMessage(T);
             return;
         }
 

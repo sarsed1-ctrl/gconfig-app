@@ -578,7 +578,7 @@
 
             project_name: 'Название проекта',
 
-            price_on_right: 'Сводка цены справа. Экспорт — кнопки под превью.',
+            price_on_right: '',
 
             open_v1_full: 'Открыть старый конфигуратор →',
 
@@ -626,7 +626,7 @@
 
             beds_step2_skip: 'Для кроватей этот шаг не применяется.',
 
-            beds_step3_skip: 'Для кроватей задняя панель и петли скрыты в v1.',
+            beds_step3_skip: 'Для кроватей задняя панель и петли не применяются.',
 
             preview_updating: 'Обновление превью…',
 
@@ -654,7 +654,7 @@
 
             sm_sending: '⏳ Отправка…',
 
-            hint_drawer_sink: 'Ящики отключают мойку в нижнем шкафу (правило v1).',
+            hint_drawer_sink: 'Ящики отключают мойку в нижнем шкафу.',
 
             hint_drawer_preview: 'Каждый ящик — отдельная панель фасада в превью.',
 
@@ -830,7 +830,7 @@
 
             project_name: 'Project name',
 
-            price_on_right: 'Price summary on the right. Export buttons below preview.',
+            price_on_right: '',
 
             open_v1_full: 'Open old configurator →',
 
@@ -878,7 +878,7 @@
 
             beds_step2_skip: 'This step does not apply to beds.',
 
-            beds_step3_skip: 'Back panel and hinges are hidden for beds in v1.',
+            beds_step3_skip: 'Back panel and hinges do not apply to beds.',
 
             preview_updating: 'Updating preview…',
 
@@ -906,7 +906,7 @@
 
             sm_sending: '⏳ Sending…',
 
-            hint_drawer_sink: 'Drawers disable sink in the lower cabinet (v1 rule).',
+            hint_drawer_sink: 'Drawers disable sink in the lower cabinet.',
 
             hint_drawer_preview: 'Each drawer becomes a separate facade panel in the preview.',
 
@@ -3879,7 +3879,7 @@
 
         const wrap = document.getElementById('v1LinkWrap');
 
-        if (wrap) wrap.hidden = !isLastStep(currentStep);
+        if (wrap) wrap.hidden = true;
 
     }
 
@@ -4075,7 +4075,7 @@
             .replace('{n}', String(displayN))
             .replace('{total}', String(total));
 
-        if (previewMeta) previewMeta.textContent = stepText;
+        if (previewMeta) previewMeta.textContent = '';
 
         const progressLabel = document.getElementById('wizardProgressLabel');
         if (progressLabel) progressLabel.textContent = stepText;

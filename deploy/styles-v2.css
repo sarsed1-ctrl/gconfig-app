@@ -1836,7 +1836,8 @@ html, body {
 
     .app-shell { height: auto; min-height: 100dvh; overflow: visible; }
 
-    .workspace {
+    .workspace,
+    .workspace.has-3d {
 
         grid-template-columns: 1fr;
 
