@@ -85,6 +85,10 @@
 
     }
 
+    function isMobileViewport() {
+        return window.matchMedia('(max-width: 900px)').matches;
+    }
+
     function normalizeBedCarcassT(value) {
 
         const allowed = [16, 18, 19, 25, 28];
@@ -4019,7 +4023,9 @@
 
         btnNext.textContent = isLastStep(currentStep) ? t('finish') : t('next');
 
-        exportActions.classList.toggle('visible', iframeReady);
+        const showExport = iframeReady && (!isMobileViewport() || isLastStep(currentStep));
+        exportActions.classList.toggle('visible', showExport);
+        document.body.classList.toggle('mobile-last-step', isLastStep(currentStep));
 
         if (iframeReady) {
             syncWizardFieldsToIframe({ includeEamf: currentStep === 4 });

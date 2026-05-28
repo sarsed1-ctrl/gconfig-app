@@ -1859,12 +1859,16 @@ html, body {
 
         order: 2;
 
-        min-height: 280px;
+        min-height: 52vh;
 
         border-left: none;
 
         border-bottom: 1px solid var(--border);
 
+    }
+
+    #furniture-3d {
+        min-height: 46vh;
     }
 
     .wizard-panel {
@@ -1908,7 +1912,23 @@ html, body {
 
     .wizard-body { padding-bottom: 8px; }
 
-    .export-actions.visible { grid-template-columns: 1fr; }
+    .export-actions.visible { display: none; }
+
+    body.mobile-last-step .export-actions.visible {
+        display: grid;
+        grid-template-columns: 1fr;
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: 72px;
+        z-index: 40;
+        padding: 0;
+        gap: 8px;
+    }
+
+    body.mobile-last-step .export-actions.visible button {
+        min-height: 46px;
+    }
 
     .preview-dock {
         flex-direction: column;
