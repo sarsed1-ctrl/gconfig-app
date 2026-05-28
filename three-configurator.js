@@ -338,7 +338,7 @@ function setFacadeHighlight(mesh, on) {
         if (!mesh.userData.hoverMaterial) {
             mesh.userData.hoverMaterial = mesh.userData.baseMaterial.clone();
             mesh.userData.hoverMaterial.emissive.setHex(isNeonTheme() ? 0x22ff88 : 0x448866);
-            mesh.userData.hoverMaterial.emissiveIntensity = 0.35;
+            mesh.userData.hoverMaterial.emissiveIntensity = isNeonTheme() ? 0.75 : 0.5;
         }
         mesh.material = mesh.userData.hoverMaterial;
     } else {
