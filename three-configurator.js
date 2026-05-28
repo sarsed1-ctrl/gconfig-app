@@ -355,6 +355,47 @@ function addPanel(group, w, h, d, mat, x, y, z) {
     return mesh;
 }
 
+/**
+ * Countertop slab with rounded front top/bottom edges (R in mm).
+ * Cross-section is extruded along width (X).
+ */
+function addRoundedCountertop(group, w, h, d, mat, x, y, z, radiusMm = 5) {
+    if (w <= 0 || h <= 0 || d <= 0) return null;
+    const hM = h * MM;
+    const dM = d * MM;
+    const wM = w * MM;
+    const rM = Math.max(0, Math.min(radiusMm * MM, hM / 2 - 0.0001, dM / 2 - 0.0001));
+    if (rM <= 0.00001) return addPanel(group, w, h, d, mat, x, y, z);
+
+    const halfH = hM / 2;
+    const halfD = dM / 2;
+    const xBack = -halfD;
+    const xFront = halfD;
+
+    const shape = new THREE.Shape();
+    shape.moveTo(xBack, -halfH);
+    shape.lineTo(xFront - rM, -halfH);
+    shape.absarc(xFront - rM, -halfH + rM, rM, -Math.PI / 2, 0, false);
+    shape.lineTo(xFront, halfH - rM);
+    shape.absarc(xFront - rM, halfH - rM, rM, 0, Math.PI / 2, false);
+    shape.lineTo(xBack, halfH);
+    shape.closePath();
+
+    const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: wM,
+        bevelEnabled: false,
+        curveSegments: 10,
+        steps: 1,
+    });
+    geo.translate(0, 0, -wM / 2);
+    geo.rotateY(Math.PI / 2);
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x * MM, y * MM, z * MM);
+    group.add(mesh);
+    return mesh;
+}
+
 function tagBedMesh(mesh, renderOrder = 0) {
     if (!mesh) return null;
     mesh.renderOrder = renderOrder;
@@ -1252,8 +1293,14 @@ class Furniture3D {
         const ctW = lower.w + side * 2;
         const ctD = lower.d + front;
         const ctMat = getMaterial('countertop', ct.material || 'countertop');
-        addPanel(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2);
-        addEdgeBand(targetGroup, ctW, ctT, ctD, edgeMat, 0, lower.h + ctT / 2, front / 2, 'front');
+        const isRoundedFront = Math.abs(ctT - 38) < 0.5;
+        if (isRoundedFront) {
+            addRoundedCountertop(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2, 5);
+        } else {
+            addPanel(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2);
+            // Straight front edge for 12/20 mm countertops, same color as slab.
+            addEdgeBand(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2, 'front');
+        }
     }
 
     buildCarcassSection(group, W, H, D, T, baseY, mat, edgeMat, backWall, backMat) {
