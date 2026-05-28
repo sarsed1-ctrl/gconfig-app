@@ -373,12 +373,14 @@ function addRoundedCountertop(group, w, h, d, mat, x, y, z, radiusMm = 5) {
     const xFront = halfD;
 
     const shape = new THREE.Shape();
-    shape.moveTo(xBack, -halfH);
-    shape.lineTo(xFront - rM, -halfH);
-    shape.absarc(xFront - rM, -halfH + rM, rM, -Math.PI / 2, 0, false);
-    shape.lineTo(xFront, halfH - rM);
-    shape.absarc(xFront - rM, halfH - rM, rM, 0, Math.PI / 2, false);
-    shape.lineTo(xBack, halfH);
+    // Front face of countertop is on negative local depth axis in this scene.
+    // Round top/bottom edges on the front (xBack) side.
+    shape.moveTo(xFront, -halfH);
+    shape.lineTo(xBack + rM, -halfH);
+    shape.absarc(xBack + rM, -halfH + rM, rM, -Math.PI / 2, -Math.PI, true);
+    shape.lineTo(xBack, halfH - rM);
+    shape.absarc(xBack + rM, halfH - rM, rM, Math.PI, Math.PI / 2, true);
+    shape.lineTo(xFront, halfH);
     shape.closePath();
 
     const geo = new THREE.ExtrudeGeometry(shape, {
