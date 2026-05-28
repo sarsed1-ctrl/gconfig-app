@@ -377,14 +377,16 @@ function addCylinder(group, r, h, mat, x, y, z, rotX = 0) {
 
 /** Thin edge-band hint on one visible face (procedural, no CSG). */
 function addEdgeBand(group, w, h, d, mat, x, y, z, face = 'front') {
-    const band = 1.5;
+    // Keep edge strip slightly outside host face to avoid z-fighting flicker.
+    const band = 1.2;
+    const eps = 0.35;
     switch (face) {
         case 'top':
-            return addPanel(group, w, band, d, mat, x, y + h / 2 - band / 2, z);
+            return addPanel(group, w, band, d, mat, x, y + h / 2 + band / 2 + eps, z);
         case 'front':
-            return addPanel(group, w, h, band, mat, x, y, z + d / 2 - band / 2);
+            return addPanel(group, w, h, band, mat, x, y, z + d / 2 + band / 2 + eps);
         case 'side':
-            return addPanel(group, band, h, d, mat, x + w / 2 - band / 2, y, z);
+            return addPanel(group, band, h, d, mat, x + w / 2 + band / 2 + eps, y, z);
         default:
             return null;
     }
