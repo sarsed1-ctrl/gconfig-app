@@ -1431,7 +1431,8 @@ class Furniture3D {
 
         if (doorMesh) {
             doorMesh.userData.baseMaterial = mat;
-            addEdgeBand(pivotGroup, doorW, doorH, facadeT, getMaterial('edge', 'facade-edge', { edge: true }), doorCenterX - hingeX, 0, 0, 'side');
+            // Keep facade side edge the same color/material as the facade face.
+            addEdgeBand(pivotGroup, doorW, doorH, facadeT, mat, doorCenterX - hingeX, 0, 0, 'side');
             this.hingeDoors.push(hingeState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
