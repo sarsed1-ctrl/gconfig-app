@@ -391,7 +391,218 @@ html, body {
 
 .workspace.has-3d {
 
-    grid-template-columns: minmax(300px, 380px) minmax(240px, 1fr) minmax(220px, 0.75fr);
+    grid-template-columns: minmax(300px, 380px) minmax(400px, 1fr);
+
+}
+
+
+
+/* Preview + 3D split (second workspace column) */
+
+.preview-3d-split {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+
+.preview-3d-top-bar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 14px 16px 8px;
+
+    flex-shrink: 0;
+
+    min-height: 48px;
+
+}
+
+
+
+.preview-3d-top-bar-left {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+}
+
+
+
+.preview-3d-top-bar-right {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+}
+
+
+
+.preview-3d-top-bar-right[hidden] {
+
+    display: none !important;
+
+}
+
+
+
+.preview-3d-body {
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: stretch;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+
+.preview-3d-split.is-3d-active .preview-3d-body .preview-panel {
+
+    flex: 0 0 auto;
+
+    width: calc(var(--preview-3d-ratio, 0.55) * (100% - 8px));
+
+    max-width: calc(100% - 228px);
+
+    min-width: 200px;
+
+}
+
+
+
+.preview-3d-split.is-3d-active .preview-3d-body .furniture-3d-panel {
+
+    flex: 1 1 0;
+
+    min-width: 220px;
+
+}
+
+
+
+.preview-3d-resizer {
+
+    flex: 0 0 8px;
+
+    width: 8px;
+
+    position: relative;
+
+    touch-action: none;
+
+    user-select: none;
+
+    cursor: col-resize;
+
+    background: var(--border);
+
+    z-index: 2;
+
+}
+
+
+
+.preview-3d-resizer[hidden] {
+
+    display: none !important;
+
+}
+
+
+
+.preview-3d-resizer::before {
+
+    content: '';
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 3px;
+
+    height: 44px;
+
+    border-radius: 2px;
+
+    background: var(--green);
+
+    opacity: 0.4;
+
+    transition: height 0.15s ease, opacity 0.15s ease;
+
+}
+
+
+
+.preview-3d-resizer:hover::before,
+.preview-3d-resizer.is-active::before,
+.preview-3d-resizer:focus-visible::before {
+
+    opacity: 1;
+
+    height: 64px;
+
+}
+
+
+
+body.is-preview-3d-resizing,
+body.is-preview-3d-resizing * {
+
+    cursor: col-resize !important;
+
+    user-select: none !important;
 
 }
 
@@ -409,7 +620,7 @@ html, body {
 
     background: var(--panel);
 
-    border-left: 1px solid var(--border);
+    border-left: none;
 
 }
 
@@ -429,7 +640,7 @@ html, body {
 
     align-items: center;
 
-    justify-content: space-between;
+    justify-content: flex-start;
 
     padding: 14px 16px 8px;
 
@@ -451,7 +662,9 @@ html, body {
 
     flex-wrap: wrap;
 
-    justify-content: flex-end;
+    justify-content: flex-start;
+
+    width: 100%;
 
 }
 
@@ -525,6 +738,114 @@ html, body {
 
 }
 
+
+
+.furniture-3d-grain {
+
+    border: 1px solid var(--border);
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    border-radius: 8px;
+
+    min-width: 40px;
+
+    height: 32px;
+
+    padding: 0 8px;
+
+    cursor: pointer;
+
+    font-size: 0.82rem;
+
+    line-height: 1;
+
+}
+
+
+.furniture-3d-mode {
+
+    border: 1px solid rgba(45, 106, 79, 0.45);
+
+    background: transparent;
+
+    color: var(--green);
+
+    border-radius: 8px;
+
+    min-width: 0;
+
+    max-width: 100%;
+
+    height: 32px;
+
+    padding: 0 10px;
+
+    cursor: pointer;
+
+    font-size: 0.58rem;
+
+    line-height: 1;
+
+    font-weight: 700;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+}
+
+
+.furniture-3d-mode.is-active,
+.furniture-3d-mode.is-grain,
+.furniture-3d-mode.is-scale {
+
+    border-color: var(--green);
+
+    color: #fff;
+
+    background: var(--green);
+
+    box-shadow: 0 0 14px rgba(45, 106, 79, 0.45);
+
+}
+
+
+.furniture-3d-mode:hover:not(:disabled) {
+
+    border-color: var(--green);
+
+    color: var(--green-light);
+
+}
+
+
+.furniture-3d-grain:hover {
+
+    border-color: var(--green);
+
+    color: var(--green);
+
+}
+
+
+
+.furniture-3d-grain:disabled,
+.furniture-3d-mode:disabled {
+
+    opacity: 0.35;
+
+    cursor: not-allowed;
+
+    pointer-events: none;
+
+}
 
 
 .furniture-3d-expand:hover {
@@ -1396,6 +1717,10 @@ html, body {
 
     flex-direction: column;
 
+    flex: 1 1 auto;
+
+    min-width: 0;
+
     min-height: 0;
 
     background: linear-gradient(180deg, #fafcfb 0%, var(--bg) 100%);
@@ -1406,17 +1731,15 @@ html, body {
 
 
 
-.preview-header {
+.preview-header-title {
 
-    display: flex;
+    margin: 0;
 
-    align-items: center;
+    font-size: 0.95rem;
 
-    justify-content: space-between;
+    color: var(--green);
 
-    gap: 12px;
-
-    padding: 14px 20px 8px;
+    font-weight: 600;
 
     flex-shrink: 0;
 
@@ -1457,18 +1780,6 @@ html, body {
     font-size: 0.68rem;
 
     padding: 0 8px;
-
-}
-
-
-
-.preview-header h2 {
-
-    font-size: 0.95rem;
-
-    color: var(--green);
-
-    font-weight: 600;
 
 }
 
@@ -1847,17 +2158,58 @@ html, body {
 
     }
 
-    .preview-panel {
+    .preview-3d-split {
 
         order: 1;
+
+    }
+
+    .preview-3d-top-bar {
+
+        flex-wrap: wrap;
+
+        padding: 12px 14px 8px;
+
+    }
+
+    .preview-3d-top-bar-left,
+    .preview-3d-top-bar-right {
+
+        flex: 1 1 100%;
+
+        justify-content: flex-start;
+
+    }
+
+    .preview-3d-body {
+
+        flex-direction: column;
+
+    }
+
+    .preview-3d-split.is-3d-active .preview-3d-body .preview-panel {
+
+        width: auto !important;
+
+        max-width: none;
+
+        flex: 1 1 auto;
+
+    }
+
+    .preview-3d-resizer {
+
+        display: none !important;
+
+    }
+
+    .preview-panel {
 
         min-height: 42vh;
 
     }
 
     .furniture-3d-panel {
-
-        order: 2;
 
         min-height: 52vh;
 

@@ -12,6 +12,58 @@ const REBUILD_MS_MOBILE = 180;
 const FACADE_GAP = 2;
 /** Sub-mm overlap so carcass panels meet without visible cracks. */
 const CARCASS_JOINT_OVERLAP_MM = 0.45;
+/** HDF / back panel thickness in closet 3D preview (mm). */
+const BACK_PANEL_THICKNESS_MM = 3;
+/** Play in dados per edge (mm) — total 4 mm off inner width/height (matches BOM h1-4 / w1-4). */
+const BACK_PANEL_PLAY_PER_EDGE_MM = 2;
+
+/**
+ * HDF back panel inside carcass (not flush with side rears — avoids exterior bleed).
+ * @returns {{ w: number, h: number, z: number }}
+ */
+function getBackPanelSpec(W, H, D, T) {
+    const innerW = Math.max(1, W - 2 * T);
+    const innerH = Math.max(1, H - 2 * T);
+    const play = BACK_PANEL_PLAY_PER_EDGE_MM * 2;
+    const sideD = carcassSideDepthMm(D, T);
+    return {
+        w: Math.max(1, innerW - play),
+        h: Math.max(1, innerH - play),
+        z: -sideD / 2 + BACK_PANEL_THICKNESS_MM / 2 + 0.5,
+    };
+}
+
+/** Single interior face — no box edges that show as white stripes at corners. */
+function addInteriorBackPanel(group, w, h, mat, y0, z) {
+    if (w <= 0 || h <= 0 || !mat) return null;
+    const geo = new THREE.PlaneGeometry(w * MM, h * MM);
+    const displayMat = mat.clone();
+    displayMat.side = THREE.DoubleSide;
+    displayMat.depthWrite = true;
+    displayMat.polygonOffset = false;
+    const mesh = new THREE.Mesh(geo, displayMat);
+    mesh.position.set(0, y0 * MM, z * MM);
+    mesh.renderOrder = 3;
+    group.add(mesh);
+    return mesh;
+}
+
+/** Side depth stops at back panel — avoids rear overlap stripe in preview. */
+function carcassSideDepthMm(D, T) {
+    const d = Number(D) || 0;
+    const t = Math.max(12, Number(T) || 16);
+    return Math.max(t * 2, d - 2 * t - BACK_PANEL_THICKNESS_MM - 4);
+}
+
+/** Front face Z of carcass opening (matches shortened side depth). */
+function carcassFrontFaceZ(D, carcassT) {
+    return carcassSideDepthMm(D, carcassT) / 2;
+}
+
+/** Center Z for facade / drawer front (flush to carcass front + FACADE_GAP). */
+function facadeFrontCenterZ(D, facadeT, carcassT) {
+    return carcassFrontFaceZ(D, carcassT) + FACADE_GAP + facadeT / 2;
+}
 /** Gas-lift flip-up door open angle (degrees from closed). */
 const GAS_LIFT_OPEN_DEG = 135;
 const GAS_LIFT_OPEN_RAD = -(GAS_LIFT_OPEN_DEG * Math.PI) / 180;
@@ -79,6 +131,19 @@ const BED_MDF_CARCASS_THICKNESS_MM = [16, 18, 19, 25, 28];
 
 /** @type {Map<string, THREE.Material>} */
 const materialPool = new Map();
+/** @type {Map<string, THREE.Texture>} */
+const texturePool = new Map();
+/** @type {Map<string, THREE.Material>} */
+const tiledMaterialPool = new Map();
+const imageTextureLoader = new THREE.TextureLoader();
+let textureQualityMode = detectMobile() ? 'mobile' : 'desktop';
+let grainRotationRad = 0;
+let show3dTextures = true;
+const MOBILE_TEXTURE_SIZE = 256;
+const DESKTOP_TEXTURE_SIZE = 512;
+const MOBILE_TEXTURE_ANISO = 2;
+const DESKTOP_TEXTURE_ANISO = 6;
+const DEFAULT_DECOR_BOARD_SIZE_MM = Object.freeze({ x: 2800, y: 2070 });
 /** Shared unit box — meshes use scale for dimensions (geometry reuse). */
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
 /** Shared unit cylinder (axis = Y, r=0.5, h=1, 8 segments) — scaled for round hardware. */
@@ -292,11 +357,447 @@ function hashColor(key, fallback = 0xc8b496) {
     return new THREE.Color().setHSL(hue, 0.28, 0.68);
 }
 
+function hashInt(key, fallback = 1) {
+    if (!key) return fallback;
+    let h = 0;
+    for (let i = 0; i < key.length; i += 1) h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+    return Math.abs(h) || fallback;
+}
+
+function extractDecorCode(rawKey) {
+    const key = String(rawKey || '').toUpperCase();
+    const m = key.match(/\b([A-Z]\d{3,4})\b/);
+    return m ? m[1] : key;
+}
+
+function classifyMaterialFamily(rawKey) {
+    const decor = extractDecorCode(rawKey);
+    if (!decor) return 'neutral';
+    if (decor.startsWith('H')) return 'wood';
+    if (decor.startsWith('U')) return 'solid';
+    if (decor.startsWith('W')) return 'solid';
+    if (decor.startsWith('F')) return 'stone';
+    if (decor.startsWith('S')) return 'stone';
+    if (decor.startsWith('B')) return 'dark';
+    return 'neutral';
+}
+
+function textureSizeForQuality() {
+    return textureQualityMode === 'mobile' ? MOBILE_TEXTURE_SIZE : DESKTOP_TEXTURE_SIZE;
+}
+
+function anisotropyForQuality() {
+    return textureQualityMode === 'mobile' ? MOBILE_TEXTURE_ANISO : DESKTOP_TEXTURE_ANISO;
+}
+
+function isPowerOfTwo(v) {
+    return Number.isInteger(v) && v > 0 && (v & (v - 1)) === 0;
+}
+
+function nextPowerOfTwo(v) {
+    return 2 ** Math.ceil(Math.log2(Math.max(1, v)));
+}
+
+function ensureRepeatSafeTextureImage(tex) {
+    const img = tex?.image;
+    if (!img) return;
+    const w = img.naturalWidth || img.videoWidth || img.width || 0;
+    const h = img.naturalHeight || img.videoHeight || img.height || 0;
+    if (!w || !h) return;
+    if (isPowerOfTwo(w) && isPowerOfTwo(h)) return;
+
+    // RepeatWrapping on non-power-of-two images can render black on some GPUs/WebGL paths.
+    // Convert to a reasonably sized power-of-two canvas once, then reuse.
+    const maxDim = textureQualityMode === 'mobile' ? 1024 : 2048;
+    const targetW = Math.min(maxDim, nextPowerOfTwo(w));
+    const targetH = Math.min(maxDim, nextPowerOfTwo(h));
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    tex.image = canvas;
+}
+
+function setupTextureCommon(tex, repeatX = 1, repeatY = 1) {
+    ensureRepeatSafeTextureImage(tex);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(repeatX, repeatY);
+    tex.anisotropy = anisotropyForQuality();
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+}
+
+function attachDefaultBoardSize(tex) {
+    if (!tex) return tex;
+    if (!tex.userData) tex.userData = {};
+    if (!tex.userData.boardSizeMm) {
+        tex.userData.boardSizeMm = { x: DEFAULT_DECOR_BOARD_SIZE_MM.x, y: DEFAULT_DECOR_BOARD_SIZE_MM.y };
+    }
+    return tex;
+}
+
+function createFacadeDemoTexture(seedKey) {
+    const size = textureSizeForQuality();
+    const seed = hashInt(seedKey, 17);
+    const family = classifyMaterialFamily(seedKey);
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const baseHue = family === 'wood'
+        ? 18 + (seed % 16)
+        : family === 'solid'
+            ? 10 + (seed % 35)
+            : family === 'stone'
+                ? 24 + (seed % 10)
+                : family === 'dark'
+                    ? 210 + (seed % 10)
+                    : 24 + (seed % 18);
+    const sat = family === 'solid' ? 7 : family === 'stone' ? 12 : family === 'dark' ? 10 : 34;
+    const lightA = family === 'dark' ? 24 : family === 'stone' ? 52 : family === 'solid' ? 66 : 48;
+    const lightB = family === 'dark' ? 28 : family === 'stone' ? 58 : family === 'solid' ? 70 : 56;
+    const lightC = family === 'dark' ? 21 : family === 'stone' ? 47 : family === 'solid' ? 62 : 45;
+
+    if (family === 'wood') {
+        const grad = ctx.createLinearGradient(0, 0, size, 0);
+        grad.addColorStop(0, `hsl(${baseHue}, ${sat}%, ${lightA}%)`);
+        grad.addColorStop(0.5, `hsl(${baseHue + 3}, ${Math.max(5, sat - 4)}%, ${lightB}%)`);
+        grad.addColorStop(1, `hsl(${baseHue - 2}, ${Math.max(5, sat - 2)}%, ${lightC}%)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+
+        // Build smooth per-column wood tone variation (no hard tile-like bands).
+        const col = new Float32Array(size);
+        let v = ((seed % 97) / 97) * 2 - 1;
+        for (let x = 0; x < size; x += 1) {
+            const noise = ((((seed + x * 37) % 1000) / 1000) * 2 - 1) * 0.085;
+            v = v * 0.92 + noise;
+            col[x] = v;
+        }
+        for (let x = 0; x < size; x += 1) {
+            const alpha = 0.055 + Math.abs(col[x]) * 0.07;
+            const tone = col[x] >= 0 ? `rgba(255,238,214,${alpha.toFixed(3)})` : `rgba(44,26,14,${alpha.toFixed(3)})`;
+            ctx.fillStyle = tone;
+            ctx.fillRect(x, 0, 1, size);
+        }
+
+        const veins = 44 + (seed % 18);
+        for (let i = 0; i < veins; i += 1) {
+            const x = ((seed * (i + 11)) % size);
+            const w = 1 + ((seed + i) % 2);
+            const alpha = 0.04 + ((i % 5) * 0.012);
+            ctx.fillStyle = `rgba(58,34,18,${alpha.toFixed(3)})`;
+            ctx.fillRect(x, 0, w, size);
+        }
+    } else {
+        // Stone/solid/dark should be non-directional; avoid vertical stripe artifacts.
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, `hsl(${baseHue}, ${sat}%, ${lightA}%)`);
+        grad.addColorStop(0.5, `hsl(${baseHue + 2}, ${Math.max(4, sat - 2)}%, ${lightB}%)`);
+        grad.addColorStop(1, `hsl(${baseHue - 2}, ${Math.max(4, sat - 1)}%, ${lightC}%)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+
+        const clouds = family === 'stone' ? 220 : 140;
+        for (let i = 0; i < clouds; i += 1) {
+            const x = (seed * (i + 3) * 19) % size;
+            const y = (seed * (i + 11) * 13) % size;
+            const r = family === 'stone' ? 6 + ((seed + i) % 22) : 4 + ((seed + i) % 12);
+            const alpha = family === 'stone' ? 0.035 + ((i % 5) * 0.008) : 0.02 + ((i % 4) * 0.006);
+            ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        const freckles = family === 'stone' ? 350 : 160;
+        for (let i = 0; i < freckles; i += 1) {
+            const x = (seed * (i + 5) * 7) % size;
+            const y = (seed * (i + 17) * 5) % size;
+            const dot = family === 'stone' ? 1 + ((seed + i) % 3) : 1;
+            const alpha = family === 'stone' ? 0.06 : 0.04;
+            ctx.fillStyle = `rgba(35,30,28,${alpha.toFixed(3)})`;
+            ctx.fillRect(x, y, dot, dot);
+        }
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    setupTextureCommon(tex, 2.2, 2.2);
+    return attachDefaultBoardSize(tex);
+}
+
+function createCountertopDemoTexture(seedKey) {
+    const size = textureSizeForQuality();
+    const seed = hashInt(seedKey, 31);
+    const family = classifyMaterialFamily(seedKey);
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const base = family === 'wood' ? 24 + (seed % 10) : 18 + (seed % 10);
+    const sat = family === 'wood' ? 18 : 8;
+    const light = family === 'wood' ? 52 : 71;
+    ctx.fillStyle = `hsl(${base}, ${sat}%, ${light}%)`;
+    ctx.fillRect(0, 0, size, size);
+
+    const dots = family === 'wood' ? 48 : 120;
+    for (let i = 0; i < dots; i += 1) {
+        const x = (seed * (i + 13) * 17) % size;
+        const y = (seed * (i + 19) * 11) % size;
+        const r = family === 'wood' ? 0.4 + ((seed + i) % 2) * 0.3 : 0.7 + ((seed + i) % 3) * 0.7;
+        const alpha = family === 'wood' ? 0.06 + ((i % 4) * 0.01) : 0.12 + ((i % 5) * 0.02);
+        ctx.fillStyle = `rgba(88, 84, 80, ${alpha.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    const scratches = family === 'wood' ? 34 : 24;
+    for (let i = 0; i < scratches; i += 1) {
+        const x1 = (seed * (i + 5) * 23) % size;
+        const y1 = (seed * (i + 9) * 7) % size;
+        const x2 = x1 + (((i % 2) ? 1 : -1) * (8 + (i % 6) * 3));
+        const y2 = y1 + (6 + (i % 4) * 2);
+        const alpha = family === 'wood' ? 0.06 + (i % 3) * 0.01 : 0.08 + (i % 3) * 0.02;
+        ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    setupTextureCommon(tex, 1.8, 1.8);
+    return attachDefaultBoardSize(tex);
+}
+
+function getDemoTexture(kind, seedKey) {
+    const key = `${kind}:${textureQualityMode}:${seedKey || ''}`;
+    if (texturePool.has(key)) return texturePool.get(key);
+    const tex = kind === 'countertop'
+        ? createCountertopDemoTexture(seedKey)
+        : createFacadeDemoTexture(seedKey);
+    if (tex) texturePool.set(key, tex);
+    return tex;
+}
+
+function parseHexColor(value) {
+    const v = String(value || '').trim();
+    if (!/^#[0-9a-f]{6}$/i.test(v)) return null;
+    return new THREE.Color(v);
+}
+
+function isTextureImageReady(tex) {
+    const img = tex?.image;
+    if (!img || tex.userData.failed) return false;
+    const w = img.naturalWidth || img.width || 0;
+    const h = img.naturalHeight || img.height || 0;
+    return w > 1 && h > 1;
+}
+
+function invalidateTextureDependentCaches() {
+    materialPool.clear();
+    tiledMaterialPool.clear();
+}
+
+function requestModelRebuildAfterTexture() {
+    const inst = typeof ensureInstance === 'function' ? ensureInstance() : null;
+    if (!inst?.lastParams) return;
+    inst.lastKey = '';
+    inst.rebuildModel(inst.lastParams);
+}
+
+/** Web-friendly preview for heavy Egger sheets (original may be 20–90 MB). */
+function toPreviewEggerTextureUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    if (url.includes('egger-textures-preview/')) return url;
+    if (!url.includes('assets/egger-textures/')) return url;
+    return url.replace('assets/egger-textures/', 'assets/egger-textures-preview/');
+}
+
+function getImageTexture(url, options = {}) {
+    const canonicalUrl = String(url || '');
+    const key = `img:${canonicalUrl}`;
+    if (texturePool.has(key)) return texturePool.get(key);
+
+    const previewUrl = options.skipPreview ? null : toPreviewEggerTextureUrl(canonicalUrl);
+    const loadUrl = previewUrl && previewUrl !== canonicalUrl ? previewUrl : canonicalUrl;
+
+    const tex = imageTextureLoader.load(
+        loadUrl,
+        (loaded) => {
+            setupTextureCommon(loaded, loaded.repeat.x || 1, loaded.repeat.y || 1);
+            loaded.needsUpdate = true;
+            invalidateTextureDependentCaches();
+            requestModelRebuildAfterTexture();
+        },
+        undefined,
+        () => {
+            if (loadUrl !== canonicalUrl && !options.skipPreview) {
+                const fullTex = getImageTexture(canonicalUrl, { skipPreview: true });
+                texturePool.set(key, fullTex);
+                invalidateTextureDependentCaches();
+                requestModelRebuildAfterTexture();
+                return;
+            }
+            tex.userData.failed = true;
+            invalidateTextureDependentCaches();
+            requestModelRebuildAfterTexture();
+        }
+    );
+    setupTextureCommon(tex, 1, 1);
+    attachDefaultBoardSize(tex);
+    texturePool.set(key, tex);
+    return tex;
+}
+
+function pickDecorTexture({ decorCode, decorTextureUrl, decorTextureMissing }) {
+    const mapped = decorTextureUrl
+        ? getImageTexture(decorTextureUrl)
+        : getMappedDecorTexture(decorCode);
+    if (mapped) {
+        if (mapped.userData.failed) {
+            return getMissingDecorPlaceholderTexture(decorCode || 'ERR');
+        }
+        return mapped;
+    }
+    if (decorTextureMissing) return getMissingDecorPlaceholderTexture(decorCode);
+    return null;
+}
+
+function getMappedDecorTexture(decorCode) {
+    const decor = String(decorCode || '').toUpperCase();
+    if (decor === 'H3730') {
+        const tex = getImageTexture('assets/textures/H3730.png');
+        tex.userData.decorCode = 'H3730';
+        // Source board in sample image: approx. 2311 x 1300 mm.
+        tex.userData.boardSizeMm = { x: 2311, y: 1300 };
+        return tex;
+    }
+    if (decor === 'H1277') {
+        const tex = getImageTexture('assets/textures/H1277.png');
+        tex.userData.decorCode = 'H1277';
+        // Egger decor sheet size.
+        tex.userData.boardSizeMm = { x: 2800, y: 2070 };
+        return tex;
+    }
+    if (decor === 'H1307') {
+        const tex = getImageTexture('assets/textures/H1307.png');
+        tex.userData.decorCode = 'H1307';
+        // Egger decor sheet size.
+        tex.userData.boardSizeMm = { x: 2800, y: 2070 };
+        return tex;
+    }
+    if (/^[A-Z]\d{3,4}$/.test(decor)) {
+        const tex = getImageTexture(`assets/egger-textures/${decor}.jpg`);
+        tex.userData.decorCode = decor;
+        // Egger decor sheet size.
+        tex.userData.boardSizeMm = { x: 2800, y: 2070 };
+        return tex;
+    }
+    return null;
+}
+
+function getMissingDecorPlaceholderTexture(decorCode) {
+    const code = String(decorCode || 'MISSING').toUpperCase();
+    const key = `missing:${textureQualityMode}:${code}`;
+    if (texturePool.has(key)) return texturePool.get(key);
+
+    const size = textureQualityMode === 'mobile' ? 256 : 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(0, 0, size, size);
+    const cell = Math.max(24, Math.floor(size / 10));
+    for (let y = 0; y < size; y += cell) {
+        for (let x = 0; x < size; x += cell) {
+            const odd = ((x / cell) + (y / cell)) % 2 === 1;
+            ctx.fillStyle = odd ? '#9ca3af' : '#6b7280';
+            ctx.fillRect(x, y, cell, cell);
+        }
+    }
+
+    ctx.fillStyle = 'rgba(220,38,38,0.9)';
+    const barH = Math.max(18, Math.floor(size * 0.1));
+    ctx.fillRect(0, Math.floor(size * 0.45), size, barH);
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${Math.max(16, Math.floor(size * 0.06))}px sans-serif`;
+    ctx.fillText(`NO TEX ${code}`, size / 2, Math.floor(size * 0.5));
+
+    const tex = new THREE.CanvasTexture(canvas);
+    setupTextureCommon(tex, 1, 1);
+    tex.userData.decorCode = code;
+    tex.userData.isMissingPlaceholder = true;
+    texturePool.set(key, tex);
+    return tex;
+}
+
+function tileSizeMmForQuality() {
+    // Larger tile size => fewer repeats on panel => less "compressed" texture look.
+    return textureQualityMode === 'mobile' ? 420 : 360;
+}
+
+function getTiledMaterial(baseMat, dimAmm, dimBmm, axis = 'front') {
+    if (!show3dTextures || !baseMat?.map) return baseMat;
+    const a = Math.max(1, Number(dimAmm) || 1);
+    const b = Math.max(1, Number(dimBmm) || 1);
+    const boardX = Number(baseMat.map?.userData?.boardSizeMm?.x) || 0;
+    const boardY = Number(baseMat.map?.userData?.boardSizeMm?.y) || 0;
+    const minRepeat = axis === 'top' ? 0.01 : 0.01;
+    const tileMm = tileSizeMmForQuality();
+    let repX;
+    let repY;
+    if (baseMat.map?.userData?.isMissingPlaceholder) {
+        const markMm = 280;
+        repX = Math.max(2, a / markMm);
+        repY = Math.max(2, b / markMm);
+    } else {
+        repX = boardX > 0 ? Math.max(minRepeat, a / boardX) : Math.max(minRepeat, a / tileMm);
+        repY = boardY > 0 ? Math.max(minRepeat, b / boardY) : Math.max(minRepeat, b / tileMm);
+    }
+    const key = `${baseMat.uuid}:${axis}:${repX.toFixed(2)}:${repY.toFixed(2)}:${textureQualityMode}:${grainRotationRad.toFixed(4)}`;
+    if (tiledMaterialPool.has(key)) return tiledMaterialPool.get(key);
+
+    const mat = baseMat.clone();
+    const map = baseMat.map.clone();
+    const useRepeat = repX > 1.0001 || repY > 1.0001;
+    map.wrapS = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+    map.wrapT = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+    map.repeat.set(repX, repY);
+    map.center.set(0.5, 0.5);
+    map.rotation = grainRotationRad;
+    map.anisotropy = anisotropyForQuality();
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.needsUpdate = true;
+    mat.map = map;
+    mat.needsUpdate = true;
+    tiledMaterialPool.set(key, mat);
+    return mat;
+}
+
 function getMaterial(name, hexOrKey, opts = {}) {
     const bedRev = name.startsWith('bed') || name === 'mattress' ? BED_MESH_MAT_REV : 0;
-    const id = `${name}:${hexOrKey}:${opts.edge ? 1 : 0}:${opts.emissive ? 1 : 0}:${opts.transparent ? 1 : 0}:${bedRev}`;
+    const id = `${name}:${hexOrKey}:${opts.edge ? 1 : 0}:${opts.emissive ? 1 : 0}:${opts.transparent ? 1 : 0}:${opts.decorCode || ''}:${opts.decorHex || ''}:${opts.decorTextureUrl || ''}:${opts.decorTextureMissing ? 1 : 0}:${show3dTextures ? 1 : 0}:${bedRev}`;
     if (materialPool.has(id)) return materialPool.get(id);
-    const color = typeof hexOrKey === 'number' ? new THREE.Color(hexOrKey) : hashColor(String(hexOrKey));
+    const mappedColor = parseHexColor(opts.decorHex);
+    const color = mappedColor
+        ? mappedColor
+        : (typeof hexOrKey === 'number' ? new THREE.Color(hexOrKey) : hashColor(String(hexOrKey)));
     if (opts.edge) color.offsetHSL(0.02, 0.08, -0.06);
     if (name === 'facade' || name === 'bed-facade') color.offsetHSL(0, -0.04, 0.1);
     if (name === 'bed-rail') color.offsetHSL(0, 0.02, -0.1);
@@ -315,7 +816,22 @@ function getMaterial(name, hexOrKey, opts = {}) {
         depthWrite: !isMattress,
         polygonOffset: false,
     });
-    materialPool.set(id, mat);
+    if (show3dTextures) {
+        if (name === 'facade-door' || name === 'facade' || name === 'bed-facade' || name === 'carcass' || name === 'bed-carcass' || name === 'back') {
+            const facadeSeed = opts.decorCode || String(hexOrKey);
+            const facadeTex = pickDecorTexture(opts) || getDemoTexture('facade', facadeSeed);
+            if (facadeTex) mat.map = facadeTex;
+        }
+        if (name === 'countertop') {
+            const ctSeed = opts.decorCode || String(hexOrKey);
+            const ctTex = pickDecorTexture(opts) || getDemoTexture('countertop', ctSeed);
+            if (ctTex) mat.map = ctTex;
+        }
+    }
+    const decorUrl = show3dTextures ? (opts.decorTextureUrl || '') : '';
+    const decorTex = decorUrl ? texturePool.get(`img:${decorUrl}`) : null;
+    const pendingDecorImage = decorUrl && decorTex && !isTextureImageReady(decorTex) && !decorTex.userData.failed;
+    if (!pendingDecorImage) materialPool.set(id, mat);
     return mat;
 }
 
@@ -331,14 +847,137 @@ function dimAccentColor() {
     return isNeonTheme() ? '#22ff88' : '#2d6a4f';
 }
 
+const TEXTURE_SCALE_STEPS = [0.125, 0.2, 0.25, 0.35, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6];
+
+function inferMeshTileDimsMm(mesh) {
+    const sx = mesh.scale.x / MM;
+    const sy = mesh.scale.y / MM;
+    const sz = mesh.scale.z / MM;
+    const axes = [
+        { v: sx, n: 'x' },
+        { v: sy, n: 'y' },
+        { v: sz, n: 'z' },
+    ].sort((a, b) => a.v - b.v);
+    const thinAxis = axes[0].n;
+    let axis = 'front';
+    if (thinAxis === 'y' && axes[2].v >= axes[1].v * 0.85) axis = 'top';
+    return { dimAmm: axes[1].v, dimBmm: axes[2].v, axis };
+}
+
+function captureMeshTextureBase(mesh) {
+    if (!mesh?.material?.map) return;
+    if (!mesh.userData.tileDimA) {
+        const dims = inferMeshTileDimsMm(mesh);
+        mesh.userData.tileDimA = dims.dimAmm;
+        mesh.userData.tileDimB = dims.dimBmm;
+        mesh.userData.tileAxis = dims.axis;
+    }
+    if (mesh.userData.ldspBaseMaterial?.map) return;
+    const mat = mesh.material.clone();
+    const map = mesh.material.map.clone();
+    map.repeat.set(1, 1);
+    map.offset.set(0, 0);
+    map.rotation = 0;
+    map.center.set(0.5, 0.5);
+    map.needsUpdate = true;
+    mat.map = map;
+    mat.needsUpdate = true;
+    mesh.userData.ldspBaseMaterial = mat;
+}
+
+function computeTileRepeat(dimAmm, dimBmm, axis, baseMat) {
+    const a = Math.max(1, Number(dimAmm) || 1);
+    const b = Math.max(1, Number(dimBmm) || 1);
+    const boardX = Number(baseMat.map?.userData?.boardSizeMm?.x) || 0;
+    const boardY = Number(baseMat.map?.userData?.boardSizeMm?.y) || 0;
+    const minRepeat = 0.01;
+    const tileMm = tileSizeMmForQuality();
+    if (baseMat.map?.userData?.isMissingPlaceholder) {
+        const markMm = 280;
+        return {
+            repX: Math.max(2, a / markMm),
+            repY: Math.max(2, b / markMm),
+        };
+    }
+    return {
+        repX: boardX > 0 ? Math.max(minRepeat, a / boardX) : Math.max(minRepeat, a / tileMm),
+        repY: boardY > 0 ? Math.max(minRepeat, b / boardY) : Math.max(minRepeat, b / tileMm),
+    };
+}
+
+function applyMeshTextureState(mesh, extraDeg, textureScale) {
+    if (!show3dTextures) return;
+    captureMeshTextureBase(mesh);
+    const baseMat = mesh.userData.ldspBaseMaterial;
+    if (!baseMat?.map) return;
+
+    const dimA = mesh.userData.tileDimA;
+    const dimB = mesh.userData.tileDimB;
+    const axis = mesh.userData.tileAxis || 'front';
+    const scale = Math.max(0.25, Math.min(4, Number(textureScale) || 1));
+    const deg = ((Number(extraDeg) || 0) % 360 + 360) % 360;
+
+    const { repX, repY } = computeTileRepeat(dimA, dimB, axis, baseMat);
+    const scaledRepX = repX / scale;
+    const scaledRepY = repY / scale;
+
+    const mat = baseMat.clone();
+    const map = baseMat.map.clone();
+    const useRepeat = scaledRepX > 1.0001 || scaledRepY > 1.0001;
+    map.wrapS = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+    map.wrapT = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+    map.repeat.set(scaledRepX, scaledRepY);
+    map.center.set(0.5, 0.5);
+    map.rotation = grainRotationRad + (deg * Math.PI) / 180;
+    map.anisotropy = anisotropyForQuality();
+    map.needsUpdate = true;
+    mat.map = map;
+    mat.needsUpdate = true;
+
+    if (mesh.userData.hoverMaterial) {
+        mesh.userData.hoverMaterial.dispose?.();
+        mesh.userData.hoverMaterial = null;
+    }
+    mesh.userData.baseMaterial = mat;
+    mesh.userData.baseMapRotation = grainRotationRad;
+    mesh.userData.grainRotationDeg = deg;
+    mesh.userData.textureScale = scale;
+    mesh.material = mat;
+}
+
+function applyMeshGrain(mesh, extraDeg) {
+    const scale = Number(mesh.userData.textureScale) || 1;
+    applyMeshTextureState(mesh, extraDeg, scale);
+}
+
+function grainOverrideKey(mesh) {
+    if (mesh.userData.grainKey) return mesh.userData.grainKey;
+    const px = Math.round(mesh.position.x / MM);
+    const py = Math.round(mesh.position.y / MM);
+    const pz = Math.round(mesh.position.z / MM);
+    const sx = Math.round(mesh.scale.x / MM);
+    const sy = Math.round(mesh.scale.y / MM);
+    const sz = Math.round(mesh.scale.z / MM);
+    const decor = mesh.material?.map?.userData?.decorCode
+        || mesh.userData.baseMaterial?.map?.userData?.decorCode
+        || '';
+    return `${decor}:${px},${py},${pz}:${sx}x${sy}x${sz}`;
+}
+
 function setFacadeHighlight(mesh, on) {
     if (!mesh) return;
     if (!mesh.userData.baseMaterial) mesh.userData.baseMaterial = mesh.material;
     if (on) {
         if (!mesh.userData.hoverMaterial) {
-            mesh.userData.hoverMaterial = mesh.userData.baseMaterial.clone();
-            mesh.userData.hoverMaterial.emissive.setHex(isNeonTheme() ? 0x22ff88 : 0x448866);
-            mesh.userData.hoverMaterial.emissiveIntensity = isNeonTheme() ? 0.75 : 0.5;
+            const hoverMat = mesh.userData.baseMaterial.clone();
+            if (hoverMat.map && mesh.userData.baseMaterial.map) {
+                hoverMat.map = mesh.userData.baseMaterial.map.clone();
+                hoverMat.map.copy(mesh.userData.baseMaterial.map);
+                hoverMat.map.needsUpdate = true;
+            }
+            hoverMat.emissive.setHex(isNeonTheme() ? 0x22ff88 : 0x448866);
+            hoverMat.emissiveIntensity = isNeonTheme() ? 0.75 : 0.5;
+            mesh.userData.hoverMaterial = hoverMat;
         }
         mesh.material = mesh.userData.hoverMaterial;
     } else {
@@ -346,11 +985,12 @@ function setFacadeHighlight(mesh, on) {
     }
 }
 
-function addPanel(group, w, h, d, mat, x, y, z) {
+function addPanel(group, w, h, d, mat, x, y, z, opts = {}) {
     if (w <= 0 || h <= 0 || d <= 0) return null;
     const mesh = new THREE.Mesh(unitBox, mat);
     mesh.scale.set(w * MM, h * MM, d * MM);
     mesh.position.set(x * MM, y * MM, z * MM);
+    if (opts.renderOrder != null) mesh.renderOrder = opts.renderOrder;
     group.add(mesh);
     return mesh;
 }
@@ -590,6 +1230,7 @@ class Furniture3D {
         this.isMobile = detectMobile();
         this.coarsePointer = detectCoarsePointer();
         this.dimensionsVisible = true;
+        this.texturesVisible = true;
         this.mobileExpanded = false;
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
@@ -597,6 +1238,12 @@ class Furniture3D {
         this.hingeDoors = [];
         this.hoverableMeshes = [];
         this.drawerSlides = [];
+        this.texturedMeshes = [];
+        this.elementGrainDeg = new Map();
+        this.elementTextureScale = new Map();
+        this.perElementGrain = false;
+        this.perElementTextureScale = false;
+        this.interactiveDoors = true;
         this.hoveredMesh = null;
         this.hoveredEntry = null;
         this._clickPending = null;
@@ -605,6 +1252,7 @@ class Furniture3D {
         this._onPointerUp = (e) => this.handlePointerUp(e);
         this._onPointerMove = (e) => this.handlePointerMove(e);
         this._onPointerLeave = () => this.handlePointerLeave();
+        this._onWheel = (e) => this.handleWheel(e);
     }
 
     init() {
@@ -689,6 +1337,7 @@ class Furniture3D {
         this.renderer.domElement.addEventListener('pointerup', this._onPointerUp);
         this.renderer.domElement.addEventListener('pointermove', this._onPointerMove);
         this.renderer.domElement.addEventListener('pointerleave', this._onPointerLeave);
+        this.renderer.domElement.addEventListener('wheel', this._onWheel, { passive: false });
 
         this.running = true;
         this.lastFrameTime = performance.now();
@@ -708,11 +1357,45 @@ class Furniture3D {
             this.controls.zoomSpeed = 1;
             this.controls.maxPolarAngle = Math.PI / 2;
         }
+        this.controls.enableZoom = !this.perElementTextureScale;
     }
 
     setOptions(opts = {}) {
         if (typeof opts.quality === 'string') {
             this.isMobile = opts.quality === 'mobile' || detectMobile();
+            const nextQuality = this.isMobile ? 'mobile' : 'desktop';
+            if (textureQualityMode !== nextQuality) {
+                textureQualityMode = nextQuality;
+                materialPool.clear();
+                tiledMaterialPool.clear();
+            }
+        }
+        if (Number.isFinite(opts.grainRotationDeg)) {
+            const nextRad = (Number(opts.grainRotationDeg) * Math.PI) / 180;
+            if (Math.abs(nextRad - grainRotationRad) > 1e-6) {
+                grainRotationRad = nextRad;
+                tiledMaterialPool.clear();
+                this.applyGlobalGrainRotation();
+            }
+        }
+        if (typeof opts.perElementGrain === 'boolean') {
+            const modeChanged = this.perElementGrain !== opts.perElementGrain;
+            this.perElementGrain = opts.perElementGrain;
+            if (modeChanged) this.handlePointerLeave();
+        }
+        if (typeof opts.perElementTextureScale === 'boolean') {
+            const modeChanged = this.perElementTextureScale !== opts.perElementTextureScale;
+            this.perElementTextureScale = opts.perElementTextureScale;
+            if (modeChanged) this.handlePointerLeave();
+        }
+        if (typeof opts.interactiveDoors === 'boolean') {
+            const wasInteractiveDoors = this.interactiveDoors;
+            const modeChanged = this.interactiveDoors !== opts.interactiveDoors;
+            this.interactiveDoors = opts.interactiveDoors;
+            if (wasInteractiveDoors && !this.interactiveDoors) {
+                this.closeAllInteractiveParts();
+            }
+            if (modeChanged) this.handlePointerLeave();
         }
         if (typeof opts.mobileExpanded === 'boolean') {
             this.mobileExpanded = opts.mobileExpanded;
@@ -720,11 +1403,24 @@ class Furniture3D {
         if (typeof opts.dimensionsVisible === 'boolean') {
             this.dimensionsVisible = opts.dimensionsVisible;
         }
+        if (typeof opts.texturesVisible === 'boolean') {
+            this.setTexturesVisible(opts.texturesVisible);
+        }
         if (this.dimGroup) this.dimGroup.visible = this.dimensionsVisible;
         if (this.renderer) {
             this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.25 : 2));
         }
         this.applyControlProfile();
+    }
+
+    setTexturesVisible(visible) {
+        const next = !!visible;
+        if (this.texturesVisible === next && show3dTextures === next) return;
+        this.texturesVisible = next;
+        show3dTextures = next;
+        materialPool.clear();
+        tiledMaterialPool.clear();
+        if (this.lastParams) this.rebuildModel(this.lastParams);
     }
 
     setDimensionsVisible(visible) {
@@ -764,13 +1460,120 @@ class Furniture3D {
         return this.hoverableMeshes.find((entry) => entry.mesh === hitMesh) ?? null;
     }
 
+    pickTexturedMesh(event) {
+        if (!this.camera || !this.renderer || !this.texturedMeshes.length) return null;
+        this.updatePointerFromEvent(event);
+        const hits = this.raycaster.intersectObjects(this.texturedMeshes, false);
+        if (!hits.length) return null;
+        return hits[0].object || null;
+    }
+
+    snapshotElementTextureStates() {
+        const grainSnap = new Map(this.elementGrainDeg);
+        const scaleSnap = new Map(this.elementTextureScale);
+        for (const mesh of this.texturedMeshes) {
+            const key = grainOverrideKey(mesh);
+            const deg = Number(mesh.userData.grainRotationDeg || 0);
+            const scale = Number(mesh.userData.textureScale || 1);
+            if (deg) grainSnap.set(key, deg);
+            else grainSnap.delete(key);
+            if (scale !== 1) scaleSnap.set(key, scale);
+            else scaleSnap.delete(key);
+        }
+        return { grainSnap, scaleSnap };
+    }
+
+    applyAllElementTextureStates() {
+        for (const mesh of this.texturedMeshes) {
+            const key = grainOverrideKey(mesh);
+            const deg = this.elementGrainDeg.get(key) || 0;
+            const scale = this.elementTextureScale.get(key) || 1;
+            if (deg || scale !== 1) applyMeshTextureState(mesh, deg, scale);
+        }
+    }
+
+    applyGlobalGrainRotation() {
+        if (!this.texturedMeshes.length) return;
+        tiledMaterialPool.clear();
+        for (const mesh of this.texturedMeshes) {
+            const key = grainOverrideKey(mesh);
+            const deg = this.elementGrainDeg.get(key) || 0;
+            const scale = this.elementTextureScale.get(key) || 1;
+            applyMeshTextureState(mesh, deg, scale);
+        }
+    }
+
+    rotateMeshGrain(mesh) {
+        if (!mesh?.material?.map) return;
+        const wasHovered = this.hoveredMesh === mesh;
+        if (wasHovered) setFacadeHighlight(mesh, false);
+
+        const currentDeg = Number(mesh.userData.grainRotationDeg || 0);
+        const nextDeg = (currentDeg + 90) % 360;
+        const key = grainOverrideKey(mesh);
+        const scale = Number(mesh.userData.textureScale) || 1;
+        if (nextDeg) this.elementGrainDeg.set(key, nextDeg);
+        else this.elementGrainDeg.delete(key);
+        applyMeshTextureState(mesh, nextDeg, scale);
+
+        if (wasHovered) setFacadeHighlight(mesh, true);
+    }
+
+    scaleMeshTexture(mesh, direction) {
+        if (!mesh?.material?.map) return;
+
+        let current = Number(mesh.userData.textureScale) || 1;
+        let idx = TEXTURE_SCALE_STEPS.findIndex((s) => Math.abs(s - current) < 0.02);
+        if (idx < 0) idx = TEXTURE_SCALE_STEPS.indexOf(1);
+        const nextIdx = Math.max(0, Math.min(TEXTURE_SCALE_STEPS.length - 1, idx + direction));
+        const nextScale = TEXTURE_SCALE_STEPS[nextIdx];
+        const key = grainOverrideKey(mesh);
+        const deg = Number(mesh.userData.grainRotationDeg || 0);
+        if (nextScale === 1) this.elementTextureScale.delete(key);
+        else this.elementTextureScale.set(key, nextScale);
+        applyMeshTextureState(mesh, deg, nextScale);
+    }
+
+    collectTexturedMeshes() {
+        this.texturedMeshes = [];
+        if (!this.root) return;
+        this.root.traverse((child) => {
+            if (!child?.isMesh) return;
+            if (!child.material?.map) return;
+            captureMeshTextureBase(child);
+            this.texturedMeshes.push(child);
+        });
+    }
+
+    handleWheel(event) {
+        if (!this.perElementTextureScale || !show3dTextures) return;
+        const mesh = this.pickTexturedMesh(event);
+        if (!mesh?.material?.map) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.scaleMeshTexture(mesh, event.deltaY < 0 ? 1 : -1);
+    }
+
     handlePointerMove(event) {
         if (this._clickPending) return;
         const now = performance.now();
         if (now - this._pickMoveTimer < 48) return;
         this._pickMoveTimer = now;
-        const picked = this.pickInteractable(event);
-        const mesh = picked?.mesh ?? null;
+
+        if (this.perElementTextureScale) {
+            const scaleMesh = this.pickTexturedMesh(event);
+            this.renderer.domElement.style.cursor = scaleMesh ? 'ns-resize' : 'default';
+            if (this.hoveredMesh) {
+                setFacadeHighlight(this.hoveredMesh, false);
+                this.hoveredMesh = null;
+                this.hoveredEntry = null;
+            }
+            return;
+        }
+
+        const picked = this.perElementGrain ? null : this.pickInteractable(event);
+        const grainMesh = this.perElementGrain ? this.pickTexturedMesh(event) : null;
+        const mesh = grainMesh || picked?.mesh || null;
         if (mesh !== this.hoveredMesh) {
             if (this.hoveredMesh) setFacadeHighlight(this.hoveredMesh, false);
             this.hoveredMesh = mesh;
@@ -789,6 +1592,14 @@ class Furniture3D {
 
     handlePointerDown(event) {
         if (event.button !== 0) return;
+        if (this.perElementTextureScale) return;
+        if (this.perElementGrain) {
+            const mesh = this.pickTexturedMesh(event);
+            if (!mesh) return;
+            this._clickPending = { kind: 'grain', mesh, x: event.clientX, y: event.clientY };
+            this.controls.enabled = false;
+            return;
+        }
         const picked = this.pickInteractable(event);
         if (!picked) return;
         this._clickPending = picked;
@@ -798,16 +1609,25 @@ class Furniture3D {
     handlePointerUp(event) {
         if (event.button !== 0) return;
         if (this._clickPending) {
-            const picked = this.pickInteractable(event);
-            if (picked && picked.mesh === this._clickPending.mesh) {
-                if (picked.state) {
-                    picked.state.baseTargetT = picked.state.baseTargetT > 0.5 ? 0 : 1;
-                    picked.state.targetT = picked.state.baseTargetT;
-                } else if (picked.kind === 'drawer' && picked.drawerIndex != null) {
-                    const slide = this.drawerSlides[picked.drawerIndex];
-                    if (slide) {
-                        slide.baseTargetT = slide.baseTargetT > 0.5 ? 0 : 1;
-                        slide.targetT = slide.baseTargetT;
+            if (this._clickPending.kind === 'grain') {
+                const mesh = this.pickTexturedMesh(event);
+                const dx = event.clientX - (this._clickPending.x ?? event.clientX);
+                const dy = event.clientY - (this._clickPending.y ?? event.clientY);
+                if (mesh && mesh === this._clickPending.mesh && dx * dx + dy * dy < 36) {
+                    this.rotateMeshGrain(mesh);
+                }
+            } else if (this.interactiveDoors) {
+                const picked = this.pickInteractable(event);
+                if (picked && picked.mesh === this._clickPending.mesh) {
+                    if (picked.state) {
+                        picked.state.baseTargetT = picked.state.baseTargetT > 0.5 ? 0 : 1;
+                        picked.state.targetT = picked.state.baseTargetT;
+                    } else if (picked.kind === 'drawer' && picked.drawerIndex != null) {
+                        const slide = this.drawerSlides[picked.drawerIndex];
+                        if (slide) {
+                            slide.baseTargetT = slide.baseTargetT > 0.5 ? 0 : 1;
+                            slide.targetT = slide.baseTargetT;
+                        }
                     }
                 }
             }
@@ -859,6 +1679,27 @@ class Furniture3D {
             }
             const eased = ease(slide.t);
             slide.group.position.z = eased * slide.slideMm * MM;
+        }
+    }
+
+    closeAllInteractiveParts() {
+        for (const lift of this.gasLiftDoors) {
+            lift.baseTargetT = 0;
+            lift.targetT = 0;
+            lift.t = 0;
+            this.animateDoorState(lift, 0);
+        }
+        for (const hinge of this.hingeDoors) {
+            hinge.baseTargetT = 0;
+            hinge.targetT = 0;
+            hinge.t = 0;
+            this.animateDoorState(hinge, 0);
+        }
+        for (const slide of this.drawerSlides) {
+            slide.baseTargetT = 0;
+            slide.targetT = 0;
+            slide.t = 0;
+            slide.group.position.z = 0;
         }
     }
 
@@ -1132,10 +1973,16 @@ class Furniture3D {
         if (!this.scene) this.init();
         if (!this.root) return;
 
+        const { grainSnap, scaleSnap } = this.snapshotElementTextureStates();
+
         this.lastParams = params;
         if (params.quality === 'mobile') this.isMobile = true;
         if (typeof params.dimensionsVisible === 'boolean') {
             this.dimensionsVisible = params.dimensionsVisible;
+        }
+        if (typeof params.texturesVisible === 'boolean') {
+            this.texturesVisible = params.texturesVisible;
+            show3dTextures = params.texturesVisible;
         }
         this.lastKey = JSON.stringify(params);
 
@@ -1144,6 +1991,7 @@ class Furniture3D {
         this.hingeDoors = [];
         this.drawerSlides = [];
         this.hoverableMeshes = [];
+        this.texturedMeshes = [];
         if (this.hoveredMesh) {
             setFacadeHighlight(this.hoveredMesh, false);
             this.hoveredMesh = null;
@@ -1159,6 +2007,10 @@ class Furniture3D {
 
         if (params.mode === 'beds') this.buildBed(params);
         else this.buildCloset(params);
+        this.elementGrainDeg = grainSnap;
+        this.elementTextureScale = scaleSnap;
+        this.collectTexturedMeshes();
+        this.applyAllElementTextureStates();
 
         const bounds = this.getModelBoundsMm();
         this.buildDimensions(params, bounds);
@@ -1201,10 +2053,26 @@ class Furniture3D {
     buildCloset(p) {
         const T = Math.max(12, p.carcassT || 16);
         const facadeT = Math.max(12, p.facadeT || 16);
-        const carcassMat = getMaterial('carcass', p.material || 'ldsp');
+        const carcassMat = getMaterial('carcass', p.material || 'ldsp', {
+            decorCode: p.carcassDecorCode,
+            decorHex: p.carcassDecorHex,
+            decorTextureUrl: p.carcassDecorTextureUrl,
+            decorTextureMissing: p.carcassDecorTextureMissing,
+        });
         const edgeMat = getMaterial('edge', p.edge || p.material || 'edge', { edge: true });
-        const doorMat = getMaterial('facade-door', p.facadeMaterial || p.material || 'facade-door');
-        const backMat = getMaterial('back', 0xd8dde0);
+        const doorMat = getMaterial('facade-door', p.facadeMaterial || p.material || 'facade-door', {
+            decorCode: p.facadeDecorCode,
+            decorHex: p.facadeDecorHex,
+            decorTextureUrl: p.facadeDecorTextureUrl,
+            decorTextureMissing: p.facadeDecorTextureMissing,
+        });
+        const bp = p.backPanelMaterial || {};
+        const backMat = getMaterial('back', bp.material || p.material || 'back', {
+            decorCode: bp.decorCode,
+            decorHex: bp.decorHex,
+            decorTextureUrl: bp.decorTextureUrl,
+            decorTextureMissing: bp.decorTextureMissing,
+        });
 
         const stack = getClosetStackMetrics(p);
         const { hasUpper, lower, upper, ctT, upperBaseY, dMm } = stack;
@@ -1254,7 +2122,7 @@ class Furniture3D {
 
         if (hasUpper) {
             if (upperMode === 'gas') {
-                this.addDoor(upperGroup, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
+                this.addDoor(upperGroup, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, true, { interactive: true, startOpen: false, carcassT: T });
             } else if (upperMode === 'hinge') {
                 const upperPos = p.hinges?.upper?.position || 'both';
                 this.addDoor(upperGroup, upper.w, upper.h, facadeT, upper.d, upperCenterY, doorMat, false, {
@@ -1266,13 +2134,19 @@ class Furniture3D {
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
-            this.addDrawers(lowerGroup, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, { interactive: true, drawerSpec: p.drawers?.spec, drawerTypes: p.drawers?.types || [] });
+            this.addDrawers(lowerGroup, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, {
+                interactive: true,
+                drawerSpec: p.drawers?.spec,
+                drawerTypes: p.drawers?.types || [],
+                carcassT: T,
+            });
         } else if (lowerMode === 'gas') {
-            this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: true, carcassT: T });
+            this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: false, carcassT: T });
         } else if (lowerMode === 'hinge') {
             if (p.lowerSplitDoor) {
                 this.addSplitDoors(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
                     interactive: true,
+                    carcassT: T,
                     ...lowerHingeOpts,
                 });
             } else {
@@ -1280,6 +2154,7 @@ class Furniture3D {
                 this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, false, {
                     interactive: true,
                     hingeSide: lowerPos === 'right' ? 'right' : 'left',
+                    carcassT: T,
                     ...lowerHingeOpts,
                 });
             }
@@ -1294,27 +2169,42 @@ class Furniture3D {
         const side = ct.sideOverhang || 0;
         const ctW = lower.w + side * 2;
         const ctD = lower.d + front;
-        const ctMat = getMaterial('countertop', ct.material || 'countertop');
+        const ctMat = getMaterial('countertop', ct.material || 'countertop', {
+            decorCode: ct.decorCode,
+            decorHex: ct.decorHex,
+            decorTextureUrl: ct.decorTextureUrl,
+            decorTextureMissing: ct.decorTextureMissing,
+        });
+        const ctTopMat = getTiledMaterial(ctMat, ctW, ctD, 'top');
         const isRoundedFront = Math.abs(ctT - 38) < 0.5;
+        const ctSlabMat = ctTopMat?.map ? ctTopMat : ctMat;
         if (isRoundedFront) {
-            addRoundedCountertop(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2, 5);
+            addRoundedCountertop(targetGroup, ctW, ctT, ctD, ctSlabMat, 0, lower.h + ctT / 2, front / 2, 5);
         } else {
-            addPanel(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2);
+            addPanel(targetGroup, ctW, ctT, ctD, ctTopMat, 0, lower.h + ctT / 2, front / 2);
             // Straight front edge for 12/20 mm countertops, same color as slab.
             addEdgeBand(targetGroup, ctW, ctT, ctD, ctMat, 0, lower.h + ctT / 2, front / 2, 'front');
         }
     }
 
     buildCarcassSection(group, W, H, D, T, baseY, mat, edgeMat, backWall, backMat) {
-        const y0 = baseY + H / 2;
-        const j = CARCASS_JOINT_OVERLAP_MM;
-        addPanel(group, T, H + j, D + j, mat, -W / 2 + T / 2, y0, 0);
-        addPanel(group, T, H + j, D + j, mat, W / 2 - T / 2, y0, 0);
-        addPanel(group, W + j, T, D + j, mat, 0, baseY + T / 2, 0);
-        addPanel(group, W + j, T, D + j, mat, 0, baseY + H - T / 2, 0);
-        addPanel(group, W + j, H + j, T, edgeMat, 0, y0, -D / 2 + T / 2);
-        addEdgeBand(group, W + j, H + j, T, edgeMat, 0, y0, -D / 2 + T / 2, 'front');
-        if (backWall) addPanel(group, W - 2 * T, H - 2 * T, 4, backMat, 0, y0, -D / 2 + T + 1);
+        const carcassRender = 2;
+        const sideD = carcassSideDepthMm(D, T);
+        const innerW = Math.max(1, W - 2 * T);
+        const sideY0 = baseY + H / 2;
+        const backY0 = baseY + H / 2;
+
+        // Match BOM: full-height sides, bottom/top between sides (no overlap at corners).
+        addPanel(group, T, H, sideD, mat, -W / 2 + T / 2, sideY0, 0, { renderOrder: carcassRender });
+        addPanel(group, T, H, sideD, mat, W / 2 - T / 2, sideY0, 0, { renderOrder: carcassRender });
+        addPanel(group, innerW, T, sideD, mat, 0, baseY + T / 2, 0, { renderOrder: carcassRender });
+        addPanel(group, innerW, T, sideD, mat, 0, baseY + H - T / 2, 0, { renderOrder: carcassRender });
+
+        if (backWall) {
+            const spec = getBackPanelSpec(W, H, D, T);
+            const backDisplayMat = getTiledMaterial(backMat, spec.w, spec.h, 'front');
+            addInteriorBackPanel(group, spec.w, spec.h, backDisplayMat?.map ? backDisplayMat : backMat, backY0, spec.z);
+        }
     }
 
     addShelves(group, sec, W, H, D, T, baseY, mat) {
@@ -1341,9 +2231,11 @@ class Furniture3D {
     }
 
     addDoor(group, W, H, facadeT, D, centerY, mat, isLift, opts = {}) {
+        const carcassT = opts.carcassT || 16;
         const doorW = W - FACADE_GAP * 2;
         const doorH = H - FACADE_GAP * 2;
-        const z = D / 2 + facadeT / 2 + 1;
+        const z = facadeFrontCenterZ(D, facadeT, carcassT);
+        const doorFaceMat = getTiledMaterial(mat, doorW, doorH, 'front');
 
         if (!isLift) {
             if (opts.interactive) {
@@ -1361,22 +2253,22 @@ class Furniture3D {
                     facadeZ: z,
                 });
             } else {
-                addPanel(group, doorW, doorH, facadeT, mat, 0, centerY, z);
+                addPanel(group, doorW, doorH, facadeT, doorFaceMat, 0, centerY, z);
             }
             return;
         }
 
         const cabinetTopY = centerY + H / 2;
-        const pivotZ = D / 2 + facadeT / 2 + 1;
+        const pivotZ = z;
         const pivotGroup = new THREE.Group();
         pivotGroup.position.set(0, cabinetTopY * MM, pivotZ * MM);
         group.add(pivotGroup);
 
-        const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, mat, 0, -doorH / 2, 0);
+        const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, doorFaceMat, 0, -doorH / 2, 0);
         if (doorMesh) doorMesh.renderOrder = 2;
         const openAngle = GAS_LIFT_OPEN_RAD;
         const closedAngle = 0;
-        const startT = opts.startOpen !== false ? 1 : 0;
+        const startT = opts.startOpen === true ? 1 : 0;
         pivotGroup.rotation.x = closedAngle + startT * (openAngle - closedAngle);
 
         const gasState = {
@@ -1393,7 +2285,7 @@ class Furniture3D {
         };
 
         if (opts.interactive && doorMesh) {
-            doorMesh.userData.baseMaterial = mat;
+            doorMesh.userData.baseMaterial = doorMesh.material;
             this.gasLiftDoors.push(gasState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'gasLift', state: gasState });
             this.updateGasLiftDoors(0);
@@ -1401,7 +2293,7 @@ class Furniture3D {
     }
 
     addHingedDoor(group, doorW, doorH, facadeT, D, centerY, mat, opts = {}) {
-        const z = D / 2 + facadeT / 2 + 2;
+        const z = opts.facadeZ ?? facadeFrontCenterZ(D, facadeT, opts.carcassT || 16);
         const hingeX = opts.hingeX ?? -doorW / 2;
         const doorCenterX = opts.doorCenterX ?? 0;
         const openSign = opts.openSign ?? 1;
@@ -1413,7 +2305,8 @@ class Furniture3D {
         pivotGroup.position.set(hingeX * MM, centerY * MM, z * MM);
         group.add(pivotGroup);
 
-        const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, mat, doorCenterX - hingeX, 0, 0);
+        const doorFaceMat = getTiledMaterial(mat, doorW, doorH, 'front');
+        const doorMesh = addPanel(pivotGroup, doorW, doorH, facadeT, doorFaceMat, doorCenterX - hingeX, 0, 0);
         pivotGroup.rotation.y = closedAngle + startT * (openAngle - closedAngle);
 
         const hingeState = {
@@ -1430,19 +2323,22 @@ class Furniture3D {
         };
 
         if (doorMesh) {
-            doorMesh.userData.baseMaterial = mat;
+            doorMesh.userData.baseMaterial = doorMesh.material;
             this.hingeDoors.push(hingeState);
             this.hoverableMeshes.push({ mesh: doorMesh, kind: 'hinge', state: hingeState });
         }
     }
 
     addSplitDoors(group, W, H, facadeT, D, centerY, mat, opts = {}) {
+        const carcassT = opts.carcassT || 16;
+        const z = facadeFrontCenterZ(D, facadeT, carcassT);
         const gap = FACADE_GAP * 2;
         const leafW = (W - FACADE_GAP * 2 - gap) / 2;
         if (!opts.interactive) {
-            const z = D / 2 + facadeT / 2 + 2;
-            addPanel(group, leafW, H - FACADE_GAP * 2, facadeT, mat, -(leafW / 2 + gap / 2), centerY, z);
-            addPanel(group, leafW, H - FACADE_GAP * 2, facadeT, mat, leafW / 2 + gap / 2, centerY, z);
+            const leafH = H - FACADE_GAP * 2;
+            const leafMat = getTiledMaterial(mat, leafW, leafH, 'front');
+            addPanel(group, leafW, leafH, facadeT, leafMat, -(leafW / 2 + gap / 2), centerY, z);
+            addPanel(group, leafW, leafH, facadeT, leafMat, leafW / 2 + gap / 2, centerY, z);
             return;
         }
         const leftCenterX = -(leafW / 2 + gap / 2);
@@ -1452,7 +2348,7 @@ class Furniture3D {
             hingeSpec: opts.hingeSpec,
             cabinetTopY: opts.cabinetTopY,
             cabinetHeightMm: opts.cabinetHeightMm,
-            facadeZ: D / 2 + facadeT / 2 + 2,
+            facadeZ: z,
         };
         this.addHingedDoor(group, leafW, doorHm, facadeT, D, centerY, mat, {
             hingeX: leftCenterX - leafW / 2,
@@ -1511,17 +2407,17 @@ class Furniture3D {
         let runnerL = RUNNERS[0];
         for (const l of RUNNERS) { if (l <= D - 24) runnerL = l; }
 
+        const carcassT = opts.carcassT || 16;
         const gap      = spec?.gap ?? 16;       // total lateral clearance consumed by system
         const drawerH  = (H - FACADE_GAP * 2) / n;  // full slot height per drawer
-        const facadeZ  = D / 2 + facadeT / 2 + 2;
+        const frontZ   = carcassFrontFaceZ(D, carcassT);
+        const facadeZ  = facadeFrontCenterZ(D, facadeT, carcassT);
         const slideMm  = runnerL * 0.92;        // realistic slide-out distance
         const innerW   = W - 32 - gap;          // 16mm carcass side each side + system clearance
         const innerD   = runnerL;
         const innerMat = getMaterial('drawer-inner', 'ldsp');
 
-        // Position the box so its front face sits ~3 mm behind the carcass opening (D/2).
-        // Without this offset the box would be centred at z=0 leaving a ~25mm gap.
-        const boxFrontZ  = D / 2 - 3;          // front face of the drawer box
+        const boxFrontZ  = frontZ - 3;
         const boxCenterZ = boxFrontZ - innerD / 2;
 
         for (let i = 0; i < n; i += 1) {
@@ -1529,7 +2425,10 @@ class Furniture3D {
             const drawerGroup = new THREE.Group();
             group.add(drawerGroup);
 
-            const facadeMesh = addPanel(drawerGroup, W - FACADE_GAP * 2, drawerH - 4, facadeT, mat, 0, cy, facadeZ);
+            const drawerFaceW = W - FACADE_GAP * 2;
+            const drawerFaceH = drawerH - 4;
+            const drawerFaceMat = getTiledMaterial(mat, drawerFaceW, drawerFaceH, 'front');
+            const facadeMesh = addPanel(drawerGroup, drawerFaceW, drawerFaceH, facadeT, drawerFaceMat, 0, cy, facadeZ);
             this.addDrawerBox(drawerGroup, innerW, drawerH, innerD, cy, spec, innerMat, boxCenterZ);
 
             // Per-drawer push-to-open flag: user index 0 = top = 3D index (n-1)
@@ -1548,7 +2447,7 @@ class Furniture3D {
             }
 
             if (opts.interactive && facadeMesh) {
-                facadeMesh.userData.baseMaterial = mat;
+                facadeMesh.userData.baseMaterial = facadeMesh.material;
                 this.hoverableMeshes.push({ mesh: facadeMesh, kind: 'drawer', drawerIndex: i });
                 this.drawerSlides.push({
                     group: drawerGroup,
@@ -1575,8 +2474,18 @@ class Furniture3D {
         const ledgerT = railT;
         const baseType = p.baseType === 'sheet' ? 'sheet' : 'slats';
 
-        const carcassMat = getMaterial('bed-carcass', p.material || 'bed');
-        const panelMat = getMaterial('bed-facade', p.facadeMaterial || p.material || 'bed-facade');
+        const carcassMat = getMaterial('bed-carcass', p.material || 'bed', {
+            decorCode: p.carcassDecorCode,
+            decorHex: p.carcassDecorHex,
+            decorTextureUrl: p.carcassDecorTextureUrl,
+            decorTextureMissing: p.carcassDecorTextureMissing,
+        });
+        const panelMat = getMaterial('bed-facade', p.facadeMaterial || p.material || 'bed-facade', {
+            decorCode: p.facadeDecorCode,
+            decorHex: p.facadeDecorHex,
+            decorTextureUrl: p.facadeDecorTextureUrl,
+            decorTextureMissing: p.facadeDecorTextureMissing,
+        });
         const mattressMat = getMaterial('mattress', 'mattress', { roughness: 0.92 });
 
         // Top view: | rail (carcassT) | mattressW | rail (carcassT) |
@@ -1719,6 +2628,7 @@ class Furniture3D {
         this.renderer?.domElement?.removeEventListener('pointerup', this._onPointerUp);
         this.renderer?.domElement?.removeEventListener('pointermove', this._onPointerMove);
         this.renderer?.domElement?.removeEventListener('pointerleave', this._onPointerLeave);
+        this.renderer?.domElement?.removeEventListener('wheel', this._onWheel);
         this.labelRenderer?.domElement?.remove();
         this.labelRenderer = null;
         this.renderer?.dispose();
@@ -1762,6 +2672,9 @@ window.GConfig3D = {
     },
     setDimensionsVisible(visible) {
         instance?.setDimensionsVisible(visible);
+    },
+    setTexturesVisible(visible) {
+        instance?.setTexturesVisible(visible);
     },
     setOptions(opts) {
         instance?.setOptions(opts);

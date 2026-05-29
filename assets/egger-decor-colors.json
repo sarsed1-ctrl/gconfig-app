@@ -1,0 +1,421 @@
+{
+  "source": "egger.com decor pages",
+  "generatedBy": "scripts/build_egger_colors.py",
+  "count": 59,
+  "colors": {
+    "F416": {
+      "decor": "F416",
+      "decorId": "F416_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/F416_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854334504990/8854514532382/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#d0bfa6"
+    },
+    "F417": {
+      "decor": "F417",
+      "decorId": "F417_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/F417_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854334898206/8854514630686/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#c3baad"
+    },
+    "F433": {
+      "decor": "F433",
+      "decorId": "F433_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/F433_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854336077854/8854514925598/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#7a7470"
+    },
+    "F637": {
+      "decor": "F637",
+      "decorId": "F637_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/F637_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854345842718/8854517710878/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#e0d8c7"
+    },
+    "F638": {
+      "decor": "F638",
+      "decorId": "F638_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/F638_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854346629150/8854517907486/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#a69e95"
+    },
+    "H1176": {
+      "decor": "H1176",
+      "decorId": "H1176_37",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1176_37?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854364979230/8854522626078/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#c8b6a0"
+    },
+    "H1180": {
+      "decor": "H1180",
+      "decorId": "H1180_37",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1180_37?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854365372446/8854523117598/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#b79873"
+    },
+    "H1181": {
+      "decor": "H1181",
+      "decorId": "H1181_37",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1181_37?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854365765662/8854523215902/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#80674e"
+    },
+    "H1210": {
+      "decor": "H1210",
+      "decorId": "H1210_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1210_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860195291166/8860195323934/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#908374"
+    },
+    "H1223": {
+      "decor": "H1223",
+      "decorId": "H1223_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1223_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854524428318/8854524461086/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#ebe0cd"
+    },
+    "H1225": {
+      "decor": "H1225",
+      "decorId": "H1225_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1225_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854525018142/8854525050910/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#eeeae6"
+    },
+    "H1307": {
+      "decor": "H1307",
+      "decorId": "H1307_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1307_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854527180830/8854527213598/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#563928"
+    },
+    "H1367": {
+      "decor": "H1367",
+      "decorId": "H1367_40",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1367_40?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854529048606/8854529081374/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#caad89"
+    },
+    "H1385": {
+      "decor": "H1385",
+      "decorId": "H1385_40",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1385_40?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854530293790/8854530326558/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#af8a63"
+    },
+    "H1386": {
+      "decor": "H1386",
+      "decorId": "H1386_40",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1386_40?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854530687006/8854530719774/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#89674a"
+    },
+    "H1714": {
+      "decor": "H1714",
+      "decorId": "H1714_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1714_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854386606110/8854531768350/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#6a482f"
+    },
+    "H1715": {
+      "decor": "H1715",
+      "decorId": "H1715_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H1715_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854657925150/8854657957918/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#c29773"
+    },
+    "H3003": {
+      "decor": "H3003",
+      "decorId": "H3003_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3003_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854535012382/8854535045150/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#5b524a"
+    },
+    "H3041": {
+      "decor": "H3041",
+      "decorId": "H3041_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3041_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860202303518/8860202336286/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#5a4235"
+    },
+    "H3078": {
+      "decor": "H3078",
+      "decorId": "H3078_22",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3078_22?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860202795038/8860202827806/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#ebe8df"
+    },
+    "H3081": {
+      "decor": "H3081",
+      "decorId": "H3081_22",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3081_22?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860203089950/8860203122718/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#2d2828"
+    },
+    "H3146": {
+      "decor": "H3146",
+      "decorId": "H3146_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3146_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854398107678/8854537142302/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#ac9c89"
+    },
+    "H3157": {
+      "decor": "H3157",
+      "decorId": "H3157_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3157_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854400466974/8854538420254/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#cdb088"
+    },
+    "H3180": {
+      "decor": "H3180",
+      "decorId": "H3180_37",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3180_37?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860203974686/8860204007454/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#6f5740"
+    },
+    "H3195": {
+      "decor": "H3195",
+      "decorId": "H3195_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3195_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854406758430/8854540091422/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#eae9e3"
+    },
+    "H3197": {
+      "decor": "H3197",
+      "decorId": "H3197_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3197_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854407544862/8854540189726/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#999189"
+    },
+    "H3198": {
+      "decor": "H3198",
+      "decorId": "H3198_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3198_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854407938078/8854540288030/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#5b524a"
+    },
+    "H3303": {
+      "decor": "H3303",
+      "decorId": "H3303_10",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3303_10?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854408724510/8854540386334/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#bd9d70"
+    },
+    "H3710": {
+      "decor": "H3710",
+      "decorId": "H3710_12",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3710_12?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854420127774/8854545104926/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#755e48"
+    },
+    "H3786": {
+      "decor": "H3786",
+      "decorId": "H3786_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3786_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860206170142/8860206202910/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#9a7762"
+    },
+    "H3787": {
+      "decor": "H3787",
+      "decorId": "H3787_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3787_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860206366750/8860206399518/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#654633"
+    },
+    "H3860": {
+      "decor": "H3860",
+      "decorId": "H3860_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/H3860_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854423273502/8854545891358/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#e2d1bd"
+    },
+    "U104": {
+      "decor": "U104",
+      "decorId": "U104_7",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U104_7?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854546415646/8855313612830/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#fdf7e3"
+    },
+    "U201": {
+      "decor": "U201",
+      "decorId": "U201_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U201_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854429171742/8855430299678/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#b0a99b"
+    },
+    "U216": {
+      "decor": "U216",
+      "decorId": "U216_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U216_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854429564958/8855430332446/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#fbefe0"
+    },
+    "U220": {
+      "decor": "U220",
+      "decorId": "U220_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U220_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860210757662/8860287729694/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#ede3d9"
+    },
+    "U250": {
+      "decor": "U250",
+      "decorId": "U250_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U250_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8856865505310/8857080397854/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#a5886c"
+    },
+    "U335": {
+      "decor": "U335",
+      "decorId": "U335_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U335_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854549200926/8855314202654/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#835249"
+    },
+    "U398": {
+      "decor": "U398",
+      "decorId": "U398_PM",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U398_PM?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860345040926/8860345073694/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#584441"
+    },
+    "U502": {
+      "decor": "U502",
+      "decorId": "U502_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U502_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854550511646/8855314464798/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#51687c"
+    },
+    "U590": {
+      "decor": "U590",
+      "decorId": "U590_PM",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U590_PM?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860345434142/8860345466910/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#232e33"
+    },
+    "U599": {
+      "decor": "U599",
+      "decorId": "U599_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U599_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854442934302/8855431446558/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#20252f"
+    },
+    "U604": {
+      "decor": "U604",
+      "decorId": "U604_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U604_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854553296926/8855314923550/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#6e796c"
+    },
+    "U665": {
+      "decor": "U665",
+      "decorId": "U665_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U665_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854555361310/8855315283998/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#495a57"
+    },
+    "U702": {
+      "decor": "U702",
+      "decorId": "U702_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U702_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854449225758/8855431970846/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#d6c8ba"
+    },
+    "U705": {
+      "decor": "U705",
+      "decorId": "U705_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U705_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854451585054/8855432167454/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#e1dacc"
+    },
+    "U708": {
+      "decor": "U708",
+      "decorId": "U708_PM",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U708_PM?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854453551134/8855432331294/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#cfccc4"
+    },
+    "U727": {
+      "decor": "U727",
+      "decorId": "U727_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U727_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854455517214/8855432495134/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#a09285"
+    },
+    "U732": {
+      "decor": "U732",
+      "decorId": "U732_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U732_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854457483294/8855432658974/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#7e7e7c"
+    },
+    "U750": {
+      "decor": "U750",
+      "decorId": "U750_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U750_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854460629022/8855432921118/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#cfc5b7"
+    },
+    "U755": {
+      "decor": "U755",
+      "decorId": "U755_PM",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U755_PM?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8860347203614/8860347236382/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#423b3e"
+    },
+    "U767": {
+      "decor": "U767",
+      "decorId": "U767_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U767_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854462201886/8855433052190/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#7f776d"
+    },
+    "U775": {
+      "decor": "U775",
+      "decorId": "U775_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U775_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854462595102/8855433084958/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#e5e1d8"
+    },
+    "U780": {
+      "decor": "U780",
+      "decorId": "U780_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U780_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854463840286/8855433183262/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#6f777c"
+    },
+    "U961": {
+      "decor": "U961",
+      "decorId": "U961_7",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U961_7?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854560866334/8855316529182/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#34302f"
+    },
+    "U963": {
+      "decor": "U963",
+      "decorId": "U963_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U963_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854470131742/8855433707550/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#3f3f3f"
+    },
+    "U999": {
+      "decor": "U999",
+      "decorId": "U999_19",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/U999_19?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854472884254/8855433936926/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#010206"
+    },
+    "W1100": {
+      "decor": "W1100",
+      "decorId": "W1100_9",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/W1100_9?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854481797150/8855434690590/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#fdfbf7"
+    },
+    "W960": {
+      "decor": "W960",
+      "decorId": "W960_7",
+      "sourcePage": "https://www.egger.com/en/furniture-interior-design/decors/W960_7?country=US",
+      "sourceImage": "https://cdn.egger.com/img/pim/8854565781534/8855317544990/AR_4_3.webp?width=64&srcext=png?width=120&srcext=png",
+      "hex": "#f5f5ee"
+    }
+  },
+  "failedDecorIdsSample": []
+}

@@ -157,7 +157,7 @@ html.theme-future .top-bar .top-actions .slide-toggle-thumb {
 }
 
 html.theme-future .top-bar .top-actions .slide-toggle[data-active="1"] .slide-toggle-thumb {
-    transform: translateX(calc(100% + 4px)) !important;
+    transform: translateX(100%) !important;
 }
 
 html.theme-future .top-bar .top-actions .slide-toggle--lang .slide-toggle-thumb {
@@ -447,11 +447,31 @@ html.theme-future .furniture-3d-panel {
     border-left-color: rgba(0, 229, 160, 0.12);
 }
 
+html.theme-future .preview-3d-resizer {
+    background: rgba(0, 229, 160, 0.08);
+    box-shadow: inset 0 0 12px rgba(0, 229, 160, 0.06);
+}
+
+html.theme-future .preview-3d-resizer::before {
+    background: var(--green-light);
+    box-shadow: 0 0 10px rgba(0, 229, 160, 0.45);
+}
+
 html.theme-future .furniture-3d-header h2 {
     color: var(--green-light);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     font-size: 0.75rem;
+}
+
+html.theme-future .preview-3d-toggle-label,
+html.theme-future .furniture-3d-dims-label {
+    color: var(--green-light);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(92, 255, 200, 0.45);
 }
 
 html.theme-future .furniture-3d-expand {
@@ -460,11 +480,39 @@ html.theme-future .furniture-3d-expand {
     color: var(--green-light);
 }
 
-html.theme-future .preview-header h2 {
+html.theme-future .preview-header-title {
     color: var(--green-light);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     font-size: 0.75rem;
+}
+
+html.theme-future .preview-3d-top-bar {
+    border-bottom: 1px solid rgba(0, 229, 160, 0.1);
+}
+
+html.theme-future .furniture-3d-mode {
+    border-color: rgba(92, 255, 200, 0.35);
+    color: var(--green-light);
+    text-shadow: 0 0 10px rgba(92, 255, 200, 0.35);
+}
+
+html.theme-future .furniture-3d-mode.is-active,
+html.theme-future .furniture-3d-mode.is-grain,
+html.theme-future .furniture-3d-mode.is-scale {
+    border-color: rgba(92, 255, 200, 0.85);
+    color: #041410;
+    background: linear-gradient(135deg, #00b87a, #00e5a0 55%, #5cffc8);
+    box-shadow:
+        0 0 16px rgba(0, 229, 160, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: none;
+}
+
+html.theme-future .furniture-3d-mode:hover:not(:disabled) {
+    border-color: rgba(92, 255, 200, 0.65);
+    color: #fff;
+    text-shadow: 0 0 12px rgba(92, 255, 200, 0.5);
 }
 
 html.theme-future .preview-canvas-wrap {

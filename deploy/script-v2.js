@@ -78,6 +78,15 @@
     let model3dEnabled = false;
 
     let model3dDimsEnabled = true;
+    let model3dTexturesEnabled = true;
+    let grainRotationDeg = 0;
+    let interactionMode3d = 'doors';
+
+    const PREVIEW_3D_RATIO_KEY = 'gconfig-preview-3d-ratio';
+    const PREVIEW_3D_RATIO_DEFAULT = 0.55;
+    const PREVIEW_3D_RATIO_MIN = 0.22;
+    const PREVIEW_3D_RATIO_MAX = 0.78;
+    let preview3dRatioCurrent = PREVIEW_3D_RATIO_DEFAULT;
 
     function isMobile3D() {
 
@@ -586,7 +595,7 @@
 
             open_v1_full: 'Открыть старый конфигуратор →',
 
-            preview: 'Превью',
+            preview: 'Схема',
 
             preview_3d: '3D',
 
@@ -599,6 +608,20 @@
             toggle_3d: '3D',
 
             toggle_3d_dims: 'Размеры',
+
+            toggle_3d_textures: 'Текстуры',
+
+            mode_3d_doors: 'Двери',
+
+            mode_3d_rotate_textures: 'Вращать текстуру',
+
+            mode_3d_rotate_textures_title: 'Вращать текстуру: клик по элементу — поворот 90°',
+
+            mode_3d_scale_textures: 'Масштабировать текстуру',
+
+            mode_3d_scale_textures_title: 'Масштабировать текстуру: колёсико над элементом',
+
+            mode_3d_doors_title: 'Двери (клик открывает/закрывает)',
 
             back: 'Назад',
 
@@ -838,7 +861,7 @@
 
             open_v1_full: 'Open old configurator →',
 
-            preview: 'Preview',
+            preview: 'Scheme',
 
             preview_3d: '3D',
 
@@ -851,6 +874,20 @@
             toggle_3d: '3D',
 
             toggle_3d_dims: 'Dimensions',
+
+            toggle_3d_textures: 'Textures',
+
+            mode_3d_doors: 'Doors',
+
+            mode_3d_rotate_textures: 'Rotate textures',
+
+            mode_3d_rotate_textures_title: 'Rotate textures: click element — 90° rotation',
+
+            mode_3d_scale_textures: 'Scale textures',
+
+            mode_3d_scale_textures_title: 'Scale textures: mouse wheel over element',
+
+            mode_3d_doors_title: 'Doors (click opens/closes)',
 
             back: 'Back',
 
@@ -1241,6 +1278,10 @@
     let eamfCatalogCache = null;
 
     let eamfCatalogLoadPromise = null;
+    let eggerColorMap = null;
+    let eggerColorMapLoadPromise = null;
+    let eggerTextureDb = null;
+    let eggerTextureDbLoadPromise = null;
 
 
 
@@ -1272,6 +1313,82 @@
 
         return eamfCatalogLoadPromise;
 
+    }
+
+    function loadEggerColorMap() {
+        if (eggerColorMap) return Promise.resolve(eggerColorMap);
+        if (eggerColorMapLoadPromise) return eggerColorMapLoadPromise;
+
+        eggerColorMapLoadPromise = fetch('assets/egger-decor-colors.json')
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+                eggerColorMap = data?.colors || {};
+                return eggerColorMap;
+            })
+            .catch(() => {
+                eggerColorMap = {};
+                return eggerColorMap;
+            });
+        return eggerColorMapLoadPromise;
+    }
+
+    function loadEggerTextureDb() {
+        if (eggerTextureDb) return Promise.resolve(eggerTextureDb);
+        if (eggerTextureDbLoadPromise) return eggerTextureDbLoadPromise;
+
+        eggerTextureDbLoadPromise = fetch('assets/egger-textures-db.json')
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+                eggerTextureDb = data || { textures: {} };
+                return eggerTextureDb;
+            })
+            .catch(() => {
+                eggerTextureDb = { textures: {} };
+                return eggerTextureDb;
+            });
+        return eggerTextureDbLoadPromise;
+    }
+
+    function extractDecorCode(value) {
+        const raw = String(value || '').toUpperCase();
+        const m = raw.match(/\b([A-Z]\d{3,4})\b/);
+        return m ? m[1] : '';
+    }
+
+    function getDecorHexByMaterialCode(materialCode) {
+        const decor = extractDecorCode(materialCode);
+        if (!decor || !eggerColorMap) return null;
+        const entry = eggerColorMap[decor];
+        const hex = entry?.hex;
+        return /^#[0-9A-F]{6}$/i.test(hex || '') ? hex : null;
+    }
+
+    function getDecorTextureUrlByMaterialCode(materialCode) {
+        const decor = extractDecorCode(materialCode);
+        if (!decor) return null;
+        const key = decor.toUpperCase();
+        const dbEntry = eggerTextureDb?.textures?.[key];
+        const dbUrl = dbEntry?.url || dbEntry?.path || '';
+        if (typeof dbUrl === 'string' && dbUrl.trim()) {
+            // Use relative workspace path to avoid root-based URL issues in some hosts.
+            return dbUrl.replace(/^\/+/, '');
+        }
+        // Missing in explicit texture DB -> use procedural texture.
+        return null;
+    }
+
+    function resolveBackPanelMaterialFor3d() {
+        if (fieldCheck('useCarcassBackPanel')) {
+            return fieldStr('eamfCarcassMaterial');
+        }
+        const win = iframeWin();
+        if (win && typeof win.getSelectedEamfBackPanelArticle === 'function') {
+            const article = win.getSelectedEamfBackPanelArticle();
+            if (article) return article;
+        }
+        const manual = fieldStr('eamfBackPanel');
+        if (manual && manual !== '__auto__') return manual;
+        return fieldStr('eamfCarcassMaterial') || fieldStr('eamfFacadeMaterial');
     }
 
 
@@ -1377,10 +1494,18 @@
         const facadeT = fieldNum('facadeThick', 16);
 
         const material = fieldStr('eamfCarcassMaterial');
+        const carcassDecorCode = extractDecorCode(material);
+        const carcassDecorHex = getDecorHexByMaterialCode(material);
+        const carcassDecorTextureUrl = getDecorTextureUrlByMaterialCode(material);
+        const carcassDecorTextureMissing = !!carcassDecorCode && !carcassDecorTextureUrl;
 
         const edge = fieldStr('eamfCarcassEdge');
 
         const facadeMaterial = fieldStr('eamfFacadeMaterial') || material;
+        const facadeDecorCode = extractDecorCode(facadeMaterial);
+        const facadeDecorHex = getDecorHexByMaterialCode(facadeMaterial);
+        const facadeDecorTextureUrl = getDecorTextureUrlByMaterialCode(facadeMaterial);
+        const facadeDecorTextureMissing = !!facadeDecorCode && !facadeDecorTextureUrl;
 
         const shared = {
 
@@ -1389,6 +1514,8 @@
             quality: isMobile3D() ? 'mobile' : 'desktop',
 
             dimensionsVisible: model3dDimsEnabled,
+            texturesVisible: model3dTexturesEnabled,
+            grainRotationDeg,
 
         };
 
@@ -1417,10 +1544,18 @@
                 baseType: fieldStr('bedBaseType') || 'slats',
 
                 material,
+                carcassDecorCode,
+                carcassDecorHex,
+                carcassDecorTextureUrl,
+                carcassDecorTextureMissing,
 
                 edge,
 
                 facadeMaterial,
+                facadeDecorCode,
+                facadeDecorHex,
+                facadeDecorTextureUrl,
+                facadeDecorTextureMissing,
 
                 ...shared,
 
@@ -1532,8 +1667,26 @@
 
             backWall: fieldCheck('useCarcassBackPanel') || !!fieldStr('eamfBackPanel'),
 
+            backPanelMaterial: (() => {
+                const code = resolveBackPanelMaterialFor3d();
+                const decorCode = extractDecorCode(code);
+                const decorHex = getDecorHexByMaterialCode(code);
+                const decorTextureUrl = getDecorTextureUrlByMaterialCode(code);
+                return {
+                    material: code,
+                    decorCode,
+                    decorHex,
+                    decorTextureUrl,
+                    decorTextureMissing: !!decorCode && !decorTextureUrl,
+                    fromCarcass: fieldCheck('useCarcassBackPanel'),
+                };
+            })(),
+
             countertop: (() => {
                 const material = fieldStr('countertopMaterial');
+                const decorCode = extractDecorCode(material);
+                const decorHex = getDecorHexByMaterialCode(material);
+                const decorTextureUrl = getDecorTextureUrlByMaterialCode(material);
                 const enabled = fieldCheck('hasCountertop');
                 const thickness = enabled ? getCountertopThicknessMm() : 0;
                 return {
@@ -1542,14 +1695,26 @@
                     frontOverhang: fieldNum('ctFrontOverhang', 20),
                     sideOverhang: fieldNum('ctSideOverhang', 2),
                     material,
+                    decorCode,
+                    decorHex,
+                    decorTextureUrl,
+                    decorTextureMissing: !!decorCode && !decorTextureUrl,
                 };
             })(),
 
             material,
+            carcassDecorCode,
+            carcassDecorHex,
+            carcassDecorTextureUrl,
+            carcassDecorTextureMissing,
 
             edge,
 
             facadeMaterial,
+            facadeDecorCode,
+            facadeDecorHex,
+            facadeDecorTextureUrl,
+            facadeDecorTextureMissing,
 
             ...shared,
 
@@ -1574,14 +1739,171 @@
         threeRebuildTimer = setTimeout(() => {
 
             threeRebuildTimer = null;
+            const params = collect3DParams();
+            window.GConfig3D.scheduleRebuild(params);
 
-            window.GConfig3D.scheduleRebuild(collect3DParams());
+            if (previewMeta) {
+                const missing = [];
+                if (params.carcassDecorTextureMissing && params.carcassDecorCode) {
+                    missing.push(params.carcassDecorCode);
+                }
+                if (params.facadeDecorTextureMissing && params.facadeDecorCode) {
+                    missing.push(params.facadeDecorCode);
+                }
+                const ct = params.countertop || {};
+                if (ct.enabled && ct.decorTextureMissing && ct.decorCode) {
+                    missing.push(ct.decorCode);
+                }
+                const bp = params.backPanelMaterial;
+                if (params.backWall && bp?.decorTextureMissing && bp.decorCode) {
+                    missing.push(bp.decorCode);
+                }
+                if (missing.length) {
+                    const uniq = Array.from(new Set(missing));
+                    previewMeta.textContent = currentLang === 'ru'
+                        ? `Текстура не найдена: ${uniq.join(', ')}. Используется placeholder.`
+                        : `Texture missing: ${uniq.join(', ')}. Placeholder is used.`;
+                } else {
+                    previewMeta.textContent = '';
+                }
+            }
 
         }, debounceMs);
 
     }
 
 
+
+    function clampPreview3dRatio(ratio) {
+        return Math.min(PREVIEW_3D_RATIO_MAX, Math.max(PREVIEW_3D_RATIO_MIN, ratio));
+    }
+
+    function getStoredPreview3dRatio() {
+        try {
+            const v = parseFloat(localStorage.getItem(PREVIEW_3D_RATIO_KEY));
+            if (Number.isFinite(v)) return clampPreview3dRatio(v);
+        } catch (e) { /* ignore */ }
+        return PREVIEW_3D_RATIO_DEFAULT;
+    }
+
+    function setPreview3dRatio(ratio, persist = true) {
+        const split = document.getElementById('preview3dSplit');
+        if (!split) return;
+        preview3dRatioCurrent = clampPreview3dRatio(ratio);
+        split.style.setProperty('--preview-3d-ratio', String(preview3dRatioCurrent));
+        if (persist) {
+            try {
+                localStorage.setItem(PREVIEW_3D_RATIO_KEY, String(preview3dRatioCurrent));
+            } catch (e) { /* ignore */ }
+        }
+        const resizer = document.getElementById('preview3dResizer');
+        if (resizer) {
+            const pct = Math.round(preview3dRatioCurrent * 100);
+            resizer.setAttribute('aria-valuenow', String(pct));
+        }
+        window.GConfig3D?.resize?.();
+    }
+
+    function syncPreview3dSplitState() {
+        const split = document.getElementById('preview3dSplit');
+        const resizer = document.getElementById('preview3dResizer');
+        const toolbar = document.getElementById('furniture3dToolbar');
+        if (!split) return;
+        if (model3dEnabled) {
+            split.classList.add('is-3d-active');
+            if (resizer) {
+                resizer.hidden = false;
+                resizer.setAttribute('aria-hidden', 'false');
+            }
+            if (toolbar) {
+                toolbar.hidden = false;
+                toolbar.setAttribute('aria-hidden', 'false');
+            }
+        } else {
+            split.classList.remove('is-3d-active');
+            if (resizer) {
+                resizer.hidden = true;
+                resizer.setAttribute('aria-hidden', 'true');
+            }
+            if (toolbar) {
+                toolbar.hidden = true;
+                toolbar.setAttribute('aria-hidden', 'true');
+            }
+        }
+    }
+
+    function bindPreview3dResizer() {
+        const split = document.getElementById('preview3dSplit');
+        const resizer = document.getElementById('preview3dResizer');
+        if (!split || !resizer) return;
+
+        setPreview3dRatio(getStoredPreview3dRatio(), false);
+
+        let dragging = false;
+
+        const applyClientX = (clientX) => {
+            const rect = split.getBoundingClientRect();
+            const resizerW = resizer.offsetWidth || 8;
+            const usable = rect.width - resizerW;
+            if (usable <= 0) return;
+            setPreview3dRatio((clientX - rect.left) / usable);
+        };
+
+        const endDrag = () => {
+            if (!dragging) return;
+            dragging = false;
+            document.body.classList.remove('is-preview-3d-resizing');
+            resizer.classList.remove('is-active');
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
+        };
+
+        const onPointerMove = (e) => {
+            if (!dragging) return;
+            e.preventDefault();
+            applyClientX(e.clientX);
+        };
+
+        const onPointerUp = () => endDrag();
+
+        resizer.addEventListener('pointerdown', (e) => {
+            if (!split.classList.contains('is-3d-active')) return;
+            e.preventDefault();
+            dragging = true;
+            document.body.classList.add('is-preview-3d-resizing');
+            resizer.classList.add('is-active');
+            if (resizer.setPointerCapture) resizer.setPointerCapture(e.pointerId);
+            applyClientX(e.clientX);
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('pointercancel', onPointerUp);
+        });
+
+        resizer.addEventListener('dblclick', () => {
+            setPreview3dRatio(PREVIEW_3D_RATIO_DEFAULT);
+        });
+
+        resizer.addEventListener('keydown', (e) => {
+            if (!split.classList.contains('is-3d-active')) return;
+            const step = e.shiftKey ? 0.08 : 0.04;
+            if (e.key === 'ArrowLeft') {
+                setPreview3dRatio(preview3dRatioCurrent - step);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                setPreview3dRatio(preview3dRatioCurrent + step);
+                e.preventDefault();
+            } else if (e.key === 'Home') {
+                setPreview3dRatio(PREVIEW_3D_RATIO_MIN);
+                e.preventDefault();
+            } else if (e.key === 'End') {
+                setPreview3dRatio(PREVIEW_3D_RATIO_MAX);
+                e.preventDefault();
+            }
+        });
+
+        syncPreview3dSplitState();
+    }
 
     function setModel3dEnabled(enabled) {
 
@@ -1594,6 +1916,8 @@
         const panel = document.getElementById('furniture3dPanel');
 
         updateSlideToggle('toggle3d', enabled ? 1 : 0);
+
+        syncPreview3dSplitState();
 
         if (enabled) {
 
@@ -1610,6 +1934,7 @@
             waitFor3DModule(() => init3DView());
 
             updateSlideToggle('toggle3dDims', model3dDimsEnabled ? 1 : 0);
+            updateSlideToggle('toggle3dTextures', model3dTexturesEnabled ? 1 : 0);
 
         } else {
 
@@ -1668,6 +1993,11 @@
             quality: isMobile3D() ? 'mobile' : 'desktop',
 
             dimensionsVisible: model3dDimsEnabled,
+            texturesVisible: model3dTexturesEnabled,
+            grainRotationDeg,
+            perElementGrain: interactionMode3d === 'grain',
+            perElementTextureScale: interactionMode3d === 'scale',
+            interactiveDoors: interactionMode3d === 'doors',
 
             mobileExpanded: false,
 
@@ -1693,6 +2023,87 @@
 
         });
 
+    }
+
+    function bind3DTexturesToggle() {
+
+        bindSlideToggle('toggle3dTextures', (btn) => {
+
+            const enabled = btn.getAttribute('data-textures') === 'on';
+
+            if (model3dTexturesEnabled === enabled) return;
+
+            model3dTexturesEnabled = enabled;
+
+            window.GConfig3D?.setTexturesVisible?.(model3dTexturesEnabled);
+            sync3dGrainControlsState();
+
+        });
+
+    }
+
+    function apply3DInteractionOptions() {
+        window.GConfig3D?.setOptions?.({
+            perElementGrain: interactionMode3d === 'grain',
+            perElementTextureScale: interactionMode3d === 'scale',
+            interactiveDoors: interactionMode3d === 'doors',
+            grainRotationDeg,
+        });
+    }
+
+    function sync3dGrainControlsState() {
+        const modeBtn = document.getElementById('btn3dMode');
+        const scaleBtn = document.getElementById('btn3dScaleMode');
+        const disabled = !model3dTexturesEnabled;
+        if (modeBtn) modeBtn.disabled = disabled;
+        if (scaleBtn) scaleBtn.disabled = disabled;
+        if (disabled && (interactionMode3d === 'grain' || interactionMode3d === 'scale')) {
+            interactionMode3d = 'doors';
+            update3DModeButtons();
+            apply3DInteractionOptions();
+        }
+    }
+
+    function update3DModeButtons() {
+        const rotateBtn = document.getElementById('btn3dMode');
+        const scaleBtn = document.getElementById('btn3dScaleMode');
+        const isGrain = interactionMode3d === 'grain';
+        const isScale = interactionMode3d === 'scale';
+        if (rotateBtn) {
+            rotateBtn.textContent = t('mode_3d_rotate_textures');
+            rotateBtn.classList.toggle('is-active', isGrain);
+            rotateBtn.classList.toggle('is-grain', isGrain);
+            rotateBtn.setAttribute('aria-pressed', isGrain ? 'true' : 'false');
+            rotateBtn.title = t('mode_3d_rotate_textures_title');
+        }
+        if (scaleBtn) {
+            scaleBtn.textContent = t('mode_3d_scale_textures');
+            scaleBtn.classList.toggle('is-active', isScale);
+            scaleBtn.classList.toggle('is-scale', isScale);
+            scaleBtn.setAttribute('aria-pressed', isScale ? 'true' : 'false');
+            scaleBtn.title = t('mode_3d_scale_textures_title');
+        }
+    }
+
+    function bind3DModeToggle() {
+        const btn = document.getElementById('btn3dMode');
+        if (!btn) return;
+        update3DModeButtons();
+        btn.addEventListener('click', () => {
+            interactionMode3d = interactionMode3d === 'grain' ? 'doors' : 'grain';
+            update3DModeButtons();
+            apply3DInteractionOptions();
+        });
+    }
+
+    function bind3DScaleModeToggle() {
+        const btn = document.getElementById('btn3dScaleMode');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            interactionMode3d = interactionMode3d === 'scale' ? 'doors' : 'scale';
+            update3DModeButtons();
+            apply3DInteractionOptions();
+        });
     }
 
 
@@ -2962,7 +3373,11 @@
 
                 if (typeof winAfter?.scheduleAmflexPriceRefresh === 'function') winAfter.scheduleAmflexPriceRefresh();
 
-                if (id === 'countertopMaterial' || id === 'hasCountertop') schedule3DRebuild();
+                if (
+                    id === 'countertopMaterial' || id === 'hasCountertop'
+                    || id === 'eamfBackPanel' || id === 'useCarcassBackPanel'
+                    || id === 'eamfCarcassMaterial' || id === 'eamfFacadeMaterial'
+                ) schedule3DRebuild();
 
             }, 0);
 
@@ -4119,6 +4534,7 @@
         updateSlideToggle('langToggle', currentLang === 'en' ? 1 : 0);
 
         applyI18n();
+        update3DModeButtons();
 
         if (productMode === 'beds') updateBedWizardSelectLabels();
 
@@ -4691,7 +5107,14 @@
 
         bind3DToggle();
 
+        bindPreview3dResizer();
+
         bind3DDimensionsToggle();
+        bind3DTexturesToggle();
+        sync3dGrainControlsState();
+        bind3DModeToggle();
+        bind3DScaleModeToggle();
+        update3DModeButtons();
 
         let resize3dTimer = null;
 
@@ -4777,7 +5200,7 @@
 
         bindUI();
 
-        loadEamfCatalog().then(() => {
+        Promise.all([loadEamfCatalog(), loadEggerColorMap(), loadEggerTextureDb()]).then(() => {
 
             if (productMode === 'closets') schedule3DRebuild();
 

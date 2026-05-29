@@ -1,12 +1,12 @@
-уш<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>GConfig v2 — Configurator</title>
     <link rel="icon" type="image/png" href="alien-logo.png">
-    <link rel="stylesheet" href="styles-v2.css?v=2">
-    <link rel="stylesheet" href="styles-v2-future.css?v=2">
+    <link rel="stylesheet" href="styles-v2.css?v=4">
+    <link rel="stylesheet" href="styles-v2-future.css?v=6">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
     <script>
     (function () {
@@ -397,18 +397,39 @@
                 </div>
             </aside>
 
-            <main class="preview-panel">
-                <div class="preview-header">
-                    <h2 data-i18n="preview">Preview</h2>
-                    <div class="preview-header-actions">
-                        <span class="preview-3d-toggle-label" data-i18n="toggle_3d_model">3D model</span>
-                        <div class="slide-toggle slide-toggle--3d" id="toggle3d" role="group" aria-label="3D model" data-active="0">
-                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
-                            <button type="button" class="slide-toggle-btn active" data-3d="off" aria-pressed="true" data-i18n="toggle_off">Off</button>
-                            <button type="button" class="slide-toggle-btn" data-3d="on" aria-pressed="false" data-i18n="toggle_3d">3D</button>
+            <div class="preview-3d-split" id="preview3dSplit">
+                <div class="preview-3d-top-bar">
+                    <div class="preview-3d-top-bar-left">
+                        <h2 class="preview-header-title" data-i18n="preview">Preview</h2>
+                        <div class="preview-header-actions">
+                            <span class="preview-3d-toggle-label" data-i18n="toggle_3d_model">3D model</span>
+                            <div class="slide-toggle slide-toggle--3d" id="toggle3d" role="group" aria-label="3D model" data-active="0">
+                                <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                                <button type="button" class="slide-toggle-btn active" data-3d="off" aria-pressed="true" data-i18n="toggle_off">Off</button>
+                                <button type="button" class="slide-toggle-btn" data-3d="on" aria-pressed="false" data-i18n="toggle_3d">3D</button>
+                            </div>
                         </div>
                     </div>
+                    <div class="preview-3d-top-bar-right" id="furniture3dToolbar" hidden aria-hidden="true">
+                        <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_textures">Textures</span>
+                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dTextures" role="group" aria-label="3D textures" data-active="1">
+                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                            <button type="button" class="slide-toggle-btn" data-textures="off" aria-pressed="false" data-i18n="toggle_off">Off</button>
+                            <button type="button" class="slide-toggle-btn active" data-textures="on" aria-pressed="true" data-i18n="toggle_on">On</button>
+                        </div>
+                        <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_dims">Dimensions</span>
+                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dDims" role="group" aria-label="3D dimensions" data-active="1">
+                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
+                            <button type="button" class="slide-toggle-btn" data-dims="off" aria-pressed="false" data-i18n="toggle_off">Off</button>
+                            <button type="button" class="slide-toggle-btn active" data-dims="on" aria-pressed="true" data-i18n="toggle_on">On</button>
+                        </div>
+                        <button type="button" class="furniture-3d-mode" id="btn3dMode" aria-label="Rotate textures" aria-pressed="false" title="Rotate textures">Rotate textures</button>
+                        <button type="button" class="furniture-3d-mode furniture-3d-mode--scale" id="btn3dScaleMode" aria-label="Scale textures" aria-pressed="false" title="Scale textures">Scale textures</button>
+                        <button type="button" class="furniture-3d-expand" id="btn3dExpand" aria-label="Expand 3D view" title="Expand">⛶</button>
+                    </div>
                 </div>
+                <div class="preview-3d-body">
+            <main class="preview-panel">
                 <div class="preview-canvas-wrap">
                     <div class="scheme-hud-frame hud-frame">
                         <span class="hud-corner hud-corner-tl" aria-hidden="true"></span>
@@ -439,21 +460,23 @@
                 </div>
             </main>
 
+            <div
+                class="preview-3d-resizer"
+                id="preview3dResizer"
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize preview and 3D panels"
+                aria-valuemin="22"
+                aria-valuemax="78"
+                tabindex="0"
+                hidden
+            ></div>
+
             <section class="furniture-3d-panel" id="furniture3dPanel" hidden aria-hidden="true" aria-label="3D preview">
-                <div class="furniture-3d-header">
-                    <h2 data-i18n="preview_3d">3D</h2>
-                    <div class="furniture-3d-header-actions">
-                        <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_dims">Dimensions</span>
-                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dDims" role="group" aria-label="3D dimensions" data-active="1">
-                            <span class="slide-toggle-thumb" aria-hidden="true"></span>
-                            <button type="button" class="slide-toggle-btn" data-dims="off" aria-pressed="false" data-i18n="toggle_off">Off</button>
-                            <button type="button" class="slide-toggle-btn active" data-dims="on" aria-pressed="true" data-i18n="toggle_on">On</button>
-                        </div>
-                        <button type="button" class="furniture-3d-expand" id="btn3dExpand" aria-label="Expand 3D view" title="Expand">⛶</button>
-                    </div>
-                </div>
                 <div id="furniture-3d" role="img" aria-label="3D furniture model"></div>
             </section>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -506,7 +529,7 @@
     }
     </script>
     <script src="eamf-countertop-thickness.js"></script>
-    <script type="module" src="three-configurator.js?v=36"></script>
-    <script src="script-v2.js?v=6"></script>
+    <script type="module" src="three-configurator.js?v=71"></script>
+    <script src="script-v2.js?v=26"></script>
 </body>
 </html>

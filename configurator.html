@@ -1574,6 +1574,7 @@
             back_panel_carcass: "Задняя стенка из материала корпуса",
             back_panel_fit: "Посадка задней стенки:",
             eamf_select_material: "— Выберите материал —",
+            eamf_old_no_texture: "OLD MATERIALS NO TEXTURE",
             eamf_select_edge: "— Выберите кант —",
             eamf_countertop_depth: "Глубина {n} см · 38 мм ЛДСП",
             eamf_countertop_depth_unknown: "38 мм ЛДСП",
@@ -1963,6 +1964,7 @@
             back_panel_carcass: "Back panel from carcass material",
             back_panel_fit: "Back panel fit:",
             eamf_select_material: "— Select material —",
+            eamf_old_no_texture: "OLD MATERIALS NO TEXTURE",
             eamf_select_edge: "— Select edge —",
             eamf_countertop_depth: "Depth {n} cm · 38 mm LMFC",
             eamf_countertop_depth_unknown: "38 mm LMFC",
@@ -2642,6 +2644,72 @@
     let eamfCatalog = null;
     let eamfCatalogReady = null;
     let eamfMaterialsReady = false;
+    let eggerTextureDb = null;
+    let eggerTextureDbReady = null;
+
+    async function loadEggerTextureDb() {
+        if (eggerTextureDb) return eggerTextureDb;
+        if (eggerTextureDbReady) return eggerTextureDbReady;
+        eggerTextureDbReady = fetch('./assets/egger-textures-db.json')
+            .then(function(res) {
+                if (!res.ok) throw new Error('Egger texture DB HTTP ' + res.status);
+                return res.json();
+            })
+            .then(function(data) {
+                eggerTextureDb = data || { textures: {} };
+                return eggerTextureDb;
+            })
+            .catch(function(err) {
+                console.warn('Egger texture DB load failed:', err);
+                eggerTextureDb = { textures: {} };
+                return eggerTextureDb;
+            });
+        return eggerTextureDbReady;
+    }
+
+    function eamfDecorHasTexture(decor) {
+        if (!decor || !/^[A-Z]\d{3,4}$/.test(decor)) return false;
+        return !!(eggerTextureDb && eggerTextureDb.textures && eggerTextureDb.textures[decor]);
+    }
+
+    function eamfMaterialHasTexture(material) {
+        return eamfDecorHasTexture(getEamfMaterialDecor(material));
+    }
+
+    function eamfCountertopHasTexture(countertop) {
+        return eamfDecorHasTexture(getEamfCountertopDecor(countertop));
+    }
+
+    function eamfBackPanelHasTexture(backPanel) {
+        return eamfDecorHasTexture(getEamfBackPanelDecor(backPanel));
+    }
+
+    function splitEamfItemsByTexture(items, hasTextureFn) {
+        const withTexture = [];
+        const withoutTexture = [];
+        (items || []).forEach(function(item) {
+            if (hasTextureFn(item)) withTexture.push(item);
+            else withoutTexture.push(item);
+        });
+        return { withTexture: withTexture, withoutTexture: withoutTexture };
+    }
+
+    function appendEamfMaterialOptions(container, materials) {
+        materials.forEach(function(m) {
+            const opt = document.createElement('option');
+            opt.value = eamfItemId(m);
+            opt.textContent = eamfDisplayLabel(m);
+            container.appendChild(opt);
+        });
+    }
+
+    function appendEamfOldNoTextureGroup(selectEl, materials, T) {
+        if (!materials.length) return;
+        const og = document.createElement('optgroup');
+        og.label = T.eamf_old_no_texture || 'OLD MATERIALS NO TEXTURE';
+        appendEamfMaterialOptions(og, materials);
+        selectEl.appendChild(og);
+    }
 
     async function loadEamfCatalog() {
         if (eamfCatalog) return eamfCatalog;
@@ -2907,7 +2975,12 @@
         }
         selectEl.appendChild(autoOpt);
 
-        getEamfBackPanelsList().forEach(function(bp) {
+        const backPanels = getEamfBackPanelsList();
+        const splitBp = splitEamfItemsByTexture(backPanels, eamfBackPanelHasTexture);
+        splitBp.withTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+        splitBp.withoutTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+
+        function appendBackPanelOption(container, bp) {
             const id = eamfItemId(bp);
             const opt = document.createElement('option');
             opt.value = id;
@@ -2920,8 +2993,16 @@
             } else {
                 opt.textContent = id;
             }
-            selectEl.appendChild(opt);
-        });
+            container.appendChild(opt);
+        }
+
+        splitBp.withTexture.forEach(function(bp) { appendBackPanelOption(selectEl, bp); });
+        if (splitBp.withoutTexture.length) {
+            const og = document.createElement('optgroup');
+            og.label = T.eamf_old_no_texture || 'OLD MATERIALS NO TEXTURE';
+            splitBp.withoutTexture.forEach(function(bp) { appendBackPanelOption(og, bp); });
+            selectEl.appendChild(og);
+        }
 
         let chosen = selectedArticle || '';
         if (!manual || opts.forceAutoDefault) {
@@ -3363,15 +3444,15 @@
 
         const targetThick = kind ? getEamfTargetThickness(kind) : null;
         const materials = filterEamfMaterialsForTargetThick(eamfCatalog.materials || [], targetThick);
+        const split = splitEamfItemsByTexture(materials, eamfMaterialHasTexture);
+        split.withTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+        split.withoutTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
         const prev = selectedArticle || selectEl.value;
         selectEl.innerHTML = '<option value="">' + (T.eamf_select_material || '—') + '</option>';
-        materials.forEach(function(m) {
-            const opt = document.createElement('option');
-            opt.value = eamfItemId(m);
-            opt.textContent = eamfDisplayLabel(m);
-            selectEl.appendChild(opt);
-        });
-        if (prev && materials.some(function(m) { return eamfItemId(m) === prev; })) {
+        appendEamfMaterialOptions(selectEl, split.withTexture);
+        appendEamfOldNoTextureGroup(selectEl, split.withoutTexture, T);
+        const allMaterials = split.withTexture.concat(split.withoutTexture);
+        if (prev && allMaterials.some(function(m) { return eamfItemId(m) === prev; })) {
             selectEl.value = prev;
         }
     }
@@ -3395,7 +3476,13 @@
             byGroup[key].push(ct);
         });
 
+        const countertopsNoTexture = [];
         Object.keys(byGroup).sort(sortEamfCountertopGroupKeys).forEach(function(groupKey) {
+            const groupItems = byGroup[groupKey].slice();
+            const split = splitEamfItemsByTexture(groupItems, eamfCountertopHasTexture);
+            split.withoutTexture.forEach(function(ct) { countertopsNoTexture.push(ct); });
+            if (!split.withTexture.length) return;
+
             const og = document.createElement('optgroup');
             const val = groupKey.split(':')[1];
             if (groupKey === 'h:12') {
@@ -3411,15 +3498,12 @@
             } else {
                 og.label = val === '?' ? '—' : (val + ' mm');
             }
-            byGroup[groupKey].sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
-            byGroup[groupKey].forEach(function(ct) {
-                const opt = document.createElement('option');
-                opt.value = eamfItemId(ct);
-                opt.textContent = eamfDisplayLabel(ct);
-                og.appendChild(opt);
-            });
+            split.withTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+            appendEamfMaterialOptions(og, split.withTexture);
             selectEl.appendChild(og);
         });
+        countertopsNoTexture.sort(function(a, b) { return eamfItemId(a).localeCompare(eamfItemId(b)); });
+        appendEamfOldNoTextureGroup(selectEl, countertopsNoTexture, T);
 
         if (prev && countertops.some(function(ct) { return eamfItemId(ct) === prev; })) {
             selectEl.value = prev;
@@ -3818,10 +3902,11 @@
         }
     }
     window.refreshEamfMaterialSelectsOnThicknessChange = refreshEamfMaterialSelectsOnThicknessChange;
+    window.getSelectedEamfBackPanelArticle = getSelectedEamfBackPanelArticle;
 
     async function initEamfMaterialsUI() {
         eamfMaterialsReady = false;
-        await loadEamfCatalog();
+        await Promise.all([loadEamfCatalog(), loadEggerTextureDb()]);
         const facadeMatEl = document.getElementById('eamfFacadeMaterial');
         const facadeEdgeEl = document.getElementById('eamfFacadeEdge');
         const carcassMatEl = document.getElementById('eamfCarcassMaterial');
