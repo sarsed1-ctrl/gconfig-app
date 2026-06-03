@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>GConfig v2 — Configurator</title>
     <link rel="icon" type="image/png" href="alien-logo.png">
-    <link rel="stylesheet" href="styles-v2.css?v=4">
-    <link rel="stylesheet" href="styles-v2-future.css?v=6">
+    <link rel="stylesheet" href="styles-v2.css?v=5">
+    <link rel="stylesheet" href="styles-v2-future.css?v=7">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
     <script>
     (function () {
@@ -150,10 +150,6 @@
                                 <span data-i18n="include_countertop">Include countertop</span>
                             </label>
                             <div class="field-grid countertop-fields" id="countertopFields">
-                                <div class="field full">
-                                    <label data-i18n="ct_material">Countertop material</label>
-                                    <select id="w-countertopMaterial" data-iframe="countertopMaterial"></select>
-                                </div>
                                 <div class="field">
                                     <label data-i18n="ct_front_overhang">Front overhang (mm)</label>
                                     <input type="number" id="w-ctFrontOverhang" data-iframe="ctFrontOverhang" value="20" min="0" step="1">
@@ -376,6 +372,10 @@
                                     <select id="w-eamfCarcassEdge" data-iframe="eamfCarcassEdge" title="Auto-selected when material changes; you can override."></select>
                                     <span class="field-hint" data-i18n="hint_edge_override">Auto-selected when material changes; you can override.</span>
                                 </div>
+                                <div class="field closets-only" id="countertopMaterialField">
+                                    <label data-i18n="ct_material">Countertop material</label>
+                                    <select id="w-countertopMaterial" data-iframe="countertopMaterial"></select>
+                                </div>
                             </div>
                         </div>
                         <div class="card">
@@ -401,12 +401,12 @@
                 <div class="preview-3d-top-bar">
                     <div class="preview-3d-top-bar-left">
                         <h2 class="preview-header-title" data-i18n="preview">Preview</h2>
-                        <div class="preview-header-actions">
+                        <div class="preview-header-actions preview-header-actions--model-cta">
                             <span class="preview-3d-toggle-label" data-i18n="toggle_3d_model">3D model</span>
                             <div class="slide-toggle slide-toggle--3d" id="toggle3d" role="group" aria-label="3D model" data-active="0">
                                 <span class="slide-toggle-thumb" aria-hidden="true"></span>
                                 <button type="button" class="slide-toggle-btn active" data-3d="off" aria-pressed="true" data-i18n="toggle_off">Off</button>
-                                <button type="button" class="slide-toggle-btn" data-3d="on" aria-pressed="false" data-i18n="toggle_3d">3D</button>
+                                <button type="button" class="slide-toggle-btn" data-3d="on" aria-pressed="false" data-i18n="toggle_on">On</button>
                             </div>
                         </div>
                     </div>
@@ -474,6 +474,7 @@
 
             <section class="furniture-3d-panel" id="furniture3dPanel" hidden aria-hidden="true" aria-label="3D preview">
                 <div id="furniture-3d" role="img" aria-label="3D furniture model"></div>
+                <p class="furniture-3d-note" data-i18n="textures_illustrative">Textures are illustrative.</p>
             </section>
                 </div>
             </div>
@@ -529,7 +530,8 @@
     }
     </script>
     <script src="eamf-countertop-thickness.js"></script>
-    <script type="module" src="three-configurator.js?v=71"></script>
-    <script src="script-v2.js?v=26"></script>
+    <script type="module" src="three-configurator.js?v=73"></script>
+    <script src="script-v2.js?v=27"></script>
 </body>
 </html>
+

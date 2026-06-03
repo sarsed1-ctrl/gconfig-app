@@ -616,6 +616,8 @@ body.is-preview-3d-resizing * {
 
     flex-direction: column;
 
+    position: relative;
+
     min-height: 0;
 
     background: var(--panel);
@@ -879,6 +881,42 @@ body.is-preview-3d-resizing * {
     width: 100% !important;
 
     height: 100% !important;
+
+}
+
+.furniture-3d-note {
+
+    position: absolute;
+
+    top: 10px;
+
+    right: 12px;
+
+    margin: 0;
+
+    padding: 6px 10px;
+
+    font-size: 0.72rem;
+
+    line-height: 1.35;
+
+    color: #ff6b6b;
+
+    text-align: right;
+
+    border: 1px solid rgba(255, 70, 70, 0.6);
+
+    border-radius: 8px;
+
+    background: rgba(40, 6, 6, 0.65);
+
+    box-shadow: 0 0 14px rgba(255, 60, 60, 0.18);
+
+    opacity: 0.9;
+
+    pointer-events: none;
+
+    z-index: 3;
 
 }
 
@@ -1756,6 +1794,34 @@ body.is-preview-3d-resizing * {
     gap: 10px;
 
     flex-shrink: 0;
+
+}
+
+.preview-header-actions--model-cta {
+
+    padding: 4px 8px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(0, 214, 153, 0.38);
+
+    background: linear-gradient(135deg, rgba(0, 214, 153, 0.08), rgba(0, 157, 255, 0.08));
+
+    box-shadow: 0 0 10px rgba(0, 214, 153, 0.16);
+
+}
+
+.preview-header-actions--model-cta .preview-3d-toggle-label {
+
+    font-weight: 700;
+
+    letter-spacing: 0.11em;
+
+}
+
+.preview-header-actions--model-cta .slide-toggle--3d {
+
+    box-shadow: 0 0 0 1px rgba(0, 214, 153, 0.28), 0 0 12px rgba(0, 214, 153, 0.2);
 
 }
 

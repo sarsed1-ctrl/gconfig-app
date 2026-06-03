@@ -135,6 +135,8 @@ const materialPool = new Map();
 const texturePool = new Map();
 /** @type {Map<string, THREE.Material>} */
 const tiledMaterialPool = new Map();
+/** @type {Map<string, THREE.Texture>} */
+const seamSoftTexturePool = new Map();
 const imageTextureLoader = new THREE.TextureLoader();
 let textureQualityMode = detectMobile() ? 'mobile' : 'desktop';
 let grainRotationRad = 0;
@@ -144,6 +146,9 @@ const DESKTOP_TEXTURE_SIZE = 512;
 const MOBILE_TEXTURE_ANISO = 2;
 const DESKTOP_TEXTURE_ANISO = 6;
 const DEFAULT_DECOR_BOARD_SIZE_MM = Object.freeze({ x: 2800, y: 2070 });
+/** One UV tile ≈ this many mm on the panel (same for every decor code). */
+const TEXTURE_TILE_MM = 1600;
+const MIN_TEXTURE_REPEAT = 1;
 /** Shared unit box — meshes use scale for dimensions (geometry reuse). */
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
 /** Shared unit cylinder (axis = Y, r=0.5, h=1, 8 segments) — scaled for round hardware. */
@@ -607,6 +612,7 @@ function isTextureImageReady(tex) {
 function invalidateTextureDependentCaches() {
     materialPool.clear();
     tiledMaterialPool.clear();
+    seamSoftTexturePool.clear();
 }
 
 function requestModelRebuildAfterTexture() {
@@ -747,38 +753,23 @@ function getMissingDecorPlaceholderTexture(decorCode) {
     return tex;
 }
 
-function tileSizeMmForQuality() {
-    // Larger tile size => fewer repeats on panel => less "compressed" texture look.
-    return textureQualityMode === 'mobile' ? 420 : 360;
-}
-
 function getTiledMaterial(baseMat, dimAmm, dimBmm, axis = 'front') {
     if (!show3dTextures || !baseMat?.map) return baseMat;
     const a = Math.max(1, Number(dimAmm) || 1);
     const b = Math.max(1, Number(dimBmm) || 1);
-    const boardX = Number(baseMat.map?.userData?.boardSizeMm?.x) || 0;
-    const boardY = Number(baseMat.map?.userData?.boardSizeMm?.y) || 0;
-    const minRepeat = axis === 'top' ? 0.01 : 0.01;
-    const tileMm = tileSizeMmForQuality();
-    let repX;
-    let repY;
-    if (baseMat.map?.userData?.isMissingPlaceholder) {
-        const markMm = 280;
-        repX = Math.max(2, a / markMm);
-        repY = Math.max(2, b / markMm);
-    } else {
-        repX = boardX > 0 ? Math.max(minRepeat, a / boardX) : Math.max(minRepeat, a / tileMm);
-        repY = boardY > 0 ? Math.max(minRepeat, b / boardY) : Math.max(minRepeat, b / tileMm);
-    }
-    const key = `${baseMat.uuid}:${axis}:${repX.toFixed(2)}:${repY.toFixed(2)}:${textureQualityMode}:${grainRotationRad.toFixed(4)}`;
+    const { repX, repY } = computeTileRepeat(a, b, axis, baseMat, false);
+    const scaledRepX = repX / DEFAULT_TEXTURE_SCALE;
+    const scaledRepY = repY / DEFAULT_TEXTURE_SCALE;
+    const key = `${baseMat.uuid}:${axis}:${scaledRepX.toFixed(2)}:${scaledRepY.toFixed(2)}:${textureQualityMode}:${grainRotationRad.toFixed(4)}:t${TEXTURE_TILE_MM}`;
     if (tiledMaterialPool.has(key)) return tiledMaterialPool.get(key);
 
     const mat = baseMat.clone();
     const map = baseMat.map.clone();
-    const useRepeat = repX > 1.0001 || repY > 1.0001;
+    const useRepeat = scaledRepX > 1.0001 || scaledRepY > 1.0001;
     map.wrapS = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
     map.wrapT = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-    map.repeat.set(repX, repY);
+    map.repeat.set(scaledRepX, scaledRepY);
+    map.userData = { ...(map.userData || {}), baseRepeatX: repX, baseRepeatY: repY };
     map.center.set(0.5, 0.5);
     map.rotation = grainRotationRad;
     map.anisotropy = anisotropyForQuality();
@@ -848,6 +839,7 @@ function dimAccentColor() {
 }
 
 const TEXTURE_SCALE_STEPS = [0.125, 0.2, 0.25, 0.35, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6];
+const DEFAULT_TEXTURE_SCALE = 0.35;
 
 function inferMeshTileDimsMm(mesh) {
     const sx = mesh.scale.x / MM;
@@ -885,24 +877,115 @@ function captureMeshTextureBase(mesh) {
     mesh.userData.ldspBaseMaterial = mat;
 }
 
-function computeTileRepeat(dimAmm, dimBmm, axis, baseMat) {
+function computeTileRepeat(dimAmm, dimBmm, axis, baseMat, rotateQuarterTurn = false) {
     const a = Math.max(1, Number(dimAmm) || 1);
     const b = Math.max(1, Number(dimBmm) || 1);
-    const boardX = Number(baseMat.map?.userData?.boardSizeMm?.x) || 0;
-    const boardY = Number(baseMat.map?.userData?.boardSizeMm?.y) || 0;
-    const minRepeat = 0.01;
-    const tileMm = tileSizeMmForQuality();
-    if (baseMat.map?.userData?.isMissingPlaceholder) {
+    if (baseMat?.map?.userData?.isMissingPlaceholder) {
         const markMm = 280;
         return {
             repX: Math.max(2, a / markMm),
             repY: Math.max(2, b / markMm),
         };
     }
-    return {
-        repX: boardX > 0 ? Math.max(minRepeat, a / boardX) : Math.max(minRepeat, a / tileMm),
-        repY: boardY > 0 ? Math.max(minRepeat, b / boardY) : Math.max(minRepeat, b / tileMm),
-    };
+    let repX = Math.max(MIN_TEXTURE_REPEAT, a / TEXTURE_TILE_MM);
+    let repY = Math.max(MIN_TEXTURE_REPEAT, b / TEXTURE_TILE_MM);
+    if (rotateQuarterTurn) {
+        const swap = repX;
+        repX = repY;
+        repY = swap;
+    }
+    return { repX, repY };
+}
+
+function syncMeshBaseRepeat(mesh, baseMat) {
+    if (!mesh?.userData?.tileDimA) {
+        const dims = inferMeshTileDimsMm(mesh);
+        mesh.userData.tileDimA = dims.dimAmm;
+        mesh.userData.tileDimB = dims.dimBmm;
+        mesh.userData.tileAxis = dims.axis;
+    }
+    const mat = baseMat || mesh.userData.ldspBaseMaterial || mesh.material;
+    const { repX, repY } = computeTileRepeat(
+        mesh.userData.tileDimA,
+        mesh.userData.tileDimB,
+        mesh.userData.tileAxis || 'front',
+        mat,
+        false
+    );
+    mesh.userData.baseRepeatX = repX;
+    mesh.userData.baseRepeatY = repY;
+    return { repX, repY };
+}
+
+function blendPixelPair(data, idxA, idxB, t) {
+    const ar = data[idxA];
+    const ag = data[idxA + 1];
+    const ab = data[idxA + 2];
+    const aa = data[idxA + 3];
+    const br = data[idxB];
+    const bg = data[idxB + 1];
+    const bb = data[idxB + 2];
+    const ba = data[idxB + 3];
+    data[idxA] = Math.round(ar * (1 - t) + br * t);
+    data[idxA + 1] = Math.round(ag * (1 - t) + bg * t);
+    data[idxA + 2] = Math.round(ab * (1 - t) + bb * t);
+    data[idxA + 3] = Math.round(aa * (1 - t) + ba * t);
+    data[idxB] = Math.round(br * (1 - t) + ar * t);
+    data[idxB + 1] = Math.round(bg * (1 - t) + ag * t);
+    data[idxB + 2] = Math.round(bb * (1 - t) + ab * t);
+    data[idxB + 3] = Math.round(ba * (1 - t) + aa * t);
+}
+
+function getSeamSoftenedSourceMap(baseMap) {
+    if (!baseMap?.image) return baseMap;
+    const image = baseMap.image;
+    const width = image.naturalWidth || image.videoWidth || image.width || 0;
+    const height = image.naturalHeight || image.videoHeight || image.height || 0;
+    if (width < 8 || height < 8) return baseMap;
+
+    const key = `${baseMap.uuid}:${width}x${height}`;
+    if (seamSoftTexturePool.has(key)) return seamSoftTexturePool.get(key);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return baseMap;
+
+    ctx.drawImage(image, 0, 0, width, height);
+    const img = ctx.getImageData(0, 0, width, height);
+    const data = img.data;
+    const feather = Math.max(2, Math.min(16, Math.round(Math.min(width, height) * 0.02)));
+    const strength = 0.22;
+
+    for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < feather; x += 1) {
+            const t = ((feather - x) / feather) * strength;
+            const idxA = (y * width + x) * 4;
+            const idxB = (y * width + (width - 1 - x)) * 4;
+            blendPixelPair(data, idxA, idxB, t);
+        }
+    }
+
+    for (let x = 0; x < width; x += 1) {
+        for (let y = 0; y < feather; y += 1) {
+            const t = ((feather - y) / feather) * strength;
+            const idxA = (y * width + x) * 4;
+            const idxB = ((height - 1 - y) * width + x) * 4;
+            blendPixelPair(data, idxA, idxB, t);
+        }
+    }
+
+    ctx.putImageData(img, 0, 0);
+    const softened = baseMap.clone();
+    softened.image = canvas;
+    softened.userData = { ...(baseMap.userData || {}) };
+    softened.generateMipmaps = true;
+    softened.minFilter = THREE.LinearMipmapLinearFilter;
+    softened.magFilter = THREE.LinearFilter;
+    softened.needsUpdate = true;
+    seamSoftTexturePool.set(key, softened);
+    return softened;
 }
 
 function applyMeshTextureState(mesh, extraDeg, textureScale) {
@@ -914,21 +997,31 @@ function applyMeshTextureState(mesh, extraDeg, textureScale) {
     const dimA = mesh.userData.tileDimA;
     const dimB = mesh.userData.tileDimB;
     const axis = mesh.userData.tileAxis || 'front';
-    const scale = Math.max(0.125, Math.min(6, Number(textureScale) || 1));
+    const scale = Math.max(0.125, Math.min(6, Number(textureScale) || DEFAULT_TEXTURE_SCALE));
     const deg = ((Number(extraDeg) || 0) % 360 + 360) % 360;
 
-    const { repX, repY } = computeTileRepeat(dimA, dimB, axis, baseMat);
-    const scaledRepX = repX / scale;
-    const scaledRepY = repY / scale;
+    const totalRotationRad = grainRotationRad + (deg * Math.PI) / 180;
+    const twoPi = Math.PI * 2;
+    const wrappedRotationRad = ((totalRotationRad % twoPi) + twoPi) % twoPi;
+    const turnsFloat = wrappedRotationRad / (Math.PI / 2);
+    const turnsRounded = Math.round(turnsFloat);
+    const snappedToQuarterTurn = Math.abs(turnsFloat - turnsRounded) < 1e-4;
+    const quarterTurnIndex = ((turnsRounded % 4) + 4) % 4;
+    const isQuarterTurn = snappedToQuarterTurn && (quarterTurnIndex === 1 || quarterTurnIndex === 3);
+    const { repX: baseRepX, repY: baseRepY } = syncMeshBaseRepeat(mesh, baseMat);
+    const appliedRepX = (isQuarterTurn ? baseRepY : baseRepX) / scale;
+    const appliedRepY = (isQuarterTurn ? baseRepX : baseRepY) / scale;
 
     const mat = baseMat.clone();
-    const map = baseMat.map.clone();
-    const useRepeat = scaledRepX > 1.0001 || scaledRepY > 1.0001;
+    const shouldSoftenSeams = scale < 0.999 && (appliedRepX > 1.0001 || appliedRepY > 1.0001);
+    const sourceMap = shouldSoftenSeams ? getSeamSoftenedSourceMap(baseMat.map) : baseMat.map;
+    const map = sourceMap.clone();
+    const useRepeat = appliedRepX > 1.0001 || appliedRepY > 1.0001;
     map.wrapS = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
     map.wrapT = useRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-    map.repeat.set(scaledRepX, scaledRepY);
+    map.repeat.set(appliedRepX, appliedRepY);
     map.center.set(0.5, 0.5);
-    map.rotation = grainRotationRad + (deg * Math.PI) / 180;
+    map.rotation = wrappedRotationRad;
     map.anisotropy = anisotropyForQuality();
     map.needsUpdate = true;
     mat.map = map;
@@ -946,7 +1039,7 @@ function applyMeshTextureState(mesh, extraDeg, textureScale) {
 }
 
 function applyMeshGrain(mesh, extraDeg) {
-    const scale = Number(mesh.userData.textureScale) || 1;
+    const scale = Number(mesh.userData.textureScale) || DEFAULT_TEXTURE_SCALE;
     applyMeshTextureState(mesh, extraDeg, scale);
 }
 
@@ -1474,10 +1567,10 @@ class Furniture3D {
         for (const mesh of this.texturedMeshes) {
             const key = grainOverrideKey(mesh);
             const deg = Number(mesh.userData.grainRotationDeg || 0);
-            const scale = Number(mesh.userData.textureScale || 1);
+            const scale = Number(mesh.userData.textureScale || DEFAULT_TEXTURE_SCALE);
             if (deg) grainSnap.set(key, deg);
             else grainSnap.delete(key);
-            if (scale !== 1) scaleSnap.set(key, scale);
+            if (Math.abs(scale - DEFAULT_TEXTURE_SCALE) > 1e-6) scaleSnap.set(key, scale);
             else scaleSnap.delete(key);
         }
         return { grainSnap, scaleSnap };
@@ -1487,8 +1580,8 @@ class Furniture3D {
         for (const mesh of this.texturedMeshes) {
             const key = grainOverrideKey(mesh);
             const deg = this.elementGrainDeg.get(key) || 0;
-            const scale = this.elementTextureScale.get(key) || 1;
-            if (deg || scale !== 1) applyMeshTextureState(mesh, deg, scale);
+            const scale = this.elementTextureScale.get(key) || DEFAULT_TEXTURE_SCALE;
+            applyMeshTextureState(mesh, deg, scale);
         }
     }
 
@@ -1498,7 +1591,7 @@ class Furniture3D {
         for (const mesh of this.texturedMeshes) {
             const key = grainOverrideKey(mesh);
             const deg = this.elementGrainDeg.get(key) || 0;
-            const scale = this.elementTextureScale.get(key) || 1;
+            const scale = this.elementTextureScale.get(key) || DEFAULT_TEXTURE_SCALE;
             applyMeshTextureState(mesh, deg, scale);
         }
     }
@@ -1511,7 +1604,7 @@ class Furniture3D {
         const currentDeg = Number(mesh.userData.grainRotationDeg || 0);
         const nextDeg = (currentDeg + 90) % 360;
         const key = grainOverrideKey(mesh);
-        const scale = Number(mesh.userData.textureScale) || 1;
+        const scale = Number(mesh.userData.textureScale) || DEFAULT_TEXTURE_SCALE;
         if (nextDeg) this.elementGrainDeg.set(key, nextDeg);
         else this.elementGrainDeg.delete(key);
         applyMeshTextureState(mesh, nextDeg, scale);
@@ -1522,14 +1615,15 @@ class Furniture3D {
     scaleMeshTexture(mesh, direction) {
         if (!mesh?.material?.map) return;
 
-        let current = Number(mesh.userData.textureScale) || 1;
+        let current = Number(mesh.userData.textureScale) || DEFAULT_TEXTURE_SCALE;
         let idx = TEXTURE_SCALE_STEPS.findIndex((s) => Math.abs(s - current) < 0.02);
+        if (idx < 0) idx = TEXTURE_SCALE_STEPS.findIndex((s) => Math.abs(s - DEFAULT_TEXTURE_SCALE) < 0.02);
         if (idx < 0) idx = TEXTURE_SCALE_STEPS.indexOf(1);
         const nextIdx = Math.max(0, Math.min(TEXTURE_SCALE_STEPS.length - 1, idx + direction));
         const nextScale = TEXTURE_SCALE_STEPS[nextIdx];
         const key = grainOverrideKey(mesh);
         const deg = Number(mesh.userData.grainRotationDeg || 0);
-        if (nextScale === 1) this.elementTextureScale.delete(key);
+        if (Math.abs(nextScale - DEFAULT_TEXTURE_SCALE) < 1e-6) this.elementTextureScale.delete(key);
         else this.elementTextureScale.set(key, nextScale);
         applyMeshTextureState(mesh, deg, nextScale);
     }
@@ -2687,3 +2781,4 @@ window.GConfig3D = {
         instance = null;
     },
 };
+

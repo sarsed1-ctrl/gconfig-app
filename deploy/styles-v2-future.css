@@ -474,6 +474,21 @@ html.theme-future .furniture-3d-dims-label {
     text-shadow: 0 0 10px rgba(92, 255, 200, 0.45);
 }
 
+html.theme-future .preview-header-actions--model-cta {
+    border-color: rgba(0, 229, 160, 0.58);
+    background: linear-gradient(135deg, rgba(0, 229, 160, 0.2), rgba(0, 143, 255, 0.18));
+    box-shadow: 0 0 14px rgba(0, 229, 160, 0.26), inset 0 0 10px rgba(0, 229, 160, 0.08);
+}
+
+html.theme-future .preview-header-actions--model-cta .preview-3d-toggle-label {
+    color: #d9fff2;
+    text-shadow: 0 0 10px rgba(0, 229, 160, 0.45);
+}
+
+html.theme-future .preview-header-actions--model-cta .slide-toggle--3d {
+    box-shadow: 0 0 0 1px rgba(0, 229, 160, 0.55), 0 0 14px rgba(0, 229, 160, 0.35);
+}
+
 html.theme-future .furniture-3d-expand {
     border-color: rgba(0, 229, 160, 0.25);
     background: rgba(0, 229, 160, 0.06);

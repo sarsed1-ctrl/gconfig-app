@@ -611,6 +611,8 @@
 
             toggle_3d_textures: 'Текстуры',
 
+            textures_illustrative: 'Текстуры носят иллюстративный характер.',
+
             mode_3d_doors: 'Двери',
 
             mode_3d_rotate_textures: 'Вращать текстуру',
@@ -876,6 +878,8 @@
             toggle_3d_dims: 'Dimensions',
 
             toggle_3d_textures: 'Textures',
+
+            textures_illustrative: 'Textures are illustrative.',
 
             mode_3d_doors: 'Doors',
 
@@ -2650,8 +2654,10 @@
         const hasCountertop = document.getElementById('w-hasCountertop')?.checked;
 
         const countertopFields = document.getElementById('countertopFields');
+        const countertopMaterialField = document.getElementById('countertopMaterialField');
 
         if (countertopFields) countertopFields.classList.toggle('hidden', !hasCountertop);
+        if (countertopMaterialField) countertopMaterialField.classList.toggle('hidden', !hasCountertop);
 
 
 
