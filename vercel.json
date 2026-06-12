@@ -3,6 +3,9 @@
   "functions": {
     "api/amflex-price.js": {
       "maxDuration": 30
+    },
+    "api/telegram-send.js": {
+      "maxDuration": 60
     }
   }
 }

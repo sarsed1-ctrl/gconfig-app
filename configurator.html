@@ -8834,17 +8834,30 @@
     });
 
     // ── Android APK: try several relative paths (same folder, ./, ../Desktop-style) then blob-download ──
-    // ── Telegram Bot — sends clean jsPDF document ────────────
-    const TG_TOKEN   = '8447797079:AAE50QcS_bMg9gWYg83HEGjjcb9dFnDa0_I';
-    const TG_CHAT_ID = '904669192';
-    const TG_API     = `https://api.telegram.org/bot${TG_TOKEN}`;
+    // ── Telegram — PDF/CSV via server proxy (token only in Vercel env) ──
+    const TG_SEND_API = '/api/telegram-send';
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+            reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+            reader.readAsDataURL(blob);
+        });
+    }
 
     async function tgSendDocument(blob, filename, mimeType, captionText) {
-        const fd = new FormData();
-        fd.append('chat_id', TG_CHAT_ID);
-        fd.append('document', new File([blob], filename, { type: mimeType || 'application/octet-stream' }));
-        if (captionText) fd.append('caption', captionText);
-        const res = await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
+        const dataBase64 = await blobToBase64(blob);
+        const res = await fetch(TG_SEND_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filename,
+                mimeType: mimeType || 'application/octet-stream',
+                caption: captionText || undefined,
+                dataBase64,
+            }),
+        });
         const data = await res.json();
         if (!data.ok) {
             throw new Error(data.description || (data.error_code ? String(data.error_code) : 'Telegram sendDocument failed'));

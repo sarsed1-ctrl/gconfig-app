@@ -2,3 +2,6 @@
 .claude/
 build_apk.py
 GConfig_local.apk
+.env
+.env.*
+!.env.example

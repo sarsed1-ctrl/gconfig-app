@@ -3799,10 +3799,37 @@
         });
     });
 
-    // ── Telegram Bot — sends clean jsPDF document ────────────
-    const TG_TOKEN   = '8447797079:AAE50QcS_bMg9gWYg83HEGjjcb9dFnDa0_I';
-    const TG_CHAT_ID = '904669192';
-    const TG_API     = `https://api.telegram.org/bot${TG_TOKEN}`;
+    // ── Telegram — via server proxy (token only in Vercel env) ──
+    const TG_SEND_API = '/api/telegram-send';
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+            reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async function tgSendDocument(blob, filename, mimeType, captionText, parseMode) {
+        const dataBase64 = await blobToBase64(blob);
+        const res = await fetch(TG_SEND_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filename,
+                mimeType: mimeType || 'application/pdf',
+                caption: captionText || undefined,
+                parseMode: parseMode || undefined,
+                dataBase64,
+            }),
+        });
+        const data = await res.json();
+        if (!data.ok) {
+            throw new Error(data.description || (data.error_code ? String(data.error_code) : 'Telegram send failed'));
+        }
+        return data;
+    }
 
     async function doSendProject() {
         const emailEl   = document.getElementById('sm-email');
@@ -3841,25 +3868,12 @@
                 `💬 *Comment:* ${desc || '—'}`,
             ].join('\n');
 
-            const fd = new FormData();
-            fd.append('chat_id',    TG_CHAT_ID);
-            fd.append('caption',    caption);
-            fd.append('parse_mode', 'Markdown');
-            fd.append('document',   new File([pdfBlob], pdfFilename, { type: 'application/pdf' }));
-
-            const res  = await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
-            const data = await res.json();
+            await tgSendDocument(pdfBlob, pdfFilename, 'application/pdf', caption, 'Markdown');
 
             btn.disabled    = false;
             btn.textContent = 'Send →';
-
-            if (data.ok) {
-                closeSendModal();
-                showToast('✅ PDF sent to Telegram!');
-            } else {
-                console.error('Telegram error:', data);
-                showToast('Send error: ' + (data.description || 'Unknown error'), true);
-            }
+            closeSendModal();
+            showToast('✅ PDF sent to Telegram!');
         } catch (err) {
             btn.disabled    = false;
             btn.textContent = 'Send →';
