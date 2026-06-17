@@ -5,3 +5,5 @@ GConfig_local.apk
 .env
 .env.*
 !.env.example
+
+.vercel
