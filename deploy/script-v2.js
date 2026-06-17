@@ -5112,6 +5112,7 @@
         bind3DModal();
 
         bind3DToggle();
+        setModel3dEnabled(true);
 
         bindPreview3dResizer();
 
