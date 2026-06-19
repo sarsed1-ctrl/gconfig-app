@@ -161,21 +161,10 @@
                             </div>
                         </div>
 
-                        <div class="card">
-                            <h3 data-i18n="general_thick">General</h3>
-                            <div class="field-grid">
-                                <div class="field">
-                                    <label data-i18n="facade_thick">Facade thickness</label>
-                                    <select id="w-facadeThick" data-iframe="facadeThick"></select>
-                                </div>
-                                <div class="field">
-                                    <label data-i18n="carcass_thick">Carcass thickness</label>
-                                    <select id="w-carcassThick" data-iframe="carcassThick"></select>
-                                </div>
-                                <div class="field full closets-only">
-                                    <label data-i18n="wall_type">Wall type</label>
-                                    <select id="w-wallType" data-iframe="wallType"></select>
-                                </div>
+                        <div class="card closets-only">
+                            <h3 data-i18n="wall_type">Wall type</h3>
+                            <div class="field full">
+                                <select id="w-wallType" data-iframe="wallType"></select>
                             </div>
                         </div>
                     </section>
@@ -354,6 +343,14 @@
                         <div class="card">
                             <h3 data-i18n="materials">EAMF materials</h3>
                             <div class="field-grid">
+                                <div class="field">
+                                    <label data-i18n="facade_thick">Facade thickness</label>
+                                    <select id="w-facadeThick" data-iframe="facadeThick"></select>
+                                </div>
+                                <div class="field">
+                                    <label data-i18n="carcass_thick">Carcass thickness</label>
+                                    <select id="w-carcassThick" data-iframe="carcassThick"></select>
+                                </div>
                                 <div class="field">
                                     <label data-i18n="facade_mat">Facade</label>
                                     <select id="w-eamfFacadeMaterial" data-iframe="eamfFacadeMaterial"></select>
