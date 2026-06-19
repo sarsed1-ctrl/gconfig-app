@@ -1,7 +1,7 @@
 {
   "source": "egger.com",
   "generatedBy": "scripts/build_egger_textures_db.py",
-  "generatedAt": "2026-05-28T15:15:21.426561+00:00",
+  "generatedAt": "2026-06-19T10:57:49.677160+00:00",
   "textureBasePath": "assets/egger-textures",
   "countRequested": 450,
   "countAvailable": 265,
@@ -14,2782 +14,3312 @@
       "file": "F021.jpg",
       "path": "assets/egger-textures/F021.jpg",
       "url": "/assets/egger-textures/F021.jpg",
-      "bytes": 55888669
+      "bytes": 843173,
+      "previewPath": "assets/egger-textures-preview/F021.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F021.jpg"
     },
     "F030": {
       "decor": "F030",
       "file": "F030.jpg",
       "path": "assets/egger-textures/F030.jpg",
       "url": "/assets/egger-textures/F030.jpg",
-      "bytes": 73720892
+      "bytes": 1367483,
+      "previewPath": "assets/egger-textures-preview/F030.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F030.jpg"
     },
     "F031": {
       "decor": "F031",
       "file": "F031.jpg",
       "path": "assets/egger-textures/F031.jpg",
       "url": "/assets/egger-textures/F031.jpg",
-      "bytes": 74185760
+      "bytes": 1628504,
+      "previewPath": "assets/egger-textures-preview/F031.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F031.jpg"
     },
     "F032": {
       "decor": "F032",
       "file": "F032.jpg",
       "path": "assets/egger-textures/F032.jpg",
       "url": "/assets/egger-textures/F032.jpg",
-      "bytes": 74186244
+      "bytes": 1649211,
+      "previewPath": "assets/egger-textures-preview/F032.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F032.jpg"
     },
     "F052": {
       "decor": "F052",
       "file": "F052.jpg",
       "path": "assets/egger-textures/F052.jpg",
       "url": "/assets/egger-textures/F052.jpg",
-      "bytes": 53090309
+      "bytes": 717913,
+      "previewPath": "assets/egger-textures-preview/F052.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F052.jpg"
     },
     "F093": {
       "decor": "F093",
       "file": "F093.jpg",
       "path": "assets/egger-textures/F093.jpg",
       "url": "/assets/egger-textures/F093.jpg",
-      "bytes": 57241043
+      "bytes": 698855,
+      "previewPath": "assets/egger-textures-preview/F093.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F093.jpg"
     },
     "F095": {
       "decor": "F095",
       "file": "F095.jpg",
       "path": "assets/egger-textures/F095.jpg",
       "url": "/assets/egger-textures/F095.jpg",
-      "bytes": 48902975
+      "bytes": 728989,
+      "previewPath": "assets/egger-textures-preview/F095.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F095.jpg"
     },
     "F108": {
       "decor": "F108",
       "file": "F108.jpg",
       "path": "assets/egger-textures/F108.jpg",
       "url": "/assets/egger-textures/F108.jpg",
-      "bytes": 51595574
+      "bytes": 594740,
+      "previewPath": "assets/egger-textures-preview/F108.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F108.jpg"
     },
     "F121": {
       "decor": "F121",
       "file": "F121.jpg",
       "path": "assets/egger-textures/F121.jpg",
       "url": "/assets/egger-textures/F121.jpg",
-      "bytes": 73709264
+      "bytes": 1232131,
+      "previewPath": "assets/egger-textures-preview/F121.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F121.jpg"
     },
     "F128": {
       "decor": "F128",
       "file": "F128.jpg",
       "path": "assets/egger-textures/F128.jpg",
       "url": "/assets/egger-textures/F128.jpg",
-      "bytes": 73778196
+      "bytes": 1091529,
+      "previewPath": "assets/egger-textures-preview/F128.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F128.jpg"
     },
     "F129": {
       "decor": "F129",
       "file": "F129.jpg",
       "path": "assets/egger-textures/F129.jpg",
       "url": "/assets/egger-textures/F129.jpg",
-      "bytes": 51829749
+      "bytes": 661408,
+      "previewPath": "assets/egger-textures-preview/F129.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F129.jpg"
     },
     "F186": {
       "decor": "F186",
       "file": "F186.jpg",
       "path": "assets/egger-textures/F186.jpg",
       "url": "/assets/egger-textures/F186.jpg",
-      "bytes": 54769264
+      "bytes": 935746,
+      "previewPath": "assets/egger-textures-preview/F186.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F186.jpg"
     },
     "F1861": {
       "decor": "F1861",
       "file": "F1861.jpg",
       "path": "assets/egger-textures/F1861.jpg",
       "url": "/assets/egger-textures/F1861.jpg",
-      "bytes": 5695212
+      "bytes": 395746,
+      "previewPath": "assets/egger-textures-preview/F1861.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F1861.jpg"
     },
     "F187": {
       "decor": "F187",
       "file": "F187.jpg",
       "path": "assets/egger-textures/F187.jpg",
       "url": "/assets/egger-textures/F187.jpg",
-      "bytes": 12431060
+      "bytes": 344453,
+      "previewPath": "assets/egger-textures-preview/F187.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F187.jpg"
     },
     "F205": {
       "decor": "F205",
       "file": "F205.jpg",
       "path": "assets/egger-textures/F205.jpg",
       "url": "/assets/egger-textures/F205.jpg",
-      "bytes": 73711640
+      "bytes": 1354328,
+      "previewPath": "assets/egger-textures-preview/F205.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F205.jpg"
     },
     "F206": {
       "decor": "F206",
       "file": "F206.jpg",
       "path": "assets/egger-textures/F206.jpg",
       "url": "/assets/egger-textures/F206.jpg",
-      "bytes": 31396927
+      "bytes": 410699,
+      "previewPath": "assets/egger-textures-preview/F206.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F206.jpg"
     },
     "F208": {
       "decor": "F208",
       "file": "F208.jpg",
       "path": "assets/egger-textures/F208.jpg",
       "url": "/assets/egger-textures/F208.jpg",
-      "bytes": 59037664
+      "bytes": 1071466,
+      "previewPath": "assets/egger-textures-preview/F208.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F208.jpg"
     },
     "F221": {
       "decor": "F221",
       "file": "F221.jpg",
       "path": "assets/egger-textures/F221.jpg",
       "url": "/assets/egger-textures/F221.jpg",
-      "bytes": 63702872
+      "bytes": 1170495,
+      "previewPath": "assets/egger-textures-preview/F221.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F221.jpg"
     },
     "F226": {
       "decor": "F226",
       "file": "F226.jpg",
       "path": "assets/egger-textures/F226.jpg",
       "url": "/assets/egger-textures/F226.jpg",
-      "bytes": 12107636
+      "bytes": 596498,
+      "previewPath": "assets/egger-textures-preview/F226.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F226.jpg"
     },
     "F227": {
       "decor": "F227",
       "file": "F227.jpg",
       "path": "assets/egger-textures/F227.jpg",
       "url": "/assets/egger-textures/F227.jpg",
-      "bytes": 73824120
+      "bytes": 1621272,
+      "previewPath": "assets/egger-textures-preview/F227.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F227.jpg"
     },
     "F228": {
       "decor": "F228",
       "file": "F228.jpg",
       "path": "assets/egger-textures/F228.jpg",
       "url": "/assets/egger-textures/F228.jpg",
-      "bytes": 9311557
+      "bytes": 544781,
+      "previewPath": "assets/egger-textures-preview/F228.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F228.jpg"
     },
     "F229": {
       "decor": "F229",
       "file": "F229.jpg",
       "path": "assets/egger-textures/F229.jpg",
       "url": "/assets/egger-textures/F229.jpg",
-      "bytes": 73767852
+      "bytes": 414425,
+      "previewPath": "assets/egger-textures-preview/F229.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F229.jpg"
     },
     "F230": {
       "decor": "F230",
       "file": "F230.jpg",
       "path": "assets/egger-textures/F230.jpg",
       "url": "/assets/egger-textures/F230.jpg",
-      "bytes": 73768620
+      "bytes": 1000081,
+      "previewPath": "assets/egger-textures-preview/F230.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F230.jpg"
     },
     "F234": {
       "decor": "F234",
       "file": "F234.jpg",
       "path": "assets/egger-textures/F234.jpg",
       "url": "/assets/egger-textures/F234.jpg",
-      "bytes": 73774448
+      "bytes": 1179047,
+      "previewPath": "assets/egger-textures-preview/F234.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F234.jpg"
     },
     "F235": {
       "decor": "F235",
       "file": "F235.jpg",
       "path": "assets/egger-textures/F235.jpg",
       "url": "/assets/egger-textures/F235.jpg",
-      "bytes": 73774484
+      "bytes": 958821,
+      "previewPath": "assets/egger-textures-preview/F235.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F235.jpg"
     },
     "F237": {
       "decor": "F237",
       "file": "F237.jpg",
       "path": "assets/egger-textures/F237.jpg",
       "url": "/assets/egger-textures/F237.jpg",
-      "bytes": 6400174
+      "bytes": 588174,
+      "previewPath": "assets/egger-textures-preview/F237.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F237.jpg"
     },
     "F243": {
       "decor": "F243",
       "file": "F243.jpg",
       "path": "assets/egger-textures/F243.jpg",
       "url": "/assets/egger-textures/F243.jpg",
-      "bytes": 73769540
+      "bytes": 1300044,
+      "previewPath": "assets/egger-textures-preview/F243.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F243.jpg"
     },
     "F244": {
       "decor": "F244",
       "file": "F244.jpg",
       "path": "assets/egger-textures/F244.jpg",
       "url": "/assets/egger-textures/F244.jpg",
-      "bytes": 8107743
+      "bytes": 626081,
+      "previewPath": "assets/egger-textures-preview/F244.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F244.jpg"
     },
     "F251": {
       "decor": "F251",
       "file": "F251.jpg",
       "path": "assets/egger-textures/F251.jpg",
       "url": "/assets/egger-textures/F251.jpg",
-      "bytes": 38278603
+      "bytes": 389332,
+      "previewPath": "assets/egger-textures-preview/F251.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F251.jpg"
     },
     "F267": {
       "decor": "F267",
       "file": "F267.jpg",
       "path": "assets/egger-textures/F267.jpg",
       "url": "/assets/egger-textures/F267.jpg",
-      "bytes": 73776428
+      "bytes": 1216104,
+      "previewPath": "assets/egger-textures-preview/F267.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F267.jpg"
     },
     "F275": {
       "decor": "F275",
       "file": "F275.jpg",
       "path": "assets/egger-textures/F275.jpg",
       "url": "/assets/egger-textures/F275.jpg",
-      "bytes": 47058933
+      "bytes": 444528,
+      "previewPath": "assets/egger-textures-preview/F275.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F275.jpg"
     },
     "F302": {
       "decor": "F302",
       "file": "F302.jpg",
       "path": "assets/egger-textures/F302.jpg",
       "url": "/assets/egger-textures/F302.jpg",
-      "bytes": 10072414
+      "bytes": 635860,
+      "previewPath": "assets/egger-textures-preview/F302.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F302.jpg"
     },
     "F311": {
       "decor": "F311",
       "file": "F311.jpg",
       "path": "assets/egger-textures/F311.jpg",
       "url": "/assets/egger-textures/F311.jpg",
-      "bytes": 9035931
+      "bytes": 505060,
+      "previewPath": "assets/egger-textures-preview/F311.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F311.jpg"
     },
     "F323": {
       "decor": "F323",
       "file": "F323.jpg",
       "path": "assets/egger-textures/F323.jpg",
       "url": "/assets/egger-textures/F323.jpg",
-      "bytes": 4506545
+      "bytes": 376217,
+      "previewPath": "assets/egger-textures-preview/F323.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F323.jpg"
     },
     "F352": {
       "decor": "F352",
       "file": "F352.jpg",
       "path": "assets/egger-textures/F352.jpg",
       "url": "/assets/egger-textures/F352.jpg",
-      "bytes": 65823708
+      "bytes": 611439,
+      "previewPath": "assets/egger-textures-preview/F352.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F352.jpg"
     },
     "F416": {
       "decor": "F416",
       "file": "F416.jpg",
       "path": "assets/egger-textures/F416.jpg",
       "url": "/assets/egger-textures/F416.jpg",
-      "bytes": 73709596
+      "bytes": 1485049,
+      "previewPath": "assets/egger-textures-preview/F416.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F416.jpg"
     },
     "F417": {
       "decor": "F417",
       "file": "F417.jpg",
       "path": "assets/egger-textures/F417.jpg",
       "url": "/assets/egger-textures/F417.jpg",
-      "bytes": 76883036
+      "bytes": 1468047,
+      "previewPath": "assets/egger-textures-preview/F417.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F417.jpg"
     },
     "F433": {
       "decor": "F433",
       "file": "F433.jpg",
       "path": "assets/egger-textures/F433.jpg",
       "url": "/assets/egger-textures/F433.jpg",
-      "bytes": 63181504
+      "bytes": 1178830,
+      "previewPath": "assets/egger-textures-preview/F433.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F433.jpg"
     },
     "F486": {
       "decor": "F486",
       "file": "F486.jpg",
       "path": "assets/egger-textures/F486.jpg",
       "url": "/assets/egger-textures/F486.jpg",
-      "bytes": 71954432
+      "bytes": 899274,
+      "previewPath": "assets/egger-textures-preview/F486.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F486.jpg"
     },
     "F502": {
       "decor": "F502",
       "file": "F502.jpg",
       "path": "assets/egger-textures/F502.jpg",
       "url": "/assets/egger-textures/F502.jpg",
-      "bytes": 76493668
+      "bytes": 1319447,
+      "previewPath": "assets/egger-textures-preview/F502.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F502.jpg"
     },
     "F528": {
       "decor": "F528",
       "file": "F528.jpg",
       "path": "assets/egger-textures/F528.jpg",
       "url": "/assets/egger-textures/F528.jpg",
-      "bytes": 2797318
+      "bytes": 141719,
+      "previewPath": "assets/egger-textures-preview/F528.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F528.jpg"
     },
     "F620": {
       "decor": "F620",
       "file": "F620.jpg",
       "path": "assets/egger-textures/F620.jpg",
       "url": "/assets/egger-textures/F620.jpg",
-      "bytes": 73773364
+      "bytes": 1230835,
+      "previewPath": "assets/egger-textures-preview/F620.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F620.jpg"
     },
     "F637": {
       "decor": "F637",
       "file": "F637.jpg",
       "path": "assets/egger-textures/F637.jpg",
       "url": "/assets/egger-textures/F637.jpg",
-      "bytes": 5976277
+      "bytes": 418158,
+      "previewPath": "assets/egger-textures-preview/F637.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F637.jpg"
     },
     "F638": {
       "decor": "F638",
       "file": "F638.jpg",
       "path": "assets/egger-textures/F638.jpg",
       "url": "/assets/egger-textures/F638.jpg",
-      "bytes": 50404856
+      "bytes": 1112183,
+      "previewPath": "assets/egger-textures-preview/F638.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F638.jpg"
     },
     "F661": {
       "decor": "F661",
       "file": "F661.jpg",
       "path": "assets/egger-textures/F661.jpg",
       "url": "/assets/egger-textures/F661.jpg",
-      "bytes": 73774988
+      "bytes": 658992,
+      "previewPath": "assets/egger-textures-preview/F661.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F661.jpg"
     },
     "F662": {
       "decor": "F662",
       "file": "F662.jpg",
       "path": "assets/egger-textures/F662.jpg",
       "url": "/assets/egger-textures/F662.jpg",
-      "bytes": 35869120
+      "bytes": 272314,
+      "previewPath": "assets/egger-textures-preview/F662.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F662.jpg"
     },
     "F675": {
       "decor": "F675",
       "file": "F675.jpg",
       "path": "assets/egger-textures/F675.jpg",
       "url": "/assets/egger-textures/F675.jpg",
-      "bytes": 37336267
+      "bytes": 339403,
+      "previewPath": "assets/egger-textures-preview/F675.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F675.jpg"
     },
     "F676": {
       "decor": "F676",
       "file": "F676.jpg",
       "path": "assets/egger-textures/F676.jpg",
       "url": "/assets/egger-textures/F676.jpg",
-      "bytes": 73770284
+      "bytes": 880277,
+      "previewPath": "assets/egger-textures-preview/F676.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F676.jpg"
     },
     "F685": {
       "decor": "F685",
       "file": "F685.jpg",
       "path": "assets/egger-textures/F685.jpg",
       "url": "/assets/egger-textures/F685.jpg",
-      "bytes": 13521750
+      "bytes": 733892,
+      "previewPath": "assets/egger-textures-preview/F685.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F685.jpg"
     },
     "F765": {
       "decor": "F765",
       "file": "F765.jpg",
       "path": "assets/egger-textures/F765.jpg",
       "url": "/assets/egger-textures/F765.jpg",
-      "bytes": 35214975
+      "bytes": 302827,
+      "previewPath": "assets/egger-textures-preview/F765.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F765.jpg"
     },
     "F800": {
       "decor": "F800",
       "file": "F800.jpg",
       "path": "assets/egger-textures/F800.jpg",
       "url": "/assets/egger-textures/F800.jpg",
-      "bytes": 73768672
+      "bytes": 319615,
+      "previewPath": "assets/egger-textures-preview/F800.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F800.jpg"
     },
     "F8001": {
       "decor": "F8001",
       "file": "F8001.jpg",
       "path": "assets/egger-textures/F8001.jpg",
       "url": "/assets/egger-textures/F8001.jpg",
-      "bytes": 73768672
+      "bytes": 319615,
+      "previewPath": "assets/egger-textures-preview/F8001.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F8001.jpg"
     },
     "F812": {
       "decor": "F812",
       "file": "F812.jpg",
       "path": "assets/egger-textures/F812.jpg",
       "url": "/assets/egger-textures/F812.jpg",
-      "bytes": 73707244
+      "bytes": 482920,
+      "previewPath": "assets/egger-textures-preview/F812.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F812.jpg"
     },
     "F836": {
       "decor": "F836",
       "file": "F836.jpg",
       "path": "assets/egger-textures/F836.jpg",
       "url": "/assets/egger-textures/F836.jpg",
-      "bytes": 39756229
+      "bytes": 477190,
+      "previewPath": "assets/egger-textures-preview/F836.jpg",
+      "previewUrl": "/assets/egger-textures-preview/F836.jpg"
     },
     "H011": {
       "decor": "H011",
       "file": "H011.jpg",
       "path": "assets/egger-textures/H011.jpg",
       "url": "/assets/egger-textures/H011.jpg",
-      "bytes": 73707120
+      "bytes": 1248588,
+      "previewPath": "assets/egger-textures-preview/H011.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H011.jpg"
     },
     "H1113": {
       "decor": "H1113",
       "file": "H1113.jpg",
       "path": "assets/egger-textures/H1113.jpg",
       "url": "/assets/egger-textures/H1113.jpg",
-      "bytes": 10545845
+      "bytes": 548505,
+      "previewPath": "assets/egger-textures-preview/H1113.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1113.jpg"
     },
     "H1142": {
       "decor": "H1142",
       "file": "H1142.jpg",
       "path": "assets/egger-textures/H1142.jpg",
       "url": "/assets/egger-textures/H1142.jpg",
-      "bytes": 73771916
+      "bytes": 1353612,
+      "previewPath": "assets/egger-textures-preview/H1142.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1142.jpg"
     },
     "H1145": {
       "decor": "H1145",
       "file": "H1145.jpg",
       "path": "assets/egger-textures/H1145.jpg",
       "url": "/assets/egger-textures/H1145.jpg",
-      "bytes": 9050084
+      "bytes": 569136,
+      "previewPath": "assets/egger-textures-preview/H1145.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1145.jpg"
     },
     "H1176": {
       "decor": "H1176",
       "file": "H1176.jpg",
       "path": "assets/egger-textures/H1176.jpg",
       "url": "/assets/egger-textures/H1176.jpg",
-      "bytes": 6209173
+      "bytes": 497224,
+      "previewPath": "assets/egger-textures-preview/H1176.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1176.jpg"
     },
     "H1180": {
       "decor": "H1180",
       "file": "H1180.jpg",
       "path": "assets/egger-textures/H1180.jpg",
       "url": "/assets/egger-textures/H1180.jpg",
-      "bytes": 6674325
+      "bytes": 554547,
+      "previewPath": "assets/egger-textures-preview/H1180.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1180.jpg"
     },
     "H1181": {
       "decor": "H1181",
       "file": "H1181.jpg",
       "path": "assets/egger-textures/H1181.jpg",
       "url": "/assets/egger-textures/H1181.jpg",
-      "bytes": 9741139
+      "bytes": 638520,
+      "previewPath": "assets/egger-textures-preview/H1181.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1181.jpg"
     },
     "H1199": {
       "decor": "H1199",
       "file": "H1199.jpg",
       "path": "assets/egger-textures/H1199.jpg",
       "url": "/assets/egger-textures/H1199.jpg",
-      "bytes": 13959823
+      "bytes": 518028,
+      "previewPath": "assets/egger-textures-preview/H1199.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1199.jpg"
     },
     "H1204": {
       "decor": "H1204",
       "file": "H1204.jpg",
       "path": "assets/egger-textures/H1204.jpg",
       "url": "/assets/egger-textures/H1204.jpg",
-      "bytes": 54913312
+      "bytes": 888376,
+      "previewPath": "assets/egger-textures-preview/H1204.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1204.jpg"
     },
     "H1223": {
       "decor": "H1223",
       "file": "H1223.jpg",
       "path": "assets/egger-textures/H1223.jpg",
       "url": "/assets/egger-textures/H1223.jpg",
-      "bytes": 7107283
+      "bytes": 308500,
+      "previewPath": "assets/egger-textures-preview/H1223.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1223.jpg"
     },
     "H1225": {
       "decor": "H1225",
       "file": "H1225.jpg",
       "path": "assets/egger-textures/H1225.jpg",
       "url": "/assets/egger-textures/H1225.jpg",
-      "bytes": 3512780
+      "bytes": 317840,
+      "previewPath": "assets/egger-textures-preview/H1225.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1225.jpg"
     },
     "H1227": {
       "decor": "H1227",
       "file": "H1227.jpg",
       "path": "assets/egger-textures/H1227.jpg",
       "url": "/assets/egger-textures/H1227.jpg",
-      "bytes": 73766972
+      "bytes": 1092102,
+      "previewPath": "assets/egger-textures-preview/H1227.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1227.jpg"
     },
     "H1242": {
       "decor": "H1242",
       "file": "H1242.jpg",
       "path": "assets/egger-textures/H1242.jpg",
       "url": "/assets/egger-textures/H1242.jpg",
-      "bytes": 73772120
+      "bytes": 1010655,
+      "previewPath": "assets/egger-textures-preview/H1242.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1242.jpg"
     },
     "H1250": {
       "decor": "H1250",
       "file": "H1250.jpg",
       "path": "assets/egger-textures/H1250.jpg",
       "url": "/assets/egger-textures/H1250.jpg",
-      "bytes": 68721848
+      "bytes": 1299707,
+      "previewPath": "assets/egger-textures-preview/H1250.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1250.jpg"
     },
     "H1277": {
       "decor": "H1277",
       "file": "H1277.jpg",
       "path": "assets/egger-textures/H1277.jpg",
       "url": "/assets/egger-textures/H1277.jpg",
-      "bytes": 18754583
+      "bytes": 313984,
+      "previewPath": "assets/egger-textures-preview/H1277.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1277.jpg"
     },
     "H1303": {
       "decor": "H1303",
       "file": "H1303.jpg",
       "path": "assets/egger-textures/H1303.jpg",
       "url": "/assets/egger-textures/H1303.jpg",
-      "bytes": 73772888
+      "bytes": 1376169,
+      "previewPath": "assets/egger-textures-preview/H1303.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1303.jpg"
     },
     "H1307": {
       "decor": "H1307",
       "file": "H1307.jpg",
       "path": "assets/egger-textures/H1307.jpg",
       "url": "/assets/egger-textures/H1307.jpg",
-      "bytes": 6913253
+      "bytes": 431421,
+      "previewPath": "assets/egger-textures-preview/H1307.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1307.jpg"
     },
     "H1312": {
       "decor": "H1312",
       "file": "H1312.jpg",
       "path": "assets/egger-textures/H1312.jpg",
       "url": "/assets/egger-textures/H1312.jpg",
-      "bytes": 73710860
+      "bytes": 1407493,
+      "previewPath": "assets/egger-textures-preview/H1312.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1312.jpg"
     },
     "H1313": {
       "decor": "H1313",
       "file": "H1313.jpg",
       "path": "assets/egger-textures/H1313.jpg",
       "url": "/assets/egger-textures/H1313.jpg",
-      "bytes": 73709500
+      "bytes": 1578602,
+      "previewPath": "assets/egger-textures-preview/H1313.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1313.jpg"
     },
     "H1316": {
       "decor": "H1316",
       "file": "H1316.jpg",
       "path": "assets/egger-textures/H1316.jpg",
       "url": "/assets/egger-textures/H1316.jpg",
-      "bytes": 73775636
+      "bytes": 917730,
+      "previewPath": "assets/egger-textures-preview/H1316.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1316.jpg"
     },
     "H1318": {
       "decor": "H1318",
       "file": "H1318.jpg",
       "path": "assets/egger-textures/H1318.jpg",
       "url": "/assets/egger-textures/H1318.jpg",
-      "bytes": 73728516
+      "bytes": 1236670,
+      "previewPath": "assets/egger-textures-preview/H1318.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1318.jpg"
     },
     "H1330": {
       "decor": "H1330",
       "file": "H1330.jpg",
       "path": "assets/egger-textures/H1330.jpg",
       "url": "/assets/egger-textures/H1330.jpg",
-      "bytes": 8428107
+      "bytes": 604811,
+      "previewPath": "assets/egger-textures-preview/H1330.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1330.jpg"
     },
     "H1344": {
       "decor": "H1344",
       "file": "H1344.jpg",
       "path": "assets/egger-textures/H1344.jpg",
       "url": "/assets/egger-textures/H1344.jpg",
-      "bytes": 73709460
+      "bytes": 1570585,
+      "previewPath": "assets/egger-textures-preview/H1344.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1344.jpg"
     },
     "H1346": {
       "decor": "H1346",
       "file": "H1346.jpg",
       "path": "assets/egger-textures/H1346.jpg",
       "url": "/assets/egger-textures/H1346.jpg",
-      "bytes": 10942017
+      "bytes": 575804,
+      "previewPath": "assets/egger-textures-preview/H1346.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1346.jpg"
     },
     "H1357": {
       "decor": "H1357",
       "file": "H1357.jpg",
       "path": "assets/egger-textures/H1357.jpg",
       "url": "/assets/egger-textures/H1357.jpg",
-      "bytes": 73772676
+      "bytes": 1380091,
+      "previewPath": "assets/egger-textures-preview/H1357.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1357.jpg"
     },
     "H1362": {
       "decor": "H1362",
       "file": "H1362.jpg",
       "path": "assets/egger-textures/H1362.jpg",
       "url": "/assets/egger-textures/H1362.jpg",
-      "bytes": 33950763
+      "bytes": 421403,
+      "previewPath": "assets/egger-textures-preview/H1362.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1362.jpg"
     },
     "H1367": {
       "decor": "H1367",
       "file": "H1367.jpg",
       "path": "assets/egger-textures/H1367.jpg",
       "url": "/assets/egger-textures/H1367.jpg",
-      "bytes": 70937964
+      "bytes": 929741,
+      "previewPath": "assets/egger-textures-preview/H1367.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1367.jpg"
     },
     "H1377": {
       "decor": "H1377",
       "file": "H1377.jpg",
       "path": "assets/egger-textures/H1377.jpg",
       "url": "/assets/egger-textures/H1377.jpg",
-      "bytes": 3761113
+      "bytes": 404725,
+      "previewPath": "assets/egger-textures-preview/H1377.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1377.jpg"
     },
     "H1379": {
       "decor": "H1379",
       "file": "H1379.jpg",
       "path": "assets/egger-textures/H1379.jpg",
       "url": "/assets/egger-textures/H1379.jpg",
-      "bytes": 4329304
+      "bytes": 459410,
+      "previewPath": "assets/egger-textures-preview/H1379.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1379.jpg"
     },
     "H1385": {
       "decor": "H1385",
       "file": "H1385.jpg",
       "path": "assets/egger-textures/H1385.jpg",
       "url": "/assets/egger-textures/H1385.jpg",
-      "bytes": 73770828
+      "bytes": 1147406,
+      "previewPath": "assets/egger-textures-preview/H1385.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1385.jpg"
     },
     "H1386": {
       "decor": "H1386",
       "file": "H1386.jpg",
       "path": "assets/egger-textures/H1386.jpg",
       "url": "/assets/egger-textures/H1386.jpg",
-      "bytes": 73770680
+      "bytes": 1218631,
+      "previewPath": "assets/egger-textures-preview/H1386.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1386.jpg"
     },
     "H1399": {
       "decor": "H1399",
       "file": "H1399.jpg",
       "path": "assets/egger-textures/H1399.jpg",
       "url": "/assets/egger-textures/H1399.jpg",
-      "bytes": 6398814
+      "bytes": 485078,
+      "previewPath": "assets/egger-textures-preview/H1399.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1399.jpg"
     },
     "H1401": {
       "decor": "H1401",
       "file": "H1401.jpg",
       "path": "assets/egger-textures/H1401.jpg",
       "url": "/assets/egger-textures/H1401.jpg",
-      "bytes": 3870525
+      "bytes": 370133,
+      "previewPath": "assets/egger-textures-preview/H1401.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1401.jpg"
     },
     "H1487": {
       "decor": "H1487",
       "file": "H1487.jpg",
       "path": "assets/egger-textures/H1487.jpg",
       "url": "/assets/egger-textures/H1487.jpg",
-      "bytes": 13800979
+      "bytes": 524779,
+      "previewPath": "assets/egger-textures-preview/H1487.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1487.jpg"
     },
     "H1636": {
       "decor": "H1636",
       "file": "H1636.jpg",
       "path": "assets/egger-textures/H1636.jpg",
       "url": "/assets/egger-textures/H1636.jpg",
-      "bytes": 12906048
+      "bytes": 292966,
+      "previewPath": "assets/egger-textures-preview/H1636.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1636.jpg"
     },
     "H1708": {
       "decor": "H1708",
       "file": "H1708.jpg",
       "path": "assets/egger-textures/H1708.jpg",
       "url": "/assets/egger-textures/H1708.jpg",
-      "bytes": 73776676
+      "bytes": 1368390,
+      "previewPath": "assets/egger-textures-preview/H1708.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1708.jpg"
     },
     "H1710": {
       "decor": "H1710",
       "file": "H1710.jpg",
       "path": "assets/egger-textures/H1710.jpg",
       "url": "/assets/egger-textures/H1710.jpg",
-      "bytes": 5463563
+      "bytes": 404694,
+      "previewPath": "assets/egger-textures-preview/H1710.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1710.jpg"
     },
     "H1714": {
       "decor": "H1714",
       "file": "H1714.jpg",
       "path": "assets/egger-textures/H1714.jpg",
       "url": "/assets/egger-textures/H1714.jpg",
-      "bytes": 73708704
+      "bytes": 1182687,
+      "previewPath": "assets/egger-textures-preview/H1714.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1714.jpg"
     },
     "H1715": {
       "decor": "H1715",
       "file": "H1715.jpg",
       "path": "assets/egger-textures/H1715.jpg",
       "url": "/assets/egger-textures/H1715.jpg",
-      "bytes": 73770764
+      "bytes": 1073050,
+      "previewPath": "assets/egger-textures-preview/H1715.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1715.jpg"
     },
     "H1732": {
       "decor": "H1732",
       "file": "H1732.jpg",
       "path": "assets/egger-textures/H1732.jpg",
       "url": "/assets/egger-textures/H1732.jpg",
-      "bytes": 2843715
+      "bytes": 272205,
+      "previewPath": "assets/egger-textures-preview/H1732.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1732.jpg"
     },
     "H1910": {
       "decor": "H1910",
       "file": "H1910.jpg",
       "path": "assets/egger-textures/H1910.jpg",
       "url": "/assets/egger-textures/H1910.jpg",
-      "bytes": 4745738
+      "bytes": 331279,
+      "previewPath": "assets/egger-textures-preview/H1910.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H1910.jpg"
     },
     "H193": {
       "decor": "H193",
       "file": "H193.jpg",
       "path": "assets/egger-textures/H193.jpg",
       "url": "/assets/egger-textures/H193.jpg",
-      "bytes": 73729784
+      "bytes": 1062753,
+      "previewPath": "assets/egger-textures-preview/H193.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H193.jpg"
     },
     "H197": {
       "decor": "H197",
       "file": "H197.jpg",
       "path": "assets/egger-textures/H197.jpg",
       "url": "/assets/egger-textures/H197.jpg",
-      "bytes": 79235096
+      "bytes": 1368975,
+      "previewPath": "assets/egger-textures-preview/H197.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H197.jpg"
     },
     "H2032": {
       "decor": "H2032",
       "file": "H2032.jpg",
       "path": "assets/egger-textures/H2032.jpg",
       "url": "/assets/egger-textures/H2032.jpg",
-      "bytes": 72933752
+      "bytes": 1637018,
+      "previewPath": "assets/egger-textures-preview/H2032.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H2032.jpg"
     },
     "H2033": {
       "decor": "H2033",
       "file": "H2033.jpg",
       "path": "assets/egger-textures/H2033.jpg",
       "url": "/assets/egger-textures/H2033.jpg",
-      "bytes": 72932876
+      "bytes": 1149077,
+      "previewPath": "assets/egger-textures-preview/H2033.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H2033.jpg"
     },
     "H2409": {
       "decor": "H2409",
       "file": "H2409.jpg",
       "path": "assets/egger-textures/H2409.jpg",
       "url": "/assets/egger-textures/H2409.jpg",
-      "bytes": 95099516
+      "bytes": 1472038,
+      "previewPath": "assets/egger-textures-preview/H2409.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H2409.jpg"
     },
     "H3003": {
       "decor": "H3003",
       "file": "H3003.jpg",
       "path": "assets/egger-textures/H3003.jpg",
       "url": "/assets/egger-textures/H3003.jpg",
-      "bytes": 5930868
+      "bytes": 489680,
+      "previewPath": "assets/egger-textures-preview/H3003.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3003.jpg"
     },
     "H3012": {
       "decor": "H3012",
       "file": "H3012.jpg",
       "path": "assets/egger-textures/H3012.jpg",
       "url": "/assets/egger-textures/H3012.jpg",
-      "bytes": 40212872
+      "bytes": 1521001,
+      "previewPath": "assets/egger-textures-preview/H3012.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3012.jpg"
     },
     "H3041": {
       "decor": "H3041",
       "file": "H3041.jpg",
       "path": "assets/egger-textures/H3041.jpg",
       "url": "/assets/egger-textures/H3041.jpg",
-      "bytes": 73773816
+      "bytes": 1174495,
+      "previewPath": "assets/egger-textures-preview/H3041.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3041.jpg"
     },
     "H3043": {
       "decor": "H3043",
       "file": "H3043.jpg",
       "path": "assets/egger-textures/H3043.jpg",
       "url": "/assets/egger-textures/H3043.jpg",
-      "bytes": 73775312
+      "bytes": 660072,
+      "previewPath": "assets/egger-textures-preview/H3043.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3043.jpg"
     },
     "H305": {
       "decor": "H305",
       "file": "H305.jpg",
       "path": "assets/egger-textures/H305.jpg",
       "url": "/assets/egger-textures/H305.jpg",
-      "bytes": 59097096
+      "bytes": 1057074,
+      "previewPath": "assets/egger-textures-preview/H305.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H305.jpg"
     },
     "H309": {
       "decor": "H309",
       "file": "H309.jpg",
       "path": "assets/egger-textures/H309.jpg",
       "url": "/assets/egger-textures/H309.jpg",
-      "bytes": 5607881
+      "bytes": 479875,
+      "previewPath": "assets/egger-textures-preview/H309.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H309.jpg"
     },
     "H3131": {
       "decor": "H3131",
       "file": "H3131.jpg",
       "path": "assets/egger-textures/H3131.jpg",
       "url": "/assets/egger-textures/H3131.jpg",
-      "bytes": 70654824
+      "bytes": 1332337,
+      "previewPath": "assets/egger-textures-preview/H3131.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3131.jpg"
     },
     "H3133": {
       "decor": "H3133",
       "file": "H3133.jpg",
       "path": "assets/egger-textures/H3133.jpg",
       "url": "/assets/egger-textures/H3133.jpg",
-      "bytes": 81907856
+      "bytes": 1493103,
+      "previewPath": "assets/egger-textures-preview/H3133.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3133.jpg"
     },
     "H3146": {
       "decor": "H3146",
       "file": "H3146.jpg",
       "path": "assets/egger-textures/H3146.jpg",
       "url": "/assets/egger-textures/H3146.jpg",
-      "bytes": 6986253
+      "bytes": 424434,
+      "previewPath": "assets/egger-textures-preview/H3146.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3146.jpg"
     },
     "H3152": {
       "decor": "H3152",
       "file": "H3152.jpg",
       "path": "assets/egger-textures/H3152.jpg",
       "url": "/assets/egger-textures/H3152.jpg",
-      "bytes": 4472079
+      "bytes": 349412,
+      "previewPath": "assets/egger-textures-preview/H3152.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3152.jpg"
     },
     "H3154": {
       "decor": "H3154",
       "file": "H3154.jpg",
       "path": "assets/egger-textures/H3154.jpg",
       "url": "/assets/egger-textures/H3154.jpg",
-      "bytes": 83475884
+      "bytes": 1449362,
+      "previewPath": "assets/egger-textures-preview/H3154.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3154.jpg"
     },
     "H3156": {
       "decor": "H3156",
       "file": "H3156.jpg",
       "path": "assets/egger-textures/H3156.jpg",
       "url": "/assets/egger-textures/H3156.jpg",
-      "bytes": 67570572
+      "bytes": 1200239,
+      "previewPath": "assets/egger-textures-preview/H3156.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3156.jpg"
     },
     "H3157": {
       "decor": "H3157",
       "file": "H3157.jpg",
       "path": "assets/egger-textures/H3157.jpg",
       "url": "/assets/egger-textures/H3157.jpg",
-      "bytes": 64279436
+      "bytes": 1115628,
+      "previewPath": "assets/egger-textures-preview/H3157.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3157.jpg"
     },
     "H3170": {
       "decor": "H3170",
       "file": "H3170.jpg",
       "path": "assets/egger-textures/H3170.jpg",
       "url": "/assets/egger-textures/H3170.jpg",
-      "bytes": 63153480
+      "bytes": 1170087,
+      "previewPath": "assets/egger-textures-preview/H3170.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3170.jpg"
     },
     "H3176": {
       "decor": "H3176",
       "file": "H3176.jpg",
       "path": "assets/egger-textures/H3176.jpg",
       "url": "/assets/egger-textures/H3176.jpg",
-      "bytes": 73709840
+      "bytes": 1658109,
+      "previewPath": "assets/egger-textures-preview/H3176.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3176.jpg"
     },
     "H3180": {
       "decor": "H3180",
       "file": "H3180.jpg",
       "path": "assets/egger-textures/H3180.jpg",
       "url": "/assets/egger-textures/H3180.jpg",
-      "bytes": 73772016
+      "bytes": 1291104,
+      "previewPath": "assets/egger-textures-preview/H3180.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3180.jpg"
     },
     "H3190": {
       "decor": "H3190",
       "file": "H3190.jpg",
       "path": "assets/egger-textures/H3190.jpg",
       "url": "/assets/egger-textures/H3190.jpg",
-      "bytes": 7239396
+      "bytes": 306810,
+      "previewPath": "assets/egger-textures-preview/H3190.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3190.jpg"
     },
     "H3195": {
       "decor": "H3195",
       "file": "H3195.jpg",
       "path": "assets/egger-textures/H3195.jpg",
       "url": "/assets/egger-textures/H3195.jpg",
-      "bytes": 17623113
+      "bytes": 239696,
+      "previewPath": "assets/egger-textures-preview/H3195.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3195.jpg"
     },
     "H3197": {
       "decor": "H3197",
       "file": "H3197.jpg",
       "path": "assets/egger-textures/H3197.jpg",
       "url": "/assets/egger-textures/H3197.jpg",
-      "bytes": 73774048
+      "bytes": 1170876,
+      "previewPath": "assets/egger-textures-preview/H3197.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3197.jpg"
     },
     "H3198": {
       "decor": "H3198",
       "file": "H3198.jpg",
       "path": "assets/egger-textures/H3198.jpg",
       "url": "/assets/egger-textures/H3198.jpg",
-      "bytes": 73774076
+      "bytes": 1309994,
+      "previewPath": "assets/egger-textures-preview/H3198.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3198.jpg"
     },
     "H3303": {
       "decor": "H3303",
       "file": "H3303.jpg",
       "path": "assets/egger-textures/H3303.jpg",
       "url": "/assets/egger-textures/H3303.jpg",
-      "bytes": 4487873
+      "bytes": 360679,
+      "previewPath": "assets/egger-textures-preview/H3303.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3303.jpg"
     },
     "H3309": {
       "decor": "H3309",
       "file": "H3309.jpg",
       "path": "assets/egger-textures/H3309.jpg",
       "url": "/assets/egger-textures/H3309.jpg",
-      "bytes": 64097564
+      "bytes": 1218673,
+      "previewPath": "assets/egger-textures-preview/H3309.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3309.jpg"
     },
     "H3311": {
       "decor": "H3311",
       "file": "H3311.jpg",
       "path": "assets/egger-textures/H3311.jpg",
       "url": "/assets/egger-textures/H3311.jpg",
-      "bytes": 6156980
+      "bytes": 496080,
+      "previewPath": "assets/egger-textures-preview/H3311.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3311.jpg"
     },
     "H3317": {
       "decor": "H3317",
       "file": "H3317.jpg",
       "path": "assets/egger-textures/H3317.jpg",
       "url": "/assets/egger-textures/H3317.jpg",
-      "bytes": 72269324
+      "bytes": 1270022,
+      "previewPath": "assets/egger-textures-preview/H3317.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3317.jpg"
     },
     "H3322": {
       "decor": "H3322",
       "file": "H3322.jpg",
       "path": "assets/egger-textures/H3322.jpg",
       "url": "/assets/egger-textures/H3322.jpg",
-      "bytes": 38444582
+      "bytes": 521954,
+      "previewPath": "assets/egger-textures-preview/H3322.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3322.jpg"
     },
     "H3325": {
       "decor": "H3325",
       "file": "H3325.jpg",
       "path": "assets/egger-textures/H3325.jpg",
       "url": "/assets/egger-textures/H3325.jpg",
-      "bytes": 82832260
+      "bytes": 1413921,
+      "previewPath": "assets/egger-textures-preview/H3325.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3325.jpg"
     },
     "H3326": {
       "decor": "H3326",
       "file": "H3326.jpg",
       "path": "assets/egger-textures/H3326.jpg",
       "url": "/assets/egger-textures/H3326.jpg",
-      "bytes": 77382220
+      "bytes": 1500822,
+      "previewPath": "assets/egger-textures-preview/H3326.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3326.jpg"
     },
     "H3331": {
       "decor": "H3331",
       "file": "H3331.jpg",
       "path": "assets/egger-textures/H3331.jpg",
       "url": "/assets/egger-textures/H3331.jpg",
-      "bytes": 66396512
+      "bytes": 1428903,
+      "previewPath": "assets/egger-textures-preview/H3331.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3331.jpg"
     },
     "H3332": {
       "decor": "H3332",
       "file": "H3332.jpg",
       "path": "assets/egger-textures/H3332.jpg",
       "url": "/assets/egger-textures/H3332.jpg",
-      "bytes": 61737432
+      "bytes": 1306181,
+      "previewPath": "assets/egger-textures-preview/H3332.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3332.jpg"
     },
     "H3342": {
       "decor": "H3342",
       "file": "H3342.jpg",
       "path": "assets/egger-textures/H3342.jpg",
       "url": "/assets/egger-textures/H3342.jpg",
-      "bytes": 85039344
+      "bytes": 1319401,
+      "previewPath": "assets/egger-textures-preview/H3342.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3342.jpg"
     },
     "H3359": {
       "decor": "H3359",
       "file": "H3359.jpg",
       "path": "assets/egger-textures/H3359.jpg",
       "url": "/assets/egger-textures/H3359.jpg",
-      "bytes": 6220816
+      "bytes": 501833,
+      "previewPath": "assets/egger-textures-preview/H3359.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3359.jpg"
     },
     "H3395": {
       "decor": "H3395",
       "file": "H3395.jpg",
       "path": "assets/egger-textures/H3395.jpg",
       "url": "/assets/egger-textures/H3395.jpg",
-      "bytes": 16358989
+      "bytes": 414511,
+      "previewPath": "assets/egger-textures-preview/H3395.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3395.jpg"
     },
     "H3398": {
       "decor": "H3398",
       "file": "H3398.jpg",
       "path": "assets/egger-textures/H3398.jpg",
       "url": "/assets/egger-textures/H3398.jpg",
-      "bytes": 77030944
+      "bytes": 1283327,
+      "previewPath": "assets/egger-textures-preview/H3398.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3398.jpg"
     },
     "H3408": {
       "decor": "H3408",
       "file": "H3408.jpg",
       "path": "assets/egger-textures/H3408.jpg",
       "url": "/assets/egger-textures/H3408.jpg",
-      "bytes": 73709128
+      "bytes": 1555597,
+      "previewPath": "assets/egger-textures-preview/H3408.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3408.jpg"
     },
     "H3430": {
       "decor": "H3430",
       "file": "H3430.jpg",
       "path": "assets/egger-textures/H3430.jpg",
       "url": "/assets/egger-textures/H3430.jpg",
-      "bytes": 5754873
+      "bytes": 408105,
+      "previewPath": "assets/egger-textures-preview/H3430.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3430.jpg"
     },
     "H3433": {
       "decor": "H3433",
       "file": "H3433.jpg",
       "path": "assets/egger-textures/H3433.jpg",
       "url": "/assets/egger-textures/H3433.jpg",
-      "bytes": 46745828
+      "bytes": 756240,
+      "previewPath": "assets/egger-textures-preview/H3433.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3433.jpg"
     },
     "H3450": {
       "decor": "H3450",
       "file": "H3450.jpg",
       "path": "assets/egger-textures/H3450.jpg",
       "url": "/assets/egger-textures/H3450.jpg",
-      "bytes": 3827346
+      "bytes": 320645,
+      "previewPath": "assets/egger-textures-preview/H3450.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3450.jpg"
     },
     "H3700": {
       "decor": "H3700",
       "file": "H3700.jpg",
       "path": "assets/egger-textures/H3700.jpg",
       "url": "/assets/egger-textures/H3700.jpg",
-      "bytes": 6835567
+      "bytes": 501095,
+      "previewPath": "assets/egger-textures-preview/H3700.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3700.jpg"
     },
     "H3702": {
       "decor": "H3702",
       "file": "H3702.jpg",
       "path": "assets/egger-textures/H3702.jpg",
       "url": "/assets/egger-textures/H3702.jpg",
-      "bytes": 77334812
+      "bytes": 1437378,
+      "previewPath": "assets/egger-textures-preview/H3702.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3702.jpg"
     },
     "H3710": {
       "decor": "H3710",
       "file": "H3710.jpg",
       "path": "assets/egger-textures/H3710.jpg",
       "url": "/assets/egger-textures/H3710.jpg",
-      "bytes": 74674216
+      "bytes": 1344396,
+      "previewPath": "assets/egger-textures-preview/H3710.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3710.jpg"
     },
     "H3730": {
       "decor": "H3730",
       "file": "H3730.jpg",
       "path": "assets/egger-textures/H3730.jpg",
       "url": "/assets/egger-textures/H3730.jpg",
-      "bytes": 5336660
+      "bytes": 434726,
+      "previewPath": "assets/egger-textures-preview/H3730.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3730.jpg"
     },
     "H3734": {
       "decor": "H3734",
       "file": "H3734.jpg",
       "path": "assets/egger-textures/H3734.jpg",
       "url": "/assets/egger-textures/H3734.jpg",
-      "bytes": 81984804
+      "bytes": 1343619,
+      "previewPath": "assets/egger-textures-preview/H3734.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3734.jpg"
     },
     "H3786": {
       "decor": "H3786",
       "file": "H3786.jpg",
       "path": "assets/egger-textures/H3786.jpg",
       "url": "/assets/egger-textures/H3786.jpg",
-      "bytes": 26814797
+      "bytes": 359612,
+      "previewPath": "assets/egger-textures-preview/H3786.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3786.jpg"
     },
     "H3787": {
       "decor": "H3787",
       "file": "H3787.jpg",
       "path": "assets/egger-textures/H3787.jpg",
       "url": "/assets/egger-textures/H3787.jpg",
-      "bytes": 73773920
+      "bytes": 1116652,
+      "previewPath": "assets/egger-textures-preview/H3787.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3787.jpg"
     },
     "H3840": {
       "decor": "H3840",
       "file": "H3840.jpg",
       "path": "assets/egger-textures/H3840.jpg",
       "url": "/assets/egger-textures/H3840.jpg",
-      "bytes": 53086872
+      "bytes": 771116,
+      "previewPath": "assets/egger-textures-preview/H3840.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3840.jpg"
     },
     "H3860": {
       "decor": "H3860",
       "file": "H3860.jpg",
       "path": "assets/egger-textures/H3860.jpg",
       "url": "/assets/egger-textures/H3860.jpg",
-      "bytes": 3455079
+      "bytes": 261248,
+      "previewPath": "assets/egger-textures-preview/H3860.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H3860.jpg"
     },
     "H7586": {
       "decor": "H7586",
       "file": "H7586.jpg",
       "path": "assets/egger-textures/H7586.jpg",
       "url": "/assets/egger-textures/H7586.jpg",
-      "bytes": 31428690
+      "bytes": 409463,
+      "previewPath": "assets/egger-textures-preview/H7586.jpg",
+      "previewUrl": "/assets/egger-textures-preview/H7586.jpg"
     },
     "S010": {
       "decor": "S010",
       "file": "S010.jpg",
       "path": "assets/egger-textures/S010.jpg",
       "url": "/assets/egger-textures/S010.jpg",
-      "bytes": 74055
+      "bytes": 74055,
+      "previewPath": "assets/egger-textures-preview/S010.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S010.jpg"
     },
     "S012": {
       "decor": "S012",
       "file": "S012.jpg",
       "path": "assets/egger-textures/S012.jpg",
       "url": "/assets/egger-textures/S012.jpg",
-      "bytes": 114918
+      "bytes": 114918,
+      "previewPath": "assets/egger-textures-preview/S012.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S012.jpg"
     },
     "S013": {
       "decor": "S013",
       "file": "S013.jpg",
       "path": "assets/egger-textures/S013.jpg",
       "url": "/assets/egger-textures/S013.jpg",
-      "bytes": 124342
+      "bytes": 124342,
+      "previewPath": "assets/egger-textures-preview/S013.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S013.jpg"
     },
     "S016": {
       "decor": "S016",
       "file": "S016.jpg",
       "path": "assets/egger-textures/S016.jpg",
       "url": "/assets/egger-textures/S016.jpg",
-      "bytes": 153896
+      "bytes": 153896,
+      "previewPath": "assets/egger-textures-preview/S016.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S016.jpg"
     },
     "S060": {
       "decor": "S060",
       "file": "S060.jpg",
       "path": "assets/egger-textures/S060.jpg",
       "url": "/assets/egger-textures/S060.jpg",
-      "bytes": 201678
+      "bytes": 201678,
+      "previewPath": "assets/egger-textures-preview/S060.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S060.jpg"
     },
     "S061": {
       "decor": "S061",
       "file": "S061.jpg",
       "path": "assets/egger-textures/S061.jpg",
       "url": "/assets/egger-textures/S061.jpg",
-      "bytes": 207508
+      "bytes": 207508,
+      "previewPath": "assets/egger-textures-preview/S061.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S061.jpg"
     },
     "S063": {
       "decor": "S063",
       "file": "S063.jpg",
       "path": "assets/egger-textures/S063.jpg",
       "url": "/assets/egger-textures/S063.jpg",
-      "bytes": 187192
+      "bytes": 187192,
+      "previewPath": "assets/egger-textures-preview/S063.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S063.jpg"
     },
     "S070": {
       "decor": "S070",
       "file": "S070.jpg",
       "path": "assets/egger-textures/S070.jpg",
       "url": "/assets/egger-textures/S070.jpg",
-      "bytes": 135833
+      "bytes": 135833,
+      "previewPath": "assets/egger-textures-preview/S070.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S070.jpg"
     },
     "S071": {
       "decor": "S071",
       "file": "S071.jpg",
       "path": "assets/egger-textures/S071.jpg",
       "url": "/assets/egger-textures/S071.jpg",
-      "bytes": 201195
+      "bytes": 201195,
+      "previewPath": "assets/egger-textures-preview/S071.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S071.jpg"
     },
     "S072": {
       "decor": "S072",
       "file": "S072.jpg",
       "path": "assets/egger-textures/S072.jpg",
       "url": "/assets/egger-textures/S072.jpg",
-      "bytes": 249202
+      "bytes": 249202,
+      "previewPath": "assets/egger-textures-preview/S072.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S072.jpg"
     },
     "S073": {
       "decor": "S073",
       "file": "S073.jpg",
       "path": "assets/egger-textures/S073.jpg",
       "url": "/assets/egger-textures/S073.jpg",
-      "bytes": 252578
+      "bytes": 252578,
+      "previewPath": "assets/egger-textures-preview/S073.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S073.jpg"
     },
     "S083": {
       "decor": "S083",
       "file": "S083.jpg",
       "path": "assets/egger-textures/S083.jpg",
       "url": "/assets/egger-textures/S083.jpg",
-      "bytes": 94414
+      "bytes": 94414,
+      "previewPath": "assets/egger-textures-preview/S083.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S083.jpg"
     },
     "S087": {
       "decor": "S087",
       "file": "S087.jpg",
       "path": "assets/egger-textures/S087.jpg",
       "url": "/assets/egger-textures/S087.jpg",
-      "bytes": 92950
+      "bytes": 92950,
+      "previewPath": "assets/egger-textures-preview/S087.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S087.jpg"
     },
     "S119": {
       "decor": "S119",
       "file": "S119.jpg",
       "path": "assets/egger-textures/S119.jpg",
       "url": "/assets/egger-textures/S119.jpg",
-      "bytes": 166803
+      "bytes": 166803,
+      "previewPath": "assets/egger-textures-preview/S119.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S119.jpg"
     },
     "S120": {
       "decor": "S120",
       "file": "S120.jpg",
       "path": "assets/egger-textures/S120.jpg",
       "url": "/assets/egger-textures/S120.jpg",
-      "bytes": 107272
+      "bytes": 107272,
+      "previewPath": "assets/egger-textures-preview/S120.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S120.jpg"
     },
     "S122": {
       "decor": "S122",
       "file": "S122.jpg",
       "path": "assets/egger-textures/S122.jpg",
       "url": "/assets/egger-textures/S122.jpg",
-      "bytes": 123484
+      "bytes": 123484,
+      "previewPath": "assets/egger-textures-preview/S122.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S122.jpg"
     },
     "S126": {
       "decor": "S126",
       "file": "S126.jpg",
       "path": "assets/egger-textures/S126.jpg",
       "url": "/assets/egger-textures/S126.jpg",
-      "bytes": 63552
+      "bytes": 63552,
+      "previewPath": "assets/egger-textures-preview/S126.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S126.jpg"
     },
     "S128": {
       "decor": "S128",
       "file": "S128.jpg",
       "path": "assets/egger-textures/S128.jpg",
       "url": "/assets/egger-textures/S128.jpg",
-      "bytes": 182066
+      "bytes": 182066,
+      "previewPath": "assets/egger-textures-preview/S128.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S128.jpg"
     },
     "S133": {
       "decor": "S133",
       "file": "S133.jpg",
       "path": "assets/egger-textures/S133.jpg",
       "url": "/assets/egger-textures/S133.jpg",
-      "bytes": 120413
+      "bytes": 120413,
+      "previewPath": "assets/egger-textures-preview/S133.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S133.jpg"
     },
     "S135": {
       "decor": "S135",
       "file": "S135.jpg",
       "path": "assets/egger-textures/S135.jpg",
       "url": "/assets/egger-textures/S135.jpg",
-      "bytes": 114421
+      "bytes": 114421,
+      "previewPath": "assets/egger-textures-preview/S135.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S135.jpg"
     },
     "S136": {
       "decor": "S136",
       "file": "S136.jpg",
       "path": "assets/egger-textures/S136.jpg",
       "url": "/assets/egger-textures/S136.jpg",
-      "bytes": 113400
+      "bytes": 113400,
+      "previewPath": "assets/egger-textures-preview/S136.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S136.jpg"
     },
     "S138": {
       "decor": "S138",
       "file": "S138.jpg",
       "path": "assets/egger-textures/S138.jpg",
       "url": "/assets/egger-textures/S138.jpg",
-      "bytes": 83515
+      "bytes": 83043,
+      "previewPath": "assets/egger-textures-preview/S138.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S138.jpg"
     },
     "S141": {
       "decor": "S141",
       "file": "S141.jpg",
       "path": "assets/egger-textures/S141.jpg",
       "url": "/assets/egger-textures/S141.jpg",
-      "bytes": 130949
+      "bytes": 130949,
+      "previewPath": "assets/egger-textures-preview/S141.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S141.jpg"
     },
     "S143": {
       "decor": "S143",
       "file": "S143.jpg",
       "path": "assets/egger-textures/S143.jpg",
       "url": "/assets/egger-textures/S143.jpg",
-      "bytes": 115941
+      "bytes": 115941,
+      "previewPath": "assets/egger-textures-preview/S143.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S143.jpg"
     },
     "S144": {
       "decor": "S144",
       "file": "S144.jpg",
       "path": "assets/egger-textures/S144.jpg",
       "url": "/assets/egger-textures/S144.jpg",
-      "bytes": 151789
+      "bytes": 151789,
+      "previewPath": "assets/egger-textures-preview/S144.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S144.jpg"
     },
     "S156": {
       "decor": "S156",
       "file": "S156.jpg",
       "path": "assets/egger-textures/S156.jpg",
       "url": "/assets/egger-textures/S156.jpg",
-      "bytes": 114051
+      "bytes": 114051,
+      "previewPath": "assets/egger-textures-preview/S156.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S156.jpg"
     },
     "S158": {
       "decor": "S158",
       "file": "S158.jpg",
       "path": "assets/egger-textures/S158.jpg",
       "url": "/assets/egger-textures/S158.jpg",
-      "bytes": 121386
+      "bytes": 121386,
+      "previewPath": "assets/egger-textures-preview/S158.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S158.jpg"
     },
     "S160": {
       "decor": "S160",
       "file": "S160.jpg",
       "path": "assets/egger-textures/S160.jpg",
       "url": "/assets/egger-textures/S160.jpg",
-      "bytes": 133619
+      "bytes": 133619,
+      "previewPath": "assets/egger-textures-preview/S160.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S160.jpg"
     },
     "S162": {
       "decor": "S162",
       "file": "S162.jpg",
       "path": "assets/egger-textures/S162.jpg",
       "url": "/assets/egger-textures/S162.jpg",
-      "bytes": 113271
+      "bytes": 113271,
+      "previewPath": "assets/egger-textures-preview/S162.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S162.jpg"
     },
     "S164": {
       "decor": "S164",
       "file": "S164.jpg",
       "path": "assets/egger-textures/S164.jpg",
       "url": "/assets/egger-textures/S164.jpg",
-      "bytes": 125988
+      "bytes": 125988,
+      "previewPath": "assets/egger-textures-preview/S164.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S164.jpg"
     },
     "S165": {
       "decor": "S165",
       "file": "S165.jpg",
       "path": "assets/egger-textures/S165.jpg",
       "url": "/assets/egger-textures/S165.jpg",
-      "bytes": 139475
+      "bytes": 139475,
+      "previewPath": "assets/egger-textures-preview/S165.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S165.jpg"
     },
     "S171": {
       "decor": "S171",
       "file": "S171.jpg",
       "path": "assets/egger-textures/S171.jpg",
       "url": "/assets/egger-textures/S171.jpg",
-      "bytes": 121184
+      "bytes": 121184,
+      "previewPath": "assets/egger-textures-preview/S171.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S171.jpg"
     },
     "S173": {
       "decor": "S173",
       "file": "S173.jpg",
       "path": "assets/egger-textures/S173.jpg",
       "url": "/assets/egger-textures/S173.jpg",
-      "bytes": 139834
+      "bytes": 139834,
+      "previewPath": "assets/egger-textures-preview/S173.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S173.jpg"
     },
     "S176": {
       "decor": "S176",
       "file": "S176.jpg",
       "path": "assets/egger-textures/S176.jpg",
       "url": "/assets/egger-textures/S176.jpg",
-      "bytes": 92203
+      "bytes": 92203,
+      "previewPath": "assets/egger-textures-preview/S176.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S176.jpg"
     },
     "S181": {
       "decor": "S181",
       "file": "S181.jpg",
       "path": "assets/egger-textures/S181.jpg",
       "url": "/assets/egger-textures/S181.jpg",
-      "bytes": 94556
+      "bytes": 94556,
+      "previewPath": "assets/egger-textures-preview/S181.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S181.jpg"
     },
     "S182": {
       "decor": "S182",
       "file": "S182.jpg",
       "path": "assets/egger-textures/S182.jpg",
       "url": "/assets/egger-textures/S182.jpg",
-      "bytes": 81752
+      "bytes": 81752,
+      "previewPath": "assets/egger-textures-preview/S182.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S182.jpg"
     },
     "S185": {
       "decor": "S185",
       "file": "S185.jpg",
       "path": "assets/egger-textures/S185.jpg",
       "url": "/assets/egger-textures/S185.jpg",
-      "bytes": 112982
+      "bytes": 112982,
+      "previewPath": "assets/egger-textures-preview/S185.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S185.jpg"
     },
     "S191": {
       "decor": "S191",
       "file": "S191.jpg",
       "path": "assets/egger-textures/S191.jpg",
       "url": "/assets/egger-textures/S191.jpg",
-      "bytes": 105118
+      "bytes": 105118,
+      "previewPath": "assets/egger-textures-preview/S191.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S191.jpg"
     },
     "S192": {
       "decor": "S192",
       "file": "S192.jpg",
       "path": "assets/egger-textures/S192.jpg",
       "url": "/assets/egger-textures/S192.jpg",
-      "bytes": 99648
+      "bytes": 99648,
+      "previewPath": "assets/egger-textures-preview/S192.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S192.jpg"
     },
     "S195": {
       "decor": "S195",
       "file": "S195.jpg",
       "path": "assets/egger-textures/S195.jpg",
       "url": "/assets/egger-textures/S195.jpg",
-      "bytes": 91852
+      "bytes": 91852,
+      "previewPath": "assets/egger-textures-preview/S195.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S195.jpg"
     },
     "S196": {
       "decor": "S196",
       "file": "S196.jpg",
       "path": "assets/egger-textures/S196.jpg",
       "url": "/assets/egger-textures/S196.jpg",
-      "bytes": 116474
+      "bytes": 116474,
+      "previewPath": "assets/egger-textures-preview/S196.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S196.jpg"
     },
     "S203": {
       "decor": "S203",
       "file": "S203.jpg",
       "path": "assets/egger-textures/S203.jpg",
       "url": "/assets/egger-textures/S203.jpg",
-      "bytes": 162386
+      "bytes": 162386,
+      "previewPath": "assets/egger-textures-preview/S203.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S203.jpg"
     },
     "S206": {
       "decor": "S206",
       "file": "S206.jpg",
       "path": "assets/egger-textures/S206.jpg",
       "url": "/assets/egger-textures/S206.jpg",
-      "bytes": 113995
+      "bytes": 113995,
+      "previewPath": "assets/egger-textures-preview/S206.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S206.jpg"
     },
     "S215": {
       "decor": "S215",
       "file": "S215.jpg",
       "path": "assets/egger-textures/S215.jpg",
       "url": "/assets/egger-textures/S215.jpg",
-      "bytes": 111878
+      "bytes": 111878,
+      "previewPath": "assets/egger-textures-preview/S215.jpg",
+      "previewUrl": "/assets/egger-textures-preview/S215.jpg"
     },
     "U104": {
       "decor": "U104",
       "file": "U104.jpg",
       "path": "assets/egger-textures/U104.jpg",
       "url": "/assets/egger-textures/U104.jpg",
-      "bytes": 3167
+      "bytes": 3167,
+      "previewPath": "assets/egger-textures-preview/U104.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U104.jpg"
     },
     "U113": {
       "decor": "U113",
       "file": "U113.jpg",
       "path": "assets/egger-textures/U113.jpg",
       "url": "/assets/egger-textures/U113.jpg",
-      "bytes": 2097968
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U113.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U113.jpg"
     },
     "U114": {
       "decor": "U114",
       "file": "U114.jpg",
       "path": "assets/egger-textures/U114.jpg",
       "url": "/assets/egger-textures/U114.jpg",
-      "bytes": 2097488
+      "bytes": 18018,
+      "previewPath": "assets/egger-textures-preview/U114.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U114.jpg"
     },
     "U115": {
       "decor": "U115",
       "file": "U115.jpg",
       "path": "assets/egger-textures/U115.jpg",
       "url": "/assets/egger-textures/U115.jpg",
-      "bytes": 236148
+      "bytes": 59649,
+      "previewPath": "assets/egger-textures-preview/U115.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U115.jpg"
     },
     "U125": {
       "decor": "U125",
       "file": "U125.jpg",
       "path": "assets/egger-textures/U125.jpg",
       "url": "/assets/egger-textures/U125.jpg",
-      "bytes": 241858
+      "bytes": 62341,
+      "previewPath": "assets/egger-textures-preview/U125.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U125.jpg"
     },
     "U131": {
       "decor": "U131",
       "file": "U131.jpg",
       "path": "assets/egger-textures/U131.jpg",
       "url": "/assets/egger-textures/U131.jpg",
-      "bytes": 2098008
+      "bytes": 18018,
+      "previewPath": "assets/egger-textures-preview/U131.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U131.jpg"
     },
     "U156": {
       "decor": "U156",
       "file": "U156.jpg",
       "path": "assets/egger-textures/U156.jpg",
       "url": "/assets/egger-textures/U156.jpg",
-      "bytes": 184296
+      "bytes": 17809,
+      "previewPath": "assets/egger-textures-preview/U156.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U156.jpg"
     },
     "U163": {
       "decor": "U163",
       "file": "U163.jpg",
       "path": "assets/egger-textures/U163.jpg",
       "url": "/assets/egger-textures/U163.jpg",
-      "bytes": 2098676
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U163.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U163.jpg"
     },
     "U201": {
       "decor": "U201",
       "file": "U201.jpg",
       "path": "assets/egger-textures/U201.jpg",
       "url": "/assets/egger-textures/U201.jpg",
-      "bytes": 217609
+      "bytes": 12179,
+      "previewPath": "assets/egger-textures-preview/U201.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U201.jpg"
     },
     "U211": {
       "decor": "U211",
       "file": "U211.jpg",
       "path": "assets/egger-textures/U211.jpg",
       "url": "/assets/egger-textures/U211.jpg",
-      "bytes": 2106032
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U211.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U211.jpg"
     },
     "U216": {
       "decor": "U216",
       "file": "U216.jpg",
       "path": "assets/egger-textures/U216.jpg",
       "url": "/assets/egger-textures/U216.jpg",
-      "bytes": 2097940
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U216.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U216.jpg"
     },
     "U220": {
       "decor": "U220",
       "file": "U220.jpg",
       "path": "assets/egger-textures/U220.jpg",
       "url": "/assets/egger-textures/U220.jpg",
-      "bytes": 2099596
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U220.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U220.jpg"
     },
     "U222": {
       "decor": "U222",
       "file": "U222.jpg",
       "path": "assets/egger-textures/U222.jpg",
       "url": "/assets/egger-textures/U222.jpg",
-      "bytes": 214013
+      "bytes": 17546,
+      "previewPath": "assets/egger-textures-preview/U222.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U222.jpg"
     },
     "U232": {
       "decor": "U232",
       "file": "U232.jpg",
       "path": "assets/egger-textures/U232.jpg",
       "url": "/assets/egger-textures/U232.jpg",
-      "bytes": 220914
+      "bytes": 12285,
+      "previewPath": "assets/egger-textures-preview/U232.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U232.jpg"
     },
     "U250": {
       "decor": "U250",
       "file": "U250.jpg",
       "path": "assets/egger-textures/U250.jpg",
       "url": "/assets/egger-textures/U250.jpg",
-      "bytes": 2106028
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U250.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U250.jpg"
     },
     "U311": {
       "decor": "U311",
       "file": "U311.jpg",
       "path": "assets/egger-textures/U311.jpg",
       "url": "/assets/egger-textures/U311.jpg",
-      "bytes": 2098492
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U311.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U311.jpg"
     },
     "U321": {
       "decor": "U321",
       "file": "U321.jpg",
       "path": "assets/egger-textures/U321.jpg",
       "url": "/assets/egger-textures/U321.jpg",
-      "bytes": 208478
+      "bytes": 33349,
+      "previewPath": "assets/egger-textures-preview/U321.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U321.jpg"
     },
     "U323": {
       "decor": "U323",
       "file": "U323.jpg",
       "path": "assets/egger-textures/U323.jpg",
       "url": "/assets/egger-textures/U323.jpg",
-      "bytes": 2098572
+      "bytes": 26753,
+      "previewPath": "assets/egger-textures-preview/U323.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U323.jpg"
     },
     "U325": {
       "decor": "U325",
       "file": "U325.jpg",
       "path": "assets/egger-textures/U325.jpg",
       "url": "/assets/egger-textures/U325.jpg",
-      "bytes": 187273
+      "bytes": 17809,
+      "previewPath": "assets/egger-textures-preview/U325.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U325.jpg"
     },
     "U332": {
       "decor": "U332",
       "file": "U332.jpg",
       "path": "assets/egger-textures/U332.jpg",
       "url": "/assets/egger-textures/U332.jpg",
-      "bytes": 2100296
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U332.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U332.jpg"
     },
     "U335": {
       "decor": "U335",
       "file": "U335.jpg",
       "path": "assets/egger-textures/U335.jpg",
       "url": "/assets/egger-textures/U335.jpg",
-      "bytes": 185402
+      "bytes": 12055,
+      "previewPath": "assets/egger-textures-preview/U335.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U335.jpg"
     },
     "U350": {
       "decor": "U350",
       "file": "U350.jpg",
       "path": "assets/egger-textures/U350.jpg",
       "url": "/assets/egger-textures/U350.jpg",
-      "bytes": 2098796
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U350.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U350.jpg"
     },
     "U363": {
       "decor": "U363",
       "file": "U363.jpg",
       "path": "assets/egger-textures/U363.jpg",
       "url": "/assets/egger-textures/U363.jpg",
-      "bytes": 2098028
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U363.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U363.jpg"
     },
     "U398": {
       "decor": "U398",
       "file": "U398.jpg",
       "path": "assets/egger-textures/U398.jpg",
       "url": "/assets/egger-textures/U398.jpg",
-      "bytes": 262493
+      "bytes": 12049,
+      "previewPath": "assets/egger-textures-preview/U398.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U398.jpg"
     },
     "U399": {
       "decor": "U399",
       "file": "U399.jpg",
       "path": "assets/egger-textures/U399.jpg",
       "url": "/assets/egger-textures/U399.jpg",
-      "bytes": 232046
+      "bytes": 52186,
+      "previewPath": "assets/egger-textures-preview/U399.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U399.jpg"
     },
     "U502": {
       "decor": "U502",
       "file": "U502.jpg",
       "path": "assets/egger-textures/U502.jpg",
       "url": "/assets/egger-textures/U502.jpg",
-      "bytes": 236507
+      "bytes": 55715,
+      "previewPath": "assets/egger-textures-preview/U502.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U502.jpg"
     },
     "U504": {
       "decor": "U504",
       "file": "U504.jpg",
       "path": "assets/egger-textures/U504.jpg",
       "url": "/assets/egger-textures/U504.jpg",
-      "bytes": 198345
+      "bytes": 12335,
+      "previewPath": "assets/egger-textures-preview/U504.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U504.jpg"
     },
     "U522": {
       "decor": "U522",
       "file": "U522.jpg",
       "path": "assets/egger-textures/U522.jpg",
       "url": "/assets/egger-textures/U522.jpg",
-      "bytes": 209318
+      "bytes": 29407,
+      "previewPath": "assets/egger-textures-preview/U522.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U522.jpg"
     },
     "U525": {
       "decor": "U525",
       "file": "U525.jpg",
       "path": "assets/egger-textures/U525.jpg",
       "url": "/assets/egger-textures/U525.jpg",
-      "bytes": 2098504
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U525.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U525.jpg"
     },
     "U540": {
       "decor": "U540",
       "file": "U540.jpg",
       "path": "assets/egger-textures/U540.jpg",
       "url": "/assets/egger-textures/U540.jpg",
-      "bytes": 221015
+      "bytes": 14596,
+      "previewPath": "assets/egger-textures-preview/U540.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U540.jpg"
     },
     "U560": {
       "decor": "U560",
       "file": "U560.jpg",
       "path": "assets/egger-textures/U560.jpg",
       "url": "/assets/egger-textures/U560.jpg",
-      "bytes": 2098520
+      "bytes": 26753,
+      "previewPath": "assets/egger-textures-preview/U560.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U560.jpg"
     },
     "U590": {
       "decor": "U590",
       "file": "U590.jpg",
       "path": "assets/egger-textures/U590.jpg",
       "url": "/assets/egger-textures/U590.jpg",
-      "bytes": 104137
+      "bytes": 12048,
+      "previewPath": "assets/egger-textures-preview/U590.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U590.jpg"
     },
     "U599": {
       "decor": "U599",
       "file": "U599.jpg",
       "path": "assets/egger-textures/U599.jpg",
       "url": "/assets/egger-textures/U599.jpg",
-      "bytes": 184557
+      "bytes": 17809,
+      "previewPath": "assets/egger-textures-preview/U599.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U599.jpg"
     },
     "U604": {
       "decor": "U604",
       "file": "U604.jpg",
       "path": "assets/egger-textures/U604.jpg",
       "url": "/assets/egger-textures/U604.jpg",
-      "bytes": 23172992
+      "bytes": 54201,
+      "previewPath": "assets/egger-textures-preview/U604.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U604.jpg"
     },
     "U606": {
       "decor": "U606",
       "file": "U606.jpg",
       "path": "assets/egger-textures/U606.jpg",
       "url": "/assets/egger-textures/U606.jpg",
-      "bytes": 184540
+      "bytes": 12067,
+      "previewPath": "assets/egger-textures-preview/U606.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U606.jpg"
     },
     "U608": {
       "decor": "U608",
       "file": "U608.jpg",
       "path": "assets/egger-textures/U608.jpg",
       "url": "/assets/egger-textures/U608.jpg",
-      "bytes": 2098476
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U608.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U608.jpg"
     },
     "U626": {
       "decor": "U626",
       "file": "U626.jpg",
       "path": "assets/egger-textures/U626.jpg",
       "url": "/assets/egger-textures/U626.jpg",
-      "bytes": 230427
+      "bytes": 12049,
+      "previewPath": "assets/egger-textures-preview/U626.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U626.jpg"
     },
     "U630": {
       "decor": "U630",
       "file": "U630.jpg",
       "path": "assets/egger-textures/U630.jpg",
       "url": "/assets/egger-textures/U630.jpg",
-      "bytes": 184243
+      "bytes": 12049,
+      "previewPath": "assets/egger-textures-preview/U630.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U630.jpg"
     },
     "U636": {
       "decor": "U636",
       "file": "U636.jpg",
       "path": "assets/egger-textures/U636.jpg",
       "url": "/assets/egger-textures/U636.jpg",
-      "bytes": 2098496
+      "bytes": 18015,
+      "previewPath": "assets/egger-textures-preview/U636.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U636.jpg"
     },
     "U638": {
       "decor": "U638",
       "file": "U638.jpg",
       "path": "assets/egger-textures/U638.jpg",
       "url": "/assets/egger-textures/U638.jpg",
-      "bytes": 184220
+      "bytes": 17809,
+      "previewPath": "assets/egger-textures-preview/U638.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U638.jpg"
     },
     "U665": {
       "decor": "U665",
       "file": "U665.jpg",
       "path": "assets/egger-textures/U665.jpg",
       "url": "/assets/egger-textures/U665.jpg",
-      "bytes": 2101372
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U665.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U665.jpg"
     },
     "U669": {
       "decor": "U669",
       "file": "U669.jpg",
       "path": "assets/egger-textures/U669.jpg",
       "url": "/assets/egger-textures/U669.jpg",
-      "bytes": 104173
+      "bytes": 17808,
+      "previewPath": "assets/egger-textures-preview/U669.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U669.jpg"
     },
     "U699": {
       "decor": "U699",
       "file": "U699.jpg",
       "path": "assets/egger-textures/U699.jpg",
       "url": "/assets/egger-textures/U699.jpg",
-      "bytes": 185088
+      "bytes": 12049,
+      "previewPath": "assets/egger-textures-preview/U699.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U699.jpg"
     },
     "U702": {
       "decor": "U702",
       "file": "U702.jpg",
       "path": "assets/egger-textures/U702.jpg",
       "url": "/assets/egger-textures/U702.jpg",
-      "bytes": 2098504
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U702.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U702.jpg"
     },
     "U705": {
       "decor": "U705",
       "file": "U705.jpg",
       "path": "assets/egger-textures/U705.jpg",
       "url": "/assets/egger-textures/U705.jpg",
-      "bytes": 184845
+      "bytes": 12090,
+      "previewPath": "assets/egger-textures-preview/U705.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U705.jpg"
     },
     "U707": {
       "decor": "U707",
       "file": "U707.jpg",
       "path": "assets/egger-textures/U707.jpg",
       "url": "/assets/egger-textures/U707.jpg",
-      "bytes": 184392
+      "bytes": 12049,
+      "previewPath": "assets/egger-textures-preview/U707.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U707.jpg"
     },
     "U708": {
       "decor": "U708",
       "file": "U708.jpg",
       "path": "assets/egger-textures/U708.jpg",
       "url": "/assets/egger-textures/U708.jpg",
-      "bytes": 2098500
+      "bytes": 26751,
+      "previewPath": "assets/egger-textures-preview/U708.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U708.jpg"
     },
     "U727": {
       "decor": "U727",
       "file": "U727.jpg",
       "path": "assets/egger-textures/U727.jpg",
       "url": "/assets/egger-textures/U727.jpg",
-      "bytes": 2098508
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U727.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U727.jpg"
     },
     "U732": {
       "decor": "U732",
       "file": "U732.jpg",
       "path": "assets/egger-textures/U732.jpg",
       "url": "/assets/egger-textures/U732.jpg",
-      "bytes": 2098548
+      "bytes": 26751,
+      "previewPath": "assets/egger-textures-preview/U732.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U732.jpg"
     },
     "U740": {
       "decor": "U740",
       "file": "U740.jpg",
       "path": "assets/egger-textures/U740.jpg",
       "url": "/assets/egger-textures/U740.jpg",
-      "bytes": 2097896
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U740.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U740.jpg"
     },
     "U741": {
       "decor": "U741",
       "file": "U741.jpg",
       "path": "assets/egger-textures/U741.jpg",
       "url": "/assets/egger-textures/U741.jpg",
-      "bytes": 2098492
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U741.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U741.jpg"
     },
     "U748": {
       "decor": "U748",
       "file": "U748.jpg",
       "path": "assets/egger-textures/U748.jpg",
       "url": "/assets/egger-textures/U748.jpg",
-      "bytes": 879974
+      "bytes": 76438,
+      "previewPath": "assets/egger-textures-preview/U748.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U748.jpg"
     },
     "U750": {
       "decor": "U750",
       "file": "U750.jpg",
       "path": "assets/egger-textures/U750.jpg",
       "url": "/assets/egger-textures/U750.jpg",
-      "bytes": 184284
+      "bytes": 12048,
+      "previewPath": "assets/egger-textures-preview/U750.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U750.jpg"
     },
     "U755": {
       "decor": "U755",
       "file": "U755.jpg",
       "path": "assets/egger-textures/U755.jpg",
       "url": "/assets/egger-textures/U755.jpg",
-      "bytes": 106349
+      "bytes": 17816,
+      "previewPath": "assets/egger-textures-preview/U755.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U755.jpg"
     },
     "U763": {
       "decor": "U763",
       "file": "U763.jpg",
       "path": "assets/egger-textures/U763.jpg",
       "url": "/assets/egger-textures/U763.jpg",
-      "bytes": 184340
+      "bytes": 12048,
+      "previewPath": "assets/egger-textures-preview/U763.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U763.jpg"
     },
     "U767": {
       "decor": "U767",
       "file": "U767.jpg",
       "path": "assets/egger-textures/U767.jpg",
       "url": "/assets/egger-textures/U767.jpg",
-      "bytes": 2098540
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U767.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U767.jpg"
     },
     "U775": {
       "decor": "U775",
       "file": "U775.jpg",
       "path": "assets/egger-textures/U775.jpg",
       "url": "/assets/egger-textures/U775.jpg",
-      "bytes": 2097924
+      "bytes": 18017,
+      "previewPath": "assets/egger-textures-preview/U775.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U775.jpg"
     },
     "U780": {
       "decor": "U780",
       "file": "U780.jpg",
       "path": "assets/egger-textures/U780.jpg",
       "url": "/assets/egger-textures/U780.jpg",
-      "bytes": 11601164
+      "bytes": 41886,
+      "previewPath": "assets/egger-textures-preview/U780.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U780.jpg"
     },
     "U788": {
       "decor": "U788",
       "file": "U788.jpg",
       "path": "assets/egger-textures/U788.jpg",
       "url": "/assets/egger-textures/U788.jpg",
-      "bytes": 2098584
+      "bytes": 18014,
+      "previewPath": "assets/egger-textures-preview/U788.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U788.jpg"
     },
     "U803": {
       "decor": "U803",
       "file": "U803.jpg",
       "path": "assets/egger-textures/U803.jpg",
       "url": "/assets/egger-textures/U803.jpg",
-      "bytes": 194990
+      "bytes": 18062,
+      "previewPath": "assets/egger-textures-preview/U803.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U803.jpg"
     },
     "U818": {
       "decor": "U818",
       "file": "U818.jpg",
       "path": "assets/egger-textures/U818.jpg",
       "url": "/assets/egger-textures/U818.jpg",
-      "bytes": 247631
+      "bytes": 24141,
+      "previewPath": "assets/egger-textures-preview/U818.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U818.jpg"
     },
     "U830": {
       "decor": "U830",
       "file": "U830.jpg",
       "path": "assets/egger-textures/U830.jpg",
       "url": "/assets/egger-textures/U830.jpg",
-      "bytes": 2099980
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U830.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U830.jpg"
     },
     "U899": {
       "decor": "U899",
       "file": "U899.jpg",
       "path": "assets/egger-textures/U899.jpg",
       "url": "/assets/egger-textures/U899.jpg",
-      "bytes": 2098512
+      "bytes": 26752,
+      "previewPath": "assets/egger-textures-preview/U899.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U899.jpg"
     },
     "U960": {
       "decor": "U960",
       "file": "U960.jpg",
       "path": "assets/egger-textures/U960.jpg",
       "url": "/assets/egger-textures/U960.jpg",
-      "bytes": 184204
+      "bytes": 17808,
+      "previewPath": "assets/egger-textures-preview/U960.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U960.jpg"
     },
     "U961": {
       "decor": "U961",
       "file": "U961.jpg",
       "path": "assets/egger-textures/U961.jpg",
       "url": "/assets/egger-textures/U961.jpg",
-      "bytes": 211162
+      "bytes": 28383,
+      "previewPath": "assets/egger-textures-preview/U961.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U961.jpg"
     },
     "U963": {
       "decor": "U963",
       "file": "U963.jpg",
       "path": "assets/egger-textures/U963.jpg",
       "url": "/assets/egger-textures/U963.jpg",
-      "bytes": 184283
+      "bytes": 12045,
+      "previewPath": "assets/egger-textures-preview/U963.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U963.jpg"
     },
     "U968": {
       "decor": "U968",
       "file": "U968.jpg",
       "path": "assets/egger-textures/U968.jpg",
       "url": "/assets/egger-textures/U968.jpg",
-      "bytes": 56761992
+      "bytes": 502490,
+      "previewPath": "assets/egger-textures-preview/U968.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U968.jpg"
     },
     "U998": {
       "decor": "U998",
       "file": "U998.jpg",
       "path": "assets/egger-textures/U998.jpg",
       "url": "/assets/egger-textures/U998.jpg",
-      "bytes": 2098532
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U998.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U998.jpg"
     },
     "U999": {
       "decor": "U999",
       "file": "U999.jpg",
       "path": "assets/egger-textures/U999.jpg",
       "url": "/assets/egger-textures/U999.jpg",
-      "bytes": 2099608
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/U999.jpg",
+      "previewUrl": "/assets/egger-textures-preview/U999.jpg"
     },
     "W1000": {
       "decor": "W1000",
       "file": "W1000.jpg",
       "path": "assets/egger-textures/W1000.jpg",
       "url": "/assets/egger-textures/W1000.jpg",
-      "bytes": 2097972
+      "bytes": 26753,
+      "previewPath": "assets/egger-textures-preview/W1000.jpg",
+      "previewUrl": "/assets/egger-textures-preview/W1000.jpg"
     },
     "W1100": {
       "decor": "W1100",
       "file": "W1100.jpg",
       "path": "assets/egger-textures/W1100.jpg",
       "url": "/assets/egger-textures/W1100.jpg",
-      "bytes": 2097888
+      "bytes": 18016,
+      "previewPath": "assets/egger-textures-preview/W1100.jpg",
+      "previewUrl": "/assets/egger-textures-preview/W1100.jpg"
     },
     "W1200": {
       "decor": "W1200",
       "file": "W1200.jpg",
       "path": "assets/egger-textures/W1200.jpg",
       "url": "/assets/egger-textures/W1200.jpg",
-      "bytes": 231780
+      "bytes": 51754,
+      "previewPath": "assets/egger-textures-preview/W1200.jpg",
+      "previewUrl": "/assets/egger-textures-preview/W1200.jpg"
     },
     "W960": {
       "decor": "W960",
       "file": "W960.jpg",
       "path": "assets/egger-textures/W960.jpg",
       "url": "/assets/egger-textures/W960.jpg",
-      "bytes": 346613
+      "bytes": 58135,
+      "previewPath": "assets/egger-textures-preview/W960.jpg",
+      "previewUrl": "/assets/egger-textures-preview/W960.jpg"
     },
     "W980": {
       "decor": "W980",
       "file": "W980.jpg",
       "path": "assets/egger-textures/W980.jpg",
       "url": "/assets/egger-textures/W980.jpg",
-      "bytes": 2097940
+      "bytes": 26753,
+      "previewPath": "assets/egger-textures-preview/W980.jpg",
+      "previewUrl": "/assets/egger-textures-preview/W980.jpg"
     }
   },
   "missing": [
     {
       "decor": "B026",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "B026: page 403"
     },
     {
       "decor": "B073",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "B073: page 403"
     },
     {
       "decor": "F011",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F011: page 403"
     },
     {
       "decor": "F012",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F012: page 403"
     },
     {
       "decor": "F014",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F014: page 403"
     },
     {
       "decor": "F028",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F028: page 403"
     },
     {
       "decor": "F029",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F029: page 403"
     },
     {
       "decor": "F041",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F041: page 403"
     },
     {
       "decor": "F042",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F042: page 403"
     },
     {
       "decor": "F059",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F059: page 403"
     },
     {
       "decor": "F061",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F061: page 403"
     },
     {
       "decor": "F074",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F074: page 403"
     },
     {
       "decor": "F076",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F076: page 403"
     },
     {
       "decor": "F080",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F080: page 403"
     },
     {
       "decor": "F081",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F081: page 403"
     },
     {
       "decor": "F092",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F092: page 403"
     },
     {
       "decor": "F094",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F094: page 403"
     },
     {
       "decor": "F104",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F104: page 403"
     },
     {
       "decor": "F105",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F105: page 403"
     },
     {
       "decor": "F110",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F110: page 403"
     },
     {
       "decor": "F112",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F112: page 403"
     },
     {
       "decor": "F117",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F117: page 403"
     },
     {
       "decor": "F120",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F120: page 403"
     },
     {
       "decor": "F133",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F133: page 403"
     },
     {
       "decor": "F141",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F141: page 403"
     },
     {
       "decor": "F142",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F142: page 403"
     },
     {
       "decor": "F147",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F147: page 403"
     },
     {
       "decor": "F160",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F160: page 403"
     },
     {
       "decor": "F166",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F166: page 403"
     },
     {
       "decor": "F204",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F204: page 403"
     },
     {
       "decor": "F212",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F212: page 403"
     },
     {
       "decor": "F222",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F222: page 403"
     },
     {
       "decor": "F242",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F242: page 403"
     },
     {
       "decor": "F256",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F256: page 403"
     },
     {
       "decor": "F274",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F274: page 403"
     },
     {
       "decor": "F276",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F276: page 403"
     },
     {
       "decor": "F292",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F292: page 403"
     },
     {
       "decor": "F303",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F303: page 403"
     },
     {
       "decor": "F310",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F310: page 403"
     },
     {
       "decor": "F312",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F312: page 403"
     },
     {
       "decor": "F333",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F333: page 403"
     },
     {
       "decor": "F371",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F371: page 403"
     },
     {
       "decor": "F385",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F385: page 403"
     },
     {
       "decor": "F425",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F425: page 403"
     },
     {
       "decor": "F426",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F426: page 403"
     },
     {
       "decor": "F484",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F484: page 403"
     },
     {
       "decor": "F501",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F501: page 403"
     },
     {
       "decor": "F508",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F508: page 403"
     },
     {
       "decor": "F509",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F509: page 403"
     },
     {
       "decor": "F547",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F547: page 403"
     },
     {
       "decor": "F570",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F570: page 403"
     },
     {
       "decor": "F571",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F571: page 403"
     },
     {
       "decor": "F583",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F583: page 403"
     },
     {
       "decor": "F641",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F641: page 403"
     },
     {
       "decor": "F642",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F642: page 403"
     },
     {
       "decor": "F649",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F649: page 403"
     },
     {
       "decor": "F651",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F651: page 403"
     },
     {
       "decor": "F784",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "F784: page 403"
     },
     {
       "decor": "H0001",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H0001: page 403"
     },
     {
       "decor": "H050",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H050: page 403"
     },
     {
       "decor": "H110",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H110: page 403"
     },
     {
       "decor": "H1101",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1101: page 403"
     },
     {
       "decor": "H111",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H111: page 403"
     },
     {
       "decor": "H1111",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1111: page 403"
     },
     {
       "decor": "H1114",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1114: page 403"
     },
     {
       "decor": "H1115",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1115: page 403"
     },
     {
       "decor": "H1122",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1122: page 403"
     },
     {
       "decor": "H1123",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1123: page 403"
     },
     {
       "decor": "H1137",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1137: page 403"
     },
     {
       "decor": "H1146",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1146: page 403"
     },
     {
       "decor": "H1151",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1151: page 403"
     },
     {
       "decor": "H1186",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1186: page 403"
     },
     {
       "decor": "H1210",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1210: page 403"
     },
     {
       "decor": "H1212",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1212: page 403"
     },
     {
       "decor": "H1213",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1213: page 403"
     },
     {
       "decor": "H1232",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1232: page 403"
     },
     {
       "decor": "H1251",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1251: page 403"
     },
     {
       "decor": "H1253",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1253: page 403"
     },
     {
       "decor": "H1267",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1267: page 403"
     },
     {
       "decor": "H1284",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1284: page 403"
     },
     {
       "decor": "H1298",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1298: page 403"
     },
     {
       "decor": "H1334",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1334: page 403"
     },
     {
       "decor": "H1345",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1345: page 403"
     },
     {
       "decor": "H1372",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1372: page 403"
     },
     {
       "decor": "H1387",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1387: page 403"
     },
     {
       "decor": "H1394",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1394: page 403"
     },
     {
       "decor": "H1400",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1400: page 403"
     },
     {
       "decor": "H1424",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1424: page 403"
     },
     {
       "decor": "H1428",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1428: page 403"
     },
     {
       "decor": "H1444",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1444: page 403"
     },
     {
       "decor": "H1474",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1474: page 403"
     },
     {
       "decor": "H1476",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1476: page 403"
     },
     {
       "decor": "H148",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H148: page 403"
     },
     {
       "decor": "H1484",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1484: page 403"
     },
     {
       "decor": "H1486",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1486: page 403"
     },
     {
       "decor": "H1511",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1511: page 403"
     },
     {
       "decor": "H1521",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1521: page 403"
     },
     {
       "decor": "H1555",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1555: page 403"
     },
     {
       "decor": "H1582",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1582: page 403"
     },
     {
       "decor": "H1599",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1599: page 403"
     },
     {
       "decor": "H1615",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1615: page 403"
     },
     {
       "decor": "H1696",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1696: page 403"
     },
     {
       "decor": "H1698",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1698: page 403"
     },
     {
       "decor": "H1699",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1699: page 403"
     },
     {
       "decor": "H1709",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1709: page 403"
     },
     {
       "decor": "H1733",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1733: page 403"
     },
     {
       "decor": "H1760",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1760: page 403"
     },
     {
       "decor": "H1887",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H1887: page 403"
     },
     {
       "decor": "H194",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H194: page 403"
     },
     {
       "decor": "H195",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H195: page 403"
     },
     {
       "decor": "H198",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H198: page 403"
     },
     {
       "decor": "H2031",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H2031: page 403"
     },
     {
       "decor": "H2415",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H2415: page 403"
     },
     {
       "decor": "H2572",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H2572: page 403"
     },
     {
       "decor": "H3005",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3005: page 403"
     },
     {
       "decor": "H3006",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3006: page 403"
     },
     {
       "decor": "H3031",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3031: page 403"
     },
     {
       "decor": "H3047",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3047: page 403"
     },
     {
       "decor": "H3048",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3048: page 403"
     },
     {
       "decor": "H3058",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3058: page 403"
     },
     {
       "decor": "H3070",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3070: page 403"
     },
     {
       "decor": "H3078",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3078: page 403"
     },
     {
       "decor": "H3080",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3080: page 403"
     },
     {
       "decor": "H3081",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3081: page 403"
     },
     {
       "decor": "H3090",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3090: page 403"
     },
     {
       "decor": "H3113",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3113: page 403"
     },
     {
       "decor": "H3114",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3114: page 403"
     },
     {
       "decor": "H3128",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3128: page 403"
     },
     {
       "decor": "H3149",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3149: page 403"
     },
     {
       "decor": "H3178",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3178: page 403"
     },
     {
       "decor": "H3192",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3192: page 403"
     },
     {
       "decor": "H3304",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3304: page 403"
     },
     {
       "decor": "H3306",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3306: page 403"
     },
     {
       "decor": "H3330",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3330: page 403"
     },
     {
       "decor": "H3344",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3344: page 403"
     },
     {
       "decor": "H3353",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3353: page 403"
     },
     {
       "decor": "H3362",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3362: page 403"
     },
     {
       "decor": "H3370",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3370: page 403"
     },
     {
       "decor": "H3379",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3379: page 403"
     },
     {
       "decor": "H3387",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3387: page 403"
     },
     {
       "decor": "H3389",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3389: page 403"
     },
     {
       "decor": "H3399",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3399: page 403"
     },
     {
       "decor": "H3410",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3410: page 403"
     },
     {
       "decor": "H3411",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3411: page 403"
     },
     {
       "decor": "H3420",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3420: page 403"
     },
     {
       "decor": "H3451",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3451: page 403"
     },
     {
       "decor": "H3453",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3453: page 403"
     },
     {
       "decor": "H3704",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3704: page 403"
     },
     {
       "decor": "H3711",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3711: page 403"
     },
     {
       "decor": "H3732",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3732: page 403"
     },
     {
       "decor": "H3760",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3760: page 403"
     },
     {
       "decor": "H3766",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3766: page 403"
     },
     {
       "decor": "H3773",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3773: page 403"
     },
     {
       "decor": "H3778",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3778: page 403"
     },
     {
       "decor": "H3991",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "H3991: page 403"
     },
     {
       "decor": "K2405",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K2405: page 403"
     },
     {
       "decor": "K4410",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K4410: page 403"
     },
     {
       "decor": "K4890",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K4890: page 403"
     },
     {
       "decor": "K4946",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K4946: page 403"
     },
     {
       "decor": "K5412",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K5412: page 403"
     },
     {
       "decor": "K5413",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K5413: page 403"
     },
     {
       "decor": "K5574",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K5574: page 403"
     },
     {
       "decor": "K5577",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K5577: page 403"
     },
     {
       "decor": "K5578",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "K5578: page 403"
     },
     {
       "decor": "U108",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U108: page 403"
     },
     {
       "decor": "U116",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U116: page 403"
     },
     {
       "decor": "U129",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U129: page 403"
     },
     {
       "decor": "U140",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U140: page 403"
     },
     {
       "decor": "U200",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U200: page 403"
     },
     {
       "decor": "U204",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U204: page 403"
     },
     {
       "decor": "U206",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U206: page 403"
     },
     {
       "decor": "U317",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U317: page 403"
     },
     {
       "decor": "U337",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U337: page 403"
     },
     {
       "decor": "U600",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U600: page 403"
     },
     {
       "decor": "U617",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U617: page 403"
     },
     {
       "decor": "U625",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U625: page 403"
     },
     {
       "decor": "U6458",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U6458: page 403"
     },
     {
       "decor": "U655",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U655: page 403"
     },
     {
       "decor": "U795",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U795: page 403"
     },
     {
       "decor": "U808",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "U808: page 403"
     },
     {
       "decor": "W908",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "W908: page 403"
     },
     {
       "decor": "W962",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "W962: page 403"
     },
     {
       "decor": "Y102",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "Y102: page 403"
     },
     {
       "decor": "Y111",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "Y111: page 403"
     },
     {
       "decor": "Y112",
       "source": "egger",
-      "reason": "texture file not found"
+      "reason": "Y112: page 403"
     }
   ]
 }

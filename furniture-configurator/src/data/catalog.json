@@ -1,0 +1,72 @@
+[
+  {
+    "id": "base-cabinet-600",
+    "name": "Base Cabinet 600",
+    "category": "Kitchen",
+    "description": "600 mm base unit with adjustable legs. Parametric preview.",
+    "thumbnail": "/thumbnails/base-cabinet.svg",
+    "materials": [
+      { "id": "oak", "label": "Oak", "color": "#c4a574", "roughness": 0.65, "metalness": 0 },
+      { "id": "white", "label": "White Matt", "color": "#f5f5f0", "roughness": 0.4, "metalness": 0 },
+      { "id": "anthracite", "label": "Anthracite", "color": "#3d3d3d", "roughness": 0.35, "metalness": 0.05 },
+      { "id": "walnut", "label": "Walnut", "color": "#5c4033", "roughness": 0.7, "metalness": 0 }
+    ],
+    "dimensions": {
+      "width": { "min": 400, "max": 1200, "step": 50, "default": 600 },
+      "height": { "min": 720, "max": 900, "step": 10, "default": 720 },
+      "depth": { "min": 500, "max": 650, "step": 10, "default": 560 }
+    }
+  },
+  {
+    "id": "wall-cabinet-800",
+    "name": "Wall Cabinet 800",
+    "category": "Kitchen",
+    "description": "800 mm wall unit with glass option. Parametric preview.",
+    "thumbnail": "/thumbnails/wall-cabinet.svg",
+    "materials": [
+      { "id": "oak", "label": "Oak", "color": "#c4a574", "roughness": 0.65, "metalness": 0 },
+      { "id": "white", "label": "White Matt", "color": "#f5f5f0", "roughness": 0.4, "metalness": 0 },
+      { "id": "graphite", "label": "Graphite", "color": "#2a2a2a", "roughness": 0.3, "metalness": 0.08 }
+    ],
+    "dimensions": {
+      "width": { "min": 600, "max": 1200, "step": 50, "default": 800 },
+      "height": { "min": 300, "max": 900, "step": 50, "default": 720 },
+      "depth": { "min": 300, "max": 400, "step": 10, "default": 350 }
+    }
+  },
+  {
+    "id": "wardrobe-1200",
+    "name": "Wardrobe 1200",
+    "category": "Bedroom",
+    "description": "Double-door wardrobe. Optional GLB when placed in /public/models/.",
+    "thumbnail": "/thumbnails/wardrobe.svg",
+    "modelUrl": "/models/wardrobe-1200.glb",
+    "meshGroups": ["body", "doors", "handles"],
+    "materials": [
+      { "id": "oak", "label": "Oak", "color": "#b8956a", "roughness": 0.68, "metalness": 0 },
+      { "id": "white", "label": "White", "color": "#fafafa", "roughness": 0.45, "metalness": 0 },
+      { "id": "black", "label": "Black", "color": "#1a1a1a", "roughness": 0.25, "metalness": 0.1 }
+    ],
+    "dimensions": {
+      "width": { "min": 800, "max": 2400, "step": 100, "default": 1200 },
+      "height": { "min": 2000, "max": 2400, "step": 50, "default": 2200 },
+      "depth": { "min": 500, "max": 650, "step": 10, "default": 600 }
+    }
+  },
+  {
+    "id": "sample-chair",
+    "name": "Sample Chair (GLB)",
+    "category": "Demo",
+    "description": "Khronos sample model — tests DRACO/meshopt loader path.",
+    "thumbnail": "/thumbnails/chair.svg",
+    "modelUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF-Binary/SheenChair.glb",
+    "materials": [
+      { "id": "original", "label": "Original", "color": "#888888", "roughness": 0.5, "metalness": 0 }
+    ],
+    "dimensions": {
+      "width": { "min": 400, "max": 800, "step": 50, "default": 600 },
+      "height": { "min": 700, "max": 1100, "step": 50, "default": 900 },
+      "depth": { "min": 400, "max": 800, "step": 50, "default": 600 }
+    }
+  }
+]

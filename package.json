@@ -6,6 +6,7 @@
   },
   "scripts": {
     "dev": "python -m http.server 8080",
-    "dev:vercel": "npx vercel dev --listen 8080"
+    "dev:vercel": "npx vercel dev --listen 8080",
+    "dev:vercel:3000": "npx vercel dev --listen 3000"
   }
 }

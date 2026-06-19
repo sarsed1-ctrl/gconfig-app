@@ -12,6 +12,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="eamf-countertop-thickness.js"></script>
+    <script src="lib/drilling/dowel-rules.js?v=55"></script>
+    <script src="lib/drilling/calc-vanity-dowel-holes.js?v=55"></script>
+    <script src="lib/drilling/production-layout.js?v=56"></script>
+    <script src="lib/drilling/draw-part-drilling-canvas.js?v=55"></script>
 
     <style>
         :root {
@@ -1390,6 +1394,10 @@
         <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-pdf"/></svg>
         Download PDF
     </button>
+    <button onclick="generateDrillingPDF()" id="btn-download-drilling" style="background:#8a4b12; margin-top:6px;" data-i18n="btn_download_drilling">
+        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-pdf"/></svg>
+        Download Drilling PDF
+    </button>
     <button onclick="downloadTellimusExcel()" id="btn-download-excel" style="background:#06642a; margin-top:6px;" data-i18n="btn_download_excel">
         <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#icon-excel"/></svg>
         Download EXCEL
@@ -1611,6 +1619,7 @@
             height_h2: "Высота (H2):",
             depth_d2: "Глубина (D2):",
             btn_download_pdf: "Скачать PDF",
+            btn_download_drilling: "Скачать присадку PDF",
             btn_download_excel: "Скачать EXCEL",
             toast_excel_ok: "Excel успешно скачан",
             toast_excel_empty: "Нет деталей для экспорта — проверьте конфигурацию",
@@ -1662,17 +1671,23 @@
             hinge_note: "Петли: Чашка Ø35 мм. Выбранный бренд: ",
             hinge_count_note: "Количество петель (H = ",
             hinge_count_note2: " мм): ",
-            part_left: "Боковая левая (Нижний шкаф)",
-            part_right: "Боковая правая (Нижний шкаф)",
+            part_left: "Боковина левая (Нижний шкаф)",
+            part_right: "Боковина правая (Нижний шкаф)",
+            part_side_lower: "Боковая (Нижний шкаф)",
             part_bottom: "Дно (Нижний шкаф)",
             part_front_rail: "Планка верхняя передняя (Нижний шкаф)",
             part_back_rail: "Планка верхняя задняя (Нижний шкаф)",
             part_roof: "Крыша (Нижний шкаф)",
+            part_roof_bottom_lower: "Крыша/Дно (Нижний шкаф)",
             part_back: "Задняя стенка (Нижний шкаф)",
             part_drawer_bottom: "Дно ящика (ЛДСП)",
             part_facade_vanity: "Фасад ящика (Нижний шкаф)",
             part_countertop: "Столешница",
             part_side_upper: "Боковая (Верхний шкаф)",
+            part_left_upper: "Боковина левая (Верхний шкаф)",
+            part_right_upper: "Боковина правая (Верхний шкаф)",
+            part_bottom_upper: "Дно (Верхний шкаф)",
+            part_roof_upper: "Крыша (Верхний шкаф)",
             part_roof_bottom_upper: "Крыша/Дно (Верхний шкаф)",
             part_back_upper: "Задняя стенка (Верхний шкаф)",
             part_facade_upper: "Фасад откидной (Верхний шкаф)",
@@ -1796,6 +1811,7 @@
             height_h2: "Height (H2):",
             depth_d2: "Depth (D2):",
             btn_download_pdf: "Download PDF",
+            btn_download_drilling: "Download Drilling PDF",
             btn_download_excel: "Download EXCEL",
             toast_excel_ok: "Excel downloaded successfully",
             toast_excel_empty: "No parts to export — check your configuration",
@@ -1849,15 +1865,21 @@
             hinge_count_note2: " mm): ",
             part_left: "Left Side Panel (Lower Closet)",
             part_right: "Right Side Panel (Lower Closet)",
+            part_side_lower: "Side Panel (Lower Closet)",
             part_bottom: "Base Panel (Lower Closet)",
             part_front_rail: "Top Front Rail",
             part_back_rail: "Top Rear Rail",
             part_roof: "Top Panel (Lower Closet)",
+            part_roof_bottom_lower: "Top/Bottom Panel (Lower Closet)",
             part_back: "Back Panel (Lower Closet)",
             part_drawer_bottom: "Drawer Base (Chipboard)",
             part_facade_vanity: "Drawer Facade (Lower Closet)",
             part_countertop: "Countertop",
             part_side_upper: "Side Panel (Closet)",
+            part_left_upper: "Left Side Panel (Upper Closet)",
+            part_right_upper: "Right Side Panel (Upper Closet)",
+            part_bottom_upper: "Bottom Panel (Upper Closet)",
+            part_roof_upper: "Top Panel (Upper Closet)",
             part_roof_bottom_upper: "Top/Bottom Panel (Closet)",
             part_back_upper: "Back Panel (Closet)",
             part_facade_upper: "Flip-up Facade (Closet)",
@@ -2465,6 +2487,145 @@
     let lastBedFasteners = [];
     let lastMainCutMapRows = [];
     let lastMainFasteners = [];
+    let lastMainDrillingSheets = [];
+
+    function getDrillingLabels(T) {
+        return {
+            lower: {
+                sideLeft: T.part_left,
+                sideRight: T.part_right,
+                bottom: T.part_bottom,
+                roof: T.part_roof,
+                shelfPrefix: T.part_shelf_h,
+            },
+            upper: {
+                sideLeft: T.part_left_upper,
+                sideRight: T.part_right_upper,
+                bottom: T.part_bottom_upper,
+                roof: T.part_roof_upper,
+                shelfPrefix: T.part_shelf_h_upper,
+            },
+        };
+    }
+
+    /** Lower + upper closet carcass dowel drilling (8×40). */
+    function updateMainDowelDrilling(T) {
+        lastMainDrillingSheets = [];
+        if (CONFIG_MODE === 'beds') return null;
+        const GD = window.GConfigDrilling;
+        if (!GD?.buildCombinedClosetDrillingFromDom) return null;
+        const w1 = parseInt(document.getElementById('w1')?.value, 10) || 0;
+        const h1 = parseInt(document.getElementById('h1')?.value, 10) || 0;
+        const d1 = parseInt(document.getElementById('d1')?.value, 10) || 0;
+        if (!(w1 > 0 && h1 > 0 && d1 > 0)) return null;
+
+        const result = GD.buildCombinedClosetDrillingFromDom(document, getDrillingLabels(T));
+        lastMainDrillingSheets = (result.sheets || []).filter(s => s.holes?.length > 0);
+        return result;
+    }
+
+    function appendDowelFastener(result, lang) {
+        if (!result?.dowelCount) return;
+        const name = lang === 'ru' ? 'Шкант 8×40' : 'Dowel 8×40';
+        const note = result.dowelSpec || 'Ø8×40 mm';
+        const existing = lastMainFasteners.find(f =>
+            /dowel|шкант/i.test(f.name || ''));
+        if (existing) {
+            existing.qty = result.dowelCount;
+            existing.note = note;
+        } else {
+            lastMainFasteners.push({ name, qty: result.dowelCount, note });
+        }
+    }
+
+    function appendDrillingPagesToPdf(pdf, T, toPdfText, pageMargin, contentWidth) {
+        if (CONFIG_MODE === 'beds' || CONFIG_MODE === 'shelves') return 0;
+        if (!window.GConfigDrilling?.partDrillingSheetToDataUrl) return 0;
+        if (!lastMainDrillingSheets.length) {
+            const dowelResult = updateMainDowelDrilling(T);
+            appendDowelFastener(dowelResult, currentLang);
+        }
+        if (!lastMainDrillingSheets.length) return 0;
+        const GD = window.GConfigDrilling;
+        const drillTitle = currentLang === 'ru' ? 'Присадка (шкант 8×40)' : 'Drilling (dowel 8×40)';
+        const exportSheets = GD.expandDrillingSheetsForExport
+            ? GD.expandDrillingSheetsForExport(lastMainDrillingSheets)
+            : lastMainDrillingSheets;
+        let pagesAdded = 0;
+        for (const sheet of exportSheets) {
+            try {
+                const exportOpts = { lang: currentLang, export: true };
+                const dataUrl = GD.partDrillingSheetToDataUrl(sheet, exportOpts);
+                if (!dataUrl || dataUrl.length < 64) {
+                    console.warn('Drilling sheet PNG empty:', sheet.partId);
+                    continue;
+                }
+                const sheetSize = GD.partDrillingSheetSize
+                    ? GD.partDrillingSheetSize(sheet, exportOpts)
+                    : { width: 520, height: 360 };
+                pdf.addPage();
+                let y = 16;
+                pdf.setFontSize(14); pdf.setTextColor(26, 107, 47);
+                pdf.text(toPdfText(drillTitle), pageMargin, y); y += 8;
+                pdf.setFontSize(11); pdf.setTextColor(60, 60, 60);
+                pdf.text(toPdfText(sheet.partName), pageMargin, y); y += 6;
+                pdf.setFontSize(9);
+                pdf.text(toPdfText(
+                    `${sheet.viewLabel} — ${Math.round(sheet.lengthMm)}×${Math.round(sheet.widthMm)}×${sheet.thicknessMm} mm`
+                ), pageMargin, y); y += 8;
+                const maxImgH = 297 - y - 12;
+                const aspect = sheetSize.height / Math.max(1, sheetSize.width);
+                let imgW = contentWidth;
+                let imgH = imgW * aspect;
+                if (imgH > maxImgH) {
+                    imgH = maxImgH;
+                    imgW = imgH / aspect;
+                }
+                pdf.addImage(dataUrl, 'PNG', pageMargin, y, imgW, imgH);
+                pagesAdded += 1;
+            } catch (err) {
+                console.error('Drilling page skipped:', sheet.partId, err);
+            }
+        }
+        return pagesAdded;
+    }
+
+    function ensureMainDrillingSheets(T) {
+        if (CONFIG_MODE === 'beds' || CONFIG_MODE === 'shelves') return false;
+        if (!lastMainCutMapRows.length && typeof updateConfigurator === 'function') updateConfigurator();
+        if (!lastMainDrillingSheets.length) updateMainDowelDrilling(T);
+        return lastMainDrillingSheets.length > 0
+            && !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
+    }
+
+    const DRILLING_SCRIPT_VER = 57;
+
+    async function ensureDrillingModuleLoaded(forceReload = false) {
+        if (
+            !forceReload
+            && window.__GCONFIG_DRILLING_VER === DRILLING_SCRIPT_VER
+            && window.GConfigDrilling?.partDrillingSheetToDataUrl
+        ) {
+            return true;
+        }
+        const files = ['dowel-rules.js', 'calc-vanity-dowel-holes.js', 'production-layout.js', 'draw-part-drilling-canvas.js'];
+        try {
+            for (const fileName of files) {
+                const res = await fetch(
+                    `lib/drilling/${fileName}?v=${DRILLING_SCRIPT_VER}&b=${Date.now()}`,
+                    { cache: 'no-store' }
+                );
+                if (!res.ok) throw new Error(`${fileName} HTTP ${res.status}`);
+                const code = await res.text();
+                (0, eval)(code);
+            }
+            window.__GCONFIG_DRILLING_VER = DRILLING_SCRIPT_VER;
+        } catch (err) {
+            console.error('Drilling module load failed:', err);
+            return false;
+        }
+        return !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
+    }
 
     function estimateBedEdge(partName, l, w, qty) {
         const name = (partName || '').toLowerCase();
@@ -2516,6 +2677,10 @@
 
     function collectMainExportData() {
         if (!lastMainCutMapRows.length) updateConfigurator();
+        else if (CONFIG_MODE !== 'beds') {
+            const dowelResult = updateMainDowelDrilling(TRANSLATIONS[currentLang]);
+            appendDowelFastener(dowelResult, currentLang);
+        }
         return lastMainCutMapRows.length > 0;
     }
 
@@ -2550,6 +2715,24 @@
         lines.push('');
         lines.push('Fastener,Qty,Note');
         lastMainFasteners.forEach(f => lines.push([`"${f.name}"`, f.qty, `"${f.note || ''}"`].join(',')));
+        if (lastMainDrillingSheets.length) {
+            lines.push('');
+            lines.push('Drilling,Part,Face,X_mm,Y_mm,Diameter_mm,Depth_mm,Type');
+            lastMainDrillingSheets.forEach(sheet => {
+                sheet.holes.forEach(hole => {
+                    lines.push([
+                        'Drilling',
+                        `"${sheet.partName}"`,
+                        `"${sheet.viewLabel}"`,
+                        hole.x,
+                        hole.y,
+                        hole.diameter,
+                        hole.depth,
+                        hole.type,
+                    ].join(','));
+                });
+            });
+        }
         return new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     }
 
@@ -2621,6 +2804,24 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
             lastMainFasteners.map((f, idx) => ({ No: idx + 1, Fastener: f.name, Qty: f.qty, Note: f.note || '' }))
         ), 'Fasteners');
+        if (lastMainDrillingSheets.length) {
+            const drillingRows = [];
+            lastMainDrillingSheets.forEach(sheet => {
+                sheet.holes.forEach((hole, idx) => {
+                    drillingRows.push({
+                        Part: sheet.partName,
+                        Face: sheet.viewLabel,
+                        Hole_No: idx + 1,
+                        X_mm: hole.x,
+                        Y_mm: hole.y,
+                        Diameter_mm: hole.diameter,
+                        Depth_mm: hole.depth,
+                        Type: hole.type,
+                    });
+                });
+            });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(drillingRows), 'Drilling');
+        }
         const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         return new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     }
@@ -2667,9 +2868,20 @@
         return eggerTextureDbReady;
     }
 
+    function eamfDecorIsKnownMissingTexture(decor) {
+        if (!decor || !/^[A-Z]\d{3,4}$/.test(decor)) return false;
+        var rows = eggerTextureDb && eggerTextureDb.missing;
+        if (!Array.isArray(rows)) return false;
+        var key = String(decor).toUpperCase();
+        return rows.some(function(row) {
+            return String((row && row.decor) || '').toUpperCase() === key;
+        });
+    }
+
     function eamfDecorHasTexture(decor) {
         if (!decor || !/^[A-Z]\d{3,4}$/.test(decor)) return false;
-        return !!(eggerTextureDb && eggerTextureDb.textures && eggerTextureDb.textures[decor]);
+        if (eggerTextureDb && eggerTextureDb.textures && eggerTextureDb.textures[decor]) return true;
+        return !eamfDecorIsKnownMissingTexture(decor);
     }
 
     function eamfMaterialHasTexture(material) {
@@ -4542,12 +4754,14 @@
         const bedsMainActions = document.getElementById('beds-main-actions');
         if (bedsMainActions) {
             const pdfBtn = document.querySelector('button[onclick="generatePDF()"]');
+            const drillingBtn = document.getElementById('btn-download-drilling');
             const excelBtn = document.getElementById('btn-download-excel');
             const sendBtn = document.getElementById('btn-send-project');
             if (pdfBtn && pdfBtn.parentElement !== bedsMainActions) {
                 pdfBtn.style.marginTop = '0';
                 bedsMainActions.appendChild(pdfBtn);
             }
+            if (drillingBtn) drillingBtn.style.display = 'none';
             if (excelBtn && excelBtn.parentElement !== bedsMainActions) {
                 excelBtn.style.marginTop = '0';
                 bedsMainActions.appendChild(excelBtn);
@@ -5703,7 +5917,6 @@
         const ctSideOverhang  = parseInt(document.getElementById('ctSideOverhang').value) || 0;
 
         const sinkType    = document.getElementById('sinkType').value;
-        const hasSiphon   = document.getElementById('hasSiphon').checked;
         const drawerSystem = document.getElementById('lowerDrawerSystem')?.value || 'axispro';
         const lowerDoorType = document.querySelector('input[name="lowerDoorType"]:checked')?.value || 'overlay';
         const lowerOverlayGap = parseFloat(document.getElementById('lowerOverlayGap').value) || 2;
@@ -6496,25 +6709,13 @@
         // 1. VANITY UNIT
         // ==========================================
         const sideArea = panelAreaM2(h1, d1);
-        parts.push({ name: T.part_left,  qty: 1, l: h1, w: d1, t: carcassT, mat: matCarcass });
-        parts.push({ name: T.part_right, qty: 1, l: h1, w: d1, t: carcassT, mat: matCarcass });
+        parts.push({ name: T.part_side_lower, qty: 2, l: h1, w: d1, t: carcassT, mat: matCarcass });
         wtVanityCarcass += 2 * sideArea * carcassWpm2;
 
         const innerW1 = w1 - (2 * carcassT);
-        const bottomArea = panelAreaM2(innerW1, d1);
-        parts.push({ name: T.part_bottom, qty: 1, l: innerW1, w: d1, t: carcassT, mat: matCarcass });
-        wtVanityCarcass += bottomArea * carcassWpm2;
-
-        if (hasSiphon) {
-            const railArea = panelAreaM2(innerW1, 80);
-            parts.push({ name: T.part_front_rail, qty: 1, l: innerW1, w: 80, t: carcassT, mat: matCarcass });
-            parts.push({ name: T.part_back_rail,  qty: 1, l: innerW1, w: 80, t: carcassT, mat: matCarcass });
-            wtVanityCarcass += 2 * railArea * carcassWpm2;
-        } else {
-            const roofArea = panelAreaM2(innerW1, d1);
-            parts.push({ name: T.part_roof, qty: 1, l: innerW1, w: d1, t: carcassT, mat: matCarcass });
-            wtVanityCarcass += roofArea * carcassWpm2;
-        }
+        const horizArea = panelAreaM2(innerW1, d1);
+        parts.push({ name: T.part_roof_bottom_lower, qty: 2, l: innerW1, w: d1, t: carcassT, mat: matCarcass });
+        wtVanityCarcass += 2 * horizArea * carcassWpm2;
 
         // Back panel — HDF default, or carcass LDSP sized like facade (overlay/inset)
         if (usesCarcassBackPanel()) {
@@ -6836,6 +7037,8 @@
             qty: h.qty || 0,
             note: h.note || h.article || h.sku || ''
         })).filter(h => h.qty > 0 || h.name !== 'Hardware');
+        const dowelResult = updateMainDowelDrilling(T);
+        appendDowelFastener(dowelResult, currentLang);
 
         // ==========================================
         // RENDER
@@ -7399,6 +7602,11 @@
             totalW, totalH, depthD, thickT, sideRows, centerRows, centerDivider, bracket, leftW, rightW, leftOffsets, centerOffsets, rightOffsets,
             schemeType, simpleCols, simpleRows
         } = getShelvesModeConfig();
+        const shelfRowCount = Math.max(sideRows, centerRows, simpleRows || 0);
+        const dimTiersBelow = schemeType === 'simple' ? 2 : 3 + Math.max(0, shelfRowCount - 3);
+        const marginX = Math.max(56, 36 + dimTiersBelow * 4);
+        const marginY = Math.max(56, 44 + dimTiersBelow * 14);
+        const dimLabelBoxes = [];
         const drawDim = (x1, y1, x2, y2, label, vertical = false) => {
             ctx.save();
             ctx.strokeStyle = '#3e4d43';
@@ -7421,21 +7629,57 @@
             drawArrow(x1, y1, x2, y2);
             drawArrow(x2, y2, x1, y1);
             ctx.font = "11px 'Segoe UI', Arial";
+            const tw = ctx.measureText(label).width;
+            const labelH = 12;
+            const placeLabel = (lx, ly) => {
+                const pad = 2;
+                const rect = { left: lx - pad, top: ly - labelH + 2, width: tw + pad * 2, height: labelH + pad };
+                const hit = dimLabelBoxes.some((b) => !(rect.left + rect.width < b.left || b.left + b.width < rect.left
+                    || rect.top + rect.height < b.top || b.top + b.height < rect.top));
+                return hit ? null : rect;
+            };
             if (vertical) {
-                ctx.save();
-                ctx.translate((x1 + x2) / 2 - 8, (y1 + y2) / 2);
-                ctx.rotate(-Math.PI / 2);
-                ctx.fillText(label, -ctx.measureText(label).width / 2, -3);
-                ctx.restore();
+                const cx = (x1 + x2) / 2;
+                const cy = (y1 + y2) / 2;
+                for (let tier = 0; tier < 6; tier++) {
+                    const off = 8 + tier * 14;
+                    for (const dir of [-1, 1]) {
+                        const lx = cx + dir * off - tw / 2;
+                        const ly = cy + 4;
+                        const rect = placeLabel(lx, ly);
+                        if (rect) {
+                            ctx.save();
+                            ctx.translate(cx + dir * off - 8, cy);
+                            ctx.rotate(-Math.PI / 2);
+                            ctx.fillText(label, -tw / 2, -3);
+                            ctx.restore();
+                            dimLabelBoxes.push(rect);
+                            ctx.restore();
+                            return;
+                        }
+                    }
+                }
             } else {
-                ctx.fillText(label, (x1 + x2) / 2 - ctx.measureText(label).width / 2, (y1 + y2) / 2 - 4);
+                const cy = (y1 + y2) / 2;
+                for (let tier = 0; tier < 6; tier++) {
+                    for (const dir of [-1, 1]) {
+                        const ly = cy - 4 + dir * (6 + tier * 14);
+                        const lx = (x1 + x2) / 2 - tw / 2;
+                        const rect = placeLabel(lx, ly);
+                        if (rect) {
+                            ctx.fillText(label, lx, ly);
+                            dimLabelBoxes.push(rect);
+                            ctx.restore();
+                            return;
+                        }
+                    }
+                }
             }
             ctx.restore();
         };
 
-        const margin = 48;
-        const maxW = canvasW - margin * 2;
-        const maxH = canvasH - margin * 2;
+        const maxW = canvasW - marginX * 2;
+        const maxH = canvasH - marginY * 2;
         const scale = Math.min(maxW / totalW, maxH / totalH);
 
         const x0 = (canvasW - totalW * scale) / 2;
@@ -7564,18 +7808,19 @@
         ctx.fillStyle = '#333';
         ctx.font = "12px 'Segoe UI', Arial";
         ctx.fillText(`${Math.round(totalW)} × ${Math.round(totalH)} × ${Math.round(depthD)} ${unit}`, x0, y0 - 10);
-        // Dimension markers like technical drawing
+        const dimBelowY = y0 + totalH * scale + 18;
+        const dimBelowStep = 16;
         drawDim(x0, y0 - 20, x0 + totalW * scale, y0 - 20, `${Math.round(totalW)} ${unit}`, false);
         drawDim(x0 - 20, y0, x0 - 20, y0 + totalH * scale, `${Math.round(totalH)} ${unit}`, true);
-        drawDim(x0, y0 + totalH * scale + 18, x0 + leftW * scale, y0 + totalH * scale + 18, `${Math.round(leftW)}`, false);
-        drawDim(x0 + leftW * scale, y0 + totalH * scale + 18, x0 + (totalW - rightW) * scale, y0 + totalH * scale + 18, `${Math.round(totalW - leftW - rightW)}`, false);
-        drawDim(x0 + (totalW - rightW) * scale, y0 + totalH * scale + 18, x0 + totalW * scale, y0 + totalH * scale + 18, `${Math.round(rightW)}`, false);
+        drawDim(x0, dimBelowY, x0 + leftW * scale, dimBelowY, `${Math.round(leftW)}`, false);
+        drawDim(x0 + leftW * scale, dimBelowY + dimBelowStep, x0 + (totalW - rightW) * scale, dimBelowY + dimBelowStep, `${Math.round(totalW - leftW - rightW)}`, false);
+        drawDim(x0 + (totalW - rightW) * scale, dimBelowY + dimBelowStep * 2, x0 + totalW * scale, dimBelowY + dimBelowStep * 2, `${Math.round(rightW)}`, false);
         ctx.fillStyle = '#1a6b2f';
         ctx.font = "italic 11px 'Segoe UI', Arial";
         const cap = centerDivider
             ? (lang === 'ru' ? 'Схема: боковые башни + центр с перегородкой (точные отступы)' : 'Layout: side towers + divided center (exact offsets)')
             : (lang === 'ru' ? 'Схема: боковые башни + центр (точные отступы)' : 'Layout: side towers + center bay (exact offsets)');
-        ctx.fillText(cap, x0, y0 + totalH * scale + 20);
+        ctx.fillText(cap, x0, dimBelowY + dimBelowStep * 3 + 8);
     }
 
     // ==========================================
@@ -8662,7 +8907,118 @@
             addTableSection(T.lower_cabinet_section, [T.col_part_name, T.col_dimensions, T.col_qty, T.col_material], lowerRowsDebug);
         }
         addTableSection(T.hardware_title, [T.col_hw_name, T.col_sku, T.col_qty], hardwareRowsDebug);
+        const drillingReady = await ensureDrillingModuleLoaded(true);
+        if (drillingReady) {
+            appendDrillingPagesToPdf(pdf, T, toPdfText, pageMargin, contentWidth);
+        }
         pdf.save('gconfig-export.pdf');
+    }
+
+    async function generateDrillingPDF() {
+        const T = TRANSLATIONS[currentLang];
+        const w1 = parseInt(document.getElementById('w1')?.value, 10) || 0;
+        const h1 = parseInt(document.getElementById('h1')?.value, 10) || 0;
+        const d1 = parseInt(document.getElementById('d1')?.value, 10) || 0;
+        const noDrillMsg = currentLang === 'ru'
+            ? 'Нет данных присадки. Задайте размеры шкафа(ов) и обновите расчёт.'
+            : 'No drilling data. Set cabinet size(s) and refresh the calculation.';
+        const libMsg = currentLang === 'ru'
+            ? 'Не загружен модуль присадки (lib/drilling). Обновите страницу.'
+            : 'Drilling module failed to load (lib/drilling). Refresh the page.';
+
+        if (CONFIG_MODE === 'beds' || CONFIG_MODE === 'shelves') {
+            alert(currentLang === 'ru'
+                ? 'Присадка доступна только для шкафов (нижний/верхний).'
+                : 'Drilling export is only available for closet cabinets.');
+            return;
+        }
+        if (!(w1 > 0 && h1 > 0 && d1 > 0)) {
+            alert(noDrillMsg);
+            return;
+        }
+        if (!await ensureDrillingModuleLoaded(true)) {
+            alert(libMsg);
+            return;
+        }
+        const hasJsPdf = !!(window.jspdf && window.jspdf.jsPDF);
+        if (!hasJsPdf) {
+            alert(currentLang === 'ru' ? 'Не загружена библиотека PDF' : 'Failed to load PDF export library');
+            return;
+        }
+        if (!ensureMainDrillingSheets(T)) {
+            alert(noDrillMsg);
+            return;
+        }
+
+        try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const forceTranslitPdf = true;
+        const toPdfText = (s) => forceTranslitPdf ? translitRuToLat(s) : s;
+        try {
+            await loadPdfUnicodeFont(pdf);
+        } catch (e) {
+            alert(currentLang === 'ru' ? 'Не удалось загрузить шрифт PDF' : 'Failed to load PDF font');
+            return;
+        }
+
+        const pageMargin = 14;
+        const contentWidth = 210 - pageMargin * 2;
+        const carcassT = parseInt(document.getElementById('carcassThick')?.value, 10) || 16;
+        const depths = window.GConfigDrilling.getDowelDepths(carcassT);
+        const w2 = parseInt(document.getElementById('upper_w')?.value, 10) || 0;
+        const h2 = parseInt(document.getElementById('upper_h')?.value, 10) || 0;
+        const d2 = parseInt(document.getElementById('upper_d')?.value, 10) || 0;
+        const hasUpper = w2 > 0 && h2 > 0 && d2 > 0;
+        const dowelResult = window.GConfigDrilling.buildCombinedClosetDrillingFromDom(
+            document,
+            getDrillingLabels(T)
+        );
+        lastMainDrillingSheets = (dowelResult.sheets || []).filter(s => s.holes?.length > 0);
+        const projectName = document.getElementById('project-name-input')?.value?.trim() || 'Untitled';
+        const title = currentLang === 'ru'
+            ? 'GConfig — Chertezhi prisadki (shkant 8x40)'
+            : 'GConfig — Drilling drawings (dowel 8x40)';
+        let y = 16;
+        pdf.setFontSize(14); pdf.setTextColor(26, 107, 47);
+        pdf.text(title, pageMargin, y); y += 8;
+        pdf.setFontSize(10); pdf.setTextColor(60, 60, 60);
+        pdf.text(toPdfText(`Date: ${new Date().toLocaleDateString('en-GB')}`), pageMargin, y); y += 6;
+        pdf.text(toPdfText(`Project: ${projectName}`), pageMargin, y); y += 6;
+        pdf.text(toPdfText(`Lower cabinet: ${w1} x ${h1} x ${d1} mm, t=${carcassT}`), pageMargin, y); y += 6;
+        if (hasUpper) {
+            pdf.text(toPdfText(`Upper cabinet: ${w2} x ${h2} x ${d2} mm, t=${carcassT}`), pageMargin, y); y += 6;
+        }
+        pdf.text(toPdfText(
+            `Dowel 8x40 — face ${depths.faceDepth} mm, edge ${depths.edgeDepth} mm, qty ${dowelResult.dowelCount}`
+        ), pageMargin, y); y += 6;
+        pdf.text(toPdfText(
+            currentLang === 'ru'
+                ? `Detaley s prisadkoy: ${lastMainDrillingSheets.length}`
+                : `Parts with drilling: ${lastMainDrillingSheets.length}`
+        ), pageMargin, y); y += 10;
+        pdf.setFontSize(9);
+        pdf.text(toPdfText(
+            currentLang === 'ru'
+                ? 'Na sleduyushchikh stranitsakh — po odnoj detali: skhema prisadki.'
+                : 'Following pages: one drilling diagram per part.'
+        ), pageMargin, y);
+
+        const pagesAdded = appendDrillingPagesToPdf(pdf, T, toPdfText, pageMargin, contentWidth);
+        if (!pagesAdded) {
+            const renderFailMsg = currentLang === 'ru'
+                ? 'Не удалось построить чертежи присадки. Обновите страницу (Ctrl+F5) и попробуйте снова.'
+                : 'Could not render drilling drawings. Hard-refresh (Ctrl+F5) and try again.';
+            alert(lastMainDrillingSheets.length ? renderFailMsg : noDrillMsg);
+            return;
+        }
+        pdf.save('gconfig-drilling-8x40.pdf');
+        } catch (err) {
+            console.error('generateDrillingPDF failed:', err);
+            alert(currentLang === 'ru'
+                ? `Ошибка экспорта: ${err?.message || err}`
+                : `Export failed: ${err?.message || err}`);
+        }
     }
 
     // ── Same as generatePDF but returns a Blob instead of saving ──
@@ -8799,6 +9155,11 @@
         });
         if (weightRows.length) {
             addTableSection('Weight Summary', ['Component', 'Weight'], weightRows);
+        }
+
+        const drillingReady = await ensureDrillingModuleLoaded(true);
+        if (drillingReady) {
+            appendDrillingPagesToPdf(pdf, T, toPdfText, pageMargin, contentWidth);
         }
 
         return pdf.output('blob');
@@ -9167,6 +9528,9 @@
             if (typeof updateConfigurator === 'function') updateConfigurator();
         });
         notifyParentV1Ready();
+        ensureDrillingModuleLoaded().catch((err) => {
+            console.warn('Drilling module preload failed:', err);
+        });
     };
 
 </script>

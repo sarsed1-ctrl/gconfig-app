@@ -2139,6 +2139,8 @@ body.is-preview-3d-resizing * {
 
 .btn-pdf { background: #374151; }
 
+.btn-drilling { background: #8a4b12; }
+
 .btn-excel { background: #06642a; }
 
 .btn-order { background: var(--green); }

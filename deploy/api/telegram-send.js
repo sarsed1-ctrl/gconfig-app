@@ -1,7 +1,7 @@
 'use strict';
 
 const ALLOWED_ORIGINS = (process.env.TELEGRAM_SEND_ORIGINS ||
-    'http://localhost:8080,http://127.0.0.1:8080,http://localhost:8000,http://127.0.0.1:8000,https://gconfig.online,https://www.gconfig.online,https://gconfig-app.vercel.app,https://gconfig.vercel.app')
+    'http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,https://gconfig.online,https://www.gconfig.online,https://gconfig-app.vercel.app,https://gconfig.vercel.app')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);

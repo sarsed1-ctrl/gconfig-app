@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "assets" / "eamf-catalog.json"
 TEXTURES_DIR = ROOT / "assets" / "egger-textures"
+PREVIEW_DIR = ROOT / "assets" / "egger-textures-preview"
 FAILED_PATH = ROOT / "assets" / "egger-textures-failed.txt"
 OUT_PATH = ROOT / "assets" / "egger-textures-db.json"
 DEPLOY_OUT_PATH = ROOT / "deploy" / "assets" / "egger-textures-db.json"
@@ -45,19 +46,41 @@ def load_failed_map(failed_path: Path) -> dict[str, str]:
     return failed_map
 
 
-def build_texture_records(codes: list[str], textures_dir: Path) -> tuple[dict[str, dict], list[str]]:
+def build_texture_records(
+    codes: list[str], textures_dir: Path, preview_dir: Path
+) -> tuple[dict[str, dict], list[str]]:
     records: dict[str, dict] = {}
     missing: list[str] = []
     for code in codes:
         file_path = textures_dir / f"{code}.jpg"
+        preview_path = preview_dir / f"{code}.jpg"
         if file_path.exists():
             rel = file_path.relative_to(ROOT).as_posix()
-            records[code] = {
+            preview_rel = (
+                preview_path.relative_to(ROOT).as_posix() if preview_path.exists() else ""
+            )
+            record = {
                 "decor": code,
                 "file": file_path.name,
                 "path": rel,
                 "url": f"/{rel}",
                 "bytes": file_path.stat().st_size,
+            }
+            if preview_rel:
+                record["previewPath"] = preview_rel
+                record["previewUrl"] = f"/{preview_rel}"
+            records[code] = record
+        elif preview_path.exists():
+            rel = preview_path.relative_to(ROOT).as_posix()
+            records[code] = {
+                "decor": code,
+                "file": preview_path.name,
+                "path": rel,
+                "url": f"/{rel}",
+                "previewPath": rel,
+                "previewUrl": f"/{rel}",
+                "previewOnly": True,
+                "bytes": preview_path.stat().st_size,
             }
         else:
             missing.append(code)
@@ -72,6 +95,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build website-ready Egger texture DB JSON.")
     parser.add_argument("--catalog", default=str(CATALOG_PATH))
     parser.add_argument("--textures-dir", default=str(TEXTURES_DIR))
+    parser.add_argument("--preview-dir", default=str(PREVIEW_DIR))
     parser.add_argument("--failed", default=str(FAILED_PATH))
     parser.add_argument("--out", default=str(OUT_PATH))
     parser.add_argument("--deploy-out", default=str(DEPLOY_OUT_PATH))
@@ -79,13 +103,14 @@ def main() -> None:
 
     catalog_path = Path(args.catalog).resolve()
     textures_dir = Path(args.textures_dir).resolve()
+    preview_dir = Path(args.preview_dir).resolve()
     failed_path = Path(args.failed).resolve()
     out_path = Path(args.out).resolve()
     deploy_out_path = Path(args.deploy_out).resolve()
 
     codes = load_catalog_codes(catalog_path)
     failed_map = load_failed_map(failed_path)
-    textures, missing = build_texture_records(codes, textures_dir)
+    textures, missing = build_texture_records(codes, textures_dir, preview_dir)
 
     missing_rows = []
     for code in missing:

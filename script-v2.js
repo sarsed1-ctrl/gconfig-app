@@ -78,7 +78,7 @@
     let model3dEnabled = false;
 
     let model3dDimsEnabled = true;
-    let model3dTexturesEnabled = true;
+    let model3dTexturesEnabled = false;
     let grainRotationDeg = 0;
     let interactionMode3d = 'doors';
 
@@ -421,6 +421,13 @@
 
     const EAMF_EDGE_SELECT_IDS = ['eamfFacadeEdge', 'eamfCarcassEdge'];
 
+    const MATERIAL_TEXTURE_IFRAME_IDS = new Set([
+        'eamfFacadeMaterial',
+        'eamfCarcassMaterial',
+        'countertopMaterial',
+        'eamfBackPanel',
+    ]);
+
 
 
     const SPACING_SLIDER_PAIRS = [
@@ -632,6 +639,8 @@
             finish: 'Готово',
 
             pdf: 'PDF',
+
+            drilling: 'Присадка',
 
             excel: 'Excel',
 
@@ -900,6 +909,8 @@
             finish: 'Done',
 
             pdf: 'PDF',
+
+            drilling: 'Drilling',
 
             excel: 'Excel',
 
@@ -1367,17 +1378,30 @@
         return /^#[0-9A-F]{6}$/i.test(hex || '') ? hex : null;
     }
 
+    function isDecorTextureKnownMissing(decorCode) {
+        const decor = String(decorCode || '').toUpperCase();
+        if (!decor) return false;
+        const rows = eggerTextureDb?.missing;
+        if (!Array.isArray(rows)) return false;
+        return rows.some((row) => String(row?.decor || '').toUpperCase() === decor);
+    }
+
     function getDecorTextureUrlByMaterialCode(materialCode) {
         const decor = extractDecorCode(materialCode);
         if (!decor) return null;
         const key = decor.toUpperCase();
+        if (isDecorTextureKnownMissing(key)) return null;
+
         const dbEntry = eggerTextureDb?.textures?.[key];
-        const dbUrl = dbEntry?.url || dbEntry?.path || '';
+        const dbUrl = dbEntry?.previewPath || dbEntry?.previewUrl || dbEntry?.url || dbEntry?.path || '';
         if (typeof dbUrl === 'string' && dbUrl.trim()) {
-            // Use relative workspace path to avoid root-based URL issues in some hosts.
             return dbUrl.replace(/^\/+/, '');
         }
-        // Missing in explicit texture DB -> use procedural texture.
+
+        // Fallback for textures on disk but DB not loaded yet (or stale index).
+        if (/^[A-Z]\d{3,4}$/.test(key)) {
+            return `assets/egger-textures/${key}.jpg`;
+        }
         return null;
     }
 
@@ -1501,7 +1525,7 @@
         const carcassDecorCode = extractDecorCode(material);
         const carcassDecorHex = getDecorHexByMaterialCode(material);
         const carcassDecorTextureUrl = getDecorTextureUrlByMaterialCode(material);
-        const carcassDecorTextureMissing = !!carcassDecorCode && !carcassDecorTextureUrl;
+        const carcassDecorTextureMissing = isDecorTextureKnownMissing(carcassDecorCode);
 
         const edge = fieldStr('eamfCarcassEdge');
 
@@ -1509,7 +1533,7 @@
         const facadeDecorCode = extractDecorCode(facadeMaterial);
         const facadeDecorHex = getDecorHexByMaterialCode(facadeMaterial);
         const facadeDecorTextureUrl = getDecorTextureUrlByMaterialCode(facadeMaterial);
-        const facadeDecorTextureMissing = !!facadeDecorCode && !facadeDecorTextureUrl;
+        const facadeDecorTextureMissing = isDecorTextureKnownMissing(facadeDecorCode);
 
         const shared = {
 
@@ -1681,7 +1705,7 @@
                     decorCode,
                     decorHex,
                     decorTextureUrl,
-                    decorTextureMissing: !!decorCode && !decorTextureUrl,
+                    decorTextureMissing: isDecorTextureKnownMissing(decorCode),
                     fromCarcass: fieldCheck('useCarcassBackPanel'),
                 };
             })(),
@@ -1702,7 +1726,7 @@
                     decorCode,
                     decorHex,
                     decorTextureUrl,
-                    decorTextureMissing: !!decorCode && !decorTextureUrl,
+                    decorTextureMissing: isDecorTextureKnownMissing(decorCode),
                 };
             })(),
 
@@ -1743,34 +1767,11 @@
         threeRebuildTimer = setTimeout(() => {
 
             threeRebuildTimer = null;
-            const params = collect3DParams();
-            window.GConfig3D.scheduleRebuild(params);
-
-            if (previewMeta) {
-                const missing = [];
-                if (params.carcassDecorTextureMissing && params.carcassDecorCode) {
-                    missing.push(params.carcassDecorCode);
-                }
-                if (params.facadeDecorTextureMissing && params.facadeDecorCode) {
-                    missing.push(params.facadeDecorCode);
-                }
-                const ct = params.countertop || {};
-                if (ct.enabled && ct.decorTextureMissing && ct.decorCode) {
-                    missing.push(ct.decorCode);
-                }
-                const bp = params.backPanelMaterial;
-                if (params.backWall && bp?.decorTextureMissing && bp.decorCode) {
-                    missing.push(bp.decorCode);
-                }
-                if (missing.length) {
-                    const uniq = Array.from(new Set(missing));
-                    previewMeta.textContent = currentLang === 'ru'
-                        ? `Текстура не найдена: ${uniq.join(', ')}. Используется placeholder.`
-                        : `Texture missing: ${uniq.join(', ')}. Placeholder is used.`;
-                } else {
-                    previewMeta.textContent = '';
-                }
-            }
+            loadEggerTextureDb().then(() => {
+                const params = collect3DParams();
+                window.GConfig3D.scheduleRebuild(params);
+                if (previewMeta) previewMeta.textContent = '';
+            });
 
         }, debounceMs);
 
@@ -2029,18 +2030,39 @@
 
     }
 
+    function setModel3dTexturesEnabled(enabled) {
+        if (model3dTexturesEnabled === enabled) return;
+        model3dTexturesEnabled = enabled;
+        updateSlideToggle('toggle3dTextures', enabled ? 1 : 0);
+        window.GConfig3D?.setTexturesVisible?.(enabled);
+        sync3dGrainControlsState();
+    }
+
+    function maybeEnableTexturesForMaterial(iframeId, rawValue) {
+        if (!MATERIAL_TEXTURE_IFRAME_IDS.has(iframeId)) return;
+        const value = String(rawValue ?? '').trim();
+        if (!value) return;
+        setModel3dTexturesEnabled(true);
+    }
+
+    function syncTexturesFromMaterialSelection() {
+        if (
+            fieldStr('eamfFacadeMaterial')
+            || fieldStr('eamfCarcassMaterial')
+            || fieldStr('countertopMaterial')
+            || fieldStr('eamfBackPanel')
+        ) {
+            setModel3dTexturesEnabled(true);
+        }
+    }
+
     function bind3DTexturesToggle() {
 
         bindSlideToggle('toggle3dTextures', (btn) => {
 
             const enabled = btn.getAttribute('data-textures') === 'on';
 
-            if (model3dTexturesEnabled === enabled) return;
-
-            model3dTexturesEnabled = enabled;
-
-            window.GConfig3D?.setTexturesVisible?.(model3dTexturesEnabled);
-            sync3dGrainControlsState();
+            setModel3dTexturesEnabled(enabled);
 
         });
 
@@ -3341,6 +3363,9 @@
 
         }
 
+        const fieldValue = fromEl.type === 'checkbox' ? fromEl.checked : fromEl.value;
+        maybeEnableTexturesForMaterial(id, fieldValue);
+
         if (THICKNESS_IFRAME_IDS.has(id)) {
             refreshIframeEamfByThickness();
             if (currentStep === 4) {
@@ -4454,6 +4479,7 @@
         if (currentStep === 4) {
             refreshWizardSelectsFromIframe();
             refreshEamfEdgeSelects();
+            syncTexturesFromMaterialSelection();
         }
 
         if (currentStep === 3) {
@@ -4856,21 +4882,59 @@
 
         const win = iframeWin();
 
-        if (!win) return;
+        if (!win) {
+
+            showV2Toast(currentLang === 'ru' ? 'Конфигуратор ещё загружается' : 'Configurator still loading', true);
+
+            return;
+
+        }
 
         const delayMs = productMode === 'beds' ? 200 : 100;
 
-        const runExport = () => {
+        const runExport = async () => {
 
-            if (typeof win[fnName] !== 'function') return;
+            const target = iframeWin();
 
-            Promise.resolve(win[fnName]()).catch((err) => {
+            if (!target) {
+
+                showV2Toast(currentLang === 'ru' ? 'Конфигуратор ещё загружается' : 'Configurator still loading', true);
+
+                return;
+
+            }
+
+            if (typeof target[fnName] !== 'function') {
+
+                showV2Toast(currentLang === 'ru' ? 'Ошибка экспорта' : 'Export failed', true);
+
+                return;
+
+            }
+
+            try {
+
+                if (fnName === 'generateDrillingPDF' || fnName === 'generatePDF') {
+
+                    if (typeof target.ensureDrillingModuleLoaded === 'function') {
+
+                        const ok = await target.ensureDrillingModuleLoaded(true);
+
+                        if (!ok) throw new Error('Drilling module failed to load');
+
+                    }
+
+                }
+
+                await target[fnName]();
+
+            } catch (err) {
 
                 console.error(`iframe ${fnName} failed:`, err);
 
                 showV2Toast(currentLang === 'ru' ? 'Ошибка экспорта' : 'Export failed', true);
 
-            });
+            }
 
         };
 

@@ -87,16 +87,30 @@
         }
         .cards {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            padding: 0 32px 48px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            padding: 0 20px 48px;
             align-items: stretch;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
         }
-        @media (max-width: 900px) {
-            .cards { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 1100px) {
+            .cards {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 0 16px 48px;
+                scroll-snap-type: x proximity;
+                -webkit-overflow-scrolling: touch;
+            }
+            .cards .card {
+                flex: 0 0 min(220px, 78vw);
+                scroll-snap-align: start;
+            }
         }
         @media (max-width: 520px) {
-            .cards { grid-template-columns: 1fr; padding: 0 16px 80px; gap: 16px; }
+            .cards { padding: 0 12px 80px; gap: 12px; }
         }
         .card {
             background: var(--panel-bg);
@@ -153,6 +167,46 @@
             transition: background 0.2s;
         }
         .card-btn:hover { background: #135223; }
+        .card--wip {
+            opacity: 0.92;
+            border-color: rgba(120, 120, 120, 0.35);
+            box-shadow: none;
+        }
+        .card--wip:hover {
+            transform: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .card--wip .card-icon-area {
+            background: linear-gradient(135deg, #ececec 0%, #d8d8d8 100%);
+        }
+        .card--wip .card-icon-area svg [stroke="#1a6b2f"],
+        .card--wip .card-icon-area svg [stroke] {
+            stroke: #9e9e9e;
+        }
+        .card--wip .card-icon-area svg [fill="#1a6b2f"] {
+            fill: #b0b0b0;
+        }
+        .card--wip .card-title {
+            color: #888;
+        }
+        .card--wip .card-desc {
+            color: #aaa;
+        }
+        .card-btn--disabled {
+            display: block;
+            text-align: center;
+            background: #b0b0b0;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-top: 8px;
+            cursor: not-allowed;
+            user-select: none;
+        }
         footer {
             margin-top: auto;
             text-align: center;
@@ -435,6 +489,33 @@
                     <span data-lang="ru" class="inline">Открыть конфигуратор</span>
                     <span data-lang="en" class="inline">Open configurator</span>
                 </a>
+            </div>
+        </div>
+
+        <div class="card card--wip" aria-disabled="true">
+            <div class="card-icon-area">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="6" y="28" width="68" height="38" rx="3" stroke="#9e9e9e" stroke-width="2.5" fill="#fff"/>
+                    <rect x="10" y="8" width="22" height="28" rx="2" stroke="#9e9e9e" stroke-width="2" fill="#b0b0b0" fill-opacity="0.15"/>
+                    <rect x="36" y="14" width="34" height="10" rx="2" stroke="#9e9e9e" stroke-width="2" fill="#b0b0b0" fill-opacity="0.25"/>
+                    <rect x="36" y="30" width="34" height="10" rx="2" stroke="#9e9e9e" stroke-width="2" fill="#b0b0b0" fill-opacity="0.4"/>
+                    <circle cx="18" cy="46" r="3" fill="#9e9e9e"/>
+                    <circle cx="62" cy="46" r="3" fill="#9e9e9e"/>
+                </svg>
+            </div>
+            <div class="card-body">
+                <div class="card-title">
+                    <span data-lang="ru" class="inline">Кухня</span>
+                    <span data-lang="en" class="inline">Kitchen</span>
+                </div>
+                <div class="card-desc">
+                    <span data-lang="ru">Каталог кухонь IMOS iX NET — скоро.</span>
+                    <span data-lang="en">IMOS iX NET kitchen catalog — coming soon.</span>
+                </div>
+                <span class="card-btn card-btn--disabled" role="status">
+                    <span data-lang="ru" class="inline">В разработке</span>
+                    <span data-lang="en" class="inline">In development</span>
+                </span>
             </div>
         </div>
 

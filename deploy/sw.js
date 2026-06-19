@@ -1,4 +1,4 @@
-const CACHE = 'gconfig-v83';
+const CACHE = 'gconfig-v137';
 
 /** Static assets only — HTML is always fetched fresh (see fetch handler). */
 const PRECACHE = [
@@ -9,9 +9,14 @@ const PRECACHE = [
     './styles-welcome-future.css',
     './script-v2.js',
     './eamf-countertop-thickness.js',
+    './lib/imos/embed-config.js',
+    './lib/imos/embed-bridge.js',
+    './lib/imos/xml-to-order-meta.js',
     './alien-logo.png',
     './alien-logo-padded.png'
 ];
+
+/** Cross-origin IMOS assets are never precached — only GConfig shell files. */
 
 function isHtmlRequest(request) {
     if (request.mode === 'navigate') return true;

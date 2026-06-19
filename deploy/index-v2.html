@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>GConfig v2 — Configurator</title>
     <link rel="icon" type="image/png" href="alien-logo.png">
-    <link rel="stylesheet" href="styles-v2.css?v=5">
+    <link rel="stylesheet" href="styles-v2.css?v=6">
     <link rel="stylesheet" href="styles-v2-future.css?v=7">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
     <script>
@@ -411,10 +411,10 @@
                     </div>
                     <div class="preview-3d-top-bar-right" id="furniture3dToolbar" hidden aria-hidden="true">
                         <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_textures">Textures</span>
-                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dTextures" role="group" aria-label="3D textures" data-active="1">
+                        <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dTextures" role="group" aria-label="3D textures" data-active="0">
                             <span class="slide-toggle-thumb" aria-hidden="true"></span>
-                            <button type="button" class="slide-toggle-btn" data-textures="off" aria-pressed="false" data-i18n="toggle_off">Off</button>
-                            <button type="button" class="slide-toggle-btn active" data-textures="on" aria-pressed="true" data-i18n="toggle_on">On</button>
+                            <button type="button" class="slide-toggle-btn active" data-textures="off" aria-pressed="true" data-i18n="toggle_off">Off</button>
+                            <button type="button" class="slide-toggle-btn" data-textures="on" aria-pressed="false" data-i18n="toggle_on">On</button>
                         </div>
                         <span class="preview-3d-toggle-label furniture-3d-dims-label" data-i18n="toggle_3d_dims">Dimensions</span>
                         <div class="slide-toggle slide-toggle--3d slide-toggle--compact" id="toggle3dDims" role="group" aria-label="3D dimensions" data-active="1">
@@ -530,7 +530,7 @@
     </script>
     <script src="eamf-countertop-thickness.js"></script>
     <script type="module" src="three-configurator.js?v=73"></script>
-    <script src="script-v2.js?v=28"></script>
+    <script src="script-v2.js?v=29"></script>
 </body>
 </html>
 

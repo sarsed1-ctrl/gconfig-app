@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GConfig — Kitchen (iX NET)</title>
+    <link rel="icon" type="image/png" href="alien-logo.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles-v2-future.css">
+    <link rel="stylesheet" href="styles-welcome-future.css">
+    <style>
+        :root {
+            --primary: #1a6b2f;
+            --bg: #f4f7f6;
+            --panel-bg: #ffffff;
+            --text-muted: #777;
+            --kitchen-chrome-h: 56px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%;
+            height: 100dvh;
+        }
+        body.kitchen-page {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100dvh;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        .kitchen-toolbar {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            padding-top: max(10px, env(safe-area-inset-top, 0));
+            background: var(--panel-bg);
+            border-bottom: 2px solid rgba(26,107,47,0.12);
+            min-height: var(--kitchen-chrome-h);
+            z-index: 10;
+        }
+        .kitchen-back {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .kitchen-back:hover { text-decoration: underline; }
+        .kitchen-title {
+            flex: 1;
+            text-align: center;
+            font-size: clamp(15px, 2.5vw, 18px);
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .kitchen-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .kitchen-btn {
+            border: 1px solid rgba(26,107,47,0.35);
+            background: #fff;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .kitchen-btn:hover { background: rgba(26,107,47,0.08); }
+        .kitchen-btn--primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .kitchen-btn--primary:hover { background: #135223; }
+        .kitchen-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .kitchen-launcher {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px 32px;
+        }
+        .kitchen-launcher-card {
+            max-width: 440px;
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid rgba(26,107,47,0.18);
+            border-radius: 12px;
+            padding: 28px 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .kitchen-launcher-card h2 {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        .kitchen-launcher-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+        .kitchen-launcher-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .kitchen-launcher-actions .kitchen-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+        .kitchen-launcher-note {
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .kitchen-frame-wrap {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            background: #e8ece9;
+        }
+        .kitchen-frame-wrap.hidden,
+        .kitchen-launcher.hidden { display: none; }
+        .kitchen-embed-banner {
+            flex-shrink: 0;
+            background: #fff3cd;
+            color: #664d03;
+            font-size: 12px;
+            padding: 8px 14px;
+            text-align: center;
+            border-bottom: 1px solid #ffecb5;
+        }
+        html.theme-future .kitchen-embed-banner {
+            background: rgba(255,193,7,0.15);
+            color: #ffc107;
+            border-bottom-color: rgba(255,193,7,0.3);
+        }
+        #imosFrame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+        }
+        .kitchen-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: rgba(244,247,246,0.92);
+            z-index: 5;
+            padding: 24px;
+            text-align: center;
+        }
+        .kitchen-overlay.hidden { display: none; }
+        .kitchen-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(26,107,47,0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: kitchenSpin 0.8s linear infinite;
+        }
+        @keyframes kitchenSpin { to { transform: rotate(360deg); } }
+        .kitchen-overlay p {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 360px;
+            line-height: 1.5;
+        }
+        .kitchen-error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .kitchen-hint {
+            flex-shrink: 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 6px 12px 10px;
+            background: var(--panel-bg);
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        #kitchenToast {
+            position: fixed;
+            bottom: max(16px, env(safe-area-inset-bottom, 16px));
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            background: #1a6b2f;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 100;
+            transition: transform 0.35s ease;
+            max-width: min(90vw, 420px);
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+        #kitchenToast.visible { transform: translateX(-50%) translateY(0); }
+        #kitchenToast.error { background: #b3261e; }
+        html.theme-future body.kitchen-page .kitchen-toolbar {
+            background: rgba(8,12,10,0.95);
+            border-bottom-color: rgba(92,255,200,0.2);
+        }
+        html.theme-future body.kitchen-page .kitchen-back,
+        html.theme-future body.kitchen-page .kitchen-title { color: #5cffc8; }
+        html.theme-future body.kitchen-page .kitchen-btn {
+            border-color: rgba(92,255,200,0.35);
+            background: rgba(0,0,0,0.3);
+            color: #5cffc8;
+        }
+        html.theme-future body.kitchen-page .kitchen-btn--primary {
+            background: #5cffc8;
+            color: #0a0f0c;
+            border-color: #5cffc8;
+        }
+        html.theme-future body.kitchen-page .kitchen-hint { background: #0d1210; color: #8aa; }
+        .lang-ru [data-lang="en"] { display: none !important; }
+        .lang-en [data-lang="ru"] { display: none !important; }
+        [data-lang] { display: inline; }
+    </style>
+    <script>
+    (function () {
+        var KEY = 'gconfig-v2-theme';
+        try {
+            var q = new URLSearchParams(location.search);
+            var qTheme = (q.get('theme') || '').toLowerCase();
+            if (qTheme !== 'classic' && qTheme !== 'v1') {
+                document.documentElement.classList.add('theme-future');
+                try { localStorage.setItem(KEY, 'future'); } catch (e) { /* ignore */ }
+            }
+        } catch (e) { /* ignore */ }
+    })();
+    </script>
+</head>
+<body class="kitchen-page lang-en">
+    <div class="kitchen-toolbar">
+        <a class="kitchen-back" href="./welcome.html" id="backLink">
+            <span data-lang="en">← Back</span>
+            <span data-lang="ru">← Назад</span>
+        </a>
+        <div class="kitchen-title">
+            <span data-lang="en">Kitchen — iX NET</span>
+            <span data-lang="ru">Кухня — iX NET</span>
+        </div>
+        <div class="kitchen-actions">
+            <button type="button" class="kitchen-btn" id="openTabBtn" hidden>
+                <span data-lang="en">Open tab</span>
+                <span data-lang="ru">Вкладка</span>
+            </button>
+            <a class="kitchen-btn" id="basketLink" href="#" target="_blank" rel="noopener">
+                <span data-lang="en">Basket</span>
+                <span data-lang="ru">Корзина</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="kitchen-main" id="kitchenMain">
+    <section class="kitchen-launcher" id="kitchenLauncher" hidden>
+        <div class="kitchen-launcher-card">
+            <h2>
+                <span data-lang="en">IMOS Kitchen catalog</span>
+                <span data-lang="ru">Каталог кухонь IMOS</span>
+            </h2>
+            <p>
+                <span data-lang="en">Browsers block IMOS login inside an embedded frame (third-party cookies). Open the catalog in a full window — your session will stay logged in.</span>
+                <span data-lang="ru">Браузер блокирует вход IMOS во встроенном окне (сторонние cookie). Откройте каталог в полном окне — сессия сохранится.</span>
+            </p>
+            <div class="kitchen-launcher-actions">
+                <button type="button" class="kitchen-btn kitchen-btn--primary" id="openFullBtn">
+                    <span data-lang="en">Open Kitchen configurator</span>
+                    <span data-lang="ru">Открыть конфигуратор кухонь</span>
+                </button>
+                <button type="button" class="kitchen-btn" id="openTabBtnLauncher">
+                    <span data-lang="en">Open in new tab</span>
+                    <span data-lang="ru">Открыть в новой вкладке</span>
+                </button>
+                <button type="button" class="kitchen-btn" id="tryEmbedBtn">
+                    <span data-lang="en">Try embedded view (login may fail)</span>
+                    <span data-lang="ru">Встроенный вид (вход может не работать)</span>
+                </button>
+            </div>
+            <p class="kitchen-launcher-note">
+                <span data-lang="en">Use your IMOS account from AM Furnitura. Ask admin if login fails.</span>
+                <span data-lang="ru">Используйте учётную запись IMOS от AM Furnitura. При ошибке входа — администратору.</span>
+            </p>
+        </div>
+    </section>
+
+    <p class="kitchen-embed-banner hidden" id="embedBanner">
+        <span data-lang="en">Embedded mode: if login loops, use ← Back and choose “Open Kitchen configurator”.</span>
+        <span data-lang="ru">Встроенный режим: если вход повторяется, вернитесь и выберите «Открыть конфигуратор».</span>
+    </p>
+
+    <div class="kitchen-frame-wrap hidden" id="kitchenEmbed">
+        <iframe id="imosFrame" title="IMOS Kitchen configurator" allow="fullscreen"></iframe>
+        <div class="kitchen-overlay" id="loadingOverlay" aria-live="polite">
+            <div class="kitchen-spinner" aria-hidden="true"></div>
+            <p>
+                <span data-lang="en">Loading IMOS Kitchen catalog…</span>
+                <span data-lang="ru">Загрузка каталога кухонь IMOS…</span>
+            </p>
+        </div>
+        <div class="kitchen-overlay hidden" id="errorOverlay" role="alert">
+            <p id="errorText">
+                <span data-lang="en">Could not embed IMOS. Open in a new tab or log in directly.</span>
+                <span data-lang="ru">Не удалось встроить IMOS. Откройте в новой вкладке.</span>
+            </p>
+            <div class="kitchen-error-actions">
+                <a class="kitchen-btn kitchen-btn--primary" id="errorOpenTab" href="#" target="_blank" rel="noopener">
+                    <span data-lang="en">Open IMOS</span>
+                    <span data-lang="ru">Открыть IMOS</span>
+                </a>
+                <a class="kitchen-btn" href="./welcome.html">
+                    <span data-lang="en">Back to home</span>
+                    <span data-lang="ru">На главную</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <p class="kitchen-hint">
+        <span data-lang="en">Price and production data come from IMOS iX NET. Closet/bed configurators remain in GConfig.</span>
+        <span data-lang="ru">Цена и производственные данные — из IMOS iX NET. Шкафы и кровати — в GConfig.</span>
+    </p>
+
+    <div id="kitchenToast" role="status" aria-live="polite"></div>
+
+    <input type="file" id="xmlFileInput" accept=".xml,text/xml,application/xml" hidden>
+
+    <script src="lib/imos/embed-config.js"></script>
+    <script src="lib/imos/embed-bridge.js"></script>
+    <script src="lib/imos/xml-to-order-meta.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var LANG_KEY = 'gconfig-v2-lang';
+        var THEME_KEY = 'gconfig-v2-theme';
+        var cfg = window.GConfigImos;
+        var catalogUrl = cfg.getCatalogUrl('kitchen');
+        var basketUrl = cfg.getBasketUrl();
+        var embedTimeoutMs = cfg.IMOS_EMBED.embedCheckTimeoutMs;
+        var launchMode = cfg.resolveLaunchMode();
+
+        var frame = document.getElementById('imosFrame');
+        var kitchenLauncher = document.getElementById('kitchenLauncher');
+        var kitchenEmbed = document.getElementById('kitchenEmbed');
+        var embedBanner = document.getElementById('embedBanner');
+        var loadingOverlay = document.getElementById('loadingOverlay');
+        var errorOverlay = document.getElementById('errorOverlay');
+        var toastEl = document.getElementById('kitchenToast');
+        var openTabBtn = document.getElementById('openTabBtn');
+        var openFullBtn = document.getElementById('openFullBtn');
+        var openTabBtnLauncher = document.getElementById('openTabBtnLauncher');
+        var tryEmbedBtn = document.getElementById('tryEmbedBtn');
+        var basketLink = document.getElementById('basketLink');
+        var errorOpenTab = document.getElementById('errorOpenTab');
+        var backLink = document.getElementById('backLink');
+        var xmlFileInput = document.getElementById('xmlFileInput');
+
+        var toastTimer = null;
+        var embedTimer = null;
+        var bridgeDispose = null;
+        var embedStarted = false;
+
+        function t(en, ru) {
+            return document.body.classList.contains('lang-ru') ? ru : en;
+        }
+
+        function showToast(msg, isError) {
+            if (toastTimer) clearTimeout(toastTimer);
+            toastEl.textContent = msg;
+            toastEl.classList.toggle('error', !!isError);
+            toastEl.classList.add('visible');
+            toastTimer = setTimeout(function () {
+                toastEl.classList.remove('visible');
+            }, 4500);
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        function showError() {
+            hideLoading();
+            errorOverlay.classList.remove('hidden');
+            openTabBtn.hidden = false;
+            logBridgeEvent('embed_error', 'iframe load timeout or blocked');
+        }
+
+        function restoreLang() {
+            try {
+                var saved = localStorage.getItem(LANG_KEY);
+                if (saved === 'en' || saved === 'ru') {
+                    document.body.className = 'kitchen-page lang-' + saved;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function syncThemeOnBackLink() {
+            try {
+                var url = new URL('welcome.html', location.href);
+                if (document.documentElement.classList.contains('theme-future')) {
+                    url.searchParams.set('theme', 'future');
+                }
+                backLink.href = url.pathname + url.search;
+            } catch (e) { /* ignore */ }
+        }
+
+        function logBridgeEvent(event, detail) {
+            fetch('/api/imos-bridge-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event: event, catalog: 'kitchen', detail: detail || '' }),
+            }).catch(function () { /* optional */ });
+        }
+
+        function notifyOrderMeta(meta) {
+            return fetch('/api/imos-order-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ meta: meta }),
+            }).then(function (r) { return r.json(); });
+        }
+
+        function onConfiguratorComplete(payload) {
+            showToast(t('Configuration saved in IMOS.', 'Конфигурация сохранена в IMOS.'));
+            logBridgeEvent('configurator_complete', JSON.stringify(payload).slice(0, 400));
+        }
+
+        function initBridge() {
+            if (!cfg.createImosEmbedBridge) return;
+            bridgeDispose = cfg.createImosEmbedBridge({
+                onComplete: onConfiguratorComplete,
+                onError: function (err) {
+                    if (err && err.code !== 'IMOS_MESSAGE_IGNORED') {
+                        console.warn('[IMOS bridge]', err.message);
+                    }
+                },
+            });
+        }
+
+        function onFrameLoad() {
+            if (embedTimer) {
+                clearTimeout(embedTimer);
+                embedTimer = null;
+            }
+            hideLoading();
+            logBridgeEvent('iframe_loaded', catalogUrl);
+        }
+
+        function startEmbedCheck() {
+            embedTimer = setTimeout(function () {
+                if (!loadingOverlay.classList.contains('hidden')) {
+                    showError();
+                }
+            }, embedTimeoutMs);
+        }
+
+        function openFullWindow() {
+            logBridgeEvent('launch_full_window', catalogUrl);
+            window.location.assign(catalogUrl);
+        }
+
+        function openNewTab() {
+            logBridgeEvent('launch_new_tab', catalogUrl);
+            window.open(catalogUrl, '_blank', 'noopener');
+        }
+
+        function startEmbed() {
+            if (embedStarted) return;
+            embedStarted = true;
+            kitchenLauncher.classList.add('hidden');
+            kitchenEmbed.classList.remove('hidden');
+            embedBanner.classList.remove('hidden');
+            openTabBtn.hidden = false;
+            frame.addEventListener('load', onFrameLoad);
+            frame.addEventListener('error', showError);
+            frame.src = catalogUrl;
+            startEmbedCheck();
+            initBridge();
+            logBridgeEvent('launch_embed', catalogUrl);
+        }
+
+        openTabBtn.addEventListener('click', openNewTab);
+        if (openFullBtn) openFullBtn.addEventListener('click', openFullWindow);
+        if (openTabBtnLauncher) openTabBtnLauncher.addEventListener('click', openNewTab);
+        if (tryEmbedBtn) tryEmbedBtn.addEventListener('click', startEmbed);
+
+        basketLink.href = basketUrl;
+        errorOpenTab.href = catalogUrl;
+
+        restoreLang();
+        syncThemeOnBackLink();
+
+        if (launchMode === 'redirect') {
+            openFullWindow();
+        } else if (launchMode === 'embed') {
+            startEmbed();
+        } else {
+            kitchenLauncher.hidden = false;
+            kitchenLauncher.classList.remove('hidden');
+        }
+
+        window.addEventListener('beforeunload', function () {
+            if (bridgeDispose) bridgeDispose();
+        });
+
+        /** Optional: parse uploaded IMOS XML and notify (Phase 4) */
+        window.GConfigKitchen = {
+            pickXmlFile: function () { xmlFileInput.click(); },
+            parseXmlText: function (xml) {
+                return cfg.parseImosOrderXml(xml);
+            },
+            notifyFromXml: function (xml) {
+                var meta = cfg.parseImosOrderXml(xml);
+                return notifyOrderMeta(meta).then(function (res) {
+                    if (res && res.ok) {
+                        showToast(t('Order summary sent.', 'Сводка заказа отправлена.'));
+                    } else {
+                        showToast(t('Could not send notification.', 'Не удалось отправить уведомление.'), true);
+                    }
+                    return res;
+                });
+            },
+        };
+
+        xmlFileInput.addEventListener('change', function () {
+            var file = xmlFileInput.files && xmlFileInput.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    window.GConfigKitchen.notifyFromXml(String(reader.result || ''));
+                } catch (err) {
+                    showToast(err.message || 'XML parse error', true);
+                }
+                xmlFileInput.value = '';
+            };
+            reader.onerror = function () {
+                showToast(t('Could not read file.', 'Не удалось прочитать файл.'), true);
+            };
+            reader.readAsText(file);
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -6,6 +6,15 @@
     },
     "api/telegram-send.js": {
       "maxDuration": 60
+    },
+    "api/imos-bridge-log.js": {
+      "maxDuration": 10
+    },
+    "api/imos-order-notify.js": {
+      "maxDuration": 15
+    },
+    "api/imos-session.js": {
+      "maxDuration": 15
     }
   }
 }
