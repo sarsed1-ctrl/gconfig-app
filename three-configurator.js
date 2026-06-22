@@ -79,7 +79,7 @@ const CLOSET_STACK_GAP_MM = 400;
 
 /** Closet layout flags — keep build + dimensions in sync (v2: both | single). */
 function getClosetLayoutFlags(layout) {
-    const L = layout || 'both';
+    const L = layout || 'single';
     const hasUpper = L === 'both';
     const hasLower = hasUpper || L === 'single';
     return { layout: L, hasUpper, hasLower };

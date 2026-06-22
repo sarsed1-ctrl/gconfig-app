@@ -2634,7 +2634,7 @@
 
     /** Returns 'both' | 'single' (single = lower cabinet only in 3D). */
     function getCabinetLayout() {
-        return getHardwareModeFromChips('cabinetLayoutChips', 'both');
+        return getHardwareModeFromChips('cabinetLayoutChips', 'single');
     }
 
     /**
