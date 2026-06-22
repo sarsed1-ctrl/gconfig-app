@@ -1,5 +1,7 @@
 *.zip
 .claude/
+.tmp-gconfig-app/
+__pycache__/
 build_apk.py
 GConfig_local.apk
 .env
