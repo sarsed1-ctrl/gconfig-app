@@ -1014,7 +1014,7 @@
             </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="display:none" aria-hidden="true">
             <label data-i18n="wall_type">Wall Material (Mounting):</label>
             <select id="wallType">
                 <option value="concrete" data-i18n-opt="wall_concrete">Concrete / Brick</option>
@@ -7025,9 +7025,6 @@
         });
 
         // Mounting warnings
-        warnings.push(wallType === 'drywall' ? T.warn_drywall : T.warn_concrete);
-
-        // Hinge brand info
         warnings.push(`${T.hinge_note}${hingeBrandLabel} (Ø35mm). ${T.hinge_count_note}${upFH}${T.hinge_count_note2}${flipupHingeCount}`);
         hardware = hardware.concat(lowerHardwareRows);
 

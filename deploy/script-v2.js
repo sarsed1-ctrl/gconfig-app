@@ -464,7 +464,7 @@
 
             step1_title: 'Размеры',
 
-            step1_desc: 'Габариты секций, толщины и тип стены.',
+            step1_desc: 'Габариты секций и толщины.',
 
             step2_title: 'Полки и двери',
 
@@ -736,7 +736,7 @@
 
             step1_title: 'Dimensions',
 
-            step1_desc: 'Cabinet sizes, thicknesses, and wall type.',
+            step1_desc: 'Cabinet sizes and thicknesses.',
 
             step2_title: 'Shelves & doors',
 
