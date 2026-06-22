@@ -592,13 +592,17 @@ function measureProductionLeftBand(ctx, ls, panelH, panelW, isEdge) {
 }
 
 function computeDimBandBelow(opts, ls) {
-    const { isEdge } = opts;
+    const { isEdge, isHorizontal } = opts;
     const rowsBelow = Math.max(1, opts.rowsBelow || 1);
     const baseOff = ps(PROD.DIM_CHAIN_BASE_OFF, ls);
     const rowGap = ps(PROD.DIM_ROW_GAP, ls);
     const textBand = ps(18, ls);
     const ext = ps(PROD.DIM_TICK_EXT, ls);
     const safety = ps(PROD.SAFETY_PAD, ls);
+
+    if (isHorizontal) {
+        return textBand + safety;
+    }
 
     if (isEdge) {
         return baseOff + rowGap + textBand + ext + safety;
@@ -691,7 +695,7 @@ function measureProductionContent(ctx, opts = {}) {
 
     const lang = opts.lang === 'en' ? 'en' : 'ru';
     const labelAreaHeight = computeTableAreaHeight(holeCount, ls);
-    const dimBandBelow = computeDimBandBelow({ isEdge, rowsBelow }, ls);
+    const dimBandBelow = computeDimBandBelow({ isEdge, isHorizontal: !!opts.isHorizontal, rowsBelow }, ls);
     const dimBandAbove = computeDimBandAbove({ rowsAbove }, ls);
     const dimBandHeight = dimBandBelow + dimBandAbove;
     const leftBand = measureProductionLeftBand(mctx, ls, panelH, panelW, isEdge);
@@ -835,6 +839,103 @@ function drawProductionPanelContent(ctx, opts) {
     };
 }
 
+/**
+ * Horizontal panel (facade): numbered holes on drawing + coordinate table below.
+ */
+function drawProductionHorizontalPanelContent(ctx, opts) {
+    const {
+        sheet,
+        ox,
+        oy,
+        pw,
+        ph,
+        scale,
+        layoutScale: ls,
+        mapHoleToSheet,
+        lang = 'ru',
+        getHoleFillColor,
+        getHoleRadius,
+        holeIndexStart = 0,
+    } = opts;
+
+    const panelH = Math.max(1, sheet.lengthMm);
+    const panelW = Math.max(1, sheet.widthMm);
+
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = Math.max(1, 1.5 * ls);
+    ctx.strokeRect(ox, oy, pw, ph);
+    ctx.fillStyle = '#f8faf8';
+    ctx.fillRect(ox, oy, pw, ph);
+    ctx.strokeRect(ox, oy, pw, ph);
+
+    ctx.fillStyle = '#444';
+    ctx.font = `${prodFs(10, ls)} Segoe UI, Arial, sans-serif`;
+    ctx.fillText(`X ${Math.round(panelH)}`, ox + pw / 2 - ps(14, ls), oy + ph + ps(16, ls));
+    ctx.save();
+    ctx.translate(ox - ps(10, ls), oy + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(`Y ${Math.round(panelW)}`, 0, 0);
+    ctx.restore();
+
+    const holeItems = (sheet.holes || []).map((hole, index) => {
+        const { sx, sy } = mapHoleToSheet(sheet, hole);
+        return {
+            hole,
+            index: holeIndexStart + index,
+            hx: ox + sx * scale,
+            hy: oy + sy * scale,
+        };
+    });
+
+    holeItems.forEach((h) => {
+        const r = getHoleRadius
+            ? getHoleRadius(h.hole, scale, ls)
+            : Math.max(ps(3, ls), (h.hole.diameter / 2) * scale * (h.hole.diameter >= 30 ? 0.5 : 0.35));
+        ctx.beginPath();
+        ctx.arc(h.hx, h.hy, r, 0, Math.PI * 2);
+        ctx.fillStyle = getHoleFillColor
+            ? getHoleFillColor(h.hole)
+            : (h.hole.type === 'face' ? '#1a6b2f' : '#c45c00');
+        ctx.fill();
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = Math.max(1, ls);
+        ctx.stroke();
+        paintProductionHoleNumber(ctx, h.index + 1, h.hx, h.hy, ls);
+    });
+
+    const contentMeasure = measureProductionContent(ctx, {
+        layoutScale: ls,
+        sheet,
+        holes: sheet.holes,
+        holeCount: sheet.holes?.length || 0,
+        pw,
+        ph,
+        panelH,
+        panelW,
+        ox,
+        oy,
+        scale,
+        mapHoleToSheet,
+        isEdge: false,
+        isHorizontal: true,
+        rows: [],
+        rowsAbove: 0,
+        rowsBelow: 0,
+        lang,
+        canvasW: opts.canvasW || pw + ps(PROD.CANVAS_MARGIN, ls) * 2,
+    });
+
+    const tableAreaTop = oy + ph + ps(PROD.LABEL_PANEL_GAP, ls) + contentMeasure.dimBandBelow;
+    const tableMeta = measureProductionHoleTable(ctx, holeItems, ls, lang);
+    const tableLayout = layoutProductionHoleTable(tableMeta, tableAreaTop, ox, pw);
+    paintProductionHoleTable(ctx, holeItems, tableLayout, ls, lang);
+
+    return {
+        tableLayout,
+        contentMeasure,
+    };
+}
+
 function validateProductionScene(scene, gap) {
     const g = gap || 0;
     let overlapCount = 0;
@@ -921,6 +1022,7 @@ const DEFAULT_PROD_CANVAS_H = 920;
 const productionApi = {
     PROD,
     drawProductionPanelContent,
+    drawProductionHorizontalPanelContent,
     measureProductionContent,
     measureProductionLeftBand,
     productionExtraMargins,
