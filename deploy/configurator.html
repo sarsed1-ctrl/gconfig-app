@@ -1046,15 +1046,15 @@
         </div>
         <div class="form-group" id="eamfCarcassBackPanelRow">
             <label style="display:flex; align-items:center; gap:8px; width:100%;">
-                <input type="checkbox" id="useCarcassBackPanel" style="width:auto;">
+                <input type="checkbox" id="useCarcassBackPanel" checked style="width:auto;">
                 <span data-i18n="back_panel_carcass">Back panel from carcass material</span>
             </label>
         </div>
         <div class="form-group" id="eamfBackPanelFitRow" style="display:none;">
             <label data-i18n="back_panel_fit">Back panel fit:</label>
             <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="overlay" checked style="width:auto;"> <span data-i18n="overlay_label">Overlay</span></label>
-                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="inset" style="width:auto;"> <span data-i18n="inset_label">Inset</span></label>
+                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="overlay" style="width:auto;"> <span data-i18n="overlay_label">Overlay</span></label>
+                <label style="width:auto;"><input type="radio" name="backPanelFitType" value="inset" checked style="width:auto;"> <span data-i18n="inset_label">Inset</span></label>
             </div>
         </div>
     </div>
@@ -2496,6 +2496,7 @@
                 sideRight: T.part_right,
                 bottom: T.part_bottom,
                 roof: T.part_roof,
+                back: T.part_back,
                 shelfPrefix: T.part_shelf_h,
             },
             upper: {
@@ -2503,6 +2504,7 @@
                 sideRight: T.part_right_upper,
                 bottom: T.part_bottom_upper,
                 roof: T.part_roof_upper,
+                back: T.part_back_upper,
                 shelfPrefix: T.part_shelf_h_upper,
             },
         };
@@ -2598,7 +2600,7 @@
             && !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
     }
 
-    const DRILLING_SCRIPT_VER = 57;
+    const DRILLING_SCRIPT_VER = 58;
 
     async function ensureDrillingModuleLoaded(forceReload = false) {
         if (
@@ -2989,10 +2991,11 @@
     }
 
     function getBackPanelFitType() {
+        if (usesCarcassBackPanel()) return 'inset';
         const stored = loadEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType);
         const checked = document.querySelector('input[name="backPanelFitType"]:checked')?.value;
-        const val = checked || stored || 'overlay';
-        return val === 'inset' ? 'inset' : 'overlay';
+        const val = checked || stored || 'inset';
+        return val === 'overlay' ? 'overlay' : 'inset';
     }
 
     function calcBackPanelFacadeDims(cabW, cabH, carcassT, fitType, overlayGap, insetGap) {
@@ -3037,9 +3040,10 @@
             return;
         }
         const useEl = document.getElementById('useCarcassBackPanel');
-        const savedUse = loadEamfSelection(EAMF_STORAGE_KEYS.useCarcassBackPanel) === '1';
+        const savedRaw = loadEamfSelection(EAMF_STORAGE_KEYS.useCarcassBackPanel);
+        const savedUse = savedRaw === '' || savedRaw === null ? true : savedRaw === '1';
         if (useEl) useEl.checked = savedUse;
-        const savedFit = loadEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType) || 'overlay';
+        const savedFit = loadEamfSelection(EAMF_STORAGE_KEYS.backPanelFitType) || 'inset';
         document.querySelectorAll('input[name="backPanelFitType"]').forEach(function(radio) {
             radio.checked = radio.value === savedFit;
         });

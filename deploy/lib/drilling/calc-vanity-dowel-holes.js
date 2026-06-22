@@ -79,6 +79,7 @@ function calcClosetCarcassDowelHoles(config) {
         spacingH = 150,
         spacingV = 200,
         labels = {},
+        hasCarcassBackPanel = false,
     } = config;
 
     const rules = drillRules();
@@ -96,6 +97,7 @@ function calcClosetCarcassDowelHoles(config) {
         sideRight: L.sideRight || 'Right side panel',
         bottom: L.bottom || 'Bottom panel',
         roof: L.roof || 'Top panel',
+        back: L.back || 'Back panel',
         shelfPrefix: L.shelfPrefix || 'Horizontal shelf',
     };
 
@@ -174,6 +176,21 @@ function calcClosetCarcassDowelHoles(config) {
         });
     }
 
+    // Carcass back panel ↔ sides (inset; same dowel spacing as bottom/roof, along width)
+    if (hasCarcassBackPanel) {
+        const backFaceY = d - rules.getFaceDowelLineOffset(carcassT);
+        const heightY = rules.getDepthHolePositions(h);
+        const widthY = rules.getDepthHolePositions(innerW);
+        heightY.forEach((x) => {
+            addFaceHole('side_left', partNames.sideLeft, h, d, x, backFaceY);
+            addFaceHole('side_right', partNames.sideRight, h, d, x, backFaceY);
+        });
+        widthY.forEach((pos) => {
+            addEdgeHole('back', partNames.back, innerW, carcassT, 'Top edge', 'edge_t', pos);
+            addEdgeHole('back', partNames.back, innerW, carcassT, 'Bottom edge', 'edge_b', pos);
+        });
+    }
+
     // Horizontal shelves ↔ sides
     if (shelvesH > 0) {
         const shelfD = d - 4;
@@ -199,7 +216,7 @@ function calcClosetCarcassDowelHoles(config) {
         }
     }
 
-    const edgeOrder = { edge_l: 0, edge_r: 1 };
+    const edgeOrder = { edge_l: 0, edge_r: 1, edge_t: 0, edge_b: 1 };
     sheets.forEach((s) => {
         if (s.layout === 'edge_pair' && s.edges?.length) {
             s.edges.sort((a, b) => (edgeOrder[a.key] ?? 9) - (edgeOrder[b.key] ?? 9));
@@ -250,6 +267,7 @@ function calcVanityDowelHoles(config) {
         spacingH: config.vanitySpacingH,
         spacingV: config.vanitySpacingV,
         labels: config.labels,
+        hasCarcassBackPanel: config.hasCarcassBackPanel,
     });
 }
 
@@ -268,6 +286,7 @@ function calcUpperClosetDowelHoles(config) {
         spacingH: config.upperSpacingH,
         spacingV: config.upperSpacingV,
         labels: config.labels,
+        hasCarcassBackPanel: config.hasCarcassBackPanel,
     });
 }
 
@@ -285,6 +304,7 @@ function buildVanityDrillingConfigFromDom(doc, labels) {
         vanityShelfT: num('vanityShelfThick', carcassT),
         vanitySpacingH: num('vanitySpacingH', 150),
         vanitySpacingV: num('vanitySpacingV', 200),
+        hasCarcassBackPanel: !!doc.getElementById('useCarcassBackPanel')?.checked,
         labels,
     };
 }
@@ -302,6 +322,7 @@ function buildUpperDrillingConfigFromDom(doc, labels) {
         upperShelfT: num('upperShelfThick', carcassT),
         upperSpacingH: num('upperSpacingH', 100),
         upperSpacingV: num('upperSpacingV', 200),
+        hasCarcassBackPanel: !!doc.getElementById('useCarcassBackPanel')?.checked,
         labels,
     };
 }
