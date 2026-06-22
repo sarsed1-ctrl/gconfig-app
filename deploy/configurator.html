@@ -12,10 +12,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="eamf-countertop-thickness.js"></script>
-    <script src="lib/drilling/dowel-rules.js?v=55"></script>
-    <script src="lib/drilling/calc-vanity-dowel-holes.js?v=55"></script>
-    <script src="lib/drilling/production-layout.js?v=56"></script>
-    <script src="lib/drilling/draw-part-drilling-canvas.js?v=55"></script>
+    <script src="lib/drilling/dowel-rules.js?v=59"></script>
+    <script src="lib/drilling/hinge-rules.js?v=59"></script>
+    <script src="lib/drilling/calc-vanity-dowel-holes.js?v=59"></script>
+    <script src="lib/drilling/calc-hinge-drilling.js?v=59"></script>
+    <script src="lib/drilling/production-layout.js?v=59"></script>
+    <script src="lib/drilling/draw-part-drilling-canvas.js?v=59"></script>
 
     <style>
         :root {
@@ -1682,6 +1684,7 @@
             part_back: "Задняя стенка (Нижний шкаф)",
             part_drawer_bottom: "Дно ящика (ЛДСП)",
             part_facade_vanity: "Фасад ящика (Нижний шкаф)",
+            part_facade_lower: "Фасад (Нижний шкаф)",
             part_countertop: "Столешница",
             part_side_upper: "Боковая (Верхний шкаф)",
             part_left_upper: "Боковина левая (Верхний шкаф)",
@@ -1874,6 +1877,7 @@
             part_back: "Back Panel (Lower Closet)",
             part_drawer_bottom: "Drawer Base (Chipboard)",
             part_facade_vanity: "Drawer Facade (Lower Closet)",
+            part_facade_lower: "Facade (Lower Closet)",
             part_countertop: "Countertop",
             part_side_upper: "Side Panel (Closet)",
             part_left_upper: "Left Side Panel (Upper Closet)",
@@ -2498,6 +2502,9 @@
                 roof: T.part_roof,
                 back: T.part_back,
                 shelfPrefix: T.part_shelf_h,
+                facade: T.part_facade_lower || T.part_facade_vanity,
+                facadeLeft: (T.part_facade_lower || T.part_facade_vanity) + ' (' + T.left_door + ')',
+                facadeRight: (T.part_facade_lower || T.part_facade_vanity) + ' (' + T.right_door + ')',
             },
             upper: {
                 sideLeft: T.part_left_upper,
@@ -2506,6 +2513,9 @@
                 roof: T.part_roof_upper,
                 back: T.part_back_upper,
                 shelfPrefix: T.part_shelf_h_upper,
+                facade: T.part_facade_upper,
+                facadeLeft: T.part_facade_upper + ' (' + T.left_door + ')',
+                facadeRight: T.part_facade_upper + ' (' + T.right_door + ')',
             },
         };
     }
@@ -2549,7 +2559,7 @@
         }
         if (!lastMainDrillingSheets.length) return 0;
         const GD = window.GConfigDrilling;
-        const drillTitle = currentLang === 'ru' ? 'Присадка (шкант 8×40)' : 'Drilling (dowel 8×40)';
+        const drillTitle = currentLang === 'ru' ? 'Присадка (шкант + петли)' : 'Drilling (dowel + hinges)';
         const exportSheets = GD.expandDrillingSheetsForExport
             ? GD.expandDrillingSheetsForExport(lastMainDrillingSheets)
             : lastMainDrillingSheets;
@@ -2600,7 +2610,7 @@
             && !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
     }
 
-    const DRILLING_SCRIPT_VER = 58;
+    const DRILLING_SCRIPT_VER = 59;
 
     async function ensureDrillingModuleLoaded(forceReload = false) {
         if (
@@ -2610,7 +2620,7 @@
         ) {
             return true;
         }
-        const files = ['dowel-rules.js', 'calc-vanity-dowel-holes.js', 'production-layout.js', 'draw-part-drilling-canvas.js'];
+        const files = ['dowel-rules.js', 'hinge-rules.js', 'calc-vanity-dowel-holes.js', 'calc-hinge-drilling.js', 'production-layout.js', 'draw-part-drilling-canvas.js'];
         try {
             for (const fileName of files) {
                 const res = await fetch(
@@ -8981,8 +8991,8 @@
         lastMainDrillingSheets = (dowelResult.sheets || []).filter(s => s.holes?.length > 0);
         const projectName = document.getElementById('project-name-input')?.value?.trim() || 'Untitled';
         const title = currentLang === 'ru'
-            ? 'GConfig — Chertezhi prisadki (shkant 8x40)'
-            : 'GConfig — Drilling drawings (dowel 8x40)';
+            ? 'GConfig — Chertezhi prisadki (shkant + petli)'
+            : 'GConfig — Drilling drawings (dowel + hinges)';
         let y = 16;
         pdf.setFontSize(14); pdf.setTextColor(26, 107, 47);
         pdf.text(title, pageMargin, y); y += 8;

@@ -327,6 +327,18 @@ function buildUpperDrillingConfigFromDom(doc, labels) {
     };
 }
 
+function hingeDrillingApi() {
+    if (typeof require !== 'undefined') {
+        try {
+            return require('./calc-hinge-drilling.js');
+        } catch (e) {
+            return {};
+        }
+    }
+    const g = typeof window !== 'undefined' ? window : globalThis;
+    return g.GConfigDrilling || {};
+}
+
 function buildCombinedClosetDrillingFromDom(doc, labels) {
     const lowerLabels = labels.lower || labels;
     const upperLabels = labels.upper || {};
@@ -336,7 +348,14 @@ function buildCombinedClosetDrillingFromDom(doc, labels) {
     if (upper.w2 > 0 && upper.h2 > 0 && upper.d2 > 0) {
         results.push(calcUpperClosetDowelHoles(upper));
     }
-    return mergeDowelResults(results);
+    const dowel = mergeDowelResults(results);
+    const hingeApi = hingeDrillingApi();
+    if (!hingeApi.buildCombinedHingeDrillingFromDom) return dowel;
+    const hinge = hingeApi.buildCombinedHingeDrillingFromDom(doc, labels);
+    if (hingeApi.mergeDrillingResults) {
+        return hingeApi.mergeDrillingResults(dowel, hinge);
+    }
+    return dowel;
 }
 
 const api = {
