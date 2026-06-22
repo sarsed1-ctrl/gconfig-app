@@ -470,9 +470,9 @@
 
             step2_desc: 'Количество полок и режим фурнитуры дверей.',
 
-            step3_title: 'Задняя стенка и петли',
+            step3_title: 'Задняя стенка, петли и столешница',
 
-            step3_desc: 'Задняя панель EAMF и настройки петель.',
+            step3_desc: 'Задняя панель EAMF, петли и опции столешницы.',
 
             step4_title: 'Материалы и цена',
 
@@ -742,9 +742,9 @@
 
             step2_desc: 'Shelf counts and door hardware mode.',
 
-            step3_title: 'Back panel & hinges',
+            step3_title: 'Back panel, hinges & countertop',
 
-            step3_desc: 'EAMF back panel and hinge settings.',
+            step3_desc: 'EAMF back panel, hinge settings, and countertop options.',
 
             step4_title: 'Materials & price',
 
@@ -2682,10 +2682,8 @@
         const hasCountertop = document.getElementById('w-hasCountertop')?.checked;
 
         const countertopFields = document.getElementById('countertopFields');
-        const countertopMaterialField = document.getElementById('countertopMaterialField');
 
         if (countertopFields) countertopFields.classList.toggle('hidden', !hasCountertop);
-        if (countertopMaterialField) countertopMaterialField.classList.toggle('hidden', !hasCountertop);
 
 
 
