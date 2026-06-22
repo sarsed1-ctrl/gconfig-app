@@ -1291,6 +1291,10 @@ function localizeDrillingLabel(text, lang) {
     return map[text] || text;
 }
 
+function isEdgePairSheet(sheet) {
+    return sheet.layout === 'edge_pair';
+}
+
 function isHorizontalPanelLayout(sheet) {
     const isSide = sheet.layout === 'side' || /^side_/.test(sheet.partId || '');
     const isEdge = sheet.layout === 'edge';
