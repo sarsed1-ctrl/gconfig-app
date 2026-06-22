@@ -269,9 +269,14 @@
                                 <input type="checkbox" id="w-useCarcassBackPanel" data-iframe="useCarcassBackPanel" checked>
                                 <span data-i18n="use_carcass_back">Carcass back panel</span>
                             </label>
-                            <div class="field full" style="margin-top:10px;">
+                            <div class="field full" id="eamfBackPanelField" style="margin-top:10px;">
                                 <label data-i18n="eamf_back">EAMF back panel</label>
                                 <select id="w-eamfBackPanel" data-iframe="eamfBackPanel"></select>
+                            </div>
+                            <div class="field full hidden" id="carcassBackMaterialField" style="margin-top:10px;">
+                                <label data-i18n="carcass_back_mat">Carcass material</label>
+                                <input type="text" id="carcassBackMaterialValue" readonly>
+                                <span class="field-hint" data-i18n="hint_carcass_back_mat">Back panel uses the same carcass LDSP as step 4.</span>
                             </div>
                             <div class="back-fit-row" id="backFitRow">
                                 <label data-i18n="back_panel_fit">Back panel fit</label>

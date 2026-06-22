@@ -591,6 +591,8 @@
             facade_edge: 'Кромка фасада',
 
             carcass_mat: 'Корпус',
+            carcass_back_mat: 'Материал корпуса',
+            hint_carcass_back_mat: 'Задняя стенка — тот же ЛДСП, что и корпус (шаг «Материалы»).',
 
             carcass_edge: 'Кромка корпуса',
 
@@ -861,6 +863,8 @@
             facade_edge: 'Facade edge',
 
             carcass_mat: 'Carcass',
+            carcass_back_mat: 'Carcass material',
+            hint_carcass_back_mat: 'Back panel uses the same carcass LDSP as on the Materials step.',
 
             carcass_edge: 'Carcass edge',
 
@@ -2515,6 +2519,8 @@
 
         refreshEamfBackPanelSelect();
 
+        syncBackPanelMaterialUI();
+
     }
 
 
@@ -2760,11 +2766,57 @@
 
         if (backFitRow) backFitRow.classList.toggle('hidden', !!useCarcassBack);
 
+        syncBackPanelMaterialUI();
+
 
 
         syncShelfSpacingVisibility();
 
         syncSpacingLabels();
+
+    }
+
+
+
+    function getCarcassMaterialLabel() {
+
+        const carcassSel = document.getElementById('w-eamfCarcassMaterial');
+
+        const fromWizard = carcassSel?.selectedOptions?.[0]?.textContent?.trim();
+
+        if (fromWizard) return fromWizard;
+
+        const article = fieldStr('eamfCarcassMaterial');
+
+        if (article && eamfCatalogCache?.materials) {
+
+            const found = eamfCatalogCache.materials.find((m) => (m.article || m.id || m.code) === article);
+
+            if (found) return found.name || found.label || article;
+
+        }
+
+        return article || (currentLang === 'ru' ? 'Выберите на шаге «Материалы»' : 'Select on Materials step');
+
+    }
+
+
+
+    function syncBackPanelMaterialUI() {
+
+        const useCarcassBack = document.getElementById('w-useCarcassBackPanel')?.checked;
+
+        const hdfField = document.getElementById('eamfBackPanelField');
+
+        const carcassField = document.getElementById('carcassBackMaterialField');
+
+        const readout = document.getElementById('carcassBackMaterialValue');
+
+        if (hdfField) hdfField.classList.toggle('hidden', !!useCarcassBack);
+
+        if (carcassField) carcassField.classList.toggle('hidden', !useCarcassBack);
+
+        if (readout && useCarcassBack) readout.value = getCarcassMaterialLabel();
 
     }
 
@@ -3365,6 +3417,10 @@
 
         const fieldValue = fromEl.type === 'checkbox' ? fromEl.checked : fromEl.value;
         maybeEnableTexturesForMaterial(id, fieldValue);
+
+        if (id === 'eamfCarcassMaterial' || id === 'useCarcassBackPanel') {
+            syncBackPanelMaterialUI();
+        }
 
         if (THICKNESS_IFRAME_IDS.has(id)) {
             refreshIframeEamfByThickness();
