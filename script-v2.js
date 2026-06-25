@@ -4948,7 +4948,10 @@
 
         const smProject = document.getElementById('v2-sm-project');
 
-        if (projectInput && smProject && !smProject.value.trim()) smProject.value = projectInput.value.trim();
+        if (projectInput && smProject) {
+            const fromWizard = projectInput.value.trim();
+            if (fromWizard) smProject.value = fromWizard;
+        }
 
         overlay.hidden = false;
 
@@ -5401,7 +5404,7 @@
         document.getElementById('btnNext').addEventListener('click', () => {
 
             if (isLastStep(currentStep)) {
-                exportActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                openOrderModal();
                 return;
             }
 
