@@ -1377,6 +1377,7 @@
                 <input type="checkbox" id="lowerSplitFacade" style="width:auto;">
                 <label for="lowerSplitFacade" data-i18n="lower_split_door">Split door into two leaves</label>
             </div>
+            <input type="checkbox" id="lowerNoFacade" hidden aria-hidden="true">
             <div id="lowerSplitWidths" style="display:none;grid-template-columns:1fr 1fr;gap:10px;">
                 <div class="form-group">
                     <label data-i18n="lower_left_door_width">Left door width (mm):</label>
@@ -1757,6 +1758,7 @@
             lower_hinge_vertical: "Вертикальные позиции петель (мм):",
             lower_edge_distance: "Расстояние от края (мм):",
             lower_split_door: "Разделить фасад на две дверцы",
+            lower_no_facade: "Без фасада (открытый перед)",
             lower_left_door_width: "Левая дверца (мм):",
             lower_right_door_width: "Правая дверца (мм):",
             hinge_table_title: "Таблица петель",
@@ -1950,6 +1952,7 @@
             lower_hinge_vertical: "Hinge vertical positions (mm):",
             lower_edge_distance: "Edge distance (mm):",
             lower_split_door: "Split door into two leaves",
+            lower_no_facade: "Without facade (open front)",
             lower_left_door_width: "Left door width (mm):",
             lower_right_door_width: "Right door width (mm):",
             hinge_table_title: "Hinge Specifications",
@@ -5749,6 +5752,7 @@
     // ==========================================
 
     function calcLowerFacadePanels(w1, h1, carcassT) {
+        const lowerNoFacade = !!document.getElementById('lowerNoFacade')?.checked;
         const lowerDoorType = document.querySelector('input[name="lowerDoorType"]:checked')?.value || 'overlay';
         const lowerOverlayGap = parseFloat(document.getElementById('lowerOverlayGap')?.value) || 2;
         const lowerInsetGap = parseFloat(document.getElementById('lowerInsetGap')?.value) || 2;
@@ -5767,6 +5771,22 @@
         const drawerCount = lowerHardwareMode === 'drawer'
             ? Math.max(1, parseInt(document.getElementById('lowerDrawerCount')?.value, 10) || 2)
             : 1;
+
+        if (lowerNoFacade) {
+            return {
+                lowerDoorType,
+                lowerOverlayGap,
+                lowerInsetGap,
+                lowerHardwareMode,
+                baseFacadeW: 0,
+                baseFacadeH: 0,
+                gapBetween: 0,
+                layout: 'none',
+                panels: [],
+                drawerCount,
+                noFacade: true,
+            };
+        }
 
         let layout = 'single';
         let gapBetween = 0;
@@ -5819,6 +5839,7 @@
     }
 
     function lowerFacadePanelsToDoors(facadeCalc, T) {
+        if (facadeCalc.noFacade || !facadeCalc.panels?.length) return [];
         if (facadeCalc.layout === 'splitHorizontal') {
             return facadeCalc.panels.map((p) => ({
                 name: (T.part_facade_vanity || 'Facade') + ' (' + (p.side === 'left' ? T.left_door : T.right_door) + ')',
@@ -5850,6 +5871,7 @@
     function drawLowerFacadePanels(ctx, vX, vY, vW, vH, w1, h1, carcassT, scale) {
         const calc = calcLowerFacadePanels(w1, h1, carcassT);
         const { lowerDoorType, lowerOverlayGap, lowerInsetGap, panels, layout, gapBetween } = calc;
+        if (calc.noFacade || !panels.length) return;
 
         const openingX = vX + (carcassT * scale);
         const openingY = vY + (carcassT * scale);
@@ -5939,6 +5961,7 @@
         const lowerHingeBrand = document.getElementById('lowerHingeBrand')?.value || 'hafele';
         const lowerHingeType = document.getElementById('lowerHingeType')?.value || 'overlay';
         const lowerSplitFacade = !!document.getElementById('lowerSplitFacade')?.checked;
+        const lowerNoFacade = !!document.getElementById('lowerNoFacade')?.checked;
         const hingeBrandLabel = lowerHingeBrand === 'hafele' ? 'HAFELE M540' : 'GTV SilentoPro';
 
         let parts    = [];
@@ -6757,7 +6780,7 @@
         // ==========================================
         // DRAWER SYSTEM (AxisPro & MatrixBox only, when lower hardware = drawer)
         // ==========================================
-        if (lowerHardwareMode === 'drawer') {
+        if (lowerHardwareMode === 'drawer' && !lowerNoFacade) {
             const axisproNLSizes = [250, 300, 350, 400, 450, 500, 550, 600];
             let runnerLength = 250;
             for (const nl of axisproNLSizes) { if (nl <= d1) runnerLength = nl; }
@@ -6808,15 +6831,19 @@
         const baseFacadeH = facadeCalc.baseFacadeH;
         const lowerDoors = lowerFacadePanelsToDoors(facadeCalc, T);
 
+        if (!lowerNoFacade) {
         lowerDoors.forEach(d => {
             const q = d.qty || 1;
             parts.push({ name: d.name, qty: q, l: d.height, w: d.width, t: facadeT, mat: matFacade });
             wtFacadesVanity += q * panelAreaM2(d.height, d.width) * facadeWpm2;
         });
+        }
 
         const lowerFacadeDimsEl = document.getElementById('lowerFacadeDims');
         if (lowerFacadeDimsEl) {
-            const label = lowerDoors.map(d => {
+            const label = lowerNoFacade
+                ? (T.lower_no_facade || 'Without facade')
+                : lowerDoors.map(d => {
                 const q = d.qty || 1;
                 const qStr = q > 1 ? ` ×${q}` : '';
                 return `${d.name}: ${Math.round(d.width)}×${Math.round(d.height)} mm${qStr}`;
@@ -6913,7 +6940,7 @@
         let lowerHardwareRows = [];
         let lowerHingeSpecRows = [];
         let lowerGasSpecRows = [];
-        if (lowerHardwareMode === 'gas') {
+        if (!lowerNoFacade && lowerHardwareMode === 'gas') {
             const lowerDoorAreaM2 = (baseFacadeW * baseFacadeH) / 1e6;
             const lowerDoorWeightKg = lowerDoorAreaM2 * facadeWpm2;
             const requiredForce = ((lowerDoorWeightKg * GRAVITY) / 2) * 130;
@@ -6931,7 +6958,7 @@
                 active: g.article === gasSelected.article,
                 note: g.article === gasSelected.article ? `${T.gaslift_note}${Math.round(requiredForce)}${T.gaslift_note2}` : '—'
             }));
-        } else if (lowerHardwareMode === 'gas') {
+        } else if (!lowerNoFacade && lowerHardwareMode === 'gas') {
             const lowerDoorAreaM2 = (baseFacadeW * baseFacadeH) / 1e6;
             const lowerDoorWeightKg = lowerDoorAreaM2 * facadeWpm2;
             const requiredForce = ((lowerDoorWeightKg * GRAVITY) / 2) * 130;
@@ -6945,7 +6972,7 @@
                 active: g.article === gasSelected.article,
                 note: g.article === gasSelected.article ? `${T.gaslift_note}${Math.round(requiredForce)}${T.gaslift_note2}` : '—'
             }));
-        } else if (lowerHardwareMode === 'hinge') {
+        } else if (!lowerNoFacade && lowerHardwareMode === 'hinge') {
             const hingeCfg = LOWER_HARDWARE_CATALOG.hinges[lowerHingeBrand][lowerHingeType];
             const totalHinges = lowerDoors.reduce((sum, d) => sum + calcHingesPerLeaf(d.height, d.width), 0);
             lowerHingeSpecRows = lowerDoors.map((d, idx) => ({
