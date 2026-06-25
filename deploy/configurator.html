@@ -998,8 +998,8 @@
         <div class="form-group">
             <label data-i18n="facade_thick">Facade Thickness (mm):</label>
             <select id="facadeThick">
-                <option value="16" selected>16 mm</option>
-                <option value="18">18 mm</option>
+                <option value="16">16 mm</option>
+                <option value="18" selected>18 mm</option>
                 <option value="19">19 mm PM/FeelWood</option>
                 <option value="25">25 mm</option>
             </select>
@@ -1009,8 +1009,8 @@
         <div class="form-group">
             <label data-i18n="carcass_thick">Carcass Thickness (mm):</label>
             <select id="carcassThick">
-                <option value="16" selected>16 mm</option>
-                <option value="18">18 mm</option>
+                <option value="16">16 mm</option>
+                <option value="18" selected>18 mm</option>
                 <option value="19">19 mm PM/FeelWood</option>
             </select>
         </div>
@@ -1100,8 +1100,8 @@
             <label data-i18n="shelf_thick_upper">Shelf thickness (mm):</label>
             <select id="upperShelfThick">
                 <option value="10">10 mm</option>
-                <option value="16" selected>16 mm</option>
-                <option value="18">18 mm</option>
+                <option value="16">16 mm</option>
+                <option value="18" selected>18 mm</option>
                 <option value="19">19 mm</option>
                 <option value="25">25 mm</option>
             </select>
@@ -1235,8 +1235,8 @@
             <label data-i18n="shelf_thick">Shelf thickness (mm):</label>
             <select id="vanityShelfThick">
                 <option value="10">10 mm</option>
-                <option value="16" selected>16 mm</option>
-                <option value="18">18 mm</option>
+                <option value="16">16 mm</option>
+                <option value="18" selected>18 mm</option>
                 <option value="19">19 mm</option>
                 <option value="25">25 mm</option>
             </select>
@@ -9076,7 +9076,7 @@
 
         const pageMargin = 14;
         const contentWidth = 210 - pageMargin * 2;
-        const carcassT = parseInt(document.getElementById('carcassThick')?.value, 10) || 16;
+        const carcassT = parseInt(document.getElementById('carcassThick')?.value, 10) || 18;
         const depths = window.GConfigDrilling.getDowelDepths(carcassT);
         const w2 = parseInt(document.getElementById('upper_w')?.value, 10) || 0;
         const h2 = parseInt(document.getElementById('upper_h')?.value, 10) || 0;

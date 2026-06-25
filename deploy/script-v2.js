@@ -269,7 +269,7 @@
         const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
         const cabinetH = fieldNum('h1', 500);
         const count    = fieldNum('lowerDrawerCount', 1);
-        const carcassT = fieldNum('carcassThick', 16);
+        const carcassT = fieldNum('carcassThick', 18);
         return getBestDrawerSpec(brand, cabinetH, count, carcassT) || DRAWER_SYSTEMS[0];
     }
 
@@ -281,7 +281,7 @@
             const brand    = document.getElementById('w-lowerDrawerSystem')?.value || 'axispro';
             const cabinetH = fieldNum('h1', 500);
             const count    = fieldNum('lowerDrawerCount', 1);
-            const carcassT = fieldNum('carcassThick', 16);
+            const carcassT = fieldNum('carcassThick', 18);
             return getBestDrawerSpec(brand, cabinetH, count, carcassT);
         })();
         if (!spec) {
@@ -1545,9 +1545,9 @@
 
     function collect3DParams() {
 
-        const carcassT = fieldNum('carcassThick', 16);
+        const carcassT = fieldNum('carcassThick', 18);
 
-        const facadeT = fieldNum('facadeThick', 16);
+        const facadeT = fieldNum('facadeThick', 18);
 
         const material = fieldStr('eamfCarcassMaterial');
         const carcassDecorCode = extractDecorCode(material);
@@ -1639,9 +1639,9 @@
 
                 spacingModeV: getShelfSpacingMode('upperSpacingModeV'),
 
-                positionsH: computeShelfPositionsForWizard(fieldNum('upperShelvesH', 0), fieldNum('carcassThick', 16), 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap'),
+                positionsH: computeShelfPositionsForWizard(fieldNum('upperShelvesH', 0), fieldNum('carcassThick', 18), 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap'),
 
-                positionsV: computeShelfPositionsForWizard(fieldNum('upperShelvesV', 0), fieldNum('carcassThick', 16), 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap'),
+                positionsV: computeShelfPositionsForWizard(fieldNum('upperShelvesV', 0), fieldNum('carcassThick', 18), 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap'),
 
                 w: fieldNum('upper_w', 800),
 
@@ -1667,9 +1667,9 @@
 
                 spacingModeV: getShelfSpacingMode('vanitySpacingModeV'),
 
-                positionsH: computeShelfPositionsForWizard(fieldNum('vanityShelvesH', 0), fieldNum('carcassThick', 16), 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap'),
+                positionsH: computeShelfPositionsForWizard(fieldNum('vanityShelvesH', 0), fieldNum('carcassThick', 18), 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap'),
 
-                positionsV: computeShelfPositionsForWizard(fieldNum('vanityShelvesV', 0), fieldNum('carcassThick', 16), 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap'),
+                positionsV: computeShelfPositionsForWizard(fieldNum('vanityShelvesV', 0), fieldNum('carcassThick', 18), 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap'),
 
                 w: fieldNum('w1', 800),
 
@@ -2878,6 +2878,7 @@
         document.getElementById('upperCabinetCard')?.classList.toggle('hidden', isSingle);
         document.getElementById('upperHwGroup')?.classList.toggle('hidden', isSingle);
         document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', isSingle));
+        document.getElementById('doorHwCard')?.classList.toggle('hidden', lowerNoFacade && isSingle);
         // ─────────────────────────────────────────────────────────────────────
 
 
