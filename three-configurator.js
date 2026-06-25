@@ -2311,17 +2311,21 @@ class Furniture3D {
 
         const fallbackSpacingH = Math.floor((H - 2 * T) / (countH + 1));
         const spacingH = (sec.spacingH > 0) ? sec.spacingH : fallbackSpacingH;
-        for (let i = 1; i <= countH; i += 1) {
-            const y = baseY + T + i * spacingH;
-            if (y + T > baseY + H - T) break;           // out-of-bounds guard
+        const positionsH = Array.isArray(sec.positionsH) && sec.positionsH.length ? sec.positionsH : null;
+        for (let i = 0; i < countH; i += 1) {
+            const posFromBottom = positionsH ? positionsH[i] : (i + 1) * spacingH;
+            const y = baseY + T + posFromBottom + T / 2;
+            if (y + T / 2 > baseY + H - T) break;
             addPanel(group, innerW, T, innerD, mat, 0, y, 0);
         }
 
         const fallbackSpacingV = Math.floor(innerW / (countV + 1));
         const spacingV = (sec.spacingV > 0) ? sec.spacingV : fallbackSpacingV;
-        for (let i = 1; i <= countV; i += 1) {
-            const x = -innerW / 2 + i * spacingV;
-            if (Math.abs(x) > innerW / 2 - T) break;   // out-of-bounds guard
+        const positionsV = Array.isArray(sec.positionsV) && sec.positionsV.length ? sec.positionsV : null;
+        for (let i = 0; i < countV; i += 1) {
+            const posFromLeft = positionsV ? positionsV[i] : (i + 1) * spacingV;
+            const x = -innerW / 2 + posFromLeft + T / 2;
+            if (Math.abs(x) > innerW / 2 - T) break;
             addPanel(group, T, H - 2 * T, innerD, mat, x, baseY + H / 2, 0);
         }
     }

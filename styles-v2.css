@@ -1424,6 +1424,13 @@ body.is-preview-3d-resizing * {
 
 .countertop-fields.hidden { display: none; }
 
+.shelf-gap-rows {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+.shelf-gap-rows.hidden { display: none; }
+
 .shelf-spacing-block {
     margin-top: 12px;
     padding-top: 10px;

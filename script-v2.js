@@ -528,6 +528,16 @@
 
             shelf_spacing_v_lower: 'Горизонтальный шаг (низ)',
 
+            shelf_spacing_mode: 'Шаг полок',
+
+            spacing_mode_uniform: 'Одинаковый',
+
+            spacing_mode_individual: 'Каждая полка',
+
+            shelf_gap_first: 'От пола до 1-й полки (мм)',
+
+            shelf_gap_between: 'Между полками',
+
             hardware_mode: 'Фурнитура дверей',
 
             upper_hw: 'Верхний шкаф',
@@ -800,6 +810,16 @@
             shelf_spacing_h_lower: 'Vertical spacing (lower)',
 
             shelf_spacing_v_lower: 'Horizontal spacing (lower)',
+
+            shelf_spacing_mode: 'Shelf spacing',
+
+            spacing_mode_uniform: 'Uniform',
+
+            spacing_mode_individual: 'Per shelf',
+
+            shelf_gap_first: 'Floor to shelf 1 (mm)',
+
+            shelf_gap_between: 'Gap before shelf',
 
             hardware_mode: 'Door hardware',
 
@@ -1459,6 +1479,8 @@
 
     function collectHingeZoneSpec(zone, cabinetHeightMm) {
 
+        if (zone === 'lower' && fieldCheck('lowerNoFacade')) return null;
+
         const prefix = zone === 'upper' ? 'upper' : 'lower';
 
         const doc = iframeDoc();
@@ -1613,6 +1635,14 @@
 
                 spacingV: fieldNum('upperSpacingV', 200),
 
+                spacingModeH: getShelfSpacingMode('upperSpacingModeH'),
+
+                spacingModeV: getShelfSpacingMode('upperSpacingModeV'),
+
+                positionsH: computeShelfPositionsForWizard(fieldNum('upperShelvesH', 0), fieldNum('carcassThick', 16), 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap'),
+
+                positionsV: computeShelfPositionsForWizard(fieldNum('upperShelvesV', 0), fieldNum('carcassThick', 16), 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap'),
+
                 w: fieldNum('upper_w', 800),
 
                 h: fieldNum('upper_h', 400),
@@ -1632,6 +1662,14 @@
                 spacingH: fieldNum('vanitySpacingH', 100),
 
                 spacingV: fieldNum('vanitySpacingV', 200),
+
+                spacingModeH: getShelfSpacingMode('vanitySpacingModeH'),
+
+                spacingModeV: getShelfSpacingMode('vanitySpacingModeV'),
+
+                positionsH: computeShelfPositionsForWizard(fieldNum('vanityShelvesH', 0), fieldNum('carcassThick', 16), 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap'),
+
+                positionsV: computeShelfPositionsForWizard(fieldNum('vanityShelvesV', 0), fieldNum('carcassThick', 16), 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap'),
 
                 w: fieldNum('w1', 800),
 
@@ -2576,6 +2614,131 @@
 
 
 
+    const SHELF_GAP_SPECS = [
+        { countId: 'upperShelvesH', modeRadio: 'upperSpacingModeH', uniformId: 'upperSpacingH', gapPrefix: 'upperSpacingHGap', modeChips: 'upperSpacingModeHChips', uniformWrap: 'upperHSpacingUniform', individualWrap: 'upperHSpacingIndividual', min: 30, max: 300, defaultUniform: 100 },
+        { countId: 'upperShelvesV', modeRadio: 'upperSpacingModeV', uniformId: 'upperSpacingV', gapPrefix: 'upperSpacingVGap', modeChips: 'upperSpacingModeVChips', uniformWrap: 'upperVSpacingUniform', individualWrap: 'upperVSpacingIndividual', min: 50, max: 600, defaultUniform: 200 },
+        { countId: 'vanityShelvesH', modeRadio: 'vanitySpacingModeH', uniformId: 'vanitySpacingH', gapPrefix: 'vanitySpacingHGap', modeChips: 'vanitySpacingModeHChips', uniformWrap: 'vanityHSpacingUniform', individualWrap: 'vanityHSpacingIndividual', min: 50, max: 400, defaultUniform: 150 },
+        { countId: 'vanityShelvesV', modeRadio: 'vanitySpacingModeV', uniformId: 'vanitySpacingV', gapPrefix: 'vanitySpacingVGap', modeChips: 'vanitySpacingModeVChips', uniformWrap: 'vanityVSpacingUniform', individualWrap: 'vanityVSpacingIndividual', min: 50, max: 600, defaultUniform: 200 },
+    ];
+
+
+
+    function getShelfSpacingMode(modeRadio) {
+
+        return getIframeRadio(modeRadio) || 'uniform';
+
+    }
+
+
+
+    function readShelfGapsFromWizard(gapPrefix, count, fallback) {
+
+        const gaps = [];
+
+        for (let i = 1; i <= count; i += 1) {
+
+            const v = fieldNum(`${gapPrefix}${i}`, 0);
+
+            gaps.push(v > 0 ? v : fallback);
+
+        }
+
+        return gaps;
+
+    }
+
+
+
+    function computeShelfPositionsForWizard(count, thick, modeRadio, uniformId, gapPrefix) {
+
+        const api = window.GConfigShelfSpacing;
+
+        const n = Math.max(0, parseInt(count, 10) || 0);
+
+        if (!api?.computeShelfBottomPositions || n <= 0) return [];
+
+        const uniform = fieldNum(uniformId, 150);
+
+        const mode = getShelfSpacingMode(modeRadio);
+
+        const gaps = readShelfGapsFromWizard(gapPrefix, n, uniform);
+
+        return api.computeShelfBottomPositions(n, thick, { mode, uniformSpacing: uniform, gaps });
+
+    }
+
+
+
+    function renderShelfGapInputs(spec) {
+
+        const count = parseInt(document.getElementById(`w-${spec.countId}`)?.value, 10) || 0;
+
+        const wrap = document.getElementById(spec.individualWrap);
+
+        if (!wrap) return;
+
+        const uniform = fieldNum(spec.uniformId, spec.defaultUniform);
+
+        const parts = [];
+
+        for (let i = 1; i <= count; i += 1) {
+
+            const gapId = `${spec.gapPrefix}${i}`;
+
+            const val = fieldNum(gapId, 0) || uniform;
+
+            const label = i === 1 ? t('shelf_gap_first') : `${t('shelf_gap_between')} ${i}`;
+
+            parts.push(`<div class="field"><label>${label}</label><input type="number" id="w-${gapId}" data-iframe="${gapId}" min="${spec.min}" max="${spec.max}" step="5" value="${val}"></div>`);
+
+        }
+
+        wrap.innerHTML = parts.join('');
+
+        wrap.querySelectorAll('[data-iframe]').forEach((el) => {
+
+            if (el.dataset.gapBound) return;
+
+            el.dataset.gapBound = '1';
+
+            el.addEventListener('input', () => {
+
+                syncFieldToIframe(el);
+
+                schedule3DRebuild();
+
+                triggerV1Update();
+
+            });
+
+        });
+
+    }
+
+
+
+    function syncShelfSpacingModeUI() {
+
+        SHELF_GAP_SPECS.forEach((spec) => {
+
+            syncHardwareChips(spec.modeRadio, spec.modeChips);
+
+            const mode = getShelfSpacingMode(spec.modeRadio);
+
+            const individual = mode === 'individual';
+
+            document.getElementById(spec.uniformWrap)?.classList.toggle('hidden', individual);
+
+            document.getElementById(spec.individualWrap)?.classList.toggle('hidden', !individual);
+
+            if (individual) renderShelfGapInputs(spec);
+
+        });
+
+    }
+
+
+
     function syncShelfSpacingVisibility() {
 
         const upperH = parseInt(document.getElementById('w-upperShelvesH')?.value, 10) || 0;
@@ -2593,6 +2756,8 @@
         document.getElementById('vanityHSpacingBlock')?.classList.toggle('hidden', lowerH <= 0);
 
         document.getElementById('vanityVSpacingBlock')?.classList.toggle('hidden', lowerV <= 0);
+
+        syncShelfSpacingModeUI();
 
     }
 
@@ -2717,7 +2882,7 @@
 
         document.getElementById('lowerHwGroup')?.classList.toggle('hidden', lowerNoFacade);
         document.querySelectorAll('.hinge-lower-field').forEach((el) => {
-            el.classList.toggle('hidden', lowerNoFacade);
+            el.classList.toggle('hidden', lowerNoFacade || lowerMode !== 'hinge');
         });
 
         // Rebuild drawer system select + per-drawer type rows whenever mode or dimensions change
@@ -2750,14 +2915,6 @@
             el.classList.toggle('hidden', upperMode === 'gas' || isSingle);
 
         });
-
-        document.querySelectorAll('.hinge-lower-field').forEach((el) => {
-
-            el.classList.toggle('hidden', lowerMode !== 'hinge');
-
-        });
-
-
 
         const gasHint = document.getElementById('gasHint');
 

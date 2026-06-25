@@ -10,6 +10,7 @@ const {
     calcZoneHingeDrilling,
     buildCombinedHingeDrillingFromDom,
     mergeDrillingResults,
+    buildLowerDoorsFromDom,
 } = require('../lib/drilling/calc-hinge-drilling.js');
 const { calcVanityDowelHoles } = require('../lib/drilling/calc-vanity-dowel-holes.js');
 
@@ -158,5 +159,20 @@ const dowel = calcVanityDowelHoles({
 const merged = mergeDrillingResults(dowel, fromDom);
 const mergedSide = merged.sheets.find((s) => s.partId === 'side_left');
 assert(mergedSide && mergedSide.holes.length > 4, 'merge adds hinge holes to existing side_left');
+
+const noFacadeDoc = mockDoc({
+    w1: 800,
+    h1: 500,
+    d1: 450,
+    carcassThick: 16,
+    facadeThick: 16,
+    'radio:lowerHardwareMode': 'hinge',
+    'check:lowerNoFacade': true,
+});
+const noFacadeDoors = buildLowerDoorsFromDom(noFacadeDoc);
+assert(noFacadeDoors.length === 0, 'lowerNoFacade → no lower doors for hinge drilling');
+const noFacadeDrill = buildCombinedHingeDrillingFromDom(noFacadeDoc, {});
+const noFacadeLowerSheets = (noFacadeDrill.sheets || []).filter((s) => !s.partId.startsWith('upper_'));
+assert(noFacadeLowerSheets.length === 0, 'lowerNoFacade → no lower hinge drilling sheets');
 
 process.exit(failed ? 1 : 0);

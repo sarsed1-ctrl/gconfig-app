@@ -176,39 +176,71 @@
                                     </div>
                                 </div>
                                 <div class="shelf-spacing-block hidden upper-shelf-field" id="upperHSpacingBlock">
-                                    <label data-i18n="shelf_spacing_h">Vertical spacing (upper)</label>
-                                    <div class="range-row">
-                                        <input type="range" id="w-upperSpacingH" data-iframe="upperSpacingH" min="30" max="300" step="5">
-                                        <span class="spacing-val" id="w-upperSpacingHVal">100 mm</span>
+                                    <label data-i18n="shelf_spacing_mode">Shelf spacing</label>
+                                    <div class="hw-chips" id="upperSpacingModeHChips" data-radio="upperSpacingModeH">
+                                        <button type="button" class="hw-chip active" data-value="uniform" data-i18n="spacing_mode_uniform">Uniform</button>
+                                        <button type="button" class="hw-chip" data-value="individual" data-i18n="spacing_mode_individual">Per shelf</button>
                                     </div>
-                                    <span class="field-hint" data-i18n="hint_spacing_upper_h">Distance between horizontal shelves in the upper cabinet.</span>
+                                    <div id="upperHSpacingUniform">
+                                        <label data-i18n="shelf_spacing_h">Vertical spacing (upper)</label>
+                                        <div class="range-row">
+                                            <input type="range" id="w-upperSpacingH" data-iframe="upperSpacingH" min="30" max="300" step="5">
+                                            <span class="spacing-val" id="w-upperSpacingHVal">100 mm</span>
+                                        </div>
+                                        <span class="field-hint" data-i18n="hint_spacing_upper_h">Distance between horizontal shelves in the upper cabinet.</span>
+                                    </div>
+                                    <div id="upperHSpacingIndividual" class="shelf-gap-rows hidden"></div>
                                 </div>
                                 <div class="shelf-spacing-block hidden upper-shelf-field" id="upperVSpacingBlock">
-                                    <label data-i18n="shelf_spacing_v">Horizontal spacing (upper)</label>
-                                    <div class="range-row">
-                                        <input type="range" id="w-upperSpacingV" data-iframe="upperSpacingV" min="50" max="600" step="5">
-                                        <span class="spacing-val" id="w-upperSpacingVVal">200 mm</span>
+                                    <label data-i18n="shelf_spacing_mode">Shelf spacing</label>
+                                    <div class="hw-chips" id="upperSpacingModeVChips" data-radio="upperSpacingModeV">
+                                        <button type="button" class="hw-chip active" data-value="uniform" data-i18n="spacing_mode_uniform">Uniform</button>
+                                        <button type="button" class="hw-chip" data-value="individual" data-i18n="spacing_mode_individual">Per shelf</button>
                                     </div>
-                                    <span class="field-hint" data-i18n="hint_spacing_upper_v">Distance between vertical shelf dividers in the upper cabinet.</span>
+                                    <div id="upperVSpacingUniform">
+                                        <label data-i18n="shelf_spacing_v">Horizontal spacing (upper)</label>
+                                        <div class="range-row">
+                                            <input type="range" id="w-upperSpacingV" data-iframe="upperSpacingV" min="50" max="600" step="5">
+                                            <span class="spacing-val" id="w-upperSpacingVVal">200 mm</span>
+                                        </div>
+                                        <span class="field-hint" data-i18n="hint_spacing_upper_v">Distance between vertical shelf dividers in the upper cabinet.</span>
+                                    </div>
+                                    <div id="upperVSpacingIndividual" class="shelf-gap-rows hidden"></div>
                                 </div>
                                 <p class="field-hint field-hint--drawer-warn hidden" id="lowerShelvesDrawerHint" data-i18n="hint_lower_shelves_drawer">
                                     Lower shelves unavailable in drawer mode.
                                 </p>
                                 <div class="shelf-spacing-block hidden lower-shelf-field" id="vanityHSpacingBlock">
-                                    <label data-i18n="shelf_spacing_h_lower">Vertical spacing (lower)</label>
-                                    <div class="range-row">
-                                        <input type="range" id="w-vanitySpacingH" data-iframe="vanitySpacingH" min="50" max="400" step="5">
-                                        <span class="spacing-val" id="w-vanitySpacingHVal">150 mm</span>
+                                    <label data-i18n="shelf_spacing_mode">Shelf spacing</label>
+                                    <div class="hw-chips" id="vanitySpacingModeHChips" data-radio="vanitySpacingModeH">
+                                        <button type="button" class="hw-chip active" data-value="uniform" data-i18n="spacing_mode_uniform">Uniform</button>
+                                        <button type="button" class="hw-chip" data-value="individual" data-i18n="spacing_mode_individual">Per shelf</button>
                                     </div>
-                                    <span class="field-hint" data-i18n="hint_spacing_lower_h">Distance between horizontal shelves in the lower cabinet.</span>
+                                    <div id="vanityHSpacingUniform">
+                                        <label data-i18n="shelf_spacing_h_lower">Vertical spacing (lower)</label>
+                                        <div class="range-row">
+                                            <input type="range" id="w-vanitySpacingH" data-iframe="vanitySpacingH" min="50" max="400" step="5">
+                                            <span class="spacing-val" id="w-vanitySpacingHVal">150 mm</span>
+                                        </div>
+                                        <span class="field-hint" data-i18n="hint_spacing_lower_h">Distance between horizontal shelves in the lower cabinet.</span>
+                                    </div>
+                                    <div id="vanityHSpacingIndividual" class="shelf-gap-rows hidden"></div>
                                 </div>
                                 <div class="shelf-spacing-block hidden lower-shelf-field" id="vanityVSpacingBlock">
-                                    <label data-i18n="shelf_spacing_v_lower">Horizontal spacing (lower)</label>
-                                    <div class="range-row">
-                                        <input type="range" id="w-vanitySpacingV" data-iframe="vanitySpacingV" min="50" max="600" step="5">
-                                        <span class="spacing-val" id="w-vanitySpacingVVal">200 mm</span>
+                                    <label data-i18n="shelf_spacing_mode">Shelf spacing</label>
+                                    <div class="hw-chips" id="vanitySpacingModeVChips" data-radio="vanitySpacingModeV">
+                                        <button type="button" class="hw-chip active" data-value="uniform" data-i18n="spacing_mode_uniform">Uniform</button>
+                                        <button type="button" class="hw-chip" data-value="individual" data-i18n="spacing_mode_individual">Per shelf</button>
                                     </div>
-                                    <span class="field-hint" data-i18n="hint_spacing_lower_v">Distance between vertical shelf dividers in the lower cabinet.</span>
+                                    <div id="vanityVSpacingUniform">
+                                        <label data-i18n="shelf_spacing_v_lower">Horizontal spacing (lower)</label>
+                                        <div class="range-row">
+                                            <input type="range" id="w-vanitySpacingV" data-iframe="vanitySpacingV" min="50" max="600" step="5">
+                                            <span class="spacing-val" id="w-vanitySpacingVVal">200 mm</span>
+                                        </div>
+                                        <span class="field-hint" data-i18n="hint_spacing_lower_v">Distance between vertical shelf dividers in the lower cabinet.</span>
+                                    </div>
+                                    <div id="vanityVSpacingIndividual" class="shelf-gap-rows hidden"></div>
                                 </div>
                             </div>
                             <div class="card">
@@ -528,6 +560,7 @@
     }
     </script>
     <script src="eamf-countertop-thickness.js"></script>
+    <script src="lib/shelf-spacing.js?v=1"></script>
     <script type="module" src="three-configurator.js?v=73"></script>
     <script src="script-v2.js?v=29"></script>
 </body>

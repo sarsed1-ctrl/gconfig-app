@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="eamf-countertop-thickness.js"></script>
+    <script src="lib/shelf-spacing.js?v=1"></script>
     <script src="lib/drilling/dowel-rules.js?v=61"></script>
     <script src="lib/drilling/hinge-rules.js?v=61"></script>
     <script src="lib/drilling/calc-vanity-dowel-holes.js?v=61"></script>
@@ -1240,7 +1241,35 @@
                 <option value="25">25 mm</option>
             </select>
         </div>
-        
+        <div id="shelfSpacingSyncFields" hidden aria-hidden="true">
+            <input type="radio" name="vanitySpacingModeH" value="uniform" checked>
+            <input type="radio" name="vanitySpacingModeH" value="individual">
+            <input type="radio" name="vanitySpacingModeV" value="uniform" checked>
+            <input type="radio" name="vanitySpacingModeV" value="individual">
+            <input type="radio" name="upperSpacingModeH" value="uniform" checked>
+            <input type="radio" name="upperSpacingModeH" value="individual">
+            <input type="radio" name="upperSpacingModeV" value="uniform" checked>
+            <input type="radio" name="upperSpacingModeV" value="individual">
+            <input type="number" id="vanitySpacingHGap1" value="150" min="30" step="5">
+            <input type="number" id="vanitySpacingHGap2" value="150" min="30" step="5">
+            <input type="number" id="vanitySpacingHGap3" value="150" min="30" step="5">
+            <input type="number" id="vanitySpacingHGap4" value="150" min="30" step="5">
+            <input type="number" id="vanitySpacingHGap5" value="150" min="30" step="5">
+            <input type="number" id="vanitySpacingVGap1" value="200" min="50" step="5">
+            <input type="number" id="vanitySpacingVGap2" value="200" min="50" step="5">
+            <input type="number" id="vanitySpacingVGap3" value="200" min="50" step="5">
+            <input type="number" id="vanitySpacingVGap4" value="200" min="50" step="5">
+            <input type="number" id="upperSpacingHGap1" value="100" min="30" step="5">
+            <input type="number" id="upperSpacingHGap2" value="100" min="30" step="5">
+            <input type="number" id="upperSpacingHGap3" value="100" min="30" step="5">
+            <input type="number" id="upperSpacingHGap4" value="100" min="30" step="5">
+            <input type="number" id="upperSpacingHGap5" value="100" min="30" step="5">
+            <input type="number" id="upperSpacingVGap1" value="200" min="50" step="5">
+            <input type="number" id="upperSpacingVGap2" value="200" min="50" step="5">
+            <input type="number" id="upperSpacingVGap3" value="200" min="50" step="5">
+            <input type="number" id="upperSpacingVGap4" value="200" min="50" step="5">
+        </div>
+
         <h4 data-i18n="countertop_section">Countertop</h4>
         <div class="form-group" style="justify-content: flex-start; gap: 10px;">
             <input type="checkbox" id="hasCountertop" style="width: auto;">
@@ -5579,6 +5608,11 @@
         if (typeof updateConfigurator === 'function') updateConfigurator();
     });
 
+    document.getElementById('lowerNoFacade')?.addEventListener('change', function() {
+        syncLowerHardwareUI();
+        if (typeof updateConfigurator === 'function') updateConfigurator();
+    });
+
     // Show/hide spacing sliders when shelf count changes + update label
     function syncShelfSpacingUI() {
         const vH = parseInt(document.getElementById('vanityShelvesH').value) || 0;
@@ -5663,7 +5697,8 @@
 
     function syncLowerHardwareUI() {
         enforceSinkDrawerRule();
-        const isHinge = (document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas') === 'hinge';
+        const noFacade = !!document.getElementById('lowerNoFacade')?.checked;
+        const isHinge = !noFacade && (document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas') === 'hinge';
         const split = !!document.getElementById('lowerSplitFacade')?.checked;
         const hingeControls = document.getElementById('lowerHingeControls');
         const splitWidths = document.getElementById('lowerSplitWidths');
@@ -6666,12 +6701,14 @@
             const upperSpacingH = parseInt(document.getElementById('upperSpacingH').value) || 100;
             const upperSpacingV = parseInt(document.getElementById('upperSpacingV').value) || 200;
             const upperShelfWpm2 = CARCASS_WEIGHT_MAP[upperShelfThick] || 12.5;
-            
+            const upperHPositions = resolveShelfAxisPositions(upperShelvesH, upperShelfThick, 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap');
+            const upperVPositions = resolveShelfAxisPositions(upperShelvesV, upperShelfThick, 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap');
+
             if (upperShelvesH > 0) {
                 const upperShelfD = d2 - 4;
-                const xSegments = getShelfOpenIntervals(upperInnerW, upperShelvesV, upperSpacingV, upperShelfThick);
+                const xSegments = getShelfOpenIntervals(upperInnerW, upperShelvesV, upperSpacingV, upperShelfThick, upperVPositions);
                 for (let i = 0; i < upperShelvesH; i++) {
-                    const posFromBottom = upperSpacingH * (i + 1);
+                    const posFromBottom = upperHPositions[i];
                     xSegments.forEach((seg, sIdx) => {
                         const segW = seg.end - seg.start;
                         if (segW <= 0) return;
@@ -6688,9 +6725,9 @@
             if (upperShelvesV > 0) {
                 const upperInnerH = h2 - 2 * carcassT;
                 const upperDivD = d2 - 4;
-                const ySegments = getShelfOpenIntervals(upperInnerH, upperShelvesH, upperSpacingH, upperShelfThick);
+                const ySegments = getShelfOpenIntervals(upperInnerH, upperShelvesH, upperSpacingH, upperShelfThick, upperHPositions);
                 for (let i = 0; i < upperShelvesV; i++) {
-                    const posFromLeft = upperSpacingV * (i + 1);
+                    const posFromLeft = upperVPositions[i];
                     ySegments.forEach((seg, sIdx) => {
                         const segH = seg.end - seg.start;
                         if (segH <= 0) return;
@@ -6874,12 +6911,14 @@
         const vanitySpacingH  = parseInt(document.getElementById('vanitySpacingH').value)  || 150;
         const vanitySpacingV  = parseInt(document.getElementById('vanitySpacingV').value)  || 200;
         const shelfWpm2 = CARCASS_WEIGHT_MAP[vanityShelfT] || 12.5;
+        const vanityHPositions = resolveShelfAxisPositions(vanityShelvesH, vanityShelfT, 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap');
+        const vanityVPositions = resolveShelfAxisPositions(vanityShelvesV, vanityShelfT, 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap');
 
         if (vanityShelvesH > 0) {
             const shelfD = d1 - 4;
-            const xSegments = getShelfOpenIntervals(innerW1, vanityShelvesV, vanitySpacingV, vanityShelfT);
+            const xSegments = getShelfOpenIntervals(innerW1, vanityShelvesV, vanitySpacingV, vanityShelfT, vanityVPositions);
             for (let i = 0; i < vanityShelvesH; i++) {
-                const posFromBottom = vanitySpacingH * (i + 1);
+                const posFromBottom = vanityHPositions[i];
                 xSegments.forEach((seg, sIdx) => {
                     const segW = seg.end - seg.start;
                     if (segW <= 0) return;
@@ -6895,9 +6934,9 @@
         if (vanityShelvesV > 0) {
             const innerH1 = h1 - 2 * carcassT;
             const divD = d1 - 4;
-            const ySegments = getShelfOpenIntervals(innerH1, vanityShelvesH, vanitySpacingH, vanityShelfT);
+            const ySegments = getShelfOpenIntervals(innerH1, vanityShelvesH, vanitySpacingH, vanityShelfT, vanityHPositions);
             for (let i = 0; i < vanityShelvesV; i++) {
-                const posFromLeft = vanitySpacingV * (i + 1);
+                const posFromLeft = vanityVPositions[i];
                 ySegments.forEach((seg, sIdx) => {
                     const segH = seg.end - seg.start;
                     if (segH <= 0) return;
@@ -7053,7 +7092,7 @@
 
         // Mounting warnings
         warnings.push(`${T.hinge_note}${hingeBrandLabel} (Ø35mm). ${T.hinge_count_note}${upFH}${T.hinge_count_note2}${flipupHingeCount}`);
-        hardware = hardware.concat(lowerHardwareRows);
+        if (!lowerNoFacade) hardware = hardware.concat(lowerHardwareRows);
 
         lastMainCutMapRows = parts
             .filter(p => Number.isFinite(p.l) && Number.isFinite(p.w) && Number.isFinite(p.t) && p.l > 0 && p.w > 0)
@@ -7323,9 +7362,10 @@
         
         // Check if Hinges mode selected for lower cabinet
         const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
-        
-        // Hide hinge table when mode is not "hinge" (gas/drawer)
-        if (lowerHardwareMode !== 'hinge') {
+        const lowerNoFacade = !!document.getElementById('lowerNoFacade')?.checked;
+
+        // Hide hinge table when mode is not "hinge" (gas/drawer) or no facade
+        if (lowerNoFacade || lowerHardwareMode !== 'hinge') {
             body.innerHTML = '';
             if (table) table.style.display = 'none';
             if (heading) heading.style.display = 'none';
@@ -7393,7 +7433,8 @@
         if (!body || !table) return;
 
         const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
-        if (lowerHardwareMode !== 'gas') {
+        const lowerNoFacade = !!document.getElementById('lowerNoFacade')?.checked;
+        if (lowerNoFacade || lowerHardwareMode !== 'gas') {
             body.innerHTML = '';
             table.style.display = 'none';
             if (heading) heading.style.display = 'none';
@@ -7539,7 +7580,26 @@
      * Open intervals along one inner axis (mm, origin at bottom/left inner edge)
      * after subtracting perpendicular shelf/divider bands (position + thickness).
      */
-    function getShelfOpenIntervals(totalInnerMm, perpCount, spacingMm, shelfThickMm) {
+    function shelfSpacingApi() {
+        return window.GConfigShelfSpacing || {};
+    }
+
+    function resolveShelfAxisPositions(count, thick, modeRadioName, uniformInputId, gapPrefix) {
+        const api = shelfSpacingApi();
+        const compute = api.computeShelfBottomPositions;
+        const readGaps = api.readGapValues;
+        if (!compute || !readGaps) return [];
+        const mode = document.querySelector(`input[name="${modeRadioName}"]:checked`)?.value || 'uniform';
+        const uniform = parseInt(document.getElementById(uniformInputId)?.value, 10) || 150;
+        const gaps = readGaps(document, gapPrefix, count, uniform);
+        return compute(count, thick, { mode, uniformSpacing: uniform, gaps });
+    }
+
+    function getShelfOpenIntervals(totalInnerMm, perpCount, spacingMm, shelfThickMm, perpPositions) {
+        const api = shelfSpacingApi();
+        if (Array.isArray(perpPositions) && perpPositions.length && api.getShelfOpenIntervalsFromPositions) {
+            return api.getShelfOpenIntervalsFromPositions(totalInnerMm, perpPositions, shelfThickMm);
+        }
         const total = Math.max(0, totalInnerMm);
         if (total <= 0) return [];
         if (!perpCount || perpCount <= 0) return [{ start: 0, end: total }];
@@ -7572,21 +7632,30 @@
         return open.length ? open : [{ start: 0, end: total }];
     }
 
-    function drawCabinetInteriorShelves(ctx, innerL, innerT, innerR, innerB, scale, hCount, hSpacing, vCount, vSpacing, shelfThickMm) {
+    function drawCabinetInteriorShelves(ctx, innerL, innerT, innerR, innerB, scale, hCount, hSpacingSpec, vCount, vSpacingSpec, shelfThickMm) {
         const innerWmm = (innerR - innerL) / scale;
         const innerHmm = (innerB - innerT) / scale;
         if (innerWmm <= 0 || innerHmm <= 0) return;
 
         const thick = Math.max(1, shelfThickMm || 16);
-        const xOpen = getShelfOpenIntervals(innerWmm, vCount, vSpacing, thick);
-        const yOpen = getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
+        const api = shelfSpacingApi();
+        const hPositions = Array.isArray(hSpacingSpec) ? hSpacingSpec : null;
+        const vPositions = Array.isArray(vSpacingSpec) ? vSpacingSpec : null;
+        const hSpacing = hPositions ? 0 : (parseFloat(hSpacingSpec) || 150);
+        const vSpacing = vPositions ? 0 : (parseFloat(vSpacingSpec) || 200);
+        const xOpen = vPositions && api.getShelfOpenIntervalsFromPositions
+            ? api.getShelfOpenIntervalsFromPositions(innerWmm, vPositions, thick)
+            : getShelfOpenIntervals(innerWmm, vCount, vSpacing, thick);
+        const yOpen = hPositions && api.getShelfOpenIntervalsFromPositions
+            ? api.getShelfOpenIntervalsFromPositions(innerHmm, hPositions, thick)
+            : getShelfOpenIntervals(innerHmm, hCount, hSpacing, thick);
         const segmentColors = ['#2980b9', '#d35400', '#8e44ad', '#16a085', '#c0392b', '#2c3e50'];
 
         ctx.lineWidth = 1.5;
 
         // Horizontal shelf segments — split at vertical dividers
         for (let i = 0; i < hCount; i++) {
-            const posFromBottom = hSpacing * (i + 1);
+            const posFromBottom = hPositions ? hPositions[i] : hSpacing * (i + 1);
             const y = innerB - (posFromBottom + thick / 2) * scale;
             if (y <= innerT || y >= innerB) continue;
             xOpen.forEach((seg, segIdx) => {
@@ -7608,7 +7677,7 @@
 
         // Vertical divider segments — split at horizontal shelves
         for (let i = 0; i < vCount; i++) {
-            const posFromLeft = vSpacing * (i + 1);
+            const posFromLeft = vPositions ? vPositions[i] : vSpacing * (i + 1);
             const x = innerL + (posFromLeft + thick / 2) * scale;
             if (x <= innerL || x >= innerR) continue;
             yOpen.forEach((seg, segIdx) => {
@@ -8660,6 +8729,10 @@
         const _uSpV    = parseInt(document.getElementById('upperSpacingV').value)   || 200;
         const _vShelfT = parseInt(document.getElementById('vanityShelfThick')?.value) || 16;
         const _uShelfT = parseInt(document.getElementById('upperShelfThick')?.value) || 16;
+        const _vHPos = resolveShelfAxisPositions(_vShH, _vShelfT, 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap');
+        const _vVPos = resolveShelfAxisPositions(_vShV, _vShelfT, 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap');
+        const _uHPos = resolveShelfAxisPositions(_uShH, _uShelfT, 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap');
+        const _uVPos = resolveShelfAxisPositions(_uShV, _uShelfT, 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap');
 
         ctx.save();
 
@@ -8667,14 +8740,14 @@
         const vInnerR = vX + vW - carcassT * scale;
         const vInnerT = vY + carcassT * scale;
         const vInnerB = startY - carcassT * scale;
-        drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vSpH, _vShV, _vSpV, _vShelfT);
+        drawCabinetInteriorShelves(ctx, vInnerL, vInnerT, vInnerR, vInnerB, scale, _vShH, _vHPos, _vShV, _vVPos, _vShelfT);
 
         if (hasUpper) {
             const uInnerL = wX + carcassT * scale;
             const uInnerR = wX + wW - carcassT * scale;
             const uInnerT = wY + carcassT * scale;
             const uInnerB = wY + wH - carcassT * scale;
-            drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uSpH, _uShV, _uSpV, _uShelfT);
+            drawCabinetInteriorShelves(ctx, uInnerL, uInnerT, uInnerR, uInnerB, scale, _uShH, _uHPos, _uShV, _uVPos, _uShelfT);
         }
 
         ctx.restore();

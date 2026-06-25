@@ -221,6 +221,8 @@ function readHingePositions(doc, prefix, count, cabinetH) {
 }
 
 function buildLowerDoorsFromDom(doc) {
+    if (doc.getElementById('lowerNoFacade')?.checked) return [];
+
     const w1 = readNum(doc, 'w1');
     const h1 = readNum(doc, 'h1');
     const carcassT = readNum(doc, 'carcassThick', 16);
@@ -290,6 +292,24 @@ function buildUpperDoorsFromDom(doc) {
 
 function buildZoneHingeConfigFromDom(doc, zone, labels) {
     const prefix = zone === 'upper' ? 'upper' : 'lower';
+    if (zone === 'lower' && doc.getElementById('lowerNoFacade')?.checked) {
+        return {
+            zone: 'lower',
+            hardwareMode: 'none',
+            hingeCount: 0,
+            hingePositions: [],
+            hingePosition: 'left',
+            doors: [],
+            facadeT: readNum(doc, 'facadeThick', 16),
+            carcassT: readNum(doc, 'carcassThick', 16),
+            cabinetH: readNum(doc, 'h1', 500),
+            cabinetD: readNum(doc, 'd1', 450),
+            doorType: 'overlay',
+            overlayGap: 2,
+            insetGap: 2,
+            labels: labels || {},
+        };
+    }
     const hardwareMode = readRadio(doc, `${prefix}HardwareMode`, zone === 'upper' ? 'gas' : 'hinge');
     const cabinetH = zone === 'upper' ? readNum(doc, 'upper_h', 400) : readNum(doc, 'h1', 500);
     const cabinetD = zone === 'upper' ? readNum(doc, 'upper_d', 450) : readNum(doc, 'd1', 450);
