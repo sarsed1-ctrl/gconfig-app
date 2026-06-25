@@ -18,6 +18,20 @@ function shelfSpacingApi() {
     return g.GConfigShelfSpacing || {};
 }
 
+/** Back panel size and vertical offset for dowels aligned with side inner face. */
+function calcBackPanelDrillDims(w, h, carcassT, fitType, overlayGap, insetGap) {
+    const openingW = Math.max(0, w - 2 * carcassT);
+    const openingH = Math.max(0, h - 2 * carcassT);
+    const panelW = fitType === 'overlay'
+        ? Math.max(0, w - 2 * overlayGap)
+        : Math.max(0, openingW - 2 * insetGap);
+    const panelH = fitType === 'overlay'
+        ? Math.max(0, h - 2 * overlayGap)
+        : Math.max(0, openingH - 2 * insetGap);
+    const bottomOffset = fitType === 'overlay' ? overlayGap : carcassT + insetGap;
+    return { panelW, panelH, bottomOffset };
+}
+
 function resolveShelfPositionsFromConfig(count, shelfThickMm, spacingMm, positions) {
     const n = Math.max(0, Math.min(5, parseInt(count, 10) || 0));
     if (!n) return [];
@@ -118,6 +132,9 @@ function calcClosetCarcassDowelHoles(config) {
         positionsV,
         labels = {},
         hasCarcassBackPanel = false,
+        backPanelFitType = 'inset',
+        overlayGap = 2,
+        insetGap = 2,
     } = config;
 
     const hPositions = resolveShelfPositionsFromConfig(shelvesH, shelfT, spacingH, positionsH);
@@ -217,19 +234,24 @@ function calcClosetCarcassDowelHoles(config) {
         });
     }
 
-    // Carcass back panel ↔ sides (inset; same dowel spacing as bottom/roof, along width)
+    // Carcass back panel ↔ sides (vertical left/right edges; height matches side back face)
     if (hasCarcassBackPanel) {
-        const backFaceY = d - rules.getFaceDowelLineOffset(carcassT);
-        const heightY = rules.getDepthHolePositions(h);
-        const widthY = rules.getDepthHolePositions(innerW);
-        heightY.forEach((x) => {
-            addFaceHole('side_left', partNames.sideLeft, h, d, x, backFaceY);
-            addFaceHole('side_right', partNames.sideRight, h, d, x, backFaceY);
-        });
-        widthY.forEach((pos) => {
-            addEdgeHole('back', partNames.back, innerW, carcassT, 'Top edge', 'edge_t', pos);
-            addEdgeHole('back', partNames.back, innerW, carcassT, 'Bottom edge', 'edge_b', pos);
-        });
+        const { panelH: backH, bottomOffset } = calcBackPanelDrillDims(
+            w, h, carcassT, backPanelFitType, overlayGap, insetGap
+        );
+        if (backH > 0) {
+            const backFaceY = d - rules.getFaceDowelLineOffset(carcassT);
+            const heightY = rules.getDepthHolePositions(backH);
+            heightY.forEach((posAlongBack) => {
+                const sideX = bottomOffset + posAlongBack;
+                addFaceHole('side_left', partNames.sideLeft, h, d, sideX, backFaceY);
+                addFaceHole('side_right', partNames.sideRight, h, d, sideX, backFaceY);
+            });
+            heightY.forEach((pos) => {
+                addEdgeHole('back', partNames.back, backH, carcassT, 'Left edge', 'edge_l', pos);
+                addEdgeHole('back', partNames.back, backH, carcassT, 'Right edge', 'edge_r', pos);
+            });
+        }
     }
 
     // Horizontal shelves ↔ sides
@@ -311,6 +333,9 @@ function calcVanityDowelHoles(config) {
         positionsV: config.positionsV,
         labels: config.labels,
         hasCarcassBackPanel: config.hasCarcassBackPanel,
+        backPanelFitType: config.backPanelFitType,
+        overlayGap: config.overlayGap,
+        insetGap: config.insetGap,
     });
 }
 
@@ -332,7 +357,21 @@ function calcUpperClosetDowelHoles(config) {
         positionsV: config.positionsV,
         labels: config.labels,
         hasCarcassBackPanel: config.hasCarcassBackPanel,
+        backPanelFitType: config.backPanelFitType,
+        overlayGap: config.overlayGap,
+        insetGap: config.insetGap,
     });
+}
+
+function readFloatFromDom(doc, id, fallback) {
+    const v = parseFloat(doc.getElementById(id)?.value);
+    return Number.isFinite(v) ? v : fallback;
+}
+
+function readBackPanelFitTypeFromDom(doc) {
+    if (doc.getElementById('useCarcassBackPanel')?.checked) return 'inset';
+    const checked = doc.querySelector('input[name="backPanelFitType"]:checked')?.value;
+    return checked === 'overlay' ? 'overlay' : 'inset';
 }
 
 function readShelfAxisPositionsFromDom(doc, count, shelfThick, modeRadioName, uniformId, gapPrefix) {
@@ -367,6 +406,9 @@ function buildVanityDrillingConfigFromDom(doc, labels) {
         positionsH: readShelfAxisPositionsFromDom(doc, vanityShelvesH, vanityShelfT, 'vanitySpacingModeH', 'vanitySpacingH', 'vanitySpacingHGap'),
         positionsV: readShelfAxisPositionsFromDom(doc, vanityShelvesV, vanityShelfT, 'vanitySpacingModeV', 'vanitySpacingV', 'vanitySpacingVGap'),
         hasCarcassBackPanel: !!doc.getElementById('useCarcassBackPanel')?.checked,
+        backPanelFitType: readBackPanelFitTypeFromDom(doc),
+        overlayGap: readFloatFromDom(doc, 'lowerOverlayGap', 2),
+        insetGap: readFloatFromDom(doc, 'lowerInsetGap', 2),
         labels,
     };
 }
@@ -392,6 +434,9 @@ function buildUpperDrillingConfigFromDom(doc, labels) {
         positionsH: readShelfAxisPositionsFromDom(doc, upperShelvesH, upperShelfT, 'upperSpacingModeH', 'upperSpacingH', 'upperSpacingHGap'),
         positionsV: readShelfAxisPositionsFromDom(doc, upperShelvesV, upperShelfT, 'upperSpacingModeV', 'upperSpacingV', 'upperSpacingVGap'),
         hasCarcassBackPanel: !!doc.getElementById('useCarcassBackPanel')?.checked,
+        backPanelFitType: readBackPanelFitTypeFromDom(doc),
+        overlayGap: readFloatFromDom(doc, 'upperOverlayGap', 2),
+        insetGap: readFloatFromDom(doc, 'upperInsetGap', 2),
         labels,
     };
 }
@@ -431,6 +476,7 @@ const api = {
     calcClosetCarcassDowelHoles,
     calcVanityDowelHoles,
     calcUpperClosetDowelHoles,
+    calcBackPanelDrillDims,
     mergeDowelResults,
     buildVanityDrillingConfigFromDom,
     buildUpperDrillingConfigFromDom,
