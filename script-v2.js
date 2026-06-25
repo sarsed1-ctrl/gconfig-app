@@ -2879,6 +2879,11 @@
         document.getElementById('upperHwGroup')?.classList.toggle('hidden', isSingle);
         document.querySelectorAll('.upper-shelf-field').forEach(el => el.classList.toggle('hidden', isSingle));
         document.getElementById('doorHwCard')?.classList.toggle('hidden', lowerNoFacade && isSingle);
+
+        const hideFacadeMaterials = lowerNoFacade && isSingle;
+        document.querySelectorAll('.facade-material-field').forEach((el) => {
+            el.classList.toggle('hidden', hideFacadeMaterials);
+        });
         // ─────────────────────────────────────────────────────────────────────
 
 
