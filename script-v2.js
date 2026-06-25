@@ -4620,11 +4620,11 @@
 
 
 
-    function persistStep(step) {
+    function resetWizardStep() {
 
         try {
 
-            sessionStorage.setItem(STEP_STORAGE_KEY, String(step));
+            sessionStorage.removeItem(STEP_STORAGE_KEY);
 
         } catch (_) { /* ignore */ }
 
@@ -4632,26 +4632,13 @@
 
 
 
-    function restoreStep() {
+    function persistStep(step) {
 
         try {
 
-            const saved = sessionStorage.getItem(STEP_STORAGE_KEY);
-
-            if (saved) {
-
-                const n = Number(saved);
-
-                if (n >= 1 && n <= TOTAL_STEPS) {
-                    if (productMode === 'beds' && (n === 2 || n === 3)) return 1;
-                    return n;
-                }
-
-            }
+            sessionStorage.setItem(STEP_STORAGE_KEY, String(step));
 
         } catch (_) { /* ignore */ }
-
-        return 1;
 
     }
 
@@ -5528,7 +5515,9 @@
 
         loadIframe();
 
-        goToStep(restoreStep());
+        resetWizardStep();
+
+        goToStep(1);
 
     }
 
