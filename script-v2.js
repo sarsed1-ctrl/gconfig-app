@@ -2669,13 +2669,21 @@
 
 
 
-    function renderShelfGapInputs(spec) {
+    function renderShelfGapInputs(spec, options) {
 
         const count = parseInt(document.getElementById(`w-${spec.countId}`)?.value, 10) || 0;
 
         const wrap = document.getElementById(spec.individualWrap);
 
         if (!wrap) return;
+
+        const prevCount = parseInt(wrap.dataset.gapCount, 10);
+
+        const hasInputs = wrap.querySelectorAll('[data-iframe]').length;
+
+        if (!options?.force && prevCount === count && hasInputs === count) return;
+
+        wrap.dataset.gapCount = String(count);
 
         const uniform = fieldNum(spec.uniformId, spec.defaultUniform);
 
@@ -2703,7 +2711,11 @@
 
             el.addEventListener('input', () => {
 
-                pushToIframe(el);
+                const gapId = el.getAttribute('data-iframe');
+
+                if (!gapId || !iframeReady) return;
+
+                setIframeValueQuiet(gapId, el.value);
 
                 schedule3DRebuild();
 
@@ -2733,7 +2745,7 @@
 
             document.getElementById(spec.individualWrap)?.classList.toggle('hidden', !individual);
 
-            if (individual) renderShelfGapInputs(spec);
+            if (individual) renderShelfGapInputs(spec, { force: false });
 
         });
 
