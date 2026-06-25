@@ -2642,7 +2642,7 @@
             && !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
     }
 
-    const DRILLING_SCRIPT_VER = 61;
+    const DRILLING_SCRIPT_VER = 62;
 
     async function ensureDrillingModuleLoaded(forceReload = false) {
         if (
@@ -8550,11 +8550,12 @@
         }
         
         // ---- DRAW LOWER CABINET HINGES (blue dots) ----
-        // Draw only if Hinges mode (not Gas springs)
+        // Draw only if Hinges mode (not Gas springs) and facade is present
         const lowerHardwareMode = document.querySelector('input[name="lowerHardwareMode"]:checked')?.value || 'gas';
         const lowerSplitFacade = !!document.getElementById('lowerSplitFacade')?.checked;
+        const lowerNoFacade = !!document.getElementById('lowerNoFacade')?.checked;
         
-        if (lowerHardwareMode === 'hinge') {
+        if (!lowerNoFacade && lowerHardwareMode === 'hinge') {
             const openingX = vX + (carcassT * scale);
             const openingY = vY + (carcassT * scale);
             const openingW = Math.max(10, vW - (2 * carcassT * scale));

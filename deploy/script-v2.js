@@ -2703,11 +2703,13 @@
 
             el.addEventListener('input', () => {
 
-                syncFieldToIframe(el);
+                pushToIframe(el);
 
                 schedule3DRebuild();
 
                 triggerV1Update();
+
+                schedulePreviewSync();
 
             });
 
@@ -3486,6 +3488,10 @@
             setIframeRadioQuiet('upperHardwareMode', getUpperHardwareMode());
             const backFit = document.getElementById('backFitChips')?.querySelector('.hw-chip.active')?.getAttribute('data-value');
             if (backFit) setIframeRadioQuiet('backPanelFitType', backFit);
+            SHELF_GAP_SPECS.forEach((spec) => {
+                const mode = document.getElementById(spec.modeChips)?.querySelector('.hw-chip.active')?.getAttribute('data-value');
+                if (mode) setIframeRadioQuiet(spec.modeRadio, mode);
+            });
 
             if (productMode === 'closets') {
                 syncCabinetLayoutToV1(getCabinetLayout(), { skipTrigger: true });
