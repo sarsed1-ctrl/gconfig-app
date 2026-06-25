@@ -2228,15 +2228,17 @@ class Furniture3D {
         }
 
         if (lowerMode === 'drawer' || p.drawers?.enabled) {
+            if (!p.lowerNoFacade) {
             this.addDrawers(lowerGroup, lower.w, lower.h, lower.d, facadeT, doorMat, p.drawers?.count || 1, {
                 interactive: true,
                 drawerSpec: p.drawers?.spec,
                 drawerTypes: p.drawers?.types || [],
                 carcassT: T,
             });
-        } else if (lowerMode === 'gas') {
+            }
+        } else if (!p.lowerNoFacade && lowerMode === 'gas') {
             this.addDoor(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, true, { interactive: true, startOpen: false, carcassT: T });
-        } else if (lowerMode === 'hinge') {
+        } else if (!p.lowerNoFacade && lowerMode === 'hinge') {
             if (p.lowerSplitDoor) {
                 this.addSplitDoors(lowerGroup, lower.w, lower.h, facadeT, lower.d, lowerCenterY, doorMat, {
                     interactive: true,

@@ -140,7 +140,7 @@
 
         'ctFrontOverhang', 'ctSideOverhang',
 
-        'facadeThick', 'carcassThick', 'wallType', 'hasCountertop',
+        'facadeThick', 'carcassThick', 'wallType', 'hasCountertop', 'lowerNoFacade',
 
         'upperShelvesH', 'upperShelvesV', 'vanityShelvesH', 'vanityShelvesV',
 
@@ -541,6 +541,7 @@
             drawer: 'Ящики',
 
             lower_split_door: 'Разделить дверь на две створки',
+            lower_no_facade: 'Без фасада (открытый перед)',
 
             drawer_system: 'Система ящиков',
 
@@ -813,6 +814,7 @@
             drawer: 'Drawers',
 
             lower_split_door: 'Split door into two leaves',
+            lower_no_facade: 'Without facade (open front)',
 
             drawer_system: 'Drawer system',
 
@@ -1696,6 +1698,8 @@
             },
 
             lowerSplitDoor: fieldCheck('lowerSplitFacade'),
+
+            lowerNoFacade: fieldCheck('lowerNoFacade'),
 
             backWall: fieldCheck('useCarcassBackPanel') || !!fieldStr('eamfBackPanel'),
 
@@ -2681,6 +2685,8 @@
 
         const hasCountertop = document.getElementById('w-hasCountertop')?.checked;
 
+        const lowerNoFacade = fieldCheck('lowerNoFacade');
+
         const countertopFields = document.getElementById('countertopFields');
         const countertopMaterialField = document.getElementById('countertopMaterialField');
 
@@ -2707,12 +2713,17 @@
 
         const lowerSplitWrap = document.getElementById('lowerSplitWrap');
 
-        if (drawerFields) drawerFields.classList.toggle('visible', lowerMode === 'drawer');
+        if (drawerFields) drawerFields.classList.toggle('visible', lowerMode === 'drawer' && !lowerNoFacade);
 
-        if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge');
+        if (lowerSplitWrap) lowerSplitWrap.classList.toggle('hidden', lowerMode !== 'hinge' || lowerNoFacade);
+
+        document.getElementById('lowerHwGroup')?.classList.toggle('hidden', lowerNoFacade);
+        document.querySelectorAll('.hinge-lower-field').forEach((el) => {
+            el.classList.toggle('hidden', lowerNoFacade);
+        });
 
         // Rebuild drawer system select + per-drawer type rows whenever mode or dimensions change
-        if (lowerMode === 'drawer') rebuildDrawerSystemSelect();
+        if (lowerMode === 'drawer' && !lowerNoFacade) rebuildDrawerSystemSelect();
 
         // ── Shelves ↔ Drawers mutex ──────────────────────────────────────────
         const isDrawer = lowerMode === 'drawer';
@@ -3461,7 +3472,7 @@
                 if (typeof winAfter?.scheduleAmflexPriceRefresh === 'function') winAfter.scheduleAmflexPriceRefresh();
 
                 if (
-                    id === 'countertopMaterial' || id === 'hasCountertop'
+                    id === 'countertopMaterial' || id === 'hasCountertop' || id === 'lowerNoFacade'
                     || id === 'eamfBackPanel' || id === 'useCarcassBackPanel'
                     || id === 'eamfCarcassMaterial' || id === 'eamfFacadeMaterial'
                 ) schedule3DRebuild();
