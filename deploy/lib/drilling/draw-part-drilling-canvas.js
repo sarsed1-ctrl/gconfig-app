@@ -18,8 +18,9 @@ function getProductionLayout() {
 const DEFAULT_SHEET_WIDTH = 520;
 const EXPORT_SHEET_WIDTH = 1040;
 const EXPORT_PIXEL_RATIO = 2;
-/** PDF embed: ~150 DPI on A4 content width; enough for drilling dims */
-const PDF_EXPORT_SHEET_WIDTH = 720;
+/** PDF embed: A4 content width; tall canvas so panel uses vertical space */
+const PDF_EXPORT_SHEET_WIDTH = 840;
+const PDF_EXPORT_CANVAS_HEIGHT = 1600;
 const PDF_EXPORT_PIXEL_RATIO = 1;
 const PDF_JPEG_QUALITY = 0.82;
 const MAX_CANVAS_PIXEL_DIM = 8192;
@@ -1513,6 +1514,10 @@ function measureDrillingSheet(sheet, opts = {}) {
         const maxPanelH = 250 * layoutScale;
         const headerBlock = headerH + 8 * layoutScale;
         if (isProduction && prodLayout && (isSideLayout || isHorizontalLayout)) {
+            const pdfExport = opts.pdfExport === true;
+            const defaultCanvasH = pdfExport
+                ? PDF_EXPORT_CANVAS_HEIGHT * layoutScale
+                : 920 * layoutScale;
             scale = prodLayout.computeProductionPanelScale({
                 layoutScale,
                 drawW,
@@ -1522,9 +1527,10 @@ function measureDrillingSheet(sheet, opts = {}) {
                 rows: sideRows,
                 holeCount: holes.length,
                 canvasW: W,
-                canvasH: Math.max(420 * layoutScale, opts.maxHeight || 920 * layoutScale),
+                canvasH: Math.max(420 * layoutScale, opts.maxHeight || defaultCanvasH),
                 headerBlock,
                 bottomPad,
+                pdfExport,
             });
         } else {
             scale = Math.min((W - pad * 2) / drawW, maxPanelH / drawH);
