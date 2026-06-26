@@ -18,6 +18,10 @@ function getProductionLayout() {
 const DEFAULT_SHEET_WIDTH = 520;
 const EXPORT_SHEET_WIDTH = 1040;
 const EXPORT_PIXEL_RATIO = 2;
+/** PDF embed: ~150 DPI on A4 content width; enough for drilling dims */
+const PDF_EXPORT_SHEET_WIDTH = 720;
+const PDF_EXPORT_PIXEL_RATIO = 1;
+const PDF_JPEG_QUALITY = 0.82;
 const MAX_CANVAS_PIXEL_DIM = 8192;
 const MAX_CANVAS_PIXELS = 12 * 1000 * 1000;
 
@@ -32,15 +36,25 @@ function mapHoleToSheet(sheet, hole) {
 }
 
 function resolveDrillingRenderOpts(opts = {}) {
-    const exportMode = opts.export === true;
-    const pixelRatio = Math.max(1, opts.pixelRatio || (exportMode ? EXPORT_PIXEL_RATIO : 1));
+    const pdfExport = opts.pdfExport === true;
+    const exportMode = opts.export === true || pdfExport;
+    let pixelRatio = opts.pixelRatio;
+    if (pixelRatio == null) {
+        if (pdfExport) pixelRatio = PDF_EXPORT_PIXEL_RATIO;
+        else if (exportMode) pixelRatio = EXPORT_PIXEL_RATIO;
+        else pixelRatio = 1;
+    }
+    pixelRatio = Math.max(1, pixelRatio);
+    const baseWidth = pdfExport
+        ? PDF_EXPORT_SHEET_WIDTH
+        : exportMode
+            ? EXPORT_SHEET_WIDTH
+            : DEFAULT_SHEET_WIDTH;
     const layoutScale = opts.layoutScale != null
         ? opts.layoutScale
-        : exportMode
-            ? EXPORT_SHEET_WIDTH / DEFAULT_SHEET_WIDTH
-            : (opts.width || DEFAULT_SHEET_WIDTH) / DEFAULT_SHEET_WIDTH;
-    const width = opts.width || (exportMode ? EXPORT_SHEET_WIDTH : DEFAULT_SHEET_WIDTH);
-    return { exportMode, width, pixelRatio, layoutScale };
+        : baseWidth / DEFAULT_SHEET_WIDTH;
+    const width = opts.width || baseWidth;
+    return { exportMode, pdfExport, width, pixelRatio, layoutScale };
 }
 
 function fs(px, layoutScale) {
@@ -1970,12 +1984,26 @@ function createPartDrillingCanvas(sheet, opts = {}) {
 
 function partDrillingSheetToDataUrl(sheet, opts = {}) {
     const canvas = createPartDrillingCanvas(sheet, { export: true, ...opts });
+    const useJpeg = opts.pdfExport === true || opts.imageFormat === 'jpeg';
+    const quality = opts.jpegQuality ?? PDF_JPEG_QUALITY;
     try {
+        if (useJpeg) {
+            return canvas.toDataURL('image/jpeg', quality);
+        }
         return canvas.toDataURL('image/png');
     } catch (err) {
         console.error('partDrillingSheetToDataUrl failed:', sheet?.partId, err);
         throw err;
     }
+}
+
+/** Compact raster for jsPDF — JPEG at PDF export resolution. */
+function partDrillingSheetToPdfImage(sheet, opts = {}) {
+    const pdfOpts = { ...opts, export: true, pdfExport: true };
+    return {
+        dataUrl: partDrillingSheetToDataUrl(sheet, pdfOpts),
+        format: 'JPEG',
+    };
 }
 
 function partDrillingSheetSize(sheet, opts = {}) {
@@ -1994,6 +2022,7 @@ const api = {
     drawPartDrillingSheet,
     createPartDrillingCanvas,
     partDrillingSheetToDataUrl,
+    partDrillingSheetToPdfImage,
     partDrillingSheetSize,
     mapHoleToSheet,
     measureDrillingSheet,
