@@ -18,6 +18,11 @@ function getProductionLayout() {
 const DEFAULT_SHEET_WIDTH = 520;
 const EXPORT_SHEET_WIDTH = 1040;
 const EXPORT_PIXEL_RATIO = 2;
+/** PDF embed: A4 content width; tall canvas so panel uses vertical space */
+const PDF_EXPORT_SHEET_WIDTH = 840;
+const PDF_EXPORT_CANVAS_HEIGHT = 1600;
+const PDF_EXPORT_PIXEL_RATIO = 1;
+const PDF_JPEG_QUALITY = 0.82;
 const MAX_CANVAS_PIXEL_DIM = 8192;
 const MAX_CANVAS_PIXELS = 12 * 1000 * 1000;
 
@@ -32,15 +37,25 @@ function mapHoleToSheet(sheet, hole) {
 }
 
 function resolveDrillingRenderOpts(opts = {}) {
-    const exportMode = opts.export === true;
-    const pixelRatio = Math.max(1, opts.pixelRatio || (exportMode ? EXPORT_PIXEL_RATIO : 1));
+    const pdfExport = opts.pdfExport === true;
+    const exportMode = opts.export === true || pdfExport;
+    let pixelRatio = opts.pixelRatio;
+    if (pixelRatio == null) {
+        if (pdfExport) pixelRatio = PDF_EXPORT_PIXEL_RATIO;
+        else if (exportMode) pixelRatio = EXPORT_PIXEL_RATIO;
+        else pixelRatio = 1;
+    }
+    pixelRatio = Math.max(1, pixelRatio);
+    const baseWidth = pdfExport
+        ? PDF_EXPORT_SHEET_WIDTH
+        : exportMode
+            ? EXPORT_SHEET_WIDTH
+            : DEFAULT_SHEET_WIDTH;
     const layoutScale = opts.layoutScale != null
         ? opts.layoutScale
-        : exportMode
-            ? EXPORT_SHEET_WIDTH / DEFAULT_SHEET_WIDTH
-            : (opts.width || DEFAULT_SHEET_WIDTH) / DEFAULT_SHEET_WIDTH;
-    const width = opts.width || (exportMode ? EXPORT_SHEET_WIDTH : DEFAULT_SHEET_WIDTH);
-    return { exportMode, width, pixelRatio, layoutScale };
+        : baseWidth / DEFAULT_SHEET_WIDTH;
+    const width = opts.width || baseWidth;
+    return { exportMode, pdfExport, width, pixelRatio, layoutScale };
 }
 
 function fs(px, layoutScale) {
@@ -1499,6 +1514,10 @@ function measureDrillingSheet(sheet, opts = {}) {
         const maxPanelH = 250 * layoutScale;
         const headerBlock = headerH + 8 * layoutScale;
         if (isProduction && prodLayout && (isSideLayout || isHorizontalLayout)) {
+            const pdfExport = opts.pdfExport === true;
+            const defaultCanvasH = pdfExport
+                ? PDF_EXPORT_CANVAS_HEIGHT * layoutScale
+                : 920 * layoutScale;
             scale = prodLayout.computeProductionPanelScale({
                 layoutScale,
                 drawW,
@@ -1508,9 +1527,10 @@ function measureDrillingSheet(sheet, opts = {}) {
                 rows: sideRows,
                 holeCount: holes.length,
                 canvasW: W,
-                canvasH: Math.max(420 * layoutScale, opts.maxHeight || 920 * layoutScale),
+                canvasH: Math.max(420 * layoutScale, opts.maxHeight || defaultCanvasH),
                 headerBlock,
                 bottomPad,
+                pdfExport,
             });
         } else {
             scale = Math.min((W - pad * 2) / drawW, maxPanelH / drawH);
@@ -1970,12 +1990,26 @@ function createPartDrillingCanvas(sheet, opts = {}) {
 
 function partDrillingSheetToDataUrl(sheet, opts = {}) {
     const canvas = createPartDrillingCanvas(sheet, { export: true, ...opts });
+    const useJpeg = opts.pdfExport === true || opts.imageFormat === 'jpeg';
+    const quality = opts.jpegQuality ?? PDF_JPEG_QUALITY;
     try {
+        if (useJpeg) {
+            return canvas.toDataURL('image/jpeg', quality);
+        }
         return canvas.toDataURL('image/png');
     } catch (err) {
         console.error('partDrillingSheetToDataUrl failed:', sheet?.partId, err);
         throw err;
     }
+}
+
+/** Compact raster for jsPDF — JPEG at PDF export resolution. */
+function partDrillingSheetToPdfImage(sheet, opts = {}) {
+    const pdfOpts = { ...opts, export: true, pdfExport: true };
+    return {
+        dataUrl: partDrillingSheetToDataUrl(sheet, pdfOpts),
+        format: 'JPEG',
+    };
 }
 
 function partDrillingSheetSize(sheet, opts = {}) {
@@ -1994,6 +2028,7 @@ const api = {
     drawPartDrillingSheet,
     createPartDrillingCanvas,
     partDrillingSheetToDataUrl,
+    partDrillingSheetToPdfImage,
     partDrillingSheetSize,
     mapHoleToSheet,
     measureDrillingSheet,

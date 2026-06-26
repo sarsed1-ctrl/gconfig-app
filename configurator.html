@@ -18,7 +18,7 @@
     <script src="lib/drilling/calc-vanity-dowel-holes.js?v=61"></script>
     <script src="lib/drilling/calc-hinge-drilling.js?v=61"></script>
     <script src="lib/drilling/production-layout.js?v=61"></script>
-    <script src="lib/drilling/draw-part-drilling-canvas.js?v=61"></script>
+    <script src="lib/drilling/draw-part-drilling-canvas.js?v=65"></script>
 
     <style>
         :root {
@@ -2598,10 +2598,13 @@
         let pagesAdded = 0;
         for (const sheet of exportSheets) {
             try {
-                const exportOpts = { lang: currentLang, export: true };
-                const dataUrl = GD.partDrillingSheetToDataUrl(sheet, exportOpts);
+                const exportOpts = { lang: currentLang, export: true, pdfExport: true };
+                const img = GD.partDrillingSheetToPdfImage
+                    ? GD.partDrillingSheetToPdfImage(sheet, exportOpts)
+                    : { dataUrl: GD.partDrillingSheetToDataUrl(sheet, exportOpts), format: 'PNG' };
+                const dataUrl = img.dataUrl;
                 if (!dataUrl || dataUrl.length < 64) {
-                    console.warn('Drilling sheet PNG empty:', sheet.partId);
+                    console.warn('Drilling sheet image empty:', sheet.partId);
                     continue;
                 }
                 const sheetSize = GD.partDrillingSheetSize
@@ -2625,7 +2628,7 @@
                     imgH = maxImgH;
                     imgW = imgH / aspect;
                 }
-                pdf.addImage(dataUrl, 'PNG', pageMargin, y, imgW, imgH);
+                pdf.addImage(dataUrl, img.format || 'JPEG', pageMargin, y, imgW, imgH, undefined, 'FAST');
                 pagesAdded += 1;
             } catch (err) {
                 console.error('Drilling page skipped:', sheet.partId, err);
@@ -2642,7 +2645,7 @@
             && !!window.GConfigDrilling?.partDrillingSheetToDataUrl;
     }
 
-    const DRILLING_SCRIPT_VER = 63;
+    const DRILLING_SCRIPT_VER = 65;
 
     async function ensureDrillingModuleLoaded(forceReload = false) {
         if (
